@@ -10,7 +10,8 @@ import ParentExams from '../components/ParentExams';
 import ParentResults from '../components/ParentResults';
 import ParentTimetable from '../components/ParentTimetable';
 import ParentNotices from '../components/ParentNotices';
-import ParentMessages from '../components/ParentMessages';
+import ParentCommunication from '../components/ParentCommunication';
+import ParentDownloads from '../components/ParentDownloads';
 import ParentProfileSettings from '../components/ParentProfileSettings';
 import DashboardHome from '../components/DashboardHome';
 import RemarkList from '../components/RemarkList';
@@ -82,8 +83,10 @@ const ParentDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/remarks">💬 Remarks</Link></li>
           <li><Link to="/dashboard/timetable">🕒 Timetable</Link></li>
           <li><Link to="/dashboard/notices">📰 Notices</Link></li>
-          <li><Link to="/dashboard/messages">✉️ Messages</Link></li>
+          <li><Link to="/dashboard/communication">💬 Communication</Link></li>
+          <li><Link to="/dashboard/downloads">📥 Downloads</Link></li>
           <li><Link to="/dashboard/settings">⚙️ Profile Settings</Link></li>
+          <li><Link to="/change-password">🔒 Change Password</Link></li>
           <li style={{ marginTop: '30px', borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '20px' }}>
             <button onClick={handleLogout} className="logout-btn" style={{ width: '100%' }}>🚪 Logout</button>
           </li>
@@ -108,7 +111,8 @@ const ParentDashboard = ({ user, onLogout }) => {
           <Route path="remarks" element={<RemarkList />} />
           <Route path="timetable" element={<ParentTimetable />} />
           <Route path="notices" element={<ParentNotices />} />
-          <Route path="messages" element={<ParentMessages />} />
+          <Route path="communication" element={<ParentCommunication />} />
+          <Route path="downloads" element={<ParentDownloads />} />
           <Route path="settings" element={<ParentProfileSettings />} />
         </Routes>
       </div>

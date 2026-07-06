@@ -16,6 +16,10 @@ const feeSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    installments: {
+      type: Number,
+      default: 3,
+    },
     isPaid: {
       type: Boolean,
       default: false,
@@ -26,6 +30,19 @@ const feeSchema = new mongoose.Schema(
       enum: ['PhonePe', 'Credit Card', 'Debit Card', 'Cash', 'Cheque', 'Net Banking', 'UPI', 'Wallet'],
     },
     transactionId: String,
+    paidAmount: {
+      type: Number,
+      default: 0,
+    },
+    paymentHistory: [
+      {
+        amount: Number,
+        paymentMethod: String,
+        transactionId: String,
+        paymentDate: Date,
+        remark: String,
+      },
+    ],
     paymentDetails: {
       phonePeId: String,
       cardHolderName: String,

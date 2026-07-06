@@ -8,23 +8,8 @@ const StudentHomework = ({ userId }) => {
   const [successMessage, setSuccessMessage] = useState('');
   const [uploadData, setUploadData] = useState({});
 
-  useEffect(() => {
+  const fetchHomework = React.useCallback(async () => {
     if (!userId) return;
-    fetchHomework();
-  }, [userId]);
-
-  useEffect(() => {
-    const handleHomeworkUpdated = () => {
-      if (userId) {
-        fetchHomework();
-      }
-    };
-
-    window.addEventListener('homeworkUpdated', handleHomeworkUpdated);
-    return () => window.removeEventListener('homeworkUpdated', handleHomeworkUpdated);
-  }, [userId]);
-
-  const fetchHomework = async () => {
     try {
       setLoading(true);
       const response = await homeworkService.getByStudent(userId);
@@ -36,7 +21,22 @@ const StudentHomework = ({ userId }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    fetchHomework();
+  }, [fetchHomework]);
+
+  useEffect(() => {
+    const handleHomeworkUpdated = () => {
+      if (userId) {
+        fetchHomework();
+      }
+    };
+
+    window.addEventListener('homeworkUpdated', handleHomeworkUpdated);
+    return () => window.removeEventListener('homeworkUpdated', handleHomeworkUpdated);
+  }, [userId, fetchHomework]);
 
   const readFileAsBase64 = (file) => {
     return new Promise((resolve, reject) => {

@@ -85,6 +85,19 @@ const seedData = async () => {
     await accountant.save();
     console.log('Created admin accounts');
 
+    // Add a demo parent account for easier testing
+    const demoParent = new User({
+      userId: 'PARENT001',
+      password: 'Parent@123',
+      role: 'parent',
+      firstName: 'Demo',
+      lastName: 'Parent',
+      email: 'parent1@school.com',
+      phone: '9876500001',
+    });
+    await demoParent.save();
+    console.log('Created demo parent account PARENT001');
+
     const teacherData = [
       { firstName: 'Ramesh', lastName: 'Sharma', subjectIndex: 0, isAllSubjectTeacher: true, grade: 1 },
       { firstName: 'Priya', lastName: 'Patel', subjectIndex: 1, isAllSubjectTeacher: true, grade: 2 },

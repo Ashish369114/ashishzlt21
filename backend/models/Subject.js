@@ -6,7 +6,6 @@ const subjectSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      enum: ['Mathematics', 'Science', 'Social Studies', 'English', 'Telugu', 'Hindi', 'Environmental Science (EVS)'],
     },
     code: String,
     description: String,

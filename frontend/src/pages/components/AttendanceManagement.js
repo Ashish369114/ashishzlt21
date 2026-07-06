@@ -127,6 +127,50 @@ const AttendanceManagement = () => {
     return String(recordClassId) === String(selectedClassId);
   });
 
+  const sectionStudents = selectedClassId
+    ? students.filter((student) => {
+      const studentClassId = student.class?._id || student.class || student.classId;
+      return String(studentClassId) === String(selectedClassId);
+    })
+    : [];
+
+  const selectedDate = formData.date || new Date().toISOString().slice(0, 10);
+
+  const getAttendanceRecord = (studentId) => {
+    return visibleAttendance.find((record) => {
+      const recordStudentId = record.student?._id || record.student;
+      const recordDate = record.date ? new Date(record.date).toISOString().slice(0, 10) : '';
+      return String(recordStudentId) === String(studentId) && recordDate === selectedDate;
+    });
+  };
+
+  const handleQuickAttendance = async (studentId, status) => {
+    if (!selectedClassId) {
+      setError('Select a class before marking attendance.');
+      return;
+    }
+
+    const payload = {
+      student: studentId,
+      class: selectedClassId,
+      date: selectedDate,
+      status,
+      remarks: '',
+    };
+
+    try {
+      const existing = getAttendanceRecord(studentId);
+      if (existing) {
+        await attendanceService.update(existing._id, payload);
+      } else {
+        await attendanceService.mark(payload);
+      }
+      fetchAttendance();
+    } catch (err) {
+      setError(`Failed to mark ${status.toLowerCase()} for student.`);
+    }
+  };
+
   return (
     <div className="card">
       <div className="card-header">
@@ -224,6 +268,53 @@ const AttendanceManagement = () => {
 
             <button type="submit" className="btn btn-success">Mark Attendance</button>
           </form>
+        </div>
+      )}
+
+      {selectedClassId && (
+        <div className="form-container" style={{ marginBottom: '30px' }}>
+          <h3>Quick Attendance</h3>
+          <p>Click Present or Absent to submit attendance immediately for the selected class and date.</p>
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Roll No.</th>
+                  <th>Status for {selectedDate}</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sectionStudents.map((student) => {
+                  const studentId = student.userId?._id || student.userId;
+                  const existing = getAttendanceRecord(studentId);
+                  return (
+                    <tr key={student._id}>
+                      <td>{student.userId?.firstName} {student.userId?.lastName}</td>
+                      <td>{student.rollNumber || '-'}</td>
+                      <td>{existing ? existing.status : 'Not marked'}</td>
+                      <td>
+                        <button
+                          className="btn btn-success btn-small"
+                          onClick={() => handleQuickAttendance(studentId, 'Present')}
+                          style={{ marginRight: '8px' }}
+                        >
+                          Present
+                        </button>
+                        <button
+                          className="btn btn-danger btn-small"
+                          onClick={() => handleQuickAttendance(studentId, 'Absent')}
+                        >
+                          Absent
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

@@ -60,7 +60,7 @@ const getStudentByUserId = async (req, res) => {
 
 const addStudent = async (req, res) => {
   try {
-    const {
+    let {
       firstName,
       lastName,
       userId,

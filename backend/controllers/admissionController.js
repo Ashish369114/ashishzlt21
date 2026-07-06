@@ -1,0 +1,163 @@
+const Admission = require('../models/Admission');
+const User = require('../models/User');
+const Student = require('../models/Student');
+
+const getAdmissions = async (req, res) => {
+  try {
+    const admissions = await Admission.find()
+      .populate('school')
+      .populate('appliedForClass')
+      .populate('approvedBy');
+    res.json(admissions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getAdmissionById = async (req, res) => {
+  try {
+    const admission = await Admission.findById(req.params.id)
+      .populate('school')
+      .populate('appliedForClass')
+      .populate('approvedBy');
+    if (!admission) {
+      return res.status(404).json({ message: 'Admission not found' });
+    }
+    res.json(admission);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const applyForAdmission = async (req, res) => {
+  const admission = new Admission({
+    ...req.body,
+    admissionNumber: `ADM-${Date.now()}`,
+    status: 'pending',
+  });
+  try {
+    const newAdmission = await admission.save();
+    res.status(201).json(newAdmission);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const updateAdmission = async (req, res) => {
+  try {
+    const admission = await Admission.findById(req.params.id);
+    if (!admission) {
+      return res.status(404).json({ message: 'Admission not found' });
+    }
+    Object.assign(admission, req.body);
+    const updatedAdmission = await admission.save();
+    res.json(updatedAdmission);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const approveAdmission = async (req, res) => {
+  try {
+    const admission = await Admission.findById(req.params.id);
+    if (!admission) {
+      return res.status(404).json({ message: 'Admission not found' });
+    }
+
+    if (admission.status === 'completed') {
+      return res.status(400).json({ message: 'Admission already completed' });
+    }
+
+    admission.status = 'approved';
+    admission.approvalDate = new Date();
+    admission.approvedBy = req.user.id;
+
+    await admission.save();
+
+    // Create user account for approved student
+    const user = new User({
+      email: admission.parentEmail,
+      password: 'defaultPassword123', // Should be generated securely
+      firstName: admission.firstName,
+      lastName: admission.lastName,
+      role: 'student',
+      school: admission.school,
+      phone: admission.phone,
+    });
+
+    await user.save();
+
+    // Create student record
+    const student = new Student({
+      userId: user._id,
+      rollNumber: `ROLL-${Date.now()}`,
+      class: admission.appliedForClass,
+      parentId: null,
+      admissionDate: new Date(),
+      bloodGroup: admission.bloodGroup,
+      emergencyContact: admission.parentPhone,
+    });
+
+    await student.save();
+
+    res.json({ 
+      message: 'Admission approved successfully',
+      admission,
+      userId: user._id,
+      studentId: student._id,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const rejectAdmission = async (req, res) => {
+  try {
+    const admission = await Admission.findById(req.params.id);
+    if (!admission) {
+      return res.status(404).json({ message: 'Admission not found' });
+    }
+
+    admission.status = 'rejected';
+    admission.approvedBy = req.user.id;
+    admission.notes = req.body.rejectionReason || '';
+
+    await admission.save();
+    res.json({ message: 'Admission rejected successfully', admission });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const getAdmissionsBySchool = async (req, res) => {
+  try {
+    const admissions = await Admission.find({ school: req.params.schoolId })
+      .populate('appliedForClass');
+    res.json(admissions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getAdmissionsByStatus = async (req, res) => {
+  try {
+    const admissions = await Admission.find({ 
+      school: req.params.schoolId,
+      status: req.params.status 
+    });
+    res.json(admissions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = {
+  getAdmissions,
+  getAdmissionById,
+  applyForAdmission,
+  updateAdmission,
+  approveAdmission,
+  rejectAdmission,
+  getAdmissionsBySchool,
+  getAdmissionsByStatus,
+};

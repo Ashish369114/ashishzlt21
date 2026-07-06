@@ -38,6 +38,18 @@ const DashboardHome = ({ stats }) => {
   if (stats?.totalFees !== undefined && stats?.pendingFees === undefined && stats?.pendingCount === undefined && stats?.totalAmount === undefined) {
     addCard('Total Fees', stats.totalFees, (value) => `₹${Number(value || 0).toLocaleString()}`);
   }
+  if (stats?.todayCollection !== undefined) {
+    addCard("Today's Collection", stats.todayCollection, (value) => `₹${Number(value || 0).toLocaleString()}`);
+  }
+  if (stats?.monthlyCollection !== undefined) {
+    addCard('Monthly Revenue', stats.monthlyCollection, (value) => `₹${Number(value || 0).toLocaleString()}`);
+  }
+  if (stats?.totalExpenses !== undefined) {
+    addCard('Total Expenses', stats.totalExpenses, (value) => `₹${Number(value || 0).toLocaleString()}`);
+  }
+  if (stats?.netIncome !== undefined) {
+    addCard('Net Income', stats.netIncome, (value) => `₹${Number(value || 0).toLocaleString()}`);
+  }
 
   if (cards.length === 0) {
     addCard('Total Students', 0);
@@ -46,8 +58,36 @@ const DashboardHome = ({ stats }) => {
     addCard('Pending Fees', 0, (value) => `₹${Number(value || 0).toLocaleString()}`);
   }
 
+  const showAccountantLanding = stats?.todayCollection !== undefined || stats?.monthlyCollection !== undefined || stats?.totalExpenses !== undefined || stats?.netIncome !== undefined;
+
   return (
     <div>
+      {showAccountantLanding && (
+        <div className="card" style={{ marginBottom: '20px' }}>
+          <div className="card-header">
+            <h2>💼 Accountant Landing Summary</h2>
+          </div>
+          <div className="stats-grid">
+            <div className="stat-card">
+              <h3>Today's Collection</h3>
+              <div className="value">₹{Number(stats.todayCollection || 0).toLocaleString()}</div>
+            </div>
+            <div className="stat-card">
+              <h3>Monthly Revenue</h3>
+              <div className="value">₹{Number(stats.monthlyCollection || 0).toLocaleString()}</div>
+            </div>
+            <div className="stat-card">
+              <h3>Total Expenses</h3>
+              <div className="value">₹{Number(stats.totalExpenses || 0).toLocaleString()}</div>
+            </div>
+            <div className="stat-card">
+              <h3>Net Income</h3>
+              <div className="value">₹{Number(stats.netIncome || 0).toLocaleString()}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="stats-grid">
         {cards.map((card) => (
           <div className="stat-card" key={card.label}>

@@ -19,6 +19,10 @@ export const authService = {
   login: (userId, password) => api.post('/auth/login', { userId, password }),
   logout: () => api.post('/auth/logout'),
   getProfile: () => api.get('/auth/profile'),
+  updateProfile: (profileData) => api.put('/auth/profile', profileData),
+  forgotPassword: (emailOrUserId) => api.post('/auth/forgot-password', emailOrUserId),
+  resetPassword: (token, password) => api.post('/auth/reset-password', { token, password }),
+  changePassword: (currentPassword, newPassword) => api.put('/auth/change-password', { currentPassword, newPassword }),
 };
 
 export const studentService = {
@@ -109,6 +113,15 @@ export const feeService = {
   delete: (id) => api.delete(`/fees/${id}`),
 };
 
+export const expenseService = {
+  getAll: () => api.get('/expenses'),
+  getById: (id) => api.get(`/expenses/${id}`),
+  add: (data) => api.post('/expenses', data),
+  update: (id, data) => api.put(`/expenses/${id}`, data),
+  delete: (id) => api.delete(`/expenses/${id}`),
+  getMonthlyReport: (year) => api.get(`/expenses/report/monthly?year=${year}`),
+};
+
 export const classService = {
   getAll: () => api.get('/classes'),
   getById: (id) => api.get(`/classes/${id}`),
@@ -118,6 +131,50 @@ export const classService = {
   assignTeacher: (data) => api.post('/classes/assign-teacher', data),
   getStats: () => api.get('/classes/stats/dashboard'),
   getSubjects: () => api.get('/classes/subjects'),
+};
+
+export const userService = {
+  getAll: () => api.get('/users'),
+  getById: (id) => api.get(`/users/${id}`),
+  add: (data) => api.post('/users', data),
+  update: (id, data) => api.put(`/users/${id}`, data),
+  delete: (id) => api.delete(`/users/${id}`),
+};
+
+export const employeeService = {
+  getAll: () => api.get('/employees'),
+  getById: (id) => api.get(`/employees/${id}`),
+  updateSalary: (id, data) => api.put(`/employees/${id}/salary`, data),
+  getPayroll: (schoolId) => api.get(`/employees/school/${schoolId}/payroll`),
+};
+
+export const schoolService = {
+  getAll: () => api.get('/schools'),
+  add: (data) => api.post('/schools', data),
+  update: (id, data) => api.put(`/schools/${id}`, data),
+  delete: (id) => api.delete(`/schools/${id}`),
+};
+
+export const libraryService = {
+  getAll: () => api.get('/library'),
+  add: (data) => api.post('/library', data),
+  update: (id, data) => api.put(`/library/${id}`, data),
+  borrow: (bookId, data) => api.post(`/library/${bookId}/borrow`, data),
+  delete: (id) => api.delete(`/library/${id}`),
+};
+
+export const transportService = {
+  getAll: () => api.get('/transport'),
+  add: (data) => api.post('/transport', data),
+  update: (id, data) => api.put(`/transport/${id}`, data),
+  delete: (id) => api.delete(`/transport/${id}`),
+};
+
+export const subjectService = {
+  getAll: () => api.get('/subjects'),
+  add: (data) => api.post('/subjects', data),
+  update: (id, data) => api.put(`/subjects/${id}`, data),
+  delete: (id) => api.delete(`/subjects/${id}`),
 };
 
 export default api;

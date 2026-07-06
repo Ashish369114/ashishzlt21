@@ -43,7 +43,13 @@ const getFeesByParent = async (req, res) => {
 
 const addFee = async (req, res) => {
   try {
-    const fee = new Fee(req.body);
+    const fee = new Fee({
+      ...req.body,
+      installments: req.body.installments || 3,
+      paidAmount: 0,
+      paymentHistory: [],
+      isPaid: false,
+    });
     await fee.save();
     const populated = await fee.populate('student');
     res.status(201).json(populated);
@@ -54,28 +60,45 @@ const addFee = async (req, res) => {
 
 const payFee = async (req, res) => {
   try {
-    const { feeId, paymentMethod, transactionId, paymentDetails } = req.body;
+    const { feeId, paymentMethod, transactionId, paymentDetails, amount } = req.body;
     const resolvedTransactionId = transactionId || `TXN-TEST-${Date.now()}`;
+    const paymentAmount = Number(amount || 0);
 
-    const fee = await Fee.findByIdAndUpdate(
-      feeId,
-      {
-        isPaid: true,
-        paymentDate: new Date(),
-        paymentMethod,
-        transactionId: resolvedTransactionId,
-        paymentDetails: paymentDetails || {},
-      },
-      { new: true }
-    ).populate('student');
+    if (!paymentAmount || paymentAmount <= 0) {
+      return res.status(400).json({ message: 'Payment amount must be greater than zero.' });
+    }
+
+    const fee = await Fee.findById(feeId);
+    if (!fee) {
+      return res.status(404).json({ message: 'Fee not found' });
+    }
+
+    const updatedPaidAmount = (fee.paidAmount || 0) + paymentAmount;
+    const isFullyPaid = updatedPaidAmount >= fee.amount;
+
+    fee.paidAmount = updatedPaidAmount;
+    fee.paymentDate = new Date();
+    fee.paymentMethod = paymentMethod;
+    fee.transactionId = resolvedTransactionId;
+    fee.isPaid = isFullyPaid;
+    fee.paymentHistory = fee.paymentHistory || [];
+    fee.paymentHistory.push({
+      amount: paymentAmount,
+      paymentMethod,
+      transactionId: resolvedTransactionId,
+      paymentDate: new Date(),
+      remark: paymentDetails?.remark || '',
+    });
+    fee.paymentDetails = paymentDetails || fee.paymentDetails || {};
+
+    await fee.save();
+    await fee.populate('student');
 
     // Update student's fees paid amount
-    if (fee) {
-      const student = await Student.findById(fee.student._id);
-      if (student) {
-        student.feesPaid += fee.amount;
-        await student.save();
-      }
+    const student = await Student.findById(fee.student._id);
+    if (student) {
+      student.feesPaid = (student.feesPaid || 0) + paymentAmount;
+      await student.save();
     }
 
     res.json(fee);

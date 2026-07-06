@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { feeService } from '../../services/api';
+import { feeService, expenseService } from '../../services/api';
 
 const AccountantReports = () => {
   const [stats, setStats] = useState(null);
+  const [expenses, setExpenses] = useState([]);
+  const [paidFees, setPaidFees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -10,10 +12,28 @@ const AccountantReports = () => {
     const fetchStats = async () => {
       try {
         setLoading(true);
-        const response = await feeService.getAll();
-        const allFees = Array.isArray(response?.data) ? response.data : [];
+        const [feeResponse, expenseResponse] = await Promise.all([feeService.getAll(), expenseService.getAll()]);
+        const allFees = Array.isArray(feeResponse?.data) ? feeResponse.data : [];
+        const allExpenses = Array.isArray(expenseResponse?.data) ? expenseResponse.data : [];
         const pending = allFees.filter((fee) => !fee.isPaid);
         const paid = allFees.filter((fee) => fee.isPaid);
+        setExpenses(allExpenses);
+        setPaidFees(paid);
+
+        const today = new Date();
+        const todaysCollection = paid.reduce((sum, fee) => {
+          if (!fee.paymentDate) return sum;
+          const date = new Date(fee.paymentDate);
+          return date.toDateString() === today.toDateString() ? sum + Number(fee.amount || 0) : sum;
+        }, 0);
+
+        const monthlyCollection = paid.reduce((sum, fee) => {
+          if (!fee.paymentDate) return sum;
+          const date = new Date(fee.paymentDate);
+          return date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear()
+            ? sum + Number(fee.amount || 0)
+            : sum;
+        }, 0);
 
         setStats({
           totalFees: allFees.length,
@@ -22,6 +42,11 @@ const AccountantReports = () => {
           pendingAmount: pending.reduce((sum, fee) => sum + (fee.amount || 0), 0),
           paidCount: paid.length,
           paidAmount: paid.reduce((sum, fee) => sum + (fee.amount || 0), 0),
+          totalExpenses: allExpenses.reduce((sum, expense) => sum + (expense.amount || 0), 0),
+          expenseCount: allExpenses.length,
+          netIncome: paid.reduce((sum, fee) => sum + (fee.amount || 0), 0) - allExpenses.reduce((sum, expense) => sum + (expense.amount || 0), 0),
+          todaysCollection,
+          monthlyCollection,
         });
       } catch (err) {
         const status = err?.response?.status;
@@ -33,7 +58,7 @@ const AccountantReports = () => {
             window.location.href = '/login';
           }, 1000);
         } else {
-          setError('Failed to load fee reports');
+          setError('Failed to load financial reports');
         }
         console.error(err);
       } finally {
@@ -55,24 +80,113 @@ const AccountantReports = () => {
       {loading ? (
         <div className="spinner"></div>
       ) : (
-        <div className="stats-grid">
-          <div className="stat-card">
-            <h3>Total Fees</h3>
-            <div className="value">{stats?.totalFees ?? 0}</div>
+        <>
+          <div className="stats-grid">
+            <div className="stat-card">
+              <h3>Total Fees</h3>
+              <div className="value">{stats?.totalFees ?? 0}</div>
+            </div>
+            <div className="stat-card">
+              <h3>Total Amount</h3>
+              <div className="value">₹{stats?.totalAmount ?? 0}</div>
+            </div>
+            <div className="stat-card">
+              <h3>Pending</h3>
+              <div className="value">{stats?.pendingCount ?? 0} / ₹{stats?.pendingAmount ?? 0}</div>
+            </div>
+            <div className="stat-card">
+              <h3>Paid</h3>
+              <div className="value">{stats?.paidCount ?? 0} / ₹{stats?.paidAmount ?? 0}</div>
+            </div>
           </div>
-          <div className="stat-card">
-            <h3>Total Amount</h3>
-            <div className="value">₹{stats?.totalAmount ?? 0}</div>
+
+          <div className="stats-grid" style={{ marginTop: '20px' }}>
+            <div className="stat-card">
+              <h3>Total Expenses</h3>
+              <div className="value">₹{stats?.totalExpenses ?? 0}</div>
+            </div>
+            <div className="stat-card">
+              <h3>Expense Count</h3>
+              <div className="value">{stats?.expenseCount ?? 0}</div>
+            </div>
+            <div className="stat-card">
+              <h3>Net Income</h3>
+              <div className="value">₹{stats?.netIncome ?? 0}</div>
+            </div>
+            <div className="stat-card">
+              <h3>Today's Collection</h3>
+              <div className="value">₹{stats?.todaysCollection ?? 0}</div>
+            </div>
           </div>
-          <div className="stat-card">
-            <h3>Pending</h3>
-            <div className="value">{stats?.pendingCount ?? 0} / ₹{stats?.pendingAmount ?? 0}</div>
+
+          <div className="card" style={{ marginTop: '20px' }}>
+            <div className="card-header">
+              <h3>Expense Breakdown</h3>
+            </div>
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {expenses.length === 0 ? (
+                    <tr>
+                      <td colSpan="4">No expense records available.</td>
+                    </tr>
+                  ) : (
+                    expenses.slice(0, 8).map((expense) => (
+                      <tr key={expense._id}>
+                        <td>{expense.title}</td>
+                        <td>{expense.category || 'General'}</td>
+                        <td>₹{expense.amount}</td>
+                        <td>{expense.date ? new Date(expense.date).toLocaleDateString() : '-'}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div className="stat-card">
-            <h3>Paid</h3>
-            <div className="value">{stats?.paidCount ?? 0} / ₹{stats?.paidAmount ?? 0}</div>
+
+          <div className="card" style={{ marginTop: '20px' }}>
+            <div className="card-header">
+              <h3>Recent Collections</h3>
+            </div>
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paidFees.length === 0 ? (
+                    <tr>
+                      <td colSpan="4">No paid fee records available.</td>
+                    </tr>
+                  ) : (
+                    paidFees.slice(0, 8).map((fee) => (
+                      <tr key={fee._id}>
+                        <td>{fee.student?.firstName} {fee.student?.lastName}</td>
+                        <td>₹{fee.amount}</td>
+                        <td>{fee.paymentMethod || '-'}</td>
+                        <td>{fee.paymentDate ? new Date(fee.paymentDate).toLocaleDateString() : '-'}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

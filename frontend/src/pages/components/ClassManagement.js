@@ -8,6 +8,7 @@ const ClassManagement = () => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [editingClassId, setEditingClassId] = useState(null);
   const [formData, setFormData] = useState({
     grade: '',
     section: 'A',
@@ -67,19 +68,44 @@ const ClassManagement = () => {
     setError('');
     setSuccessMessage('');
     try {
-      const response = await classService.create(formData);
+      let response;
+      if (editingClassId) {
+        response = await classService.update(editingClassId, formData);
+      } else {
+        response = await classService.create(formData);
+      }
       const message = response?.data?.message;
       if (message === 'Class already exists') {
         setSuccessMessage('This class already exists in the system.');
       } else {
-        setSuccessMessage('Class saved successfully.');
+        setSuccessMessage(editingClassId ? 'Class updated successfully.' : 'Class saved successfully.');
       }
       setFormData({ grade: '', section: 'A', classTeacher: '', subject: '' });
       setShowForm(false);
+      setEditingClassId(null);
       fetchClasses();
     } catch (err) {
       setError('Failed to add class: ' + (err.response?.data?.message || 'Unknown error'));
     }
+  };
+
+  const handleEditClass = (cls) => {
+    setEditingClassId(cls._id);
+    setFormData({
+      grade: cls.grade || '',
+      section: cls.section || 'A',
+      classTeacher: cls.classTeacher?._id || cls.classTeacher || '',
+      subject: cls.subject || '',
+    });
+    setShowForm(true);
+  };
+
+  const resetForm = () => {
+    setEditingClassId(null);
+    setFormData({ grade: '', section: 'A', classTeacher: '', subject: '' });
+    setShowForm(false);
+    setError('');
+    setSuccessMessage('');
   };
 
   const handleDeleteClass = async (id) => {
@@ -181,6 +207,13 @@ const ClassManagement = () => {
                 <td>{getTeacherDisplayName(cls.classTeacher) || 'No teacher assigned'}</td>
                 <td>{cls.students?.length || 0}</td>
                 <td>
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => handleEditClass(cls)}
+                      style={{ marginRight: '8px' }}
+                    >
+                      Edit
+                    </button>
                   <button
                     className="btn btn-danger btn-sm"
                     onClick={() => handleDeleteClass(cls._id)}

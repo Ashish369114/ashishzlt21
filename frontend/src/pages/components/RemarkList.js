@@ -110,7 +110,7 @@ const RemarkList = ({ teacherUserId, studentId, showActions = true }) => {
     };
 
     loadData();
-  }, [teacherUserId, fetchRemarks]);
+  }, [teacherUserId, studentId, fetchRemarks]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

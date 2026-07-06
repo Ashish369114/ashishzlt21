@@ -9,6 +9,7 @@ const FeeManagement = () => {
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
+  const [paymentAmounts, setPaymentAmounts] = useState({});
   const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
   const [selectedClassId, setSelectedClassId] = useState('');
@@ -19,6 +20,7 @@ const FeeManagement = () => {
     amount: '',
     description: 'Annual Tuition Fees',
     dueDate: '',
+    installments: 3,
   });
 
   useEffect(() => {
@@ -99,6 +101,7 @@ const FeeManagement = () => {
       amount: '',
       description: 'Annual Tuition Fees',
       dueDate: '',
+      installments: 3,
     });
     setSelectedStudent('');
     setEditingFeeId(null);
@@ -114,6 +117,7 @@ const FeeManagement = () => {
       amount: fee.amount || '',
       description: fee.description || 'Annual Tuition Fees',
       dueDate: fee.dueDate ? new Date(fee.dueDate).toISOString().slice(0, 10) : '',
+      installments: fee.installments || 3,
     });
     setShowForm(true);
   };
@@ -131,6 +135,7 @@ const FeeManagement = () => {
         student: selectedStudent,
         amount: Number(formData.amount),
         dueDate: formData.dueDate,
+        installments: Number(formData.installments) || 3,
       };
 
       if (editingFeeId) {
@@ -162,12 +167,20 @@ const FeeManagement = () => {
       alert('Please select a payment method');
       return;
     }
+    const paymentAmount = Number(paymentAmounts[feeId]) || 0;
+    if (!paymentAmount || paymentAmount <= 0) {
+      alert('Please enter a valid payment amount');
+      return;
+    }
+
     try {
       await feeService.pay({
         feeId,
         paymentMethod: selectedPaymentMethod,
         transactionId: `TXN${Date.now()}`,
+        amount: paymentAmount,
       });
+      setPaymentAmounts((prev) => ({ ...prev, [feeId]: '' }));
       setSelectedPaymentMethod('');
       fetchFees();
     } catch (err) {
@@ -186,8 +199,8 @@ const FeeManagement = () => {
     : [];
   const visibleFees = selectedClassId
     ? sectionStudents.map((student) => {
-      const studentUserId = student.userId?._id || student.userId;
-      const fee = fees.find((feeRecord) => String(feeRecord.student?._id || feeRecord.student) === String(studentUserId));
+      const studentId = student._id;
+      const fee = fees.find((feeRecord) => String(feeRecord.student?._id || feeRecord.student) === String(studentId));
       return {
         ...student,
         fee,
@@ -257,9 +270,8 @@ const FeeManagement = () => {
                 >
                   <option value="">Select student</option>
                   {sectionStudents.map((student) => {
-                    const studentUserId = student.userId?._id || student.userId;
                     return (
-                      <option key={student._id} value={studentUserId}>
+                      <option key={student._id} value={student._id}>
                         {student.userId?.firstName} {student.userId?.lastName} ({student.rollNumber})
                       </option>
                     );
@@ -272,6 +284,17 @@ const FeeManagement = () => {
                   type="number"
                   name="amount"
                   value={formData.amount}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Installments</label>
+                <input
+                  type="number"
+                  name="installments"
+                  min="1"
+                  value={formData.installments}
                   onChange={handleInputChange}
                   required
                 />
@@ -321,6 +344,20 @@ const FeeManagement = () => {
                 </div>
               </div>
 
+              <div className="summary-row" style={{ display: 'flex', gap: '16px', marginBottom: '20px' }}>
+                <div className="summary-card" style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px', flex: 1 }}>
+                  <strong>Total Amount</strong>
+                  <div>₹{visibleFees.reduce((sum, row) => sum + (row.fee?.amount || 0), 0)}</div>
+                </div>
+                <div className="summary-card" style={{ padding: '12px', background: '#f0fdf4', borderRadius: '8px', flex: 1 }}>
+                  <strong>Paid Amount</strong>
+                  <div>₹{visibleFees.reduce((sum, row) => sum + (row.fee?.paidAmount || 0), 0)}</div>
+                </div>
+                <div className="summary-card" style={{ padding: '12px', background: '#fff1f2', borderRadius: '8px', flex: 1 }}>
+                  <strong>Pending Amount</strong>
+                  <div>₹{visibleFees.reduce((sum, row) => sum + Math.max((row.fee?.amount || 0) - (row.fee?.paidAmount || 0), 0), 0)}</div>
+                </div>
+              </div>
               <div className="table-container">
                 <table>
                   <thead>
@@ -329,6 +366,9 @@ const FeeManagement = () => {
                       <th>Roll No.</th>
                       <th>Class</th>
                       <th>Amount</th>
+                      <th>Paid</th>
+                      <th>Pending</th>
+                      <th>Installments</th>
                       <th>Due Date</th>
                       <th>Status</th>
                       <th>Payment Method</th>
@@ -337,13 +377,19 @@ const FeeManagement = () => {
                   </thead>
                   <tbody>
                     {visibleFees.map((row) => {
+                      const feeAmount = row.fee?.amount || 0;
+                      const paidAmount = row.fee?.paidAmount || 0;
+                      const pendingAmount = Math.max(feeAmount - paidAmount, 0);
                       const feeStatus = row.fee ? (row.fee.isPaid ? 'Paid' : 'Pending') : 'Pending';
                       return (
                         <tr key={row._id}>
-                          <td>{row.userId?.firstName} {row.userId?.lastName}</td>
+                          <td>{row.userId?.firstName || 'Unknown'} {row.userId?.lastName || ''}</td>
                           <td>{row.rollNumber || '-'}</td>
                           <td>{row.class ? `Grade ${row.class.grade} - Section ${row.class.section}` : 'N/A'}</td>
-                          <td>₹{row.fee?.amount || 'N/A'}</td>
+                          <td>₹{feeAmount}</td>
+                          <td>₹{paidAmount}</td>
+                          <td>₹{pendingAmount}</td>
+                          <td>{row.fee?.installments || 3}</td>
                           <td>{row.fee?.dueDate ? new Date(row.fee.dueDate).toLocaleDateString() : 'N/A'}</td>
                           <td>
                             <span style={{
@@ -359,20 +405,34 @@ const FeeManagement = () => {
                           <td>
                             <div className="action-buttons">
                               {row.fee && !row.fee.isPaid && (
-                                <button
-                                  className="btn btn-small"
-                                  onClick={() => handlePayFee(row.fee._id)}
-                                  style={{ background: '#10b981', color: 'white' }}
-                                >
-                                  Pay Now
-                                </button>
+                                <>
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    placeholder="Pay amount"
+                                    value={paymentAmounts[row.fee._id] || ''}
+                                    onChange={(e) => setPaymentAmounts((prev) => ({ ...prev, [row.fee._id]: e.target.value }))}
+                                    style={{ width: '120px', marginRight: '8px' }}
+                                  />
+                                  <button
+                                    className="btn btn-small"
+                                    onClick={() => handlePayFee(row.fee._id)}
+                                    style={{ background: '#10b981', color: 'white' }}
+                                  >
+                                    Pay Now
+                                  </button>
+                                </>
                               )}
-                              <button className="btn btn-secondary btn-small" onClick={() => row.fee && handleEditFee(row.fee)}>
-                                Edit
-                              </button>
-                              <button className="btn btn-danger btn-small" onClick={() => row.fee && handleDeleteFee(row.fee._id)}>
-                                Delete
-                              </button>
+                              {row.fee && (
+                                <>
+                                  <button className="btn btn-secondary btn-small" onClick={() => handleEditFee(row.fee)}>
+                                    Edit
+                                  </button>
+                                  <button className="btn btn-danger btn-small" onClick={() => handleDeleteFee(row.fee._id)}>
+                                    Delete
+                                  </button>
+                                </>
+                              )}
                             </div>
                           </td>
                         </tr>
