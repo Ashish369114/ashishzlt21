@@ -1,39 +1,38 @@
 const silverModules = [
-  'Multiple Dashboards',
-  'News Management',
+  'Core Academics Module',
   'Timetable Management',
-  'Student Admission',
-  'Messaging System',
   'Student Attendance',
-  'Courses and Batches',
-  'Human Resources (HR)',
-  'Finance Management',
-  'Examination Management',
+  'Homework Management',
+  'School & Events Calendar',
+  'Student Admission',
   'User Management',
-  'Report Center',
-  'Employee / Teacher Login',
   'Student / Parent Login',
   'Student Information Management',
-  'Custom Student Remarks',
-  'Certificate Generator',
-  'ID Card Generator',
-  'SMS Integration',
-  'School & Events Calendar',
-  'Advance Fee Management',
-  'Gradebook',
+  'News Management',
+  'Report Center'
 ];
 
 const goldModules = [
   ...silverModules,
-  'Advanced Analytics',
-  'Homework Management',
-  'Payroll Automation',
+  'Gradebook',
+  'Examination Management',
+  'Human Resources (HR)',
+  'Finance Management',
+  'Advance Fee Management',
+  'Employee / Teacher Login',
+  'Messaging System',
+  'Custom Student Remarks',
+  'Certificate Generator',
+  'ID Card Generator'
 ];
 
 const platinumModules = [
   ...goldModules,
   'Multi-Branch Management',
+  'Payroll Automation',
+  'SMS Integration',
   'Dedicated Support',
+  'Advanced Analytics'
 ];
 
 export const getPlanModules = (planName = 'silver') => {

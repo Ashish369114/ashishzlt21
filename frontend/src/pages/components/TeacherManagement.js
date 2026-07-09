@@ -204,29 +204,7 @@ const TeacherManagement = () => {
     }
   };
 
-  const gradeOptions = [...new Set(classes.map((cls) => String(cls.grade)).filter(Boolean))].sort((a, b) => Number(a) - Number(b));
-  const visibleClasses = classes.filter((cls) => String(cls.grade) === String(selectedGrade));
-  const sectionsForGrade = [...new Set(visibleClasses.map((cls) => cls.section).filter(Boolean))].sort();
-  const visibleTeachers = teachers.filter((teacher) => {
-    const assignedClassIds = (teacher.assignedClasses || []).map((cls) => String(cls?._id || cls));
-
-    if (!selectedGrade && !selectedSection && !selectedClassId) {
-      return true;
-    }
-
-    if (selectedClassId) {
-      return assignedClassIds.includes(String(selectedClassId));
-    }
-
-    const matchingClasses = classes.filter((cls) => {
-      const classId = String(cls._id);
-      const matchesGrade = !selectedGrade || String(cls.grade) === String(selectedGrade);
-      const matchesSection = !selectedSection || String(cls.section) === String(selectedSection);
-      return matchesGrade && matchesSection && assignedClassIds.includes(classId);
-    });
-
-    return matchingClasses.length > 0;
-  });
+  const visibleTeachers = teachers;
 
   const getTeacherClasses = (teacher) => Array.isArray(teacher.assignedClasses) ? teacher.assignedClasses : [];
   const getTeacherStudents = (teacher) => {
@@ -241,35 +219,6 @@ const TeacherManagement = () => {
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
-
-      <div className="form-container" style={{ marginBottom: '20px' }}>
-        <h3>Browse by Grade and Section</h3>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Grade</label>
-            <select value={selectedGrade} onChange={(e) => setSelectedGrade(e.target.value)}>
-              <option value="">Select grade</option>
-              {gradeOptions.map((grade) => (
-                <option key={grade} value={grade}>Grade {grade}</option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Section</label>
-            <select value={selectedSection} onChange={(e) => setSelectedSection(e.target.value)} disabled={!sectionsForGrade.length}>
-              <option value="">Select section</option>
-              {sectionsForGrade.map((section) => (
-                <option key={section} value={section}>Section {section}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-        {selectedGrade && selectedSection && (
-          <div className="alert alert-success" style={{ marginTop: '10px' }}>
-            Showing teachers assigned to Grade {selectedGrade} · Section {selectedSection}
-          </div>
-        )}
-      </div>
 
       {showForm && (
         <div className="form-container" style={{ marginBottom: '30px' }}>

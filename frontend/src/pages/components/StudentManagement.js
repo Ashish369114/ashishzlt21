@@ -198,14 +198,7 @@ const StudentManagement = () => {
     }
   };
 
-  const gradeOptions = [...new Set(classes.map((cls) => String(cls.grade)).filter(Boolean))].sort((a, b) => Number(a) - Number(b));
-  const visibleClasses = classes.filter((cls) => String(cls.grade) === String(selectedGrade));
-  const sectionsForGrade = [...new Set(visibleClasses.map((cls) => cls.section).filter(Boolean))].sort();
-  const visibleStudents = students.filter((student) => {
-    if (!selectedClassId) return true;
-    const studentClassId = student.class?._id || student.class || student.classId;
-    return String(studentClassId) === String(selectedClassId);
-  });
+  const visibleStudents = students;
 
   return (
     <div className="card">
@@ -214,35 +207,6 @@ const StudentManagement = () => {
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
-
-      <div className="form-container" style={{ marginBottom: '20px' }}>
-        <h3>Browse by Grade and Section</h3>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Grade</label>
-            <select value={selectedGrade} onChange={(e) => setSelectedGrade(e.target.value)}>
-              <option value="">Select grade</option>
-              {gradeOptions.map((grade) => (
-                <option key={grade} value={grade}>Grade {grade}</option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Section</label>
-            <select value={selectedSection} onChange={(e) => setSelectedSection(e.target.value)} disabled={!sectionsForGrade.length}>
-              <option value="">Select section</option>
-              {sectionsForGrade.map((section) => (
-                <option key={section} value={section}>Section {section}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-        {selectedGrade && selectedSection && (
-          <div className="alert alert-success" style={{ marginTop: '10px' }}>
-            Showing students for Grade {selectedGrade} · Section {selectedSection}
-          </div>
-        )}
-      </div>
 
       {showForm && (
         <div className="form-container" style={{ marginBottom: '30px' }}>
