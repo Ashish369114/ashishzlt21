@@ -9,6 +9,7 @@ const Marks = require('../models/Marks');
 const Attendance = require('../models/Attendance');
 const Exam = require('../models/Exam');
 const Event = require('../models/Event');
+const Leave = require('../models/Leave');
 
 const seedDataFn = async () => {
   // Clear lists first
@@ -24,6 +25,7 @@ const seedDataFn = async () => {
     Attendance.deleteMany({}),
     Exam.deleteMany({}),
     Event.deleteMany({}),
+    Leave.deleteMany({}),
   ]);
 
   console.log('Cleared existing data');
@@ -374,6 +376,71 @@ const seedDataFn = async () => {
     eventRecords.push(eventDoc);
   }
   console.log(`Created ${eventRecords.length} events`);
+
+  // ── Seed demo leave requests ──────────────────────────────────
+  // Use the first 4 seeded teacher users
+  const teacherUsers = await User.find({ role: 'teacher' }).limit(4);
+  const today = new Date();
+  const d = (offset) => {
+    const dt = new Date(today);
+    dt.setDate(dt.getDate() + offset);
+    return dt;
+  };
+
+  const leaveSeeds = [
+    {
+      applicant: teacherUsers[0]?._id,
+      applicantRole: 'teacher',
+      applicantName: `${teacherUsers[0]?.firstName} ${teacherUsers[0]?.lastName}`,
+      applicantId: teacherUsers[0]?.userId,
+      leaveType: 'Sick Leave',
+      fromDate: d(1),
+      toDate: d(3),
+      reason: 'Fever and viral infection, doctor advised rest for 3 days.',
+      status: 'pending',
+    },
+    {
+      applicant: teacherUsers[1]?._id,
+      applicantRole: 'teacher',
+      applicantName: `${teacherUsers[1]?.firstName} ${teacherUsers[1]?.lastName}`,
+      applicantId: teacherUsers[1]?.userId,
+      leaveType: 'Casual Leave',
+      fromDate: d(5),
+      toDate: d(5),
+      reason: 'Family function on Saturday.',
+      status: 'pending',
+    },
+    {
+      applicant: teacherUsers[2]?._id,
+      applicantRole: 'teacher',
+      applicantName: `${teacherUsers[2]?.firstName} ${teacherUsers[2]?.lastName}`,
+      applicantId: teacherUsers[2]?.userId,
+      leaveType: 'Emergency Leave',
+      fromDate: d(-2),
+      toDate: d(-1),
+      reason: 'Medical emergency in family.',
+      status: 'approved',
+      remarks: 'Granted. Please ensure substitute arrangement.',
+    },
+    {
+      applicant: teacherUsers[3]?._id,
+      applicantRole: 'teacher',
+      applicantName: `${teacherUsers[3]?.firstName} ${teacherUsers[3]?.lastName}`,
+      applicantId: teacherUsers[3]?.userId,
+      leaveType: 'Earned Leave',
+      fromDate: d(-5),
+      toDate: d(-3),
+      reason: 'Annual vacation plan.',
+      status: 'rejected',
+      remarks: 'Exam season — please reschedule after exams.',
+    },
+  ];
+
+  const validLeaves = leaveSeeds.filter((l) => l.applicant);
+  if (validLeaves.length > 0) {
+    await Leave.insertMany(validLeaves);
+    console.log(`Created ${validLeaves.length} demo leave requests`);
+  }
 };
 
 module.exports = seedDataFn;

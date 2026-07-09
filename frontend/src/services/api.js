@@ -188,4 +188,13 @@ export const subjectService = {
   delete: (id) => api.delete(`/subjects/${id}`),
 };
 
+export const leaveService = {
+  getAll:     ()         => api.get('/leaves'),
+  getPending: ()         => api.get('/leaves/pending'),
+  submit:     (data)     => api.post('/leaves', data),
+  approve:    (id, rem)  => api.put(`/leaves/${id}/approve`, { remarks: rem }),
+  reject:     (id, rem)  => api.put(`/leaves/${id}/reject`, { remarks: rem }),
+  remove:     (id)       => api.delete(`/leaves/${id}`),
+};
+
 export default api;

@@ -12,6 +12,7 @@ import PrincipalExamManagement from '../components/PrincipalExamManagement';
 import PrincipalTeacherManagement from '../components/PrincipalTeacherManagement';
 import PrincipalFinanceReport from '../components/PrincipalFinanceReport';
 import PrincipalComprehensiveReports from '../components/PrincipalComprehensiveReports';
+import PrincipalLeaveManagement from '../components/PrincipalLeaveManagement';
 
 const PrincipalDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -107,6 +108,7 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/attendance">✅ Attendance</Link></li>
           <li><Link to="/dashboard/performance">📈 Performance</Link></li>
           <li><Link to="/dashboard/fees">💰 Fees</Link></li>
+          <li><Link to="/dashboard/leaves">🗓️ Leave Requests</Link></li>
           <li><Link to="/change-password">🔒 Change Password</Link></li>
           
           <li style={{ marginTop: '20px', fontSize: '0.85em', fontWeight: 'bold', color: 'rgba(255,255,255,0.6)', paddingLeft: '15px' }}>
@@ -160,6 +162,7 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           <Route path="performance" element={<PrincipalPerformance />} />
           <Route path="finance" element={<PrincipalFinanceReport />} />
           <Route path="reports" element={<PrincipalComprehensiveReports />} />
+          <Route path="leaves" element={<PrincipalLeaveManagement />} />
           <Route path="*" element={<DashboardHome stats={stats} />} />
         </Routes>
       </div>
