@@ -3,16 +3,15 @@ import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { studentService, teacherService, feeService, attendanceService, examService } from '../../services/api';
 import StudentManagement from '../components/StudentManagement';
 import TeacherManagement from '../components/TeacherManagement';
-import FeeManagement from '../components/FeeManagement';
 import DashboardHome from '../components/DashboardHome';
 import PrincipalAttendance from '../components/PrincipalAttendance';
 import PrincipalPerformance from '../components/PrincipalPerformance';
-import PrincipalReports from '../components/PrincipalReports';
 import PrincipalExamManagement from '../components/PrincipalExamManagement';
 import PrincipalTeacherManagement from '../components/PrincipalTeacherManagement';
 import PrincipalFinanceReport from '../components/PrincipalFinanceReport';
 import PrincipalComprehensiveReports from '../components/PrincipalComprehensiveReports';
 import PrincipalLeaveManagement from '../components/PrincipalLeaveManagement';
+
 
 const PrincipalDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -107,14 +106,13 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           </li>
           <li><Link to="/dashboard/attendance">✅ Attendance</Link></li>
           <li><Link to="/dashboard/performance">📈 Performance</Link></li>
-          <li><Link to="/dashboard/fees">💰 Fees</Link></li>
           <li><Link to="/dashboard/leaves">🗓️ Leave Requests</Link></li>
           <li><Link to="/change-password">🔒 Change Password</Link></li>
           
           <li style={{ marginTop: '20px', fontSize: '0.85em', fontWeight: 'bold', color: 'rgba(255,255,255,0.6)', paddingLeft: '15px' }}>
             REPORTS & ANALYTICS
           </li>
-          <li><Link to="/dashboard/finance">💼 Finance Report</Link></li>
+          <li><Link to="/dashboard/finance">💼 Finance Overview</Link></li>
           <li><Link to="/dashboard/reports">📊 Comprehensive Reports</Link></li>
           
           <li style={{ marginTop: '30px', borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '20px' }}>
@@ -157,12 +155,13 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           <Route path="students" element={<StudentManagement />} />
           <Route path="teachers" element={<PrincipalTeacherManagement />} />
           <Route path="exams" element={<PrincipalExamManagement />} />
-          <Route path="fees" element={<FeeManagement />} />
           <Route path="attendance" element={<PrincipalAttendance />} />
           <Route path="performance" element={<PrincipalPerformance />} />
           <Route path="finance" element={<PrincipalFinanceReport />} />
           <Route path="reports" element={<PrincipalComprehensiveReports />} />
           <Route path="leaves" element={<PrincipalLeaveManagement />} />
+          {/* fees/* redirects to finance overview so old bookmarks still work */}
+          <Route path="fees" element={<PrincipalFinanceReport />} />
           <Route path="*" element={<DashboardHome stats={stats} />} />
         </Routes>
       </div>
