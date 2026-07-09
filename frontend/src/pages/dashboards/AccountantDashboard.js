@@ -11,6 +11,7 @@ import AccountantReports from '../components/AccountantReports';
 import AccountantCollections from '../components/AccountantCollections';
 import AccountantExpenses from '../components/AccountantExpenses';
 import AccountantPayroll from '../components/AccountantPayroll';
+import ConcessionManagement from '../components/ConcessionManagement';
 
 const AccountantDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -86,6 +87,7 @@ const AccountantDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/reports">📊 Reports</Link></li>
           <li><Link to="/dashboard/expenses">📉 Expenses</Link></li>
           <li><Link to="/dashboard/salary">💵 Payroll</Link></li>
+          <li><Link to="/dashboard/concessions">✍ Concessions</Link></li>
           <li><Link to="/change-password">🔒 Change Password</Link></li>
           <li style={{ marginTop: '30px', borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '20px' }}>
             <button onClick={handleLogout} className="logout-btn" style={{ width: '100%' }}>🚪 Logout</button>
@@ -110,6 +112,7 @@ const AccountantDashboard = ({ user, onLogout }) => {
           <Route path="reports" element={<AccountantReports />} />
           <Route path="expenses" element={<AccountantExpenses />} />
           <Route path="salary" element={<AccountantPayroll />} />
+          <Route path="concessions" element={<ConcessionManagement />} />
           <Route path="*" element={<DashboardHome stats={stats} />} />
         </Routes>
       </div>

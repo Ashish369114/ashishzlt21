@@ -305,120 +305,124 @@ const StudentManagement = () => {
               </div>
             </div>
 
-            <div className="form-divider">
-              <h4>Parent / Guardian Details</h4>
-              <p style={{ marginTop: '8px', color: '#6b7280' }}>
-                If you have an existing parent account, supply the Parent Account ID here. To create a new parent account, fill the parent user details below; leaving Parent User ID blank will auto-generate a parent login.
-              </p>
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Existing Parent Account ID</label>
-                <input
-                  type="text"
-                  name="parentId"
-                  value={formData.parentId}
-                  onChange={handleInputChange}
-                  placeholder="Link an existing parent account by ObjectId"
-                />
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Parent User ID</label>
-                <input
-                  type="text"
-                  name="parentUserId"
-                  value={formData.parentUserId}
-                  onChange={handleInputChange}
-                  placeholder="Leave blank to auto-generate when creating a new parent"
-                />
-              </div>
-              <div className="form-group">
-                <label>Parent Password</label>
-                <input
-                  type="password"
-                  name="parentPassword"
-                  value={formData.parentPassword}
-                  onChange={handleInputChange}
-                  placeholder="Enter to create/update parent account"
-                />
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Parent First Name</label>
-                <input
-                  type="text"
-                  name="parentFirstName"
-                  value={formData.parentFirstName}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="form-group">
-                <label>Parent Last Name</label>
-                <input
-                  type="text"
-                  name="parentLastName"
-                  value={formData.parentLastName}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Parent Email</label>
-                <input
-                  type="email"
-                  name="parentEmail"
-                  value={formData.parentEmail}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="form-group">
-                <label>Parent Phone</label>
-                <input
-                  type="tel"
-                  name="parentPhone"
-                  value={formData.parentPhone}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Parent Gender</label>
-                <select
-                  name="parentGender"
-                  value={formData.parentGender}
-                  onChange={handleInputChange}
-                >
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Relationship</label>
-                <input
-                  type="text"
-                  name="parentRelationship"
-                  value={formData.parentRelationship}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Parent Address</label>
-                <input
-                  type="text"
-                  name="parentAddress"
-                  value={formData.parentAddress}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </div>
+            {currentUser && currentUser.role === 'super_admin' && (
+              <>
+                <div className="form-divider">
+                  <h4>Parent / Guardian Details</h4>
+                  <p style={{ marginTop: '8px', color: '#6b7280' }}>
+                    If you have an existing parent account, supply the Parent Account ID here. To create a new parent account, fill the parent user details below; leaving Parent User ID blank will auto-generate a parent login.
+                  </p>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Existing Parent Account ID</label>
+                    <input
+                      type="text"
+                      name="parentId"
+                      value={formData.parentId}
+                      onChange={handleInputChange}
+                      placeholder="Link an existing parent account by ObjectId"
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Parent User ID</label>
+                    <input
+                      type="text"
+                      name="parentUserId"
+                      value={formData.parentUserId}
+                      onChange={handleInputChange}
+                      placeholder="Leave blank to auto-generate when creating a new parent"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Parent Password</label>
+                    <input
+                      type="password"
+                      name="parentPassword"
+                      value={formData.parentPassword}
+                      onChange={handleInputChange}
+                      placeholder="Enter to create/update parent account"
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Parent First Name</label>
+                    <input
+                      type="text"
+                      name="parentFirstName"
+                      value={formData.parentFirstName}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Parent Last Name</label>
+                    <input
+                      type="text"
+                      name="parentLastName"
+                      value={formData.parentLastName}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Parent Email</label>
+                    <input
+                      type="email"
+                      name="parentEmail"
+                      value={formData.parentEmail}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Parent Phone</label>
+                    <input
+                      type="tel"
+                      name="parentPhone"
+                      value={formData.parentPhone}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Parent Gender</label>
+                    <select
+                      name="parentGender"
+                      value={formData.parentGender}
+                      onChange={handleInputChange}
+                    >
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Relationship</label>
+                    <input
+                      type="text"
+                      name="parentRelationship"
+                      value={formData.parentRelationship}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Parent Address</label>
+                    <input
+                      type="text"
+                      name="parentAddress"
+                      value={formData.parentAddress}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
 
             <button type="submit" className="btn btn-success">{editingId ? 'Update Student' : 'Save Student'}</button>
             {editingId && (

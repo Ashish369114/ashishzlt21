@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { feeService, classService, studentService } from '../../services/api';
+import { feeService, classService, studentService, concessionService } from '../../services/api';
 
 const initialFormData = {
   student: '',
@@ -23,6 +23,13 @@ const FeeManagement = () => {
   const [selectedStudent, setSelectedStudent] = useState('');
   const [editingFeeId, setEditingFeeId] = useState(null);
   const [formData, setFormData] = useState(initialFormData);
+  const [showConcessionModal, setShowConcessionModal] = useState(false);
+  const [concessionForm, setConcessionForm] = useState({
+    concessionAmount: '',
+    reason: '',
+  });
+  const [concessionTargetFee, setConcessionTargetFee] = useState(null);
+  const [concessionSuccess, setConcessionSuccess] = useState('');
   const [editForm, setEditForm] = useState({
     amount: '',
     installments: '3',
@@ -291,6 +298,40 @@ const FeeManagement = () => {
       } catch (err) {
         setError('Failed to delete fee records');
       }
+    }
+  };
+
+  const handleOpenConcessionModal = (fee) => {
+    setConcessionTargetFee(fee);
+    setConcessionForm({ concessionAmount: '', reason: '' });
+    setShowConcessionModal(true);
+    setConcessionSuccess('');
+  };
+
+  const handleConcessionSubmit = async (e) => {
+    e.preventDefault();
+    if (!concessionForm.concessionAmount || !concessionForm.reason || !concessionTargetFee) {
+      setError('Please fill in all concession request fields.');
+      return;
+    }
+
+    try {
+      const studentId = concessionTargetFee.student?._id || concessionTargetFee.student || selectedStudent;
+      await concessionService.create({
+        studentId,
+        feeId: concessionTargetFee._id,
+        concessionAmount: concessionForm.concessionAmount,
+        reason: concessionForm.reason,
+      });
+
+      setConcessionSuccess('Concession request submitted to Principal successfully!');
+      setTimeout(() => {
+        setShowConcessionModal(false);
+        setConcessionTargetFee(null);
+        setConcessionSuccess('');
+      }, 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to submit concession request.');
     }
   };
 
@@ -564,6 +605,7 @@ const FeeManagement = () => {
                         <th>Pending Amount</th>
                         <th>Paid Amount</th>
                         <th>Payment Method</th>
+                        <th>Concession</th>
                         <th>Edit</th>
                         <th>Delete</th>
                       </tr>
@@ -624,7 +666,7 @@ const FeeManagement = () => {
                                   <option value="Cheque">Cheque</option>
                                 </select>
                               </td>
-                              <td colSpan="2">
+                              <td colSpan="3">
                                 <div className="action-buttons">
                                   <button className="btn btn-success btn-small" onClick={handleSaveEdit}>Save</button>
                                   <button className="btn btn-secondary btn-small" onClick={resetEditForm}>Cancel</button>
@@ -638,6 +680,14 @@ const FeeManagement = () => {
                               <td>{formatCurrency(Math.max((selectedFee.amount || 0) - (selectedFee.paidAmount || 0), 0))}</td>
                               <td>{formatCurrency(selectedFee.paidAmount || 0)}</td>
                               <td>{selectedFee.paymentMethod || '-'}</td>
+                              <td>
+                                <button
+                                  className="btn btn-primary btn-small"
+                                  onClick={() => handleOpenConcessionModal(selectedFee)}
+                                >
+                                  Request Concession
+                                </button>
+                              </td>
                               <td>
                                 <button className="btn btn-secondary btn-small" onClick={() => handleEditFee(selectedFee)}>
                                   Edit
@@ -656,7 +706,7 @@ const FeeManagement = () => {
                         </tr>
                       ) : (
                         <tr>
-                          <td colSpan="8">No fee details found for the selected student.</td>
+                          <td colSpan="9">No fee details found for the selected student.</td>
                         </tr>
                       )}
                     </tbody>
@@ -669,6 +719,75 @@ const FeeManagement = () => {
               )}
             </>
           )}
+        </div>
+      )}
+
+      {showConcessionModal && concessionTargetFee && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div className="card" style={{ width: '450px', padding: '20px', position: 'relative' }}>
+            <div className="card-header" style={{ marginBottom: '15px' }}>
+              <h3>Request Fee Concession</h3>
+            </div>
+            {concessionSuccess && <div className="alert alert-success">{concessionSuccess}</div>}
+            <form onSubmit={handleConcessionSubmit}>
+              <div className="form-group" style={{ marginBottom: '15px' }}>
+                <label>Current Fee Amount</label>
+                <input
+                  type="text"
+                  value={`₹${concessionTargetFee.amount}`}
+                  disabled
+                  style={{ backgroundColor: '#f3f4f6' }}
+                />
+              </div>
+              <div className="form-group" style={{ marginBottom: '15px' }}>
+                <label>Concession Amount (Discount)</label>
+                <input
+                  type="number"
+                  min="1"
+                  max={concessionTargetFee.amount}
+                  placeholder="Enter discount amount"
+                  value={concessionForm.concessionAmount}
+                  onChange={(e) => setConcessionForm(prev => ({ ...prev, concessionAmount: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="form-group" style={{ marginBottom: '20px' }}>
+                <label>Reason / Justification</label>
+                <textarea
+                  placeholder="e.g. Merit discount, sports quota..."
+                  value={concessionForm.reason}
+                  onChange={(e) => setConcessionForm(prev => ({ ...prev, reason: e.target.value }))}
+                  required
+                  rows="3"
+                  style={{ width: '100%', padding: '8px', border: '1px solid #d1d5db', borderRadius: '4px' }}
+                />
+              </div>
+              <div className="action-buttons" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button type="submit" className="btn btn-success">Submit Request</button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    setShowConcessionModal(false);
+                    setConcessionTargetFee(null);
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

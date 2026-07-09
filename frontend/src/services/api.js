@@ -173,6 +173,14 @@ export const transportService = {
   delete: (id) => api.delete(`/transport/${id}`),
 };
 
+export const concessionService = {
+  getAll: () => api.get('/concessions'),
+  getPending: () => api.get('/concessions/pending'),
+  create: (data) => api.post('/concessions', data),
+  approve: (id, remarks) => api.put(`/concessions/${id}/approve`, { remarks }),
+  reject: (id, remarks) => api.put(`/concessions/${id}/reject`, { remarks }),
+};
+
 export const subjectService = {
   getAll: () => api.get('/subjects'),
   add: (data) => api.post('/subjects', data),

@@ -28,6 +28,7 @@ const settingsRoutes = require('./routes/settings');
 const userRoutes = require('./routes/users');
 const subjectRoutes = require('./routes/subjects');
 const expensesRoutes = require('./routes/expenses');
+const concessionRoutes = require('./routes/concessions');
 
 const app = express();
 
@@ -74,6 +75,7 @@ const startServer = async () => {
     app.use('/api/users', userRoutes);
     app.use('/api/subjects', subjectRoutes);
     app.use('/api/expenses', expensesRoutes);
+    app.use('/api/concessions', concessionRoutes);
 
     // Health check
     app.get('/api/health', (req, res) => {
