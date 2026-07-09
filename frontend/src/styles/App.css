@@ -135,25 +135,27 @@ body {
 .sidebar {
   background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   color: white;
-  padding: 14px 24px;
+  padding: 16px 24px;
   position: sticky;
   top: 0;
   height: auto;
   z-index: 1000;
   display: flex;
-  align-items: center;
-  gap: 24px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
 }
 
 .sidebar-header {
   margin-bottom: 0;
-  padding-bottom: 0;
-  border-bottom: none;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex-shrink: 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .sidebar-header h2 {
@@ -164,7 +166,7 @@ body {
 }
 
 .sidebar-header p {
-  font-size: 10px;
+  font-size: 11px;
   opacity: 0.8;
   white-space: nowrap;
 }
@@ -173,32 +175,23 @@ body {
   list-style: none;
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 8px 10px;
   margin: 0;
   padding: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  flex-grow: 1;
-  scrollbar-width: none; /* Hide scrollbar on Firefox */
-}
-
-.nav-menu::-webkit-scrollbar {
-  display: none; /* Hide scrollbar on Chrome/Safari/Edge */
+  width: 100%;
 }
 
 .nav-menu li {
   display: inline-block;
   margin-bottom: 0;
-  flex-shrink: 0;
 }
 
 .nav-menu li[style] {
   margin-top: 0 !important;
   border-top: none !important;
   padding-top: 0 !important;
-  margin-left: auto !important; /* Pushes logout button to the far right */
 }
 
 .nav-menu a {

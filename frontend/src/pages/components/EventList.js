@@ -108,7 +108,6 @@ const EventList = ({ showActions = true }) => {
   return (
     <div className="card">
       <div className="card-header">
-        <h2>🎉 School Events</h2>
         {showActions && (
           <button className="btn btn-primary" onClick={() => {
             if (showForm) resetForm();
