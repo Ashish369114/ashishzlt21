@@ -254,10 +254,7 @@ const Login = ({ onLogin }) => {
                   <span className="plan-name">Silver ({activeCurrency.symbol})</span>
                   <span className="plan-badge badge-silver">Core</span>
                 </div>
-                <div style={{ padding: '10px 14px 2px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Yearly Price</span>
-                  <span className="plan-price">{activeCurrency.symbol}{activeCurrency.silver}/yr</span>
-                </div>
+
                 <ul className="plan-features">
                   <li><i className="fa-solid fa-circle-check"></i> Core Academics Module</li>
                   <li><i className="fa-solid fa-circle-check"></i> Student Directory</li>
@@ -272,10 +269,7 @@ const Login = ({ onLogin }) => {
                   <span className="plan-name">Gold ({activeCurrency.symbol})</span>
                   <span className="plan-badge badge-gold">Standard</span>
                 </div>
-                <div style={{ padding: '10px 14px 2px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Yearly Price</span>
-                  <span className="plan-price">{activeCurrency.symbol}{activeCurrency.gold}/yr</span>
-                </div>
+
                 <ul className="plan-features">
                   <li><i className="fa-solid fa-circle-check"></i> Fee Management &amp; Receipts</li>
                   <li><i className="fa-solid fa-circle-check"></i> Homework &amp; Timetables</li>
@@ -290,10 +284,7 @@ const Login = ({ onLogin }) => {
                   <span className="plan-name">Platinum ({activeCurrency.symbol})</span>
                   <span className="plan-badge badge-platinum">Elite</span>
                 </div>
-                <div style={{ padding: '10px 14px 2px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Yearly Price</span>
-                  <span className="plan-price">{activeCurrency.symbol}{activeCurrency.platinum}/yr</span>
-                </div>
+
                 <ul className="plan-features">
                   <li><i className="fa-solid fa-circle-check"></i> Custom APIs &amp; Integrations</li>
                   <li><i className="fa-solid fa-circle-check"></i> Multi-branch Operations</li>
