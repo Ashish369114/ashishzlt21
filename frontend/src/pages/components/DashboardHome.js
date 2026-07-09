@@ -106,12 +106,30 @@ const DashboardHome = ({ stats }) => {
       )}
 
       <div className="stats-grid">
-        {cards.map((card) => (
-          <div className="stat-card" key={card.label}>
-            <h3>{card.label}</h3>
-            <div className="value">{card.value}</div>
-          </div>
-        ))}
+        {cards.map((card) => {
+          const getIcon = (label) => {
+            switch (label) {
+              case 'Total Students': return '👨‍🎓';
+              case 'Total Teachers': return '👩‍🏫';
+              case 'Total Classes': return '🏫';
+              case 'Total Parents': return '👪';
+              case 'Pending Fees': return '⏳';
+              case 'Collected Fees': return '💰';
+              case "Today's Collection": return '📅';
+              case 'Monthly Revenue': return '📈';
+              case 'Total Expenses': return '💸';
+              case 'Net Income': return '⚖️';
+              default: return '📊';
+            }
+          };
+          return (
+            <div className="stat-card" key={card.label}>
+              <div style={{ fontSize: '2.2rem', marginBottom: '10px' }}>{getIcon(card.label)}</div>
+              <h3>{card.label}</h3>
+              <div className="value">{card.value}</div>
+            </div>
+          );
+        })}
       </div>
 
       <div className="card">
