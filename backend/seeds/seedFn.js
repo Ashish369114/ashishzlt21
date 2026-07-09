@@ -49,6 +49,7 @@ const seedDataFn = async () => {
     lastName: 'Admin',
     email: 'superadmin@school.com',
     phone: '9876543210',
+    subscriptionPlan: 'platinum_with_ocr',
   });
   await superAdmin.save();
 
@@ -60,6 +61,7 @@ const seedDataFn = async () => {
     lastName: 'Kumar',
     email: 'principal@school.com',
     phone: '9876543211',
+    subscriptionPlan: 'gold',
   });
   await principal.save();
 
@@ -71,6 +73,7 @@ const seedDataFn = async () => {
     lastName: 'Verma',
     email: 'accountant@school.com',
     phone: '9876543299',
+    subscriptionPlan: 'gold',
   });
   await accountant.save();
   console.log('Created admin accounts');

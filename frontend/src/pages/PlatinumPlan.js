@@ -90,7 +90,7 @@ const PlatinumPlan = () => {
       });
 
       const { school, credentials, emailSent } = response.data;
-      localStorage.setItem('subscriptionPlan', planKey);
+      localStorage.setItem('pendingPlan', planKey);
       setSuccessData({ school, credentials, emailSent });
       setPaymentStatus('Payment completed successfully!');
       setStep('success');

@@ -97,7 +97,13 @@ const Login = ({ onLogin }) => {
       localStorage.setItem('schoolId', response.data.user.school || '');
       localStorage.setItem('role', response.data.user.role);
       localStorage.setItem('userName', `${response.data.user.firstName} ${response.data.user.lastName}`);
-      localStorage.setItem('subscriptionPlan', response.data.user.subscriptionPlan || 'silver');
+
+      // If user selected a plan from the plans page before logging in, respect that.
+      // Otherwise use the plan stored in their account in the DB.
+      const pendingPlan = localStorage.getItem('pendingPlan');
+      const finalPlan = pendingPlan || response.data.user.subscriptionPlan || 'silver';
+      localStorage.setItem('subscriptionPlan', finalPlan);
+      if (pendingPlan) localStorage.removeItem('pendingPlan'); // clear after use
       
       // Redirect to dashboard
       navigate('/dashboard', { replace: true });
@@ -346,11 +352,10 @@ const Login = ({ onLogin }) => {
                 <i className="fa-solid fa-wand-magic-sparkles"></i> Quick Login
               </div>
 
-              {/* Platform Admin */}
+              {/* All roles — available in every plan */}
               <div className="tier-group tier-platinum">
                 <div className="tier-header">
                   <span className="tier-name">👑 School Super Admin</span>
-                  <span className="tier-badge badge-platinum">Elite</span>
                 </div>
                 <div className="role-grid">
                   <div
@@ -363,11 +368,9 @@ const Login = ({ onLogin }) => {
                 </div>
               </div>
 
-              {/* Branch Roles */}
               <div className="tier-group tier-gold">
                 <div className="tier-header">
                   <span className="tier-name">🏫 School Branch Staff</span>
-                  <span className="tier-badge badge-gold">Standard</span>
                 </div>
                 <div className="role-grid">
                   <div
@@ -391,11 +394,9 @@ const Login = ({ onLogin }) => {
                 </div>
               </div>
 
-              {/* Users */}
               <div className="tier-group tier-silver">
                 <div className="tier-header">
                   <span className="tier-name">👥 Students &amp; Parents</span>
-                  <span className="tier-badge badge-silver">Core</span>
                 </div>
                 <div className="role-grid">
                   <div
