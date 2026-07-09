@@ -65,12 +65,12 @@ function App() {
         <Route path="/profile-security" element={<Navigate to="/change-password" replace />} />
         <Route path="/password-change" element={<Navigate to="/change-password" replace />} />
         
-        {/* Protected Routes - Dashboard */}
+        {/* Protected Routes - Dashboard (role-based) */}
         {user && user.role === 'super_admin' && (
-          <Route path="/dashboard/*" element={<AccountantDashboard user={user} onLogout={handleLogout} />} />
+          <Route path="/dashboard/*" element={<SuperAdminDashboard user={user} onLogout={handleLogout} />} />
         )}
         {user && user.role === 'principal' && (
-          <Route path="/dashboard/*" element={<AccountantDashboard user={user} onLogout={handleLogout} />} />
+          <Route path="/dashboard/*" element={<PrincipalDashboard user={user} onLogout={handleLogout} />} />
         )}
         {user && user.role === 'teacher' && (
           <Route path="/dashboard/*" element={<TeacherDashboard user={user} onLogout={handleLogout} />} />
@@ -81,7 +81,7 @@ function App() {
         {user && user.role === 'parent' && (
           <Route path="/dashboard/*" element={<ParentDashboard user={user} onLogout={handleLogout} />} />
         )}
-        {user && user.role === 'accountant_admin' && (
+        {user && (user.role === 'accountant_admin' || user.role === 'accountant') && (
           <Route path="/dashboard/*" element={<AccountantDashboard user={user} onLogout={handleLogout} />} />
         )}
 

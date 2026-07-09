@@ -110,7 +110,6 @@ const AccountantTeachers = () => {
                 <th>Employee ID</th>
                 <th>Contact Details</th>
                 <th>Profile / Bio</th>
-                <th>Salary</th>
                 <th>Designation</th>
                 <th>Assigned Classes</th>
                 <th>Assigned Subjects</th>
@@ -120,7 +119,7 @@ const AccountantTeachers = () => {
             <tbody>
               {filteredTeachers.length === 0 ? (
                 <tr>
-                  <td colSpan="9">No teacher records found.</td>
+                  <td colSpan="8">No teacher records found.</td>
                 </tr>
               ) : (
                 filteredTeachers.map((teacher) => (
@@ -132,7 +131,6 @@ const AccountantTeachers = () => {
                       <div>{teacher.userId?.email || 'Email N/A'}</div>
                     </td>
                     <td>{teacher.bio || 'No profile details available.'}</td>
-                    <td>{teacher.salary ? `₹${Number(teacher.salary).toLocaleString()}` : 'Not set'}</td>
                     <td>{teacher.designation || 'Teacher'}</td>
                     <td>{formatAssignedClasses(teacher.assignedClasses)}</td>
                     <td>{formatAssignedSubjects(teacher)}</td>

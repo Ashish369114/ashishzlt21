@@ -127,7 +127,6 @@ const AccountantDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/payments">💳 Payments</Link></li>
           <li><Link to="/dashboard/reports">📊 Reports</Link></li>
           <li><Link to="/dashboard/expenses">📉 Expenses</Link></li>
-          <li><Link to="/dashboard/salary">💵 Payroll</Link></li>
           <li><Link to="/dashboard/concessions">✍ Concessions</Link></li>
           <li><Link to="/change-password">🔒 Change Password</Link></li>
           <li style={{ marginTop: '30px', borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '20px' }}>
@@ -170,11 +169,6 @@ const AccountantDashboard = ({ user, onLogout }) => {
           <Route path="payments" element={<AccountantPayments />} />
           <Route path="reports" element={<AccountantReports isPremiumFeatureAllowed={isPremiumFeatureAllowed} />} />
           <Route path="expenses" element={<AccountantExpenses />} />
-          <Route path="salary" element={
-            isPremiumFeatureAllowed('payroll')
-              ? <AccountantPayroll />
-              : <FeatureLockBanner featureName="Payroll Management" requiredPlan="Gold" />
-          } />
           <Route path="concessions" element={
             isPremiumFeatureAllowed('concessions')
               ? <ConcessionManagement />
