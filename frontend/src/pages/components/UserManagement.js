@@ -240,12 +240,13 @@ const UserManagement = () => {
               <th>Email</th>
               <th>Phone</th>
               <th>Status</th>
+              <th>Last Login</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="7">Loading...</td></tr>
+              <tr><td colSpan="8">Loading...</td></tr>
             ) : (
               users.map((user) => (
                 <tr key={user._id}>
@@ -255,6 +256,11 @@ const UserManagement = () => {
                   <td>{user.email || '-'}</td>
                   <td>{user.phone || '-'}</td>
                   <td>{user.isActive ? 'Active' : 'Inactive'}</td>
+                  <td>
+                    {(user.role === 'principal' || user.role === 'accountant_admin')
+                      ? (user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never')
+                      : '-'}
+                  </td>
                   <td>
                     <button className="btn btn-secondary btn-small" onClick={() => handleEdit(user)}>Edit</button>
                     <button className="btn btn-danger btn-small" onClick={() => handleDelete(user._id)}>Delete</button>

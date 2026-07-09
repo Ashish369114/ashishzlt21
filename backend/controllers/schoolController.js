@@ -92,57 +92,87 @@ const generatePassword = () => {
 };
 
 const createOrUpdateAdminUser = async ({ schoolEmail, principalName, phone, normalizedPlan, schoolCode }) => {
-  const existingUser = await User.findOne({ email: schoolEmail });
+  const mongoose = require('mongoose');
+  const isDbConnected = mongoose.connection && mongoose.connection.readyState === 1;
+
   const nameParts = String(principalName || '').trim().split(' ');
   const firstName = nameParts[0] || 'Admin';
   const lastName = nameParts.slice(1).join(' ') || 'User';
 
-  if (existingUser) {
-    existingUser.role = existingUser.role || 'super_admin';
-    existingUser.firstName = firstName || existingUser.firstName;
-    existingUser.lastName = lastName || existingUser.lastName;
-    existingUser.phone = phone || existingUser.phone;
-    existingUser.subscriptionPlan = normalizedPlan;
-    await existingUser.save();
+  if (isDbConnected) {
+    const existingUser = await User.findOne({ email: schoolEmail });
+    if (existingUser) {
+      existingUser.role = existingUser.role || 'super_admin';
+      existingUser.firstName = firstName || existingUser.firstName;
+      existingUser.lastName = lastName || existingUser.lastName;
+      existingUser.phone = phone || existingUser.phone;
+      existingUser.subscriptionPlan = normalizedPlan;
+      await existingUser.save();
 
-    return {
-      user: existingUser,
-      credentials: {
-        userId: existingUser.userId,
-        password: null,
-      },
-    };
+      return {
+        user: existingUser,
+        credentials: {
+          userId: existingUser.userId,
+          password: null,
+        },
+      };
+    }
   }
 
   let userId = `${schoolCode}-admin`;
-  let suffix = 0;
-  while (await User.findOne({ userId })) {
-    suffix += 1;
-    userId = `${schoolCode}-admin${suffix}`;
-    if (suffix > 20) break;
+  if (isDbConnected) {
+    let suffix = 0;
+    while (await User.findOne({ userId })) {
+      suffix += 1;
+      userId = `${schoolCode}-admin${suffix}`;
+      if (suffix > 20) break;
+    }
   }
 
   const password = generatePassword();
-  const user = new User({
-    userId,
-    password,
-    role: 'super_admin',
-    firstName,
-    lastName,
-    email: schoolEmail,
-    phone,
-    subscriptionPlan: normalizedPlan,
-  });
 
-  await user.save();
-
-  return {
-    user,
-    credentials: {
+  if (isDbConnected) {
+    const user = new User({
       userId,
       password,
-    },
-  };
+      role: 'super_admin',
+      firstName,
+      lastName,
+      email: schoolEmail,
+      phone,
+      subscriptionPlan: normalizedPlan,
+    });
+
+    await user.save();
+
+    return {
+      user,
+      credentials: {
+        userId,
+        password,
+      },
+    };
+  } else {
+    const mockUser = {
+      _id: `mock_u_${Date.now()}`,
+      userId,
+      password,
+      role: 'super_admin',
+      firstName,
+      lastName,
+      email: schoolEmail,
+      phone,
+      subscriptionPlan: normalizedPlan,
+      isActive: true,
+    };
+    return {
+      user: mockUser,
+      credentials: {
+        userId,
+        password,
+      },
+    };
+  }
 };
 
 const upgradePlan = async (req, res) => {
@@ -175,49 +205,68 @@ const upgradePlan = async (req, res) => {
     const endDate = new Date(startDate);
     endDate.setMonth(endDate.getMonth() + durationMonths);
 
-    let school = await School.findOne({ $or: [{ email: schoolEmail }, { name: schoolName }] });
+    const mongoose = require('mongoose');
+    const isDbConnected = mongoose.connection && mongoose.connection.readyState === 1;
+    let school;
 
-    if (!school) {
-      school = new School({
+    if (isDbConnected) {
+      school = await School.findOne({ $or: [{ email: schoolEmail }, { name: schoolName }] });
+
+      if (!school) {
+        school = new School({
+          name: schoolName,
+          code: schoolCode,
+          email: schoolEmail,
+          phone,
+          address: {
+            street: address || '',
+            city: '',
+            state: '',
+            zipCode: '',
+            country: 'India',
+          },
+          principalName,
+          academicYear: new Date().getFullYear().toString(),
+          subscriptionPlan: normalizedPlan,
+          subscriptionDurationMonths: durationMonths,
+          subscriptionStatus: 'active',
+          subscriptionStartDate: startDate,
+          subscriptionEndDate: endDate,
+          paymentReference: paymentReference || `PAY-${Date.now()}`,
+          status: 'active',
+        });
+      } else {
+        school.subscriptionPlan = normalizedPlan;
+        school.subscriptionDurationMonths = durationMonths;
+        school.subscriptionStatus = 'active';
+        school.subscriptionStartDate = startDate;
+        school.subscriptionEndDate = endDate;
+        school.paymentReference = paymentReference || school.paymentReference || `PAY-${Date.now()}`;
+        school.phone = phone || school.phone;
+        school.email = schoolEmail || school.email;
+        school.address = school.address || {};
+        school.address.street = address || school.address.street || '';
+        school.address.city = school.address.city || '';
+        school.address.state = school.address.state || '';
+        school.address.country = school.address.country || 'India';
+        school.principalName = principalName || school.principalName;
+      }
+
+      await school.save();
+    } else {
+      school = {
+        _id: `mock_sch_${Date.now()}`,
         name: schoolName,
         code: schoolCode,
         email: schoolEmail,
         phone,
-        address: {
-          street: address || '',
-          city: '',
-          state: '',
-          zipCode: '',
-          country: 'India',
-        },
         principalName,
-        academicYear: new Date().getFullYear().toString(),
         subscriptionPlan: normalizedPlan,
         subscriptionDurationMonths: durationMonths,
         subscriptionStatus: 'active',
-        subscriptionStartDate: startDate,
-        subscriptionEndDate: endDate,
         paymentReference: paymentReference || `PAY-${Date.now()}`,
-        status: 'active',
-      });
-    } else {
-      school.subscriptionPlan = normalizedPlan;
-      school.subscriptionDurationMonths = durationMonths;
-      school.subscriptionStatus = 'active';
-      school.subscriptionStartDate = startDate;
-      school.subscriptionEndDate = endDate;
-      school.paymentReference = paymentReference || school.paymentReference || `PAY-${Date.now()}`;
-      school.phone = phone || school.phone;
-      school.email = schoolEmail || school.email;
-      school.address = school.address || {};
-      school.address.street = address || school.address.street || '';
-      school.address.city = school.address.city || '';
-      school.address.state = school.address.state || '';
-      school.address.country = school.address.country || 'India';
-      school.principalName = principalName || school.principalName;
+      };
     }
-
-    await school.save();
 
     const { user, credentials } = await createOrUpdateAdminUser({
       schoolEmail,
@@ -226,6 +275,28 @@ const upgradePlan = async (req, res) => {
       normalizedPlan,
       schoolCode,
     });
+
+    // Dynamically register the newly created admin user in the local memory authController.mockUsers list
+    if (!isDbConnected) {
+      const authController = require('./authController');
+      if (authController.mockUsers) {
+        const userToRegister = {
+          _id: user._id,
+          userId: credentials.userId,
+          password: credentials.password,
+          role: 'super_admin',
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          subscriptionPlan: user.subscriptionPlan,
+          isActive: true,
+        };
+        const existingInMock = authController.mockUsers.find(u => u.userId === credentials.userId);
+        if (!existingInMock) {
+          authController.mockUsers.push(userToRegister);
+        }
+      }
+    }
 
     const loginUrl = process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/login` : 'http://localhost:3000/login';
     let emailSent = false;
@@ -247,7 +318,7 @@ const upgradePlan = async (req, res) => {
       await sendEmail(schoolEmail, emailSubject, emailMessage);
       emailSent = true;
     } catch (emailError) {
-      console.error('Failed to send gold plan activation email:', emailError);
+      console.error('Failed to send plan activation email:', emailError);
     }
 
     res.json({

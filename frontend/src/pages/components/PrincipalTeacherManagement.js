@@ -112,6 +112,9 @@ const PrincipalTeacherManagement = () => {
   const getAttendanceStats = () => {
     // Simulate attendance data
     const total = teachers.length;
+    if (total === 0) {
+      return { total: 0, present: 0, absent: 0, percentage: '100.0' };
+    }
     const present = Math.floor(total * 0.9);
     const absent = total - present;
     return { total, present, absent, percentage: ((present / total) * 100).toFixed(1) };

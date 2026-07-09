@@ -50,6 +50,13 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'User account is inactive' });
     }
 
+    if (user.role === 'principal' || user.role === 'accountant_admin') {
+      user.lastLogin = new Date();
+      if (isDbConnected && typeof user.save === 'function') {
+        await user.save();
+      }
+    }
+
     const token = jwt.sign(
       {
         userId: user._id,
@@ -238,4 +245,5 @@ module.exports = {
   resetPassword,
   changePassword,
   updateProfile,
+  mockUsers,
 };

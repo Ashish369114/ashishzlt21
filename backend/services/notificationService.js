@@ -11,15 +11,70 @@ const transporter = nodemailer.createTransport({
 
 const sendEmail = async (to, subject, html) => {
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to,
-      subject,
-      html,
-    });
-    console.log(`Email sent to ${to}`);
+    let activeTransporter = transporter;
+    const hasConfig = process.env.EMAIL_USER && 
+                      process.env.EMAIL_USER !== 'your_email@gmail.com' && 
+                      process.env.EMAIL_USER !== 'your_email' &&
+                      process.env.EMAIL_PASSWORD && 
+                      process.env.EMAIL_PASSWORD !== 'your_app_password' &&
+                      process.env.EMAIL_PASSWORD !== 'your_password';
+
+    if (!hasConfig) {
+      console.log('EMAIL_USER/EMAIL_PASSWORD not configured or default. Generating temporary Ethereal test email account on-the-fly...');
+      const testAccount = await nodemailer.createTestAccount();
+      activeTransporter = nodemailer.createTransport({
+        host: 'smtp.ethereal.email',
+        port: 587,
+        secure: false,
+        auth: {
+          user: testAccount.user,
+          pass: testAccount.pass,
+        },
+      });
+
+      const info = await activeTransporter.sendMail({
+        from: '"EduManage Onboarding" <no-reply@edumanage.com>',
+        to,
+        subject,
+        html,
+      });
+
+      console.log(`Test email sent successfully to ${to}`);
+      console.log(`Preview Test Email URL: ${nodemailer.getTestMessageUrl(info)}`);
+      return;
+    }
+
+    try {
+      await activeTransporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to,
+        subject,
+        html,
+      });
+      console.log(`Real email sent successfully to ${to}`);
+    } catch (realMailError) {
+      console.error('Failed to send real email (falling back to Ethereal):', realMailError.message);
+      const testAccount = await nodemailer.createTestAccount();
+      const fallbackTransporter = nodemailer.createTransport({
+        host: 'smtp.ethereal.email',
+        port: 587,
+        secure: false,
+        auth: {
+          user: testAccount.user,
+          pass: testAccount.pass,
+        },
+      });
+      const info = await fallbackTransporter.sendMail({
+        from: '"EduManage Onboarding (Fallback)" <no-reply@edumanage.com>',
+        to,
+        subject,
+        html,
+      });
+      console.log(`Fallback test email sent successfully to ${to}`);
+      console.log(`Preview Test Email URL: ${nodemailer.getTestMessageUrl(info)}`);
+    }
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('Error in sendEmail wrapper:', error);
   }
 };
 
