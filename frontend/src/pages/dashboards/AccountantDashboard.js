@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
-import { studentService, feeService, teacherService, expenseService } from '../../services/api';
+import { studentService, feeService, teacherService, expenseService, classService } from '../../services/api';
 import StudentManagement from '../components/StudentManagement';
 import AccountantTeachers from '../components/AccountantTeachers';
 import FeeManagement from '../components/FeeManagement';
@@ -22,12 +22,13 @@ const AccountantDashboard = ({ user, onLogout }) => {
 
   const fetchData = async () => {
     try {
-      const [students, pendingFees, allFees, teachers, expenses] = await Promise.all([
+      const [students, pendingFees, allFees, teachers, expenses, classes] = await Promise.all([
         studentService.getAll(),
         feeService.getPending(),
         feeService.getAll(),
         teacherService.getAll(),
         expenseService.getAll(),
+        classService.getAll(),
       ]);
 
       const allPaidFees = Array.isArray(allFees.data) ? allFees.data.filter((fee) => fee.isPaid || Number(fee.paidAmount || 0) > 0) : [];
@@ -49,8 +50,8 @@ const AccountantDashboard = ({ user, onLogout }) => {
       setStats({
         totalStudents: students.data.length,
         totalTeachers: teachers.data.length,
-        pendingFees: pendingFees.data.length,
-        pendingAmount: pendingFees.data.reduce((sum, fee) => sum + Math.max(Number(fee.amount || 0) - Number(fee.paidAmount || 0), 0), 0),
+        totalClasses: classes.data.length,
+        totalPendingAmount: pendingFees.data.reduce((sum, fee) => sum + Math.max(Number(fee.amount || 0) - Number(fee.paidAmount || 0), 0), 0),
         totalAmount: allFees.data.reduce((sum, fee) => sum + Number(fee.amount || 0), 0),
         totalExpenses,
         netIncome: allPaidFees.reduce((sum, fee) => sum + Number(fee.paidAmount || fee.amount || 0), 0) - totalExpenses,
