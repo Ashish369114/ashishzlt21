@@ -1,7 +1,10 @@
 const test = require('node:test');
 const assert = require('assert');
+const mongoose = require('mongoose');
 const feeController = require('../controllers/feeController');
 const Fee = require('../models/Fee');
+const Student = require('../models/Student');
+const User = require('../models/User');
 
 test('updateFee recalculates payment status when amount is changed', async () => {
   const savedFee = {
@@ -153,5 +156,114 @@ test('deleteFeesByStudent removes every fee record for a student', async () => {
     assert.deepStrictEqual(res.body, { message: 'Fees deleted', deletedCount: 2 });
   } finally {
     Fee.deleteMany = originalDeleteMany;
+  }
+});
+
+test('getFeesByParent returns the current parent’s student fees', async () => {
+  const originalFeeFind = Fee.find;
+  const originalStudentFind = Student.find;
+  const originalUserFindOne = User.findOne;
+  const originalIsValid = mongoose.Types.ObjectId.isValid;
+
+  try {
+    const feeDocs = [{ _id: 'fee-1', amount: 5000, isPaid: false, student: { _id: 'student-user-1' } }];
+
+    Fee.find = () => ({
+      populate: () => feeDocs,
+    });
+    Student.find = async () => [{ userId: 'student-user-1' }];
+    User.findOne = async () => null;
+    mongoose.Types.ObjectId.isValid = () => true;
+
+    const req = {
+      user: { userId: 'parent-user-1' },
+    };
+
+    const res = {
+      body: null,
+      statusCode: null,
+      status(code) {
+        this.statusCode = code;
+        return this;
+      },
+      json(payload) {
+        this.body = payload;
+        return this;
+      },
+    };
+
+    await feeController.getFeesByParent(req, res);
+
+    assert.deepStrictEqual(res.body, feeDocs);
+  } finally {
+    Fee.find = originalFeeFind;
+    Student.find = originalStudentFind;
+    User.findOne = originalUserFindOne;
+    mongoose.Types.ObjectId.isValid = originalIsValid;
+  }
+});
+
+test('payFee defaults to the outstanding balance when no amount is sent', async () => {
+  const originalFindById = Fee.findById;
+  const originalStudentFindById = Student.findById;
+
+  try {
+    const feeDoc = {
+      _id: 'fee-3',
+      student: { _id: 'student-3' },
+      amount: 5000,
+      paidAmount: 0,
+      paymentHistory: [],
+      paymentDetails: {},
+      save: async function () {
+        return this;
+      },
+      populate: async function () {
+        return this;
+      },
+    };
+
+    const studentDoc = {
+      _id: 'student-3',
+      feesPaid: 0,
+      save: async function () {
+        return this;
+      },
+    };
+
+    Fee.findById = async () => feeDoc;
+    Student.findById = async () => studentDoc;
+
+    const req = {
+      body: {
+        feeId: 'fee-3',
+        paymentMethod: 'Cash',
+        transactionId: 'txn-123',
+        paymentDetails: {},
+      },
+    };
+
+    const res = {
+      body: null,
+      statusCode: null,
+      status(code) {
+        this.statusCode = code;
+        return this;
+      },
+      json(payload) {
+        this.body = payload;
+        return this;
+      },
+    };
+
+    await feeController.payFee(req, res);
+
+    assert.strictEqual(feeDoc.paidAmount, 5000);
+    assert.strictEqual(feeDoc.isPaid, true);
+    assert.strictEqual(studentDoc.feesPaid, 5000);
+    assert.strictEqual(res.statusCode, null);
+  } finally {
+    Fee.findById = originalFindById;
+    Student.findById = originalStudentFindById;
   }
 });

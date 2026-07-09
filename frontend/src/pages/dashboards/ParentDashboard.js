@@ -25,12 +25,24 @@ const ParentDashboard = ({ user, onLogout }) => {
     try {
       const response = await feeService.getByParent();
       const fees = response.data || [];
-      const paidFees = fees.filter((fee) => fee.isPaid);
+      const paidFees = fees.filter((fee) => fee.isPaid || Number(fee.paidAmount || 0) > 0);
+      const totalAmount = fees.reduce((sum, fee) => sum + Number(fee.amount || 0), 0);
+      const totalPaidAmount = fees.reduce((sum, fee) => sum + Number(fee.paidAmount || 0), 0);
+      const totalPendingAmount = fees.reduce(
+        (sum, fee) => sum + Math.max(Number(fee.amount || 0) - Number(fee.paidAmount || 0), 0),
+        0,
+      );
+      const pendingCount = fees.filter((fee) => !fee.isPaid).length;
+
       setStats({
         totalStudents: studentList.length,
         totalFees: fees.length,
-        totalCollected: paidFees.reduce((sum, fee) => sum + fee.amount, 0),
-        pendingCount: fees.filter((fee) => !fee.isPaid).length,
+        totalFeeAmount: totalAmount,
+        totalPaidAmount,
+        totalPendingAmount,
+        paidCount: paidFees.length,
+        pendingCount,
+        totalCollected: totalPaidAmount,
         lastPaymentMethod: paidFees.length ? paidFees[paidFees.length - 1].paymentMethod : 'N/A',
         totalChildren: studentList.length,
       });

@@ -1,4 +1,4 @@
-# School Management System - User Credentials Reference
+# School Operating System - User Credentials Reference
 
 ## 📋 Pre-Populated User Accounts
 
@@ -503,7 +503,7 @@ After initial setup, you can add more users through the dashboard:
 
 ```
 ╔═══════════════════════════════════════════════════════════╗
-║        SCHOOL MANAGEMENT SYSTEM - LOGIN QUICK REF         ║
+║        School Operating System - LOGIN QUICK REF         ║
 ╠═════════════════╦═════════════════╦════════════════════════╣
 ║     ROLE        ║     USER ID     ║      PASSWORD          ║
 ╠═════════════════╬═════════════════╬════════════════════════╣

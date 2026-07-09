@@ -1,7 +1,7 @@
-# School Management System - API Documentation
+# School Operating System - API Documentation
 
 ## Overview
-This is a comprehensive RESTful API for a school management system with real-time updates using WebSocket.
+This is a comprehensive RESTful API for a School Operating System with real-time updates using WebSocket.
 
 ## Base URL
 ```
@@ -580,7 +580,7 @@ POST /settings
 {
   "school": "school_id",
   "general": {
-    "systemName": "School Management System",
+    "systemName": "School Operating System",
     "timezone": "Asia/Kolkata",
     "language": "English",
     "currency": "INR"

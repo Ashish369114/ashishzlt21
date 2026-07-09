@@ -1,7 +1,7 @@
-# School Management System - New Modules Guide
+# School Operating System - New Modules Guide
 
 ## Overview
-This document describes the newly added modules to the school management system with real-time capabilities.
+This document describes the newly added modules to the School Operating System with real-time capabilities.
 
 ## New Modules Added
 

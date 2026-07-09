@@ -446,4 +446,4 @@ dist/
 
 ---
 
-**All configuration is ready! You're set to run the School Management System.** 🚀
+**All configuration is ready! You're set to run the School Operating System.** 🚀

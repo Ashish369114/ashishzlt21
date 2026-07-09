@@ -31,7 +31,6 @@ const schoolSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
-    principalName: String,
     academicYear: {
       type: String,
       required: true,
@@ -45,23 +44,6 @@ const schoolSchema = new mongoose.Schema(
       enum: ['active', 'inactive'],
       default: 'active',
     },
-    subscriptionPlan: {
-      type: String,
-      enum: ['silver', 'gold', 'platinum'],
-      default: 'silver',
-    },
-    subscriptionDurationMonths: {
-      type: Number,
-      default: 12,
-    },
-    subscriptionStatus: {
-      type: String,
-      enum: ['active', 'inactive', 'pending'],
-      default: 'active',
-    },
-    subscriptionStartDate: Date,
-    subscriptionEndDate: Date,
-    paymentReference: String,
     totalStudents: {
       type: Number,
       default: 0,

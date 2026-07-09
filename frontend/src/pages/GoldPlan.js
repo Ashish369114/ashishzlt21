@@ -81,7 +81,7 @@ const GoldPlan = () => {
       <section className="hero-banner" style={{ minHeight: '60vh' }}>
         <div className="hero-content">
           <div className="hero-badge">Gold Plan Subscription</div>
-          <h1 className="hero-title">School Management System Gold Plan</h1>
+          <h1 className="hero-title">School Operating System Gold Plan</h1>
           <p className="hero-subtitle">
             Complete onboarding for your school with a demo UPI payment experience and instant credential provisioning.
           </p>
@@ -215,7 +215,7 @@ const GoldPlan = () => {
           {step === 'success' && successData && (
             <div className="success-popup visible">
               <h3>Payment Successful!</h3>
-              <p>Your School Management System credentials have been sent to your registered email address.</p>
+              <p>Your School Operating System credentials have been sent to your registered email address.</p>
               <div className="success-details">
                 <p>{successData.emailSent ? 'An email has been delivered to your inbox.' : 'If email delivery is unavailable, please check your email or contact support.'}</p>
               </div>

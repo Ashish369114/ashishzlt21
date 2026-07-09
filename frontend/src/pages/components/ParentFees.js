@@ -123,8 +123,19 @@ const ParentFees = () => {
     URL.revokeObjectURL(link.href);
   };
 
+  const calculateTotalPaid = () => {
+    return fees.reduce((sum, f) => sum + Number(f.paidAmount || 0), 0);
+  };
+
   const calculateTotalPending = () => {
-    return fees.filter(f => !f.isPaid).reduce((sum, f) => sum + f.amount, 0);
+    return fees.reduce(
+      (sum, f) => sum + Math.max(Number(f.amount || 0) - Number(f.paidAmount || 0), 0),
+      0,
+    );
+  };
+
+  const calculateTotalFeeAmount = () => {
+    return fees.reduce((sum, f) => sum + Number(f.amount || 0), 0);
   };
 
   return (
@@ -137,12 +148,20 @@ const ParentFees = () => {
 
       <div className="stats-grid" style={{ marginBottom: '20px' }}>
         <div className="stat-card">
+          <h3>Total Fees</h3>
+          <div className="value">{fees.length}</div>
+        </div>
+        <div className="stat-card">
+          <h3>Paid Amount</h3>
+          <div className="value">₹{calculateTotalPaid()}</div>
+        </div>
+        <div className="stat-card">
           <h3>Pending Amount</h3>
           <div className="value">₹{calculateTotalPending()}</div>
         </div>
         <div className="stat-card">
-          <h3>Paid Fees</h3>
-          <div className="value">{fees.filter(f => f.isPaid).length}</div>
+          <h3>Total Fee Amount</h3>
+          <div className="value">₹{calculateTotalFeeAmount()}</div>
         </div>
       </div>
 
@@ -155,6 +174,9 @@ const ParentFees = () => {
               <tr>
                 <th>Student</th>
                 <th>Amount</th>
+                <th>Installments</th>
+                <th>Paid</th>
+                <th>Pending</th>
                 <th>Due Date</th>
                 <th>Status</th>
                 <th>Payment Method</th>
@@ -162,12 +184,18 @@ const ParentFees = () => {
               </tr>
             </thead>
             <tbody>
-              {fees.map((fee) => (
-                <tr key={fee._id}>
-                  <td><strong>{fee.student?.firstName} {fee.student?.lastName}</strong></td>
-                  <td>₹{fee.amount}</td>
-                  <td>{new Date(fee.dueDate).toLocaleDateString()}</td>
-                  <td>
+              {fees.map((fee) => {
+                const paidAmount = Number(fee.paidAmount || 0);
+                const pendingAmount = Math.max(Number(fee.amount || 0) - paidAmount, 0);
+                return (
+                  <tr key={fee._id}>
+                    <td><strong>{fee.student?.firstName} {fee.student?.lastName}</strong></td>
+                    <td>₹{fee.amount}</td>
+                    <td>{fee.installments || 3}</td>
+                    <td>₹{paidAmount}</td>
+                    <td>₹{pendingAmount}</td>
+                    <td>{new Date(fee.dueDate).toLocaleDateString()}</td>
+                    <td>
                     <span style={{
                       padding: '5px 10px',
                       borderRadius: '3px',
@@ -210,7 +238,8 @@ const ParentFees = () => {
                     )}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

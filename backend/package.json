@@ -1,7 +1,7 @@
 {
   "name": "school-management-system-backend",
   "version": "1.0.0",
-  "description": "School Management System Backend",
+  "description": "School Operating System Backend",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

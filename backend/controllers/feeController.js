@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Fee = require('../models/Fee');
 const Student = require('../models/Student');
 const User = require('../models/User');
@@ -79,15 +80,17 @@ const payFee = async (req, res) => {
   try {
     const { feeId, paymentMethod, transactionId, paymentDetails, amount } = req.body;
     const resolvedTransactionId = transactionId || `TXN-TEST-${Date.now()}`;
-    const paymentAmount = Number(amount || 0);
-
-    if (!paymentAmount || paymentAmount <= 0) {
-      return res.status(400).json({ message: 'Payment amount must be greater than zero.' });
-    }
 
     const fee = await Fee.findById(feeId);
     if (!fee) {
       return res.status(404).json({ message: 'Fee not found' });
+    }
+
+    const outstandingAmount = Math.max(0, (Number(fee.amount) || 0) - (Number(fee.paidAmount) || 0));
+    const paymentAmount = Number(amount || outstandingAmount || 0);
+
+    if (!paymentAmount || paymentAmount <= 0) {
+      return res.status(400).json({ message: 'Payment amount must be greater than zero.' });
     }
 
     const updatedPaidAmount = (fee.paidAmount || 0) + paymentAmount;

@@ -49,7 +49,7 @@ const Login = ({ onLogin }) => {
               <span className="logo-icon">🎓</span>
               <span className="logo-text">Zayn Levi Technologies</span>
             </div>
-            <h2>School Management System</h2>
+            <h2>School Operating System</h2>
             <p>Welcome Back! Please login to your account</p>
           </div>
 

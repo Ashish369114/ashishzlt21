@@ -42,8 +42,8 @@ const Navigation = ({ user = null, onLogout = null }) => {
       <div className="navbar-container">
         <div className="navbar-brand">
           <div className="school-logo" onClick={() => navigate('/')}>
-            <span className="logo-icon">💻</span>
-            <span className="logo-text">Zayn Levi</span>
+            <span className="logo-icon">🎓</span>
+            <span className="logo-text">EduManage</span>
           </div>
         </div>
 
@@ -70,32 +70,79 @@ const Navigation = ({ user = null, onLogout = null }) => {
                   handleNavClick('about');
                 }}
               >
-                About Us
+                About
               </a>
             </li>
             <li>
               <a 
-                href="#services" 
+                href="#admissions" 
                 className="nav-link"
                 onClick={(e) => {
                   e.preventDefault();
-                  handleNavClick('services');
+                  handleNavClick('admissions');
                 }}
               >
-                Services
+                Admissions
               </a>
             </li>
             <li>
               <a 
-                href="#pricing" 
+                href="#academics" 
                 className="nav-link"
                 onClick={(e) => {
                   e.preventDefault();
-                  handleNavClick('pricing');
+                  handleNavClick('academics');
                 }}
               >
-                Pricing
+                Academics
               </a>
+            </li>
+            <li>
+              <a 
+                href="#faculty" 
+                className="nav-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavClick('faculty');
+                }}
+              >
+                Faculty
+              </a>
+            </li>
+            <li>
+              <a 
+                href="#gallery" 
+                className="nav-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavClick('gallery');
+                }}
+              >
+                Gallery
+              </a>
+            </li>
+            <li>
+              <a 
+                href="#events" 
+                className="nav-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavClick('events');
+                }}
+              >
+                Events
+              </a>
+            </li>
+            <li>
+              <button
+                className="nav-link"
+                onClick={() => {
+                  navigate('/home');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                Home Page
+              </button>
             </li>
             <li>
               <a 

@@ -2,7 +2,7 @@
 
 ## What's New? 🎉
 
-Your school management system now has 10 powerful new modules with real-time capabilities!
+Your School Operating System now has 10 powerful new modules with real-time capabilities!
 
 ## Quick Overview
 

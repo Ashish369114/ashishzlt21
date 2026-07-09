@@ -96,7 +96,7 @@ const LandingPage = () => {
           <div className="hero-badge">Trusted Digital Transformation Partner</div>
           <h1 className="hero-title">Zayn Levi Technologies</h1>
           <p className="hero-subtitle">
-            Delivering intelligent software solutions with our <span>Advanced School Management System</span>
+            Delivering intelligent software solutions with our <span>Advanced School Operating System</span>
           </p>
           <p className="hero-description">
             We build secure, scalable technology for schools, enterprises, and fast-growing organizations that want reliable digital operations.
@@ -187,9 +187,9 @@ const LandingPage = () => {
           <div className="services-spotlight">
             <div className="spotlight-panel">
               <div className="hero-badge">Flagship Product</div>
-              <h3>School Management System</h3>
+              <h3>School Operating System</h3>
               <p>
-                Our Advanced School Management System helps educational institutions manage admissions, attendance, fee collection, examinations, communication, and reporting from a single platform.
+                Our Advanced School Operating System helps educational institutions manage admissions, attendance, fee collection, examinations, communication, and reporting from a single platform.
               </p>
               <ul className="check-list">
                 <li>Student management</li>
@@ -209,7 +209,7 @@ const LandingPage = () => {
 
       <section id="pricing" className="pricing-section">
         <div className="container">
-          <h2 className="section-title">School Management System Pricing</h2>
+          <h2 className="section-title">School Operating System Pricing</h2>
           <div className="pricing-grid">
             {pricingTiers.map((tier) => (
               <div className={`price-card ${tier.featured ? 'popular' : ''}`} key={tier.name}>
@@ -235,7 +235,7 @@ const LandingPage = () => {
         <div className="container">
           <div className="subscription-cta-card">
             <h2>Ready to get started?</h2>
-            <p>Choose the Gold Plan to unlock the full School Management System experience with a separate subscription dashboard and a demo UPI payment flow.</p>
+            <p>Choose the Gold Plan to unlock the full School Operating System experience with a separate subscription dashboard and a demo UPI payment flow.</p>
             <button className="btn btn-primary" onClick={() => navigate('/silver-plan')}>
               Go to Silver Plan Subscription
             </button>

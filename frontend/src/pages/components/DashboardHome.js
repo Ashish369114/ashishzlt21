@@ -38,11 +38,21 @@ const DashboardHome = ({ stats }) => {
   if (stats?.totalExams !== undefined) {
     addCard('Total Exams', stats.totalExams);
   }
-  if (stats?.pendingFees !== undefined || stats?.pendingCount !== undefined || stats?.totalAmount !== undefined || stats?.totalFees !== undefined) {
-    const feeValue = stats?.pendingFees ?? stats?.pendingCount ?? stats?.totalAmount ?? stats?.totalFees ?? 0;
-    addCard('Pending Fees', feeValue, (value) => `₹${Number(value || 0).toLocaleString()}`);
+  if (stats?.totalPendingAmount !== undefined) {
+    addCard('Pending Fees', stats.totalPendingAmount, (value) => `₹${Number(value || 0).toLocaleString()}`);
+  } else if (stats?.pendingFees !== undefined) {
+    addCard('Pending Fees', stats.pendingFees, (value) => `₹${Number(value || 0).toLocaleString()}`);
+  } else if (stats?.pendingCount !== undefined) {
+    addCard('Pending Fees', stats.pendingCount, (value) => Number(value).toLocaleString());
   }
-  if (stats?.totalFees !== undefined && stats?.pendingFees === undefined && stats?.pendingCount === undefined && stats?.totalAmount === undefined) {
+
+  if (stats?.totalPaidAmount !== undefined) {
+    addCard('Collected Fees', stats.totalPaidAmount, (value) => `₹${Number(value || 0).toLocaleString()}`);
+  }
+
+  if (stats?.totalFeeAmount !== undefined) {
+    addCard('Total Fee Amount', stats.totalFeeAmount, (value) => `₹${Number(value || 0).toLocaleString()}`);
+  } else if (stats?.totalFees !== undefined && stats?.pendingFees === undefined && stats?.pendingCount === undefined && stats?.totalAmount === undefined) {
     addCard('Total Fees', stats.totalFees, (value) => `₹${Number(value || 0).toLocaleString()}`);
   }
   if (stats?.todayCollection !== undefined) {
@@ -108,7 +118,7 @@ const DashboardHome = ({ stats }) => {
         <div className="card-header">
           <h2>📊 Quick Overview</h2>
         </div>
-        <p>Welcome to the School Management System. Use the navigation menu to access different modules.</p>
+        <p>Welcome to the School Operating System. Use the navigation menu to access different modules.</p>
         <div style={{ marginTop: '12px' }}>
           <strong>Active Plan:</strong> {getPlanDisplayName(planName)}
         </div>

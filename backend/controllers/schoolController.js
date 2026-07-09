@@ -230,7 +230,7 @@ const upgradePlan = async (req, res) => {
     const loginUrl = process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/login` : 'http://localhost:3000/login';
     let emailSent = false;
 
-    const emailSubject = `${normalizedPlan.charAt(0).toUpperCase() + normalizedPlan.slice(1)} Plan Activated - School Management System Access`;
+    const emailSubject = `${normalizedPlan.charAt(0).toUpperCase() + normalizedPlan.slice(1)} Plan Activated - School Operating System Access`;
     const emailMessage = `
       <h2>Welcome to the ${normalizedPlan.charAt(0).toUpperCase() + normalizedPlan.slice(1)} Plan</h2>
       <p>Your school <strong>${school.name}</strong> has been successfully upgraded to the <strong>${normalizedPlan.toUpperCase()}</strong> plan.</p>
