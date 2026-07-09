@@ -457,18 +457,18 @@ const StudentManagement = () => {
                   <td>{student.parentId?.firstName ? `${student.parentId.firstName} ${student.parentId.lastName}` : 'N/A'}</td>
                   <td>
                     <div className="action-buttons">
-                      {currentUser && ['super_admin', 'principal'].includes(currentUser.role) && (
-                        <>
+                        {currentUser && ['super_admin', 'principal', 'accountant_admin'].includes(currentUser.role) && (
                           <button className="btn btn-secondary btn-small" onClick={() => handleEditStudent(student)}>Edit</button>
+                        )}
+                        {currentUser && ['super_admin', 'principal'].includes(currentUser.role) && (
                           <button
                             className="btn btn-danger btn-small"
                             onClick={() => handleDeleteStudent(student._id)}
                           >
                             Delete
                           </button>
-                        </>
-                      )}
-                    </div>
+                        )}
+                      </div>
                   </td>
                 </tr>
               ))}

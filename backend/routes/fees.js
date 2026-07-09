@@ -13,7 +13,7 @@ router.get('/student/:studentId', authMiddleware, feeController.getFeesByStudent
 router.post('/', authMiddleware, roleMiddleware(['accountant_admin', 'super_admin', 'principal']), feeController.addFee);
 router.post('/pay', authMiddleware, feeController.payFee);
 router.put('/:id', authMiddleware, roleMiddleware(['accountant_admin', 'super_admin', 'principal']), feeController.updateFee);
-router.delete('/student/:studentId', authMiddleware, roleMiddleware(['super_admin', 'principal']), feeController.deleteFeesByStudent);
-router.delete('/:id', authMiddleware, roleMiddleware(['super_admin', 'principal']), feeController.deleteFee);
+router.delete('/student/:studentId', authMiddleware, roleMiddleware(['super_admin', 'principal', 'accountant_admin']), feeController.deleteFeesByStudent);
+router.delete('/:id', authMiddleware, roleMiddleware(['super_admin', 'principal', 'accountant_admin']), feeController.deleteFee);
 
 module.exports = router;
