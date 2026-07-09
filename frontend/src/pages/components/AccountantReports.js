@@ -1,7 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { feeService, expenseService } from '../../services/api';
 
-const AccountantReports = () => {
+const FeatureLockBanner = ({ featureName, requiredPlan = 'Platinum' }) => (
+  <div style={{
+    background: 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(99,102,241,0.08))',
+    border: '1.5px solid rgba(6,182,212,0.3)',
+    borderRadius: '12px',
+    padding: '16px 22px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '14px',
+    marginTop: '20px',
+  }}>
+    <span style={{ fontSize: '1.6rem' }}>🔒</span>
+    <div>
+      <strong style={{ color: '#0e7490' }}>{featureName} — {requiredPlan} Plan Feature</strong>
+      <p style={{ margin: '4px 0 0', color: '#155e75', fontSize: '0.88rem' }}>
+        This feature is available in the <strong>{requiredPlan}</strong> plan and above.
+        <a href="/" style={{ color: '#7c3aed', marginLeft: '6px', fontWeight: '600' }}>Upgrade your plan →</a>
+      </p>
+    </div>
+  </div>
+);
+
+const AccountantReports = ({ isPremiumFeatureAllowed }) => {
   const [stats, setStats] = useState(null);
   const [expenses, setExpenses] = useState([]);
   const [paidFees, setPaidFees] = useState([]);
@@ -152,6 +174,11 @@ const AccountantReports = () => {
               </table>
             </div>
           </div>
+
+          {/* Advanced Analytics — Platinum+ only */}
+          {isPremiumFeatureAllowed && !isPremiumFeatureAllowed('advanced_reports') && (
+            <FeatureLockBanner featureName="Advanced Analytics & Revenue Trends" requiredPlan="Platinum" />
+          )}
 
           <div className="card" style={{ marginTop: '20px' }}>
             <div className="card-header">

@@ -13,16 +13,26 @@ import AccountantExpenses from '../components/AccountantExpenses';
 import AccountantPayroll from '../components/AccountantPayroll';
 import ConcessionManagement from '../components/ConcessionManagement';
 
-const UpgradeRequired = ({ requiredPlan = 'Gold' }) => (
-  <div className="card" style={{ padding: '40px', textAlign: 'center', margin: '20px auto', maxWidth: '600px' }}>
-    <div style={{ fontSize: '3.5rem', marginBottom: '20px' }}>🔒</div>
-    <h2>Plan Upgrade Required</h2>
-    <p style={{ marginTop: '10px', color: '#6b7280', lineHeight: '1.6' }}>
-      This module is not included in your current active plan. Please upgrade to the <strong>{requiredPlan} Plan</strong> or above to unlock this feature.
-    </p>
-    <button className="btn btn-primary" style={{ marginTop: '20px' }} onClick={() => window.location.href = '/'}>
-      View Subscription Plans
-    </button>
+// Shows a locked feature banner WITHIN a page (not a full block)
+const FeatureLockBanner = ({ featureName, requiredPlan = 'Gold' }) => (
+  <div style={{
+    background: 'linear-gradient(135deg, rgba(245,158,11,0.08), rgba(99,102,241,0.08))',
+    border: '1.5px solid rgba(245,158,11,0.3)',
+    borderRadius: '12px',
+    padding: '18px 24px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '14px',
+    marginBottom: '18px',
+  }}>
+    <span style={{ fontSize: '1.6rem' }}>🔒</span>
+    <div>
+      <strong style={{ color: '#92400e' }}>{featureName} — {requiredPlan} Plan Feature</strong>
+      <p style={{ margin: '4px 0 0', color: '#78350f', fontSize: '0.88rem' }}>
+        This feature is available in the <strong>{requiredPlan}</strong> plan and above. 
+        <a href="/" style={{ color: '#7c3aed', marginLeft: '6px', fontWeight: '600' }}>Upgrade your plan →</a>
+      </p>
+    </div>
   </div>
 );
 
@@ -31,16 +41,21 @@ const AccountantDashboard = ({ user, onLogout }) => {
   const [stats, setStats] = useState(null);
   const plan = localStorage.getItem('subscriptionPlan') || 'silver';
 
-  const isModuleAllowed = (moduleKey) => {
-    const normalizedPlan = String(plan).toLowerCase();
-    
-    // Silver Plan restrictions
-    if (normalizedPlan === 'silver') {
-      const allowedInSilver = ['dashboard', 'students', 'teachers', 'change-password'];
-      return allowedInSilver.includes(moduleKey);
+  // All modules are always visible/accessible for all plans.
+  // This function checks if a *premium feature* within a module is allowed.
+  const isPremiumFeatureAllowed = (featureKey) => {
+    const p = String(plan).toLowerCase();
+    const isGoldOrAbove = ['gold', 'platinum', 'platinum_with_ocr', 'platinum_without_ocr'].includes(p);
+    const isPlatinum = p.startsWith('platinum');
+    const isOcrPlatinum = p === 'platinum_with_ocr';
+
+    switch (featureKey) {
+      case 'concessions':      return isGoldOrAbove;      // Gold+ only
+      case 'payroll':          return isGoldOrAbove;      // Gold+ only
+      case 'advanced_reports': return isPlatinum;         // Platinum+ only
+      case 'ocr':              return isOcrPlatinum;      // Platinum with OCR only
+      default:                 return true;               // Available to all plans
     }
-    
-    return true;
   };
 
   useEffect(() => {
@@ -104,16 +119,16 @@ const AccountantDashboard = ({ user, onLogout }) => {
         </div>
         <ul className="nav-menu">
           <li><Link to="/dashboard" className="active">📊 Dashboard</Link></li>
-          {isModuleAllowed('students') && <li><Link to="/dashboard/students">👨‍🎓 Students</Link></li>}
-          {isModuleAllowed('teachers') && <li><Link to="/dashboard/teachers">👨‍🏫 Teachers</Link></li>}
-          {isModuleAllowed('collections') && <li><Link to="/dashboard/collections">💰 Collections</Link></li>}
-          {isModuleAllowed('fees') && <li><Link to="/dashboard/fees">🧾 Fee Management</Link></li>}
-          {isModuleAllowed('pending') && <li><Link to="/dashboard/pending">⏳ Pending Fees</Link></li>}
-          {isModuleAllowed('payments') && <li><Link to="/dashboard/payments">💳 Payments</Link></li>}
-          {isModuleAllowed('reports') && <li><Link to="/dashboard/reports">📊 Reports</Link></li>}
-          {isModuleAllowed('expenses') && <li><Link to="/dashboard/expenses">📉 Expenses</Link></li>}
-          {isModuleAllowed('salary') && <li><Link to="/dashboard/salary">💵 Payroll</Link></li>}
-          {isModuleAllowed('concessions') && <li><Link to="/dashboard/concessions">✍ Concessions</Link></li>}
+          <li><Link to="/dashboard/students">👨‍🎓 Students</Link></li>
+          <li><Link to="/dashboard/teachers">👨‍🏫 Teachers</Link></li>
+          <li><Link to="/dashboard/collections">💰 Collections</Link></li>
+          <li><Link to="/dashboard/fees">🧾 Fee Management</Link></li>
+          <li><Link to="/dashboard/pending">⏳ Pending Fees</Link></li>
+          <li><Link to="/dashboard/payments">💳 Payments</Link></li>
+          <li><Link to="/dashboard/reports">📊 Reports</Link></li>
+          <li><Link to="/dashboard/expenses">📉 Expenses</Link></li>
+          <li><Link to="/dashboard/salary">💵 Payroll</Link></li>
+          <li><Link to="/dashboard/concessions">✍ Concessions</Link></li>
           <li><Link to="/change-password">🔒 Change Password</Link></li>
           <li style={{ marginTop: '30px', borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '20px' }}>
             <button onClick={handleLogout} className="logout-btn" style={{ width: '100%' }}>🚪 Logout</button>
@@ -124,21 +139,47 @@ const AccountantDashboard = ({ user, onLogout }) => {
       <div className="main-content">
         <div className="header">
           <h1>Accountant & Admin Dashboard</h1>
-          <div>{new Date().toLocaleDateString()}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{
+              padding: '4px 12px',
+              borderRadius: '20px',
+              fontSize: '0.78rem',
+              fontWeight: '700',
+              letterSpacing: '0.04em',
+              background: plan.startsWith('platinum') ? 'linear-gradient(135deg, #06b6d4, #0891b2)' :
+                          plan === 'gold' ? 'linear-gradient(135deg, #f59e0b, #d97706)' :
+                          'linear-gradient(135deg, #64748b, #475569)',
+              color: '#fff',
+              textTransform: 'uppercase',
+            }}>
+              {plan === 'platinum_with_ocr' ? '⭐ Platinum + OCR' :
+               plan === 'platinum_without_ocr' || plan === 'platinum' ? '⭐ Platinum' :
+               plan === 'gold' ? '🏆 Gold' : '🥈 Silver'} Plan
+            </span>
+            <span>{new Date().toLocaleDateString()}</span>
+          </div>
         </div>
 
         <Routes>
           <Route index element={<DashboardHome stats={stats} />} />
-          <Route path="students" element={isModuleAllowed('students') ? <StudentManagement /> : <UpgradeRequired requiredPlan="Silver" />} />
-          <Route path="teachers" element={isModuleAllowed('teachers') ? <AccountantTeachers /> : <UpgradeRequired requiredPlan="Silver" />} />
-          <Route path="collections" element={isModuleAllowed('collections') ? <AccountantCollections /> : <UpgradeRequired requiredPlan="Gold" />} />
-          <Route path="fees" element={isModuleAllowed('fees') ? <FeeManagement /> : <UpgradeRequired requiredPlan="Gold" />} />
-          <Route path="pending" element={isModuleAllowed('pending') ? <AccountantPendingFees /> : <UpgradeRequired requiredPlan="Gold" />} />
-          <Route path="payments" element={isModuleAllowed('payments') ? <AccountantPayments /> : <UpgradeRequired requiredPlan="Gold" />} />
-          <Route path="reports" element={isModuleAllowed('reports') ? <AccountantReports /> : <UpgradeRequired requiredPlan="Gold" />} />
-          <Route path="expenses" element={isModuleAllowed('expenses') ? <AccountantExpenses /> : <UpgradeRequired requiredPlan="Gold" />} />
-          <Route path="salary" element={isModuleAllowed('salary') ? <AccountantPayroll /> : <UpgradeRequired requiredPlan="Gold" />} />
-          <Route path="concessions" element={isModuleAllowed('concessions') ? <ConcessionManagement /> : <UpgradeRequired requiredPlan="Gold" />} />
+          <Route path="students" element={<StudentManagement />} />
+          <Route path="teachers" element={<AccountantTeachers />} />
+          <Route path="collections" element={<AccountantCollections />} />
+          <Route path="fees" element={<FeeManagement />} />
+          <Route path="pending" element={<AccountantPendingFees />} />
+          <Route path="payments" element={<AccountantPayments />} />
+          <Route path="reports" element={<AccountantReports isPremiumFeatureAllowed={isPremiumFeatureAllowed} />} />
+          <Route path="expenses" element={<AccountantExpenses />} />
+          <Route path="salary" element={
+            isPremiumFeatureAllowed('payroll')
+              ? <AccountantPayroll />
+              : <FeatureLockBanner featureName="Payroll Management" requiredPlan="Gold" />
+          } />
+          <Route path="concessions" element={
+            isPremiumFeatureAllowed('concessions')
+              ? <ConcessionManagement />
+              : <FeatureLockBanner featureName="Fee Concession Approvals" requiredPlan="Gold" />
+          } />
           <Route path="*" element={<DashboardHome stats={stats} />} />
         </Routes>
       </div>
