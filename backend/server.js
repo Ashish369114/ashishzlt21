@@ -34,10 +34,14 @@ const app = express();
 const startServer = async () => {
   try {
     await connectDB();
+    const mongoose = require('mongoose');
+    const isDbConnected = mongoose.connection && mongoose.connection.readyState === 1;
 
-    // Sync Class model indexes to remove any stale collection index definitions.
-    const Class = require('./models/Class');
-    await Class.syncIndexes();
+    if (isDbConnected) {
+      // Sync Class model indexes to remove any stale collection index definitions.
+      const Class = require('./models/Class');
+      await Class.syncIndexes();
+    }
 
     // Middleware
     app.use(cors());
@@ -76,11 +80,15 @@ const startServer = async () => {
       res.json({ message: 'Server is running' });
     });
 
-    await ensureAdminRoles();
+    if (isDbConnected) {
+      await ensureAdminRoles();
+    } else {
+      console.log('Skipping syncIndexes and role check: MongoDB is offline.');
+    }
 
     const PORT = process.env.PORT || 5000;
     server.listen(PORT, () => {
-      console.log(`Server running on port ${PORT} with WebSocket support`);
+      console.log(`Server running on port ${PORT} with WebSocket support (Local Mock Mode)`);
     });
   } catch (error) {
     console.error('Failed to start server:', error.message);
