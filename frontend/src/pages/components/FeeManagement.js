@@ -328,7 +328,6 @@ const FeeManagement = () => {
       {error && <div className="alert alert-error">{error}</div>}
 
       <div className="form-container" style={{ marginBottom: '20px' }}>
-        <h3>Filter by Grade, Section, and Student</h3>
         <div className="form-row">
           <div className="form-group">
             <label>Grade</label>
