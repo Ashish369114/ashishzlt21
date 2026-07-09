@@ -290,6 +290,7 @@ const Login = ({ onLogin }) => {
                   <li><i className="fa-solid fa-circle-check"></i> Multi-branch Operations</li>
                   <li><i className="fa-solid fa-circle-check"></i> Advanced Role Access Control</li>
                   <li><i className="fa-solid fa-circle-check"></i> Dedicated Account Support</li>
+                  <li><i className="fa-solid fa-circle-check"></i> OCR to Accountant (Teacher &amp; Student upcoming)</li>
                 </ul>
               </div>
             </div>

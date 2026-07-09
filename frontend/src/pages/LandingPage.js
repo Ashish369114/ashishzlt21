@@ -40,7 +40,7 @@ const pricingTiers = [
     name: 'Platinum Plan',
     price: '₹1,00,000',
     subtitle: 'Premium solution for large institutions with complex integrations.',
-    features: ['Everything in Gold', 'Custom integrations and APIs', 'Multi-branch management', 'Advanced role-based access', 'Dedicated implementation and support'],
+    features: ['Everything in Gold', 'Custom integrations and APIs', 'Multi-branch management', 'Advanced role-based access', 'Dedicated implementation and support', 'OCR to Accountant (Teacher & Student upcoming)'],
     featured: false
   }
 ];
