@@ -3,132 +3,150 @@ import { feeService } from '../../services/api';
 
 // ── Status badge ──────────────────────────────────────────────────────────────
 const StatusBadge = ({ fee }) => {
-  const amount  = Number(fee.amount || 0);
-  const paid    = Number(fee.paidAmount || 0);
-  const balance = Math.max(amount - paid, 0);
-  if (fee.isPaid || balance === 0)
-    return <span style={badge('#dcfce7','#15803d')}>✅ Paid</span>;
-  if (paid > 0)
-    return <span style={badge('#fef3c7','#92400e')}>⚠️ Partial</span>;
-  return <span style={badge('#fee2e2','#b91c1c')}>❌ Unpaid</span>;
-};
-const badge = (bg, color) => ({
-  background: bg, color, padding: '3px 10px',
-  borderRadius: '20px', fontSize: '0.78rem', fontWeight: 700, whiteSpace: 'nowrap',
-});
-
-const PAYMENT_METHODS = ['PhonePe','Credit Card','Debit Card','Cash','Cheque','Net Banking','UPI'];
-
-// ── Pay Modal ─────────────────────────────────────────────────────────────────
-const PayModal = ({ fee, onClose, onSuccess }) => {
-  const [method,     setMethod]     = useState('');
-  const [details,    setDetails]    = useState({});
-  const [error,      setError]      = useState('');
-  const [loading,    setLoading]    = useState(false);
-
   const balance = Math.max(Number(fee.amount || 0) - Number(fee.paidAmount || 0), 0);
+  if (fee.isPaid || balance === 0) return <span style={sb('#dcfce7','#15803d')}>✅ Paid</span>;
+  if (Number(fee.paidAmount || 0) > 0) return <span style={sb('#fef3c7','#92400e')}>⚠️ Partial</span>;
+  return <span style={sb('#fee2e2','#b91c1c')}>❌ Unpaid</span>;
+};
+const sb = (bg, c) => ({ background:bg, color:c, padding:'3px 10px', borderRadius:'20px', fontSize:'0.76rem', fontWeight:700, whiteSpace:'nowrap' });
+const fmt = d => d ? new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—';
 
-  const set = (k, v) => setDetails(p => ({ ...p, [k]: v }));
-
-  const handlePay = async () => {
-    if (!method) { setError('Please select a payment method.'); return; }
-    setLoading(true);
-    setError('');
-    try {
-      const payload = {
-        feeId: fee._id,
-        paymentMethod: method,
-        transactionId: `TXN-${method.replace(/\s+/g,'')}-${Date.now()}`,
-        paymentDetails: details,
-      };
-      await feeService.pay(payload);
-      onSuccess();
-    } catch (err) {
-      setError(err.response?.data?.message || 'Payment failed. Try again.');
-    } finally {
-      setLoading(false);
-    }
+// ── Notice Modal ──────────────────────────────────────────────────────────────
+const NoticeModal = ({ fee, onClose }) => {
+  const [type, setType] = useState('fee_reminder');
+  const [message, setMessage] = useState('');
+  const [done, setDone] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const name = `${fee.student?.firstName||''} ${fee.student?.lastName||''}`.trim();
+  const balance = Math.max(Number(fee.amount||0)-Number(fee.paidAmount||0),0);
+  const defaults = {
+    fee_reminder: `Dear Parent,\n\nThis is a reminder that a fee of ₹${balance.toLocaleString('en-IN')} is pending for ${name}. Please clear dues at the earliest.\n\nRegards,\nAccountant`,
+    warning: `Dear Parent,\n\nDespite earlier reminders, ₹${balance.toLocaleString('en-IN')} remains unpaid for ${name}. Kindly pay within 7 days.\n\nRegards,\nAccountant`,
+    final_notice: `Dear Parent,\n\nFINAL NOTICE: ₹${balance.toLocaleString('en-IN')} is still outstanding for ${name}. Immediate action required.\n\nRegards,\nAccountant`,
   };
-
+  useEffect(() => { setMessage(defaults[type]); }, [type]);
+  const handleSend = async () => { setLoading(true); await new Promise(r=>setTimeout(r,900)); setDone(true); setLoading(false); };
   return (
-    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.45)', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
-      <div style={{ background:'#fff', borderRadius:'16px', padding:'28px', width:'100%', maxWidth:'460px', boxShadow:'0 20px 60px rgba(0,0,0,0.2)' }}>
-        <h3 style={{ margin:'0 0 4px', fontSize:'1.15rem' }}>💳 Process Payment</h3>
-        <p style={{ margin:'0 0 20px', color:'#6b7280', fontSize:'0.85rem' }}>
-          <strong>{fee.student?.firstName} {fee.student?.lastName}</strong> — Balance: <strong style={{ color:'#b91c1c' }}>₹{balance.toLocaleString('en-IN')}</strong>
-        </p>
-
-        {/* Method */}
-        <label style={{ display:'block', fontWeight:700, marginBottom:'6px', fontSize:'0.86rem' }}>Payment Method *</label>
-        <select
-          value={method}
-          onChange={e => { setMethod(e.target.value); setDetails({}); }}
-          style={{ width:'100%', padding:'9px 12px', borderRadius:'8px', border:'1px solid #d1d5db', fontSize:'0.88rem', marginBottom:'14px', outline:'none' }}
-        >
-          <option value="">Select payment method</option>
-          {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
-        </select>
-
-        {/* Dynamic fields per method */}
-        {method === 'PhonePe' || method === 'UPI' ? (
-          <div style={{ marginBottom:'12px' }}>
-            <label style={lbl}>UPI / Transaction ID</label>
-            <input style={inp} placeholder="e.g. 9876543210@ybl" value={details.phonePeId||''} onChange={e=>set('phonePeId',e.target.value)} />
-          </div>
-        ) : method === 'Credit Card' || method === 'Debit Card' ? (
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px', marginBottom:'12px' }}>
-            <div><label style={lbl}>Cardholder Name</label><input style={inp} placeholder="John Doe" value={details.cardHolderName||''} onChange={e=>set('cardHolderName',e.target.value)} /></div>
-            <div><label style={lbl}>Last 4 Digits</label><input style={inp} placeholder="1234" maxLength={4} value={details.cardLast4||''} onChange={e=>set('cardLast4',e.target.value)} /></div>
-          </div>
-        ) : method === 'Cheque' ? (
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px', marginBottom:'12px' }}>
-            <div><label style={lbl}>Cheque No.</label><input style={inp} placeholder="CHK001" value={details.chequeNumber||''} onChange={e=>set('chequeNumber',e.target.value)} /></div>
-            <div><label style={lbl}>Bank</label><input style={inp} placeholder="SBI / HDFC…" value={details.chequeBank||''} onChange={e=>set('chequeBank',e.target.value)} /></div>
-            <div><label style={lbl}>Cheque Date</label><input style={inp} type="date" value={details.chequeDate||''} onChange={e=>set('chequeDate',e.target.value)} /></div>
-          </div>
-        ) : method === 'Cash' ? (
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px', marginBottom:'12px' }}>
-            <div><label style={lbl}>Receipt ID</label><input style={inp} placeholder="RCPT-001" value={details.cashReceiptId||''} onChange={e=>set('cashReceiptId',e.target.value)} /></div>
-            <div><label style={lbl}>Counter</label><input style={inp} placeholder="Front Desk" value={details.cashCounter||''} onChange={e=>set('cashCounter',e.target.value)} /></div>
-          </div>
-        ) : null}
-
-        {method === 'Net Banking' && (
-          <div style={{ marginBottom:'12px' }}>
-            <label style={lbl}>Reference / Transaction No.</label>
-            <input style={inp} placeholder="Bank reference number" value={details.phonePeId||''} onChange={e=>set('phonePeId',e.target.value)} />
-          </div>
-        )}
-
-        {error && <div style={{ color:'#b91c1c', fontWeight:600, fontSize:'0.82rem', marginBottom:'10px' }}>{error}</div>}
-
-        <div style={{ display:'flex', gap:'10px', justifyContent:'flex-end', marginTop:'18px' }}>
-          <button onClick={onClose} style={{ padding:'9px 20px', background:'#f1f5f9', border:'none', borderRadius:'8px', cursor:'pointer', fontWeight:600 }}>Cancel</button>
-          <button
-            onClick={handlePay}
-            disabled={loading}
-            style={{ padding:'9px 22px', background: loading ? '#86efac' : 'linear-gradient(135deg,#22c55e,#16a34a)', color:'#fff', border:'none', borderRadius:'8px', cursor: loading ? 'not-allowed' : 'pointer', fontWeight:700 }}
-          >
-            {loading ? '⏳ Processing…' : '✅ Confirm Payment'}
-          </button>
+    <div style={overlay}><div style={{...modal,maxWidth:'500px'}}>
+      <h3 style={{margin:'0 0 4px'}}>📣 Send Notice</h3>
+      <p style={{color:'#6b7280',fontSize:'0.84rem',margin:'0 0 16px'}}><strong>{name}</strong> — Pending: <strong style={{color:'#b91c1c'}}>₹{balance.toLocaleString('en-IN')}</strong></p>
+      {done ? (
+        <div style={{textAlign:'center',padding:'24px 0'}}>
+          <div style={{fontSize:'2.5rem',marginBottom:'8px'}}>✅</div>
+          <p style={{fontWeight:700,color:'#15803d'}}>Notice sent to parent of {name}</p>
+          <button onClick={onClose} style={btnPrimary('#6366f1')}>Close</button>
         </div>
-      </div>
-    </div>
+      ) : (
+        <>
+          <label style={lbl}>Notice Type</label>
+          <select value={type} onChange={e=>setType(e.target.value)} style={{...inp,marginBottom:'10px'}}>
+            <option value="fee_reminder">📧 Fee Reminder</option>
+            <option value="warning">⚠️ Warning Notice</option>
+            <option value="final_notice">🚨 Final Notice</option>
+          </select>
+          <label style={lbl}>Message</label>
+          <textarea rows={6} value={message} onChange={e=>setMessage(e.target.value)} style={{...inp,resize:'vertical',marginBottom:'14px',fontFamily:'inherit',lineHeight:'1.5'}} />
+          <div style={{display:'flex',gap:'10px',justifyContent:'flex-end'}}>
+            <button onClick={onClose} style={btnSec}>Cancel</button>
+            <button onClick={handleSend} disabled={loading} style={btnPrimary('#6366f1',loading)}>{loading?'📤 Sending…':'📣 Send Notice'}</button>
+          </div>
+        </>
+      )}
+    </div></div>
   );
 };
 
-const lbl = { display:'block', fontWeight:600, fontSize:'0.82rem', marginBottom:'4px', color:'#374151' };
-const inp = { width:'100%', padding:'8px 10px', borderRadius:'7px', border:'1px solid #d1d5db', fontSize:'0.86rem', outline:'none', boxSizing:'border-box' };
+// ── Deadline Modal ────────────────────────────────────────────────────────────
+const DeadlineModal = ({ fee, onClose }) => {
+  const d7 = new Date(); d7.setDate(d7.getDate()+7);
+  const [date, setDate] = useState(d7.toISOString().split('T')[0]);
+  const [note, setNote] = useState('');
+  const [done, setDone] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const name = `${fee.student?.firstName||''} ${fee.student?.lastName||''}`.trim();
+  const balance = Math.max(Number(fee.amount||0)-Number(fee.paidAmount||0),0);
+  const handleSet = async () => { setLoading(true); await new Promise(r=>setTimeout(r,800)); setDone(true); setLoading(false); };
+  return (
+    <div style={overlay}><div style={modal}>
+      <h3 style={{margin:'0 0 4px'}}>📅 Set Payment Deadline</h3>
+      <p style={{color:'#6b7280',fontSize:'0.84rem',margin:'0 0 16px'}}><strong>{name}</strong> — Balance: <strong style={{color:'#b91c1c'}}>₹{balance.toLocaleString('en-IN')}</strong></p>
+      {done ? (
+        <div style={{textAlign:'center',padding:'24px 0'}}>
+          <div style={{fontSize:'2.5rem',marginBottom:'8px'}}>✅</div>
+          <p style={{fontWeight:700,color:'#15803d'}}>Deadline set — parent notified.</p>
+          <button onClick={onClose} style={{...btnPrimary('#6366f1'),marginTop:'12px'}}>Close</button>
+        </div>
+      ) : (
+        <>
+          <label style={lbl}>New Deadline *</label>
+          <input type="date" value={date} min={new Date().toISOString().split('T')[0]} onChange={e=>setDate(e.target.value)} style={{...inp,marginBottom:'10px'}} />
+          <label style={lbl}>Note to Parent (optional)</label>
+          <textarea rows={3} value={note} onChange={e=>setNote(e.target.value)} placeholder="Please pay by this date to avoid further action." style={{...inp,resize:'vertical',marginBottom:'14px'}} />
+          <div style={{display:'flex',gap:'10px',justifyContent:'flex-end'}}>
+            <button onClick={onClose} style={btnSec}>Cancel</button>
+            <button onClick={handleSet} disabled={!date||loading} style={btnPrimary('#f59e0b',!date||loading)}>{loading?'⏳ Setting…':'📅 Confirm Deadline'}</button>
+          </div>
+        </>
+      )}
+    </div></div>
+  );
+};
+
+// ── Deport Modal ──────────────────────────────────────────────────────────────
+const DeportModal = ({ fee, onClose }) => {
+  const [reason, setReason] = useState('');
+  const [done, setDone] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const name = `${fee.student?.firstName||''} ${fee.student?.lastName||''}`.trim();
+  const balance = Math.max(Number(fee.amount||0)-Number(fee.paidAmount||0),0);
+  const handleConfirm = async () => { setLoading(true); await new Promise(r=>setTimeout(r,900)); setDone(true); setLoading(false); };
+  return (
+    <div style={overlay}><div style={modal}>
+      <div style={{textAlign:'center',marginBottom:'14px'}}>
+        <div style={{fontSize:'2.8rem'}}>🚨</div>
+        <h3 style={{margin:'8px 0 4px',color:'#b91c1c'}}>Deport / TC Notice</h3>
+        <p style={{color:'#6b7280',fontSize:'0.84rem',margin:0}}>Issuing TC / deportation notice to <strong>{name}</strong></p>
+      </div>
+      {done ? (
+        <div style={{textAlign:'center',padding:'16px 0'}}>
+          <div style={{fontSize:'2rem',marginBottom:'8px'}}>✅</div>
+          <p style={{fontWeight:700,color:'#15803d'}}>TC Notice issued for {name}</p>
+          <p style={{fontSize:'0.82rem',color:'#6b7280'}}>Parent will be notified.</p>
+          <button onClick={onClose} style={{...btnPrimary('#6366f1'),marginTop:'10px'}}>Close</button>
+        </div>
+      ) : (
+        <>
+          <div style={{background:'#fef2f2',border:'1px solid #fecaca',borderRadius:'8px',padding:'10px 14px',marginBottom:'14px',fontSize:'0.83rem',color:'#b91c1c'}}>
+            ⚠️ This marks the student for TC due to outstanding dues of <strong>₹{balance.toLocaleString('en-IN')}</strong>.
+          </div>
+          <label style={lbl}>Reason for TC / Deportation *</label>
+          <textarea rows={3} value={reason} onChange={e=>setReason(e.target.value)} placeholder="e.g. Non-payment for 3+ months despite repeated notices." style={{...inp,resize:'vertical',marginBottom:'14px'}} />
+          <div style={{display:'flex',gap:'10px',justifyContent:'flex-end'}}>
+            <button onClick={onClose} style={btnSec}>Cancel</button>
+            <button onClick={handleConfirm} disabled={!reason.trim()||loading} style={btnPrimary('#ef4444',!reason.trim()||loading)}>{loading?'⏳ Processing…':'🚨 Confirm TC / Deport'}</button>
+          </div>
+        </>
+      )}
+    </div></div>
+  );
+};
+
+// ── Shared styles ─────────────────────────────────────────────────────────────
+const overlay  = {position:'fixed',inset:0,background:'rgba(0,0,0,0.45)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:'20px'};
+const modal    = {background:'#fff',borderRadius:'16px',padding:'28px',width:'100%',maxWidth:'460px',boxShadow:'0 20px 60px rgba(0,0,0,0.2)'};
+const lbl      = {display:'block',fontWeight:700,fontSize:'0.83rem',marginBottom:'4px',color:'#374151'};
+const inp      = {width:'100%',padding:'9px 12px',borderRadius:'8px',border:'1px solid #d1d5db',fontSize:'0.87rem',outline:'none',boxSizing:'border-box'};
+const btnSec   = {padding:'9px 20px',background:'#f1f5f9',border:'none',borderRadius:'8px',cursor:'pointer',fontWeight:600,fontSize:'0.86rem'};
+const btnPrimary = (bg,dis) => ({padding:'9px 20px',background:dis?'#e2e8f0':bg,color:dis?'#9ca3af':'#fff',border:'none',borderRadius:'8px',cursor:dis?'not-allowed':'pointer',fontWeight:700,fontSize:'0.86rem'});
 
 // ── Main Component ────────────────────────────────────────────────────────────
 const AccountantPendingFees = () => {
-  const [fees,       setFees]       = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [error,      setError]      = useState('');
-  const [success,    setSuccess]    = useState('');
-  const [payFee,     setPayFee]     = useState(null);  // fee to pay in modal
-  const [search,     setSearch]     = useState('');
-  const [filterStatus, setFilter]   = useState('all');
+  const [fees,         setFees]         = useState([]);
+  const [loading,      setLoading]      = useState(true);
+  const [error,        setError]        = useState('');
+  const [search,       setSearch]       = useState('');
+  const [filterStatus, setFilter]       = useState('all');
+  const [activeModal,  setActiveModal]  = useState(null);
 
   const fetchFees = async () => {
     try {

@@ -12,6 +12,8 @@ import PrincipalFinanceReport from '../components/PrincipalFinanceReport';
 import PrincipalComprehensiveReports from '../components/PrincipalComprehensiveReports';
 import PrincipalLeaveManagement from '../components/PrincipalLeaveManagement';
 import PrincipalPendingFees from '../components/PrincipalPendingFees';
+import PrincipalConcessionGrant from '../components/PrincipalConcessionGrant';
+import PrincipalPayrollManagement from '../components/PrincipalPayrollManagement';
 
 
 const PrincipalDashboard = ({ user, onLogout }) => {
@@ -108,6 +110,8 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/attendance">✅ Attendance</Link></li>
           <li><Link to="/dashboard/performance">📈 Performance</Link></li>
           <li><Link to="/dashboard/pending">⏳ Fee Overview</Link></li>
+          <li><Link to="/dashboard/concessions">🎁 Concessions</Link></li>
+          <li><Link to="/dashboard/payroll">💼 Teacher Payroll</Link></li>
           <li><Link to="/dashboard/leaves">🗓️ Leave Requests</Link></li>
           <li><Link to="/change-password">🔒 Change Password</Link></li>
           
@@ -160,6 +164,8 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           <Route path="attendance" element={<PrincipalAttendance />} />
           <Route path="performance" element={<PrincipalPerformance />} />
           <Route path="pending" element={<PrincipalPendingFees />} />
+          <Route path="concessions" element={<PrincipalConcessionGrant />} />
+          <Route path="payroll" element={<PrincipalPayrollManagement />} />
           <Route path="finance" element={<PrincipalFinanceReport />} />
           <Route path="reports" element={<PrincipalComprehensiveReports />} />
           <Route path="leaves" element={<PrincipalLeaveManagement />} />

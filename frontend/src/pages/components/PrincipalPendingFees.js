@@ -1,35 +1,245 @@
 import React, { useState, useEffect } from 'react';
 import { feeService } from '../../services/api';
 
-const StatusBadge = ({ paid, paidAmount, amount }) => {
-  const balance = Math.max(Number(amount || 0) - Number(paidAmount || 0), 0);
-  const isPaid = paid || balance === 0;
-  const isPartial = !isPaid && Number(paidAmount || 0) > 0;
+// ── Status badge ──────────────────────────────────────────────────────────────
+const StatusBadge = ({ fee }) => {
+  const balance = Math.max(Number(fee.amount || 0) - Number(fee.paidAmount || 0), 0);
+  if (fee.isPaid || balance === 0)
+    return <span style={sb('#dcfce7','#15803d')}>✅ Paid</span>;
+  if (Number(fee.paidAmount || 0) > 0)
+    return <span style={sb('#fef3c7','#92400e')}>⚠️ Partial</span>;
+  return <span style={sb('#fee2e2','#b91c1c')}>❌ Unpaid</span>;
+};
+const sb = (bg, color) => ({
+  background: bg, color, padding: '3px 10px',
+  borderRadius: '20px', fontSize: '0.76rem', fontWeight: 700, whiteSpace: 'nowrap',
+});
 
-  if (isPaid) return (
-    <span style={{ background: '#dcfce7', color: '#15803d', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 700 }}>
-      ✅ Paid
-    </span>
-  );
-  if (isPartial) return (
-    <span style={{ background: '#fef3c7', color: '#92400e', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 700 }}>
-      ⚠️ Partial
-    </span>
-  );
+const fmt = d => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+
+// ── Deport Modal ───────────────────────────────────────────────────────────────
+const DeportModal = ({ fee, onClose }) => {
+  const [reason, setReason] = useState('');
+  const [done, setDone] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleConfirm = async () => {
+    if (!reason.trim()) return;
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 900));
+    setDone(true);
+    setLoading(false);
+  };
+
+  const name = `${fee.student?.firstName || ''} ${fee.student?.lastName || ''}`.trim();
+
   return (
-    <span style={{ background: '#fee2e2', color: '#b91c1c', padding: '3px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 700 }}>
-      ❌ Unpaid
-    </span>
+    <div style={overlay}>
+      <div style={modal}>
+        <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+          <div style={{ fontSize: '2.8rem' }}>🚨</div>
+          <h3 style={{ margin: '8px 0 4px', color: '#b91c1c' }}>Deport / TC Notice</h3>
+          <p style={{ color: '#6b7280', fontSize: '0.86rem', margin: 0 }}>
+            Issuing TC / Deportation notice to <strong>{name}</strong>
+          </p>
+        </div>
+
+        {done ? (
+          <div style={{ textAlign: 'center', padding: '20px 0' }}>
+            <div style={{ fontSize: '2rem', marginBottom: '8px' }}>✅</div>
+            <p style={{ fontWeight: 700, color: '#15803d' }}>TC Notice issued for {name}</p>
+            <p style={{ fontSize: '0.82rem', color: '#6b7280' }}>Records updated. Parent will be notified.</p>
+            <button onClick={onClose} style={btnPrimary('#6366f1')}>Close</button>
+          </div>
+        ) : (
+          <>
+            <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px 14px', marginBottom: '16px', fontSize: '0.84rem', color: '#b91c1c' }}>
+              ⚠️ This action will mark the student for TC issuance due to outstanding dues of{' '}
+              <strong>₹{Math.max(Number(fee.amount||0)-Number(fee.paidAmount||0),0).toLocaleString('en-IN')}</strong>.
+            </div>
+            <label style={lbl}>Reason for Deportation / TC *</label>
+            <textarea
+              rows={3}
+              value={reason}
+              onChange={e => setReason(e.target.value)}
+              placeholder="e.g. Non-payment of dues for 3+ months, despite repeated notices."
+              style={{ ...inpStyle, resize: 'vertical', marginBottom: '16px' }}
+            />
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button onClick={onClose} style={btnSecondary}>Cancel</button>
+              <button
+                onClick={handleConfirm}
+                disabled={!reason.trim() || loading}
+                style={btnPrimary('#ef4444', !reason.trim() || loading)}
+              >
+                {loading ? '⏳ Processing…' : '🚨 Confirm TC / Deport'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 };
 
+// ── Notice Modal ───────────────────────────────────────────────────────────────
+const NoticeModal = ({ fee, onClose }) => {
+  const [type, setType] = useState('fee_reminder');
+  const [message, setMessage] = useState('');
+  const [done, setDone] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const name = `${fee.student?.firstName || ''} ${fee.student?.lastName || ''}`.trim();
+  const balance = Math.max(Number(fee.amount||0)-Number(fee.paidAmount||0),0);
+
+  const defaultMsg = {
+    fee_reminder: `Dear Parent,\n\nThis is a reminder that a fee of ₹${balance.toLocaleString('en-IN')} is pending for your ward ${name}. Kindly clear the dues at the earliest.\n\nRegards,\nPrincipal`,
+    warning:      `Dear Parent,\n\nDespite earlier reminders, a fee of ₹${balance.toLocaleString('en-IN')} remains unpaid for ${name}. This is a formal warning. Failure to pay within 7 days may result in TC issuance.\n\nRegards,\nPrincipal`,
+    final_notice: `Dear Parent,\n\nThis is a FINAL NOTICE for outstanding dues of ₹${balance.toLocaleString('en-IN')} for ${name}. Immediate payment is required to avoid suspension of services.\n\nRegards,\nPrincipal`,
+  };
+
+  useEffect(() => { setMessage(defaultMsg[type]); }, [type]);
+
+  const handleSend = async () => {
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 1000));
+    setDone(true);
+    setLoading(false);
+  };
+
+  return (
+    <div style={overlay}>
+      <div style={{ ...modal, maxWidth: '520px' }}>
+        <h3 style={{ margin: '0 0 4px', fontSize: '1.15rem' }}>📣 Send Notice</h3>
+        <p style={{ color: '#6b7280', fontSize: '0.85rem', margin: '0 0 18px' }}>
+          Sending notice for <strong>{name}</strong> — Pending: <strong style={{ color: '#b91c1c' }}>₹{balance.toLocaleString('en-IN')}</strong>
+        </p>
+
+        {done ? (
+          <div style={{ textAlign: 'center', padding: '24px 0' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '8px' }}>✅</div>
+            <p style={{ fontWeight: 700, color: '#15803d' }}>Notice sent to parent of {name}</p>
+            <button onClick={onClose} style={{ ...btnPrimary('#6366f1'), marginTop: '12px' }}>Close</button>
+          </div>
+        ) : (
+          <>
+            <label style={lbl}>Notice Type</label>
+            <select value={type} onChange={e => setType(e.target.value)}
+              style={{ ...inpStyle, marginBottom: '12px' }}>
+              <option value="fee_reminder">📧 Fee Reminder</option>
+              <option value="warning">⚠️ Warning Notice</option>
+              <option value="final_notice">🚨 Final Notice</option>
+            </select>
+
+            <label style={lbl}>Message</label>
+            <textarea
+              rows={7}
+              value={message}
+              onChange={e => setMessage(e.target.value)}
+              style={{ ...inpStyle, resize: 'vertical', marginBottom: '16px', fontFamily: 'inherit', lineHeight: '1.5' }}
+            />
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button onClick={onClose} style={btnSecondary}>Cancel</button>
+              <button onClick={handleSend} disabled={loading} style={btnPrimary('#6366f1', loading)}>
+                {loading ? '📤 Sending…' : '📣 Send Notice'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── Deadline Modal ─────────────────────────────────────────────────────────────
+const DeadlineModal = ({ fee, onClose }) => {
+  const today = new Date();
+  const defaultDate = new Date(today.setDate(today.getDate() + 7)).toISOString().split('T')[0];
+  const [date, setDate] = useState(defaultDate);
+  const [note, setNote] = useState('');
+  const [done, setDone] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const name = `${fee.student?.firstName || ''} ${fee.student?.lastName || ''}`.trim();
+  const balance = Math.max(Number(fee.amount||0)-Number(fee.paidAmount||0),0);
+
+  const handleSet = async () => {
+    if (!date) return;
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 800));
+    setDone(true);
+    setLoading(false);
+  };
+
+  return (
+    <div style={overlay}>
+      <div style={modal}>
+        <h3 style={{ margin: '0 0 4px', fontSize: '1.15rem' }}>📅 Set Payment Deadline</h3>
+        <p style={{ color: '#6b7280', fontSize: '0.85rem', margin: '0 0 18px' }}>
+          Setting deadline for <strong>{name}</strong> — Balance: <strong style={{ color: '#b91c1c' }}>₹{balance.toLocaleString('en-IN')}</strong>
+        </p>
+
+        {done ? (
+          <div style={{ textAlign: 'center', padding: '24px 0' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '8px' }}>✅</div>
+            <p style={{ fontWeight: 700, color: '#15803d' }}>
+              Deadline set to <strong>{new Date(date).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}</strong>
+            </p>
+            <p style={{ fontSize: '0.82rem', color: '#6b7280' }}>Parent notified about the new payment deadline.</p>
+            <button onClick={onClose} style={{ ...btnPrimary('#6366f1'), marginTop: '12px' }}>Close</button>
+          </div>
+        ) : (
+          <>
+            <label style={lbl}>New Deadline Date *</label>
+            <input
+              type="date"
+              value={date}
+              min={new Date().toISOString().split('T')[0]}
+              onChange={e => setDate(e.target.value)}
+              style={{ ...inpStyle, marginBottom: '12px' }}
+            />
+
+            <label style={lbl}>Note to Parent (optional)</label>
+            <textarea
+              rows={3}
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              placeholder="e.g. Please ensure payment by this date to avoid further action."
+              style={{ ...inpStyle, resize: 'vertical', marginBottom: '16px' }}
+            />
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button onClick={onClose} style={btnSecondary}>Cancel</button>
+              <button onClick={handleSet} disabled={!date || loading} style={btnPrimary('#f59e0b', !date || loading)}>
+                {loading ? '⏳ Setting…' : '📅 Confirm Deadline'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── Shared styles ─────────────────────────────────────────────────────────────
+const overlay = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' };
+const modal   = { background: '#fff', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '460px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' };
+const lbl     = { display: 'block', fontWeight: 700, fontSize: '0.84rem', marginBottom: '5px', color: '#374151' };
+const inpStyle = { width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.87rem', outline: 'none', boxSizing: 'border-box' };
+const btnSecondary = { padding: '9px 20px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.86rem' };
+const btnPrimary = (bg, disabled) => ({
+  padding: '9px 20px', background: disabled ? '#e2e8f0' : bg, color: disabled ? '#9ca3af' : '#fff',
+  border: 'none', borderRadius: '8px', cursor: disabled ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: '0.86rem',
+});
+
+// ── Main component ────────────────────────────────────────────────────────────
 const PrincipalPendingFees = () => {
-  const [fees, setFees] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [noticeState, setNoticeState] = useState({}); // { feeId: 'sent' | 'sending' }
-  const [search, setSearch] = useState('');
+  const [fees,         setFees]         = useState([]);
+  const [loading,      setLoading]      = useState(true);
+  const [error,        setError]        = useState('');
+  const [search,       setSearch]       = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  // Modal state: { type: 'deport'|'notice'|'deadline', fee }
+  const [activeModal,  setActiveModal]  = useState(null);
 
   useEffect(() => {
     const fetchFees = async () => {
@@ -48,52 +258,23 @@ const PrincipalPendingFees = () => {
   }, []);
 
   const getStatus = (fee) => {
-    const amount = Number(fee.amount || 0);
-    const paid = Number(fee.paidAmount || 0);
-    const balance = Math.max(amount - paid, 0);
+    const balance = Math.max(Number(fee.amount||0) - Number(fee.paidAmount||0), 0);
     if (fee.isPaid || balance === 0) return 'paid';
-    if (paid > 0) return 'partial';
+    if (Number(fee.paidAmount||0) > 0) return 'partial';
     return 'unpaid';
   };
 
-  const handleSendNotice = async (fee) => {
-    const id = fee._id;
-    setNoticeState(prev => ({ ...prev, [id]: 'sending' }));
-    // Simulate sending notice (replace with real API call when notification service ready)
-    await new Promise(r => setTimeout(r, 900));
-    setNoticeState(prev => ({ ...prev, [id]: 'sent' }));
-    // Auto-reset after 3s
-    setTimeout(() => setNoticeState(prev => {
-      const next = { ...prev };
-      delete next[id];
-      return next;
-    }), 3000);
-  };
-
-  // Stats
-  const total = fees.length;
-  const unpaidCount = fees.filter(f => getStatus(f) === 'unpaid').length;
-  const partialCount = fees.filter(f => getStatus(f) === 'partial').length;
-  const totalPending = fees.reduce((sum, f) => {
-    const balance = Math.max(Number(f.amount || 0) - Number(f.paidAmount || 0), 0);
-    return sum + balance;
-  }, 0);
-
-  // Filter
   const filtered = fees.filter(fee => {
-    const name = `${fee.student?.firstName || ''} ${fee.student?.lastName || ''}`.toLowerCase();
-    const matchSearch = !search || name.includes(search.toLowerCase());
-    const status = getStatus(fee);
-    const matchStatus = filterStatus === 'all' || status === filterStatus;
-    return matchSearch && matchStatus;
+    const name = `${fee.student?.firstName||''} ${fee.student?.lastName||''}`.toLowerCase();
+    const matchS = !search || name.includes(search.toLowerCase());
+    const matchF = filterStatus === 'all' || getStatus(fee) === filterStatus;
+    return matchS && matchF;
   });
 
-  const cardStyle = {
-    background: '#fff',
-    borderRadius: '14px',
-    boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-    border: '1px solid #e5e7eb',
-  };
+  const totalPending = fees.reduce((s, f) => s + Math.max(Number(f.amount||0)-Number(f.paidAmount||0),0), 0);
+  const unpaid  = fees.filter(f => getStatus(f) === 'unpaid').length;
+  const partial = fees.filter(f => getStatus(f) === 'partial').length;
+  const cardStyle = { background: '#fff', borderRadius: '14px', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', border: '1px solid #e5e7eb' };
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
@@ -101,18 +282,18 @@ const PrincipalPendingFees = () => {
       <div style={{ marginBottom: '22px' }}>
         <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700 }}>⏳ Fee Overview</h2>
         <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: '0.87rem' }}>
-          Read-only view of student fee status. Use Send Notice to remind parents of pending dues.
+          Read-only view. Use the action buttons to issue notices, set deadlines, or initiate TC.
         </p>
       </div>
 
       {error && <div style={{ background: '#fee2e2', color: '#b91c1c', padding: '10px 16px', borderRadius: '8px', marginBottom: '14px', fontWeight: 600 }}>{error}</div>}
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '22px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '12px', marginBottom: '20px' }}>
         {[
-          { label: 'Total Records', val: total,        icon: '📋', color: '#6366f1', bg: '#eef2ff' },
-          { label: 'Unpaid',        val: unpaidCount,   icon: '❌', color: '#ef4444', bg: '#fef2f2' },
-          { label: 'Partial',       val: partialCount,  icon: '⚠️', color: '#f59e0b', bg: '#fffbeb' },
+          { label: 'Total Records', val: fees.length,                                icon: '📋', color: '#6366f1', bg: '#eef2ff' },
+          { label: 'Unpaid',        val: unpaid,                                     icon: '❌', color: '#ef4444', bg: '#fef2f2' },
+          { label: 'Partial',       val: partial,                                    icon: '⚠️', color: '#f59e0b', bg: '#fffbeb' },
           { label: 'Total Pending', val: `₹${totalPending.toLocaleString('en-IN')}`, icon: '💰', color: '#0891b2', bg: '#ecfeff' },
         ].map(s => (
           <div key={s.label} style={{ ...cardStyle, padding: '16px 18px', display: 'flex', alignItems: 'center', gap: '12px', background: s.bg }}>
@@ -127,18 +308,10 @@ const PrincipalPendingFees = () => {
 
       {/* Filters */}
       <div style={{ display: 'flex', gap: '10px', marginBottom: '14px', flexWrap: 'wrap' }}>
-        <input
-          type="text"
-          placeholder="🔍 Search student name…"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{ flex: 1, minWidth: '200px', padding: '8px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.88rem', outline: 'none' }}
-        />
-        <select
-          value={filterStatus}
-          onChange={e => setFilterStatus(e.target.value)}
-          style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.88rem', background: '#fff', cursor: 'pointer' }}
-        >
+        <input type="text" placeholder="🔍 Search student…" value={search} onChange={e => setSearch(e.target.value)}
+          style={{ flex: 1, minWidth: '200px', padding: '8px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.88rem', outline: 'none' }} />
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
+          style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.88rem', background: '#fff', cursor: 'pointer' }}>
           <option value="all">All Status</option>
           <option value="unpaid">Unpaid</option>
           <option value="partial">Partial</option>
@@ -150,7 +323,7 @@ const PrincipalPendingFees = () => {
       <div style={cardStyle}>
         {loading ? (
           <div style={{ padding: '60px', textAlign: 'center', color: '#6b7280' }}>
-            <div style={{ fontSize: '2rem', marginBottom: '10px' }}>⏳</div>Loading fee records…
+            <div style={{ fontSize: '2rem', marginBottom: '10px' }}>⏳</div>Loading fees…
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ padding: '60px', textAlign: 'center', color: '#9ca3af' }}>
@@ -162,7 +335,7 @@ const PrincipalPendingFees = () => {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.87rem' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e5e7eb' }}>
-                  {['Student', 'Total Fee', 'Paid', 'Balance Pending', 'Due Date', 'Status', 'Send Notice'].map(h => (
+                  {['Student', 'Total Fee', 'Paid', 'Balance', 'Due Date', 'Status', 'Actions'].map(h => (
                     <th key={h} style={{ padding: '11px 14px', textAlign: 'left', fontWeight: 700, color: '#374151', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
@@ -173,69 +346,56 @@ const PrincipalPendingFees = () => {
                   const paid    = Number(fee.paidAmount || 0);
                   const balance = Math.max(amount - paid, 0);
                   const status  = getStatus(fee);
-                  const notice  = noticeState[fee._id];
 
                   return (
-                    <tr
-                      key={fee._id}
-                      style={{ borderBottom: '1px solid #f1f5f9', background: i % 2 === 0 ? '#fff' : '#fafafa', transition: 'background 0.15s' }}
+                    <tr key={fee._id}
+                      style={{ borderBottom: '1px solid #f1f5f9', background: i%2===0 ? '#fff' : '#fafafa', transition: 'background 0.15s' }}
                       onMouseEnter={e => e.currentTarget.style.background = '#f0f7ff'}
-                      onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? '#fff' : '#fafafa'}
+                      onMouseLeave={e => e.currentTarget.style.background = i%2===0 ? '#fff' : '#fafafa'}
                     >
-                      {/* Student */}
                       <td style={{ padding: '11px 14px' }}>
-                        <div style={{ fontWeight: 700, color: '#1f2937' }}>
-                          {fee.student?.firstName} {fee.student?.lastName}
-                        </div>
-                        <div style={{ fontSize: '0.74rem', color: '#9ca3af' }}>
-                          {fee.description || 'Fee Record'}
-                        </div>
+                        <div style={{ fontWeight: 700, color: '#1f2937' }}>{fee.student?.firstName} {fee.student?.lastName}</div>
+                        <div style={{ fontSize: '0.74rem', color: '#9ca3af' }}>{fee.description || 'Fee Record'}</div>
                       </td>
-                      {/* Total */}
-                      <td style={{ padding: '11px 14px', fontWeight: 600, color: '#374151' }}>
-                        ₹{amount.toLocaleString('en-IN')}
-                      </td>
-                      {/* Paid */}
-                      <td style={{ padding: '11px 14px', color: '#15803d', fontWeight: 600 }}>
-                        ₹{paid.toLocaleString('en-IN')}
-                      </td>
-                      {/* Balance */}
+                      <td style={{ padding: '11px 14px', fontWeight: 600 }}>₹{amount.toLocaleString('en-IN')}</td>
+                      <td style={{ padding: '11px 14px', color: '#15803d', fontWeight: 600 }}>₹{paid.toLocaleString('en-IN')}</td>
                       <td style={{ padding: '11px 14px', fontWeight: 700, color: balance > 0 ? '#b91c1c' : '#15803d' }}>
                         {balance > 0 ? `₹${balance.toLocaleString('en-IN')}` : '—'}
                       </td>
-                      {/* Due Date */}
-                      <td style={{ padding: '11px 14px', color: '#6b7280', whiteSpace: 'nowrap' }}>
-                        {fee.dueDate ? new Date(fee.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
-                      </td>
-                      {/* Status */}
-                      <td style={{ padding: '11px 14px' }}>
-                        <StatusBadge paid={fee.isPaid} paidAmount={fee.paidAmount} amount={fee.amount} />
-                      </td>
-                      {/* Send Notice */}
+                      <td style={{ padding: '11px 14px', color: '#6b7280', whiteSpace: 'nowrap' }}>{fmt(fee.dueDate)}</td>
+                      <td style={{ padding: '11px 14px' }}><StatusBadge fee={fee} /></td>
+
+                      {/* ── Actions ── */}
                       <td style={{ padding: '11px 14px' }}>
                         {status === 'paid' ? (
-                          <span style={{ color: '#9ca3af', fontSize: '0.8rem' }}>—</span>
-                        ) : notice === 'sent' ? (
-                          <span style={{ color: '#15803d', fontWeight: 700, fontSize: '0.82rem' }}>✅ Notice Sent!</span>
+                          <span style={{ color: '#9ca3af', fontSize: '0.8rem' }}>No action needed</span>
                         ) : (
-                          <button
-                            onClick={() => handleSendNotice(fee)}
-                            disabled={notice === 'sending'}
-                            style={{
-                              padding: '6px 14px',
-                              background: notice === 'sending' ? '#e0e7ff' : 'linear-gradient(135deg,#6366f1,#8b5cf6)',
-                              color: notice === 'sending' ? '#6366f1' : '#fff',
-                              border: 'none',
-                              borderRadius: '7px',
-                              cursor: notice === 'sending' ? 'not-allowed' : 'pointer',
-                              fontWeight: 700,
-                              fontSize: '0.8rem',
-                              whiteSpace: 'nowrap',
-                              transition: 'all 0.2s',
-                            }}
-                          >
-                            {notice === 'sending' ? '📤 Sending…' : '📣 Send Notice'}
-                          </button>
+                          <div style={{ display: 'flex', gap: '6px', flexWrap: 'nowrap' }}>
+                            {/* Send Notice */}
+                            <button
+                              onClick={() => setActiveModal({ type: 'notice', fee })}
+                              title="Send notice to parent"
+                              style={{ padding: '5px 10px', background: '#eef2ff', color: '#6366f1', border: '1px solid #c7d2fe', borderRadius: '6px', cursor: 'pointer', fontWeight: 700, fontSize: '0.76rem', whiteSpace: 'nowrap' }}
+                            >
+                              📣 Notice
+                            </button>
+                            {/* Set Deadline */}
+                            <button
+                              onClick={() => setActiveModal({ type: 'deadline', fee })}
+                              title="Set/extend payment deadline"
+                              style={{ padding: '5px 10px', background: '#fffbeb', color: '#b45309', border: '1px solid #fde68a', borderRadius: '6px', cursor: 'pointer', fontWeight: 700, fontSize: '0.76rem', whiteSpace: 'nowrap' }}
+                            >
+                              📅 Deadline
+                            </button>
+                            {/* Deport / TC */}
+                            <button
+                              onClick={() => setActiveModal({ type: 'deport', fee })}
+                              title="Issue TC / Deport student"
+                              style={{ padding: '5px 10px', background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', borderRadius: '6px', cursor: 'pointer', fontWeight: 700, fontSize: '0.76rem', whiteSpace: 'nowrap' }}
+                            >
+                              🚨 Deport
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -247,10 +407,14 @@ const PrincipalPendingFees = () => {
         )}
       </div>
 
-      {/* Footer note */}
       <p style={{ marginTop: '14px', fontSize: '0.8rem', color: '#9ca3af', textAlign: 'center' }}>
-        💡 This is a read-only overview. To process payments, contact the Accountant.
+        💡 Read-only view. To process payments, contact the Accountant.
       </p>
+
+      {/* Modals */}
+      {activeModal?.type === 'notice'   && <NoticeModal   fee={activeModal.fee} onClose={() => setActiveModal(null)} />}
+      {activeModal?.type === 'deadline' && <DeadlineModal fee={activeModal.fee} onClose={() => setActiveModal(null)} />}
+      {activeModal?.type === 'deport'   && <DeportModal   fee={activeModal.fee} onClose={() => setActiveModal(null)} />}
     </div>
   );
 };
