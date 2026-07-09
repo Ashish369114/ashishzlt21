@@ -202,8 +202,13 @@ const StudentManagement = () => {
 
   return (
     <div className="card">
-      <div className="card-header">
+      <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2>👨‍🎓 Student Management</h2>
+        {currentUser && ['super_admin', 'principal', 'accountant_admin'].includes(currentUser.role) && (
+          <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
+            {showForm ? 'Cancel' : '➕ Add Student'}
+          </button>
+        )}
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
@@ -469,14 +474,6 @@ const StudentManagement = () => {
               ))}
             </tbody>
           </table>
-        </div>
-      )}
-
-      {currentUser && ['super_admin', 'principal', 'accountant_admin'].includes(currentUser.role) && (
-        <div style={{ marginTop: '16px' }}>
-          <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-            {showForm ? 'Cancel' : '➕ Add Student'}
-          </button>
         </div>
       )}
     </div>

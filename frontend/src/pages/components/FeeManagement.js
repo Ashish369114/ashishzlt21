@@ -321,8 +321,11 @@ const FeeManagement = () => {
 
   return (
     <div className="card">
-      <div className="card-header">
+      <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2>💰 Fee Management</h2>
+        <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
+          {showForm ? 'Cancel' : '➕ Add Fee'}
+        </button>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
@@ -664,12 +667,6 @@ const FeeManagement = () => {
                   Select a student to view and manage the fee details for that record.
                 </div>
               )}
-
-              <div style={{ marginTop: '16px' }}>
-                <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-                  {showForm ? 'Cancel' : '➕ Add Fee'}
-                </button>
-              </div>
             </>
           )}
         </div>
