@@ -13,9 +13,35 @@ import AccountantExpenses from '../components/AccountantExpenses';
 import AccountantPayroll from '../components/AccountantPayroll';
 import ConcessionManagement from '../components/ConcessionManagement';
 
+const UpgradeRequired = ({ requiredPlan = 'Gold' }) => (
+  <div className="card" style={{ padding: '40px', textAlign: 'center', margin: '20px auto', maxWidth: '600px' }}>
+    <div style={{ fontSize: '3.5rem', marginBottom: '20px' }}>🔒</div>
+    <h2>Plan Upgrade Required</h2>
+    <p style={{ marginTop: '10px', color: '#6b7280', lineHeight: '1.6' }}>
+      This module is not included in your current active plan. Please upgrade to the <strong>{requiredPlan} Plan</strong> or above to unlock this feature.
+    </p>
+    <button className="btn btn-primary" style={{ marginTop: '20px' }} onClick={() => window.location.href = '/'}>
+      View Subscription Plans
+    </button>
+  </div>
+);
+
 const AccountantDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
+  const plan = localStorage.getItem('subscriptionPlan') || 'silver';
+
+  const isModuleAllowed = (moduleKey) => {
+    const normalizedPlan = String(plan).toLowerCase();
+    
+    // Silver Plan restrictions
+    if (normalizedPlan === 'silver') {
+      const allowedInSilver = ['dashboard', 'students', 'teachers', 'change-password'];
+      return allowedInSilver.includes(moduleKey);
+    }
+    
+    return true;
+  };
 
   useEffect(() => {
     fetchData();
@@ -78,16 +104,16 @@ const AccountantDashboard = ({ user, onLogout }) => {
         </div>
         <ul className="nav-menu">
           <li><Link to="/dashboard" className="active">📊 Dashboard</Link></li>
-          <li><Link to="/dashboard/students">👨‍🎓 Students</Link></li>
-          <li><Link to="/dashboard/teachers">👨‍🏫 Teachers</Link></li>
-          <li><Link to="/dashboard/collections">💰 Collections</Link></li>
-          <li><Link to="/dashboard/fees">🧾 Fee Management</Link></li>
-          <li><Link to="/dashboard/pending">⏳ Pending Fees</Link></li>
-          <li><Link to="/dashboard/payments">💳 Payments</Link></li>
-          <li><Link to="/dashboard/reports">📊 Reports</Link></li>
-          <li><Link to="/dashboard/expenses">📉 Expenses</Link></li>
-          <li><Link to="/dashboard/salary">💵 Payroll</Link></li>
-          <li><Link to="/dashboard/concessions">✍ Concessions</Link></li>
+          {isModuleAllowed('students') && <li><Link to="/dashboard/students">👨‍🎓 Students</Link></li>}
+          {isModuleAllowed('teachers') && <li><Link to="/dashboard/teachers">👨‍🏫 Teachers</Link></li>}
+          {isModuleAllowed('collections') && <li><Link to="/dashboard/collections">💰 Collections</Link></li>}
+          {isModuleAllowed('fees') && <li><Link to="/dashboard/fees">🧾 Fee Management</Link></li>}
+          {isModuleAllowed('pending') && <li><Link to="/dashboard/pending">⏳ Pending Fees</Link></li>}
+          {isModuleAllowed('payments') && <li><Link to="/dashboard/payments">💳 Payments</Link></li>}
+          {isModuleAllowed('reports') && <li><Link to="/dashboard/reports">📊 Reports</Link></li>}
+          {isModuleAllowed('expenses') && <li><Link to="/dashboard/expenses">📉 Expenses</Link></li>}
+          {isModuleAllowed('salary') && <li><Link to="/dashboard/salary">💵 Payroll</Link></li>}
+          {isModuleAllowed('concessions') && <li><Link to="/dashboard/concessions">✍ Concessions</Link></li>}
           <li><Link to="/change-password">🔒 Change Password</Link></li>
           <li style={{ marginTop: '30px', borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '20px' }}>
             <button onClick={handleLogout} className="logout-btn" style={{ width: '100%' }}>🚪 Logout</button>
@@ -103,16 +129,16 @@ const AccountantDashboard = ({ user, onLogout }) => {
 
         <Routes>
           <Route index element={<DashboardHome stats={stats} />} />
-          <Route path="students" element={<StudentManagement />} />
-          <Route path="teachers" element={<AccountantTeachers />} />
-          <Route path="collections" element={<AccountantCollections />} />
-          <Route path="fees" element={<FeeManagement />} />
-          <Route path="pending" element={<AccountantPendingFees />} />
-          <Route path="payments" element={<AccountantPayments />} />
-          <Route path="reports" element={<AccountantReports />} />
-          <Route path="expenses" element={<AccountantExpenses />} />
-          <Route path="salary" element={<AccountantPayroll />} />
-          <Route path="concessions" element={<ConcessionManagement />} />
+          <Route path="students" element={isModuleAllowed('students') ? <StudentManagement /> : <UpgradeRequired requiredPlan="Silver" />} />
+          <Route path="teachers" element={isModuleAllowed('teachers') ? <AccountantTeachers /> : <UpgradeRequired requiredPlan="Silver" />} />
+          <Route path="collections" element={isModuleAllowed('collections') ? <AccountantCollections /> : <UpgradeRequired requiredPlan="Gold" />} />
+          <Route path="fees" element={isModuleAllowed('fees') ? <FeeManagement /> : <UpgradeRequired requiredPlan="Gold" />} />
+          <Route path="pending" element={isModuleAllowed('pending') ? <AccountantPendingFees /> : <UpgradeRequired requiredPlan="Gold" />} />
+          <Route path="payments" element={isModuleAllowed('payments') ? <AccountantPayments /> : <UpgradeRequired requiredPlan="Gold" />} />
+          <Route path="reports" element={isModuleAllowed('reports') ? <AccountantReports /> : <UpgradeRequired requiredPlan="Gold" />} />
+          <Route path="expenses" element={isModuleAllowed('expenses') ? <AccountantExpenses /> : <UpgradeRequired requiredPlan="Gold" />} />
+          <Route path="salary" element={isModuleAllowed('salary') ? <AccountantPayroll /> : <UpgradeRequired requiredPlan="Gold" />} />
+          <Route path="concessions" element={isModuleAllowed('concessions') ? <ConcessionManagement /> : <UpgradeRequired requiredPlan="Gold" />} />
           <Route path="*" element={<DashboardHome stats={stats} />} />
         </Routes>
       </div>
