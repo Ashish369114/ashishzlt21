@@ -392,7 +392,31 @@ const Login = ({ onLogin }) => {
                     className={`role-pill ${activePill === 'TEACHER001' ? 'role-pill-clicked' : ''}`}
                     onClick={() => handleQuickLogin('TEACHER001', 'Teacher@123')}
                   >
-                    Teacher
+                    Ramesh (T001)
+                  </div>
+                  <div
+                    className={`role-pill ${activePill === 'TEACHER002' ? 'role-pill-clicked' : ''}`}
+                    onClick={() => handleQuickLogin('TEACHER002', 'Teacher@123')}
+                  >
+                    Priya (T002)
+                  </div>
+                  <div
+                    className={`role-pill ${activePill === 'TEACHER003' ? 'role-pill-clicked' : ''}`}
+                    onClick={() => handleQuickLogin('TEACHER003', 'Teacher@123')}
+                  >
+                    Rajesh (T003)
+                  </div>
+                  <div
+                    className={`role-pill ${activePill === 'TEACHER004' ? 'role-pill-clicked' : ''}`}
+                    onClick={() => handleQuickLogin('TEACHER004', 'Teacher@123')}
+                  >
+                    Sneha (T004)
+                  </div>
+                  <div
+                    className={`role-pill ${activePill === 'TEACHER005' ? 'role-pill-clicked' : ''}`}
+                    onClick={() => handleQuickLogin('TEACHER005', 'Teacher@123')}
+                  >
+                    Suresh (T005)
                   </div>
                 </div>
               </div>

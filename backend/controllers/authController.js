@@ -5,12 +5,16 @@ const User = require('../models/User');
 const { sendEmail } = require('../services/notificationService');
 
 const mockUsers = [
-  { _id: 'mock_sa_id_123', userId: 'SUPERADMIN001', password: 'Admin@123', role: 'super_admin', firstName: 'Super', lastName: 'Admin', email: 'superadmin@school.com', subscriptionPlan: 'platinum', isActive: true },
-  { _id: 'mock_p_id_123', userId: 'PRINCIPAL001', password: 'Principal@123', role: 'principal', firstName: 'Dr.', lastName: 'Kumar', email: 'principal@school.com', subscriptionPlan: 'gold', isActive: true },
-  { _id: 'mock_a_id_123', userId: 'ACCOUNTANT001', password: 'Accountant@123', role: 'accountant_admin', firstName: 'Ravi', lastName: 'Verma', email: 'accountant@school.com', subscriptionPlan: 'gold', isActive: true },
-  { _id: 'mock_t_id_123', userId: 'TEACHER001', password: 'Teacher@123', role: 'teacher', firstName: 'Ramesh', lastName: 'Sharma', email: 'ramesh1@school.com', subscriptionPlan: 'silver', isActive: true },
-  { _id: 'mock_s_id_123', userId: 'STUDENT001', password: 'Student@123', role: 'student', firstName: 'Aarav', lastName: 'Singh', email: 'aarav1@school.com', subscriptionPlan: 'silver', isActive: true },
-  { _id: 'mock_pa_id_123', userId: 'PAR-G1-001', password: 'Parent@123', role: 'parent', firstName: 'Rajesh', lastName: 'Sharma', email: 'parent-g1-001@school.com', subscriptionPlan: 'silver', isActive: true }
+  { _id: 'mock_sa_id_123',  userId: 'SUPERADMIN001', password: 'Admin@123',      role: 'super_admin',     firstName: 'Super',  lastName: 'Admin',  email: 'superadmin@school.com',  subscriptionPlan: 'platinum_with_ocr', isActive: true },
+  { _id: 'mock_p_id_123',   userId: 'PRINCIPAL001',  password: 'Principal@123',  role: 'principal',       firstName: 'Dr.',    lastName: 'Kumar',  email: 'principal@school.com',   subscriptionPlan: 'gold',              isActive: true },
+  { _id: 'mock_a_id_123',   userId: 'ACCOUNTANT001', password: 'Accountant@123', role: 'accountant_admin',firstName: 'Ravi',   lastName: 'Verma',  email: 'accountant@school.com',  subscriptionPlan: 'gold',              isActive: true },
+  { _id: 'mock_t1_id_123',  userId: 'TEACHER001',    password: 'Teacher@123',    role: 'teacher',         firstName: 'Ramesh', lastName: 'Sharma', email: 'ramesh1@school.com',     subscriptionPlan: 'silver',            isActive: true },
+  { _id: 'mock_t2_id_123',  userId: 'TEACHER002',    password: 'Teacher@123',    role: 'teacher',         firstName: 'Priya',  lastName: 'Patel',  email: 'priya2@school.com',      subscriptionPlan: 'silver',            isActive: true },
+  { _id: 'mock_t3_id_123',  userId: 'TEACHER003',    password: 'Teacher@123',    role: 'teacher',         firstName: 'Rajesh', lastName: 'Singh',  email: 'rajesh3@school.com',     subscriptionPlan: 'silver',            isActive: true },
+  { _id: 'mock_t4_id_123',  userId: 'TEACHER004',    password: 'Teacher@123',    role: 'teacher',         firstName: 'Sneha',  lastName: 'Gupta',  email: 'sneha4@school.com',      subscriptionPlan: 'silver',            isActive: true },
+  { _id: 'mock_t5_id_123',  userId: 'TEACHER005',    password: 'Teacher@123',    role: 'teacher',         firstName: 'Suresh', lastName: 'Rao',    email: 'suresh5@school.com',     subscriptionPlan: 'silver',            isActive: true },
+  { _id: 'mock_s_id_123',   userId: 'STUDENT001',    password: 'Student@123',    role: 'student',         firstName: 'Aarav',  lastName: 'Singh',  email: 'aarav1@school.com',      subscriptionPlan: 'silver',            isActive: true },
+  { _id: 'mock_pa_id_123',  userId: 'PAR-G1-001',    password: 'Parent@123',     role: 'parent',          firstName: 'Rajesh', lastName: 'Sharma', email: 'parent-g1-001@school.com',subscriptionPlan: 'silver',            isActive: true },
 ];
 
 const login = async (req, res) => {
