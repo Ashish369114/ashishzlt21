@@ -22,6 +22,20 @@ const Login = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [activePill, setActivePill] = useState('');
   const [stars, setStars] = useState([]);
+  const [contactForm, setContactForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+  const [contactSent, setContactSent] = useState(false);
+
+  const handleContactChange = (e) => {
+    const { name, value } = e.target;
+    setContactForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleContactSubmit = (e) => {
+    e.preventDefault();
+    setContactSent(true);
+    setContactForm({ name: '', email: '', phone: '', subject: '', message: '' });
+    setTimeout(() => setContactSent(false), 5000);
+  };
   
   const userIdRef = useRef(null);
   const loginBtnRef = useRef(null);
@@ -232,9 +246,13 @@ const Login = ({ onLogin }) => {
               Forgot Password?
             </Link>
             <span className="divider">•</span>
-            <Link to="/" className="link">
-              Back to Home
-            </Link>
+            <a href="#about" className="link" onClick={(e) => { e.preventDefault(); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); }}>
+              About Us
+            </a>
+            <span className="divider">•</span>
+            <a href="#contact" className="link" onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }}>
+              Contact Us
+            </a>
           </div>
         </div>
 
@@ -394,6 +412,75 @@ const Login = ({ onLogin }) => {
         </div>
 
       </div>
+
+      {/* About Us Card */}
+      <div className="login-wrapper about-section-card" id="about" style={{ marginTop: '40px', padding: '40px', flexDirection: 'column', gap: '15px' }}>
+        <div className="plans-hdr" style={{ fontSize: '1.5rem', marginBottom: '10px' }}>
+          <i className="fa-solid fa-circle-info"></i> About Zayn Levi Technologies
+        </div>
+        <p style={{ lineHeight: '1.6', opacity: 0.9 }}>
+          Zayn Levi Technologies is a forward-thinking technology company dedicated to creating digital solutions that simplify complexity and unlock growth for modern organizations.
+        </p>
+        <p style={{ lineHeight: '1.6', opacity: 0.9 }}>
+          Our vision is to blend innovation, reliability, and user-focused design to deliver software that empowers teams, improves customer experiences, and scales with ambition. From custom platforms to intelligent automation, we build technology that turns business goals into measurable progress.
+        </p>
+        <div className="why-choose-us-grid" style={{ marginTop: '15px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+          <div className="why-card" style={{ padding: '12px', background: 'rgba(99,102,241,0.06)', borderRadius: '10px', border: '1px solid rgba(99,102,241,0.1)', fontWeight: '600' }}>✓ End-to-end digital transformation support</div>
+          <div className="why-card" style={{ padding: '12px', background: 'rgba(99,102,241,0.06)', borderRadius: '10px', border: '1px solid rgba(99,102,241,0.1)', fontWeight: '600' }}>✓ Transparent collaboration & milestones</div>
+          <div className="why-card" style={{ padding: '12px', background: 'rgba(99,102,241,0.06)', borderRadius: '10px', border: '1px solid rgba(99,102,241,0.1)', fontWeight: '600' }}>✓ Reliable post-launch maintenance</div>
+          <div className="why-card" style={{ padding: '12px', background: 'rgba(99,102,241,0.06)', borderRadius: '10px', border: '1px solid rgba(99,102,241,0.1)', fontWeight: '600' }}>✓ Flexible engagement models</div>
+        </div>
+      </div>
+
+      {/* Contact Us Card */}
+      <div className="login-wrapper contact-section-card" id="contact" style={{ marginTop: '40px', padding: '40px', display: 'flex', gap: '40px' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="plans-hdr" style={{ fontSize: '1.5rem', marginBottom: '10px' }}>
+            <i className="fa-solid fa-paper-plane"></i> Contact Us
+          </div>
+          <div>
+            <h4 style={{ fontWeight: '700', marginBottom: '6px' }}>Official Email</h4>
+            <p style={{ opacity: 0.9 }}>business@zaynlevi.com</p>
+          </div>
+          <div>
+            <h4 style={{ fontWeight: '700', marginBottom: '6px' }}>Official Phone</h4>
+            <p style={{ opacity: 0.9 }}>+91 6300854318</p>
+          </div>
+          <div>
+            <h4 style={{ fontWeight: '700', marginBottom: '6px' }}>Service Area</h4>
+            <p style={{ opacity: 0.9 }}>Remote delivery, strategic consulting, and implementation support for growing teams.</p>
+          </div>
+        </div>
+
+        <div style={{ flex: 1.2 }}>
+          <h3 style={{ fontSize: '1.3rem', fontWeight: '700', marginBottom: '20px' }}>Request a consultation</h3>
+          {contactSent ? (
+            <div className="alert alert-success" style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)', color: '#047857', padding: '15px', borderRadius: '12px' }}>
+              <i className="fa-solid fa-circle-check"></i> Thank you! Your message has been sent successfully. Our team will contact you shortly.
+            </div>
+          ) : (
+            <form onSubmit={handleContactSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <input type="text" name="name" placeholder="Your Name" value={contactForm.name} onChange={handleContactChange} required className="form-input" style={{ width: '100%' }} />
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <input type="email" name="email" placeholder="Your Email" value={contactForm.email} onChange={handleContactChange} required className="form-input" style={{ width: '100%' }} />
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <input type="tel" name="phone" placeholder="Your Phone" value={contactForm.phone} onChange={handleContactChange} className="form-input" style={{ width: '100%' }} />
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <input type="text" name="subject" placeholder="Subject" value={contactForm.subject} onChange={handleContactChange} required className="form-input" style={{ width: '100%' }} />
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <textarea name="message" placeholder="Tell us about your project" rows="3" value={contactForm.message} onChange={handleContactChange} required className="form-input" style={{ width: '100%', resize: 'none' }}></textarea>
+              </div>
+              <button type="submit" className="btn-login" style={{ width: '100%', marginTop: '5px' }}>Send Inquiry</button>
+            </form>
+          )}
+        </div>
+      </div>
+
     </div>
   );
 };

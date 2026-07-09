@@ -53,7 +53,7 @@ function App() {
     <Router>
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
+        <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Login onLogin={handleLogin} />} />
         <Route path="/home" element={user ? <Navigate to="/dashboard" replace /> : <HomePage />} />
         <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login onLogin={handleLogin} />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
