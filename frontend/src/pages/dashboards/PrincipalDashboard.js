@@ -11,6 +11,7 @@ import PrincipalTeacherManagement from '../components/PrincipalTeacherManagement
 import PrincipalFinanceReport from '../components/PrincipalFinanceReport';
 import PrincipalComprehensiveReports from '../components/PrincipalComprehensiveReports';
 import PrincipalLeaveManagement from '../components/PrincipalLeaveManagement';
+import PrincipalPendingFees from '../components/PrincipalPendingFees';
 
 
 const PrincipalDashboard = ({ user, onLogout }) => {
@@ -106,6 +107,7 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           </li>
           <li><Link to="/dashboard/attendance">✅ Attendance</Link></li>
           <li><Link to="/dashboard/performance">📈 Performance</Link></li>
+          <li><Link to="/dashboard/pending">⏳ Fee Overview</Link></li>
           <li><Link to="/dashboard/leaves">🗓️ Leave Requests</Link></li>
           <li><Link to="/change-password">🔒 Change Password</Link></li>
           
@@ -157,10 +159,10 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           <Route path="exams" element={<PrincipalExamManagement />} />
           <Route path="attendance" element={<PrincipalAttendance />} />
           <Route path="performance" element={<PrincipalPerformance />} />
+          <Route path="pending" element={<PrincipalPendingFees />} />
           <Route path="finance" element={<PrincipalFinanceReport />} />
           <Route path="reports" element={<PrincipalComprehensiveReports />} />
           <Route path="leaves" element={<PrincipalLeaveManagement />} />
-          {/* fees/* redirects to finance overview so old bookmarks still work */}
           <Route path="fees" element={<PrincipalFinanceReport />} />
           <Route path="*" element={<DashboardHome stats={stats} />} />
         </Routes>
