@@ -279,6 +279,9 @@ const Login = ({ onLogin }) => {
                   <li><i className="fa-solid fa-circle-check"></i> Daily Attendance Logs</li>
                   <li><i className="fa-solid fa-circle-check"></i> Basic Exam Schedules</li>
                 </ul>
+                <button className="btn-login" style={{ marginTop: '14px', width: '100%', padding: '10px', fontSize: '0.9rem' }} onClick={() => navigate('/silver-plan')}>
+                  Choose Plan
+                </button>
               </div>
 
               {/* Gold Card */}
@@ -294,6 +297,9 @@ const Login = ({ onLogin }) => {
                   <li><i className="fa-solid fa-circle-check"></i> Staff Leave &amp; Payroll</li>
                   <li><i className="fa-solid fa-circle-check"></i> Parent Communication</li>
                 </ul>
+                <button className="btn-login" style={{ marginTop: '14px', width: '100%', padding: '10px', fontSize: '0.9rem' }} onClick={() => navigate('/gold-plan')}>
+                  Choose Plan
+                </button>
               </div>
 
               {/* Platinum Without OCR Card */}
@@ -309,6 +315,9 @@ const Login = ({ onLogin }) => {
                   <li><i className="fa-solid fa-circle-check"></i> Advanced Role Access Control</li>
                   <li><i className="fa-solid fa-circle-check"></i> Dedicated Account Support</li>
                 </ul>
+                <button className="btn-login" style={{ marginTop: '14px', width: '100%', padding: '10px', fontSize: '0.9rem' }} onClick={() => navigate('/platinum-plan?ocr=false')}>
+                  Choose Plan
+                </button>
               </div>
 
               {/* Platinum With OCR Card */}
@@ -325,6 +334,9 @@ const Login = ({ onLogin }) => {
                   <li><i className="fa-solid fa-circle-check"></i> Dedicated Account Support</li>
                   <li><i className="fa-solid fa-circle-check"></i> OCR to Accountant (Teacher &amp; Student upcoming)</li>
                 </ul>
+                <button className="btn-login" style={{ marginTop: '14px', width: '100%', padding: '10px', fontSize: '0.9rem' }} onClick={() => navigate('/platinum-plan?ocr=true')}>
+                  Choose Plan
+                </button>
               </div>
             </div>
 
