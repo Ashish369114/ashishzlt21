@@ -14,6 +14,9 @@ import TeacherDashboard from './pages/dashboards/TeacherDashboard';
 import StudentDashboard from './pages/dashboards/StudentDashboard';
 import ParentDashboard from './pages/dashboards/ParentDashboard';
 import AccountantDashboard from './pages/dashboards/AccountantDashboard';
+import SilverPlan from './pages/SilverPlan';
+import GoldPlan from './pages/GoldPlan';
+import PlatinumPlan from './pages/PlatinumPlan';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -56,6 +59,9 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/change-password" element={<ProfileSecurity />} />
+        <Route path="/silver-plan" element={<SilverPlan />} />
+        <Route path="/gold-plan" element={<GoldPlan />} />
+        <Route path="/platinum-plan" element={<PlatinumPlan />} />
         <Route path="/profile-security" element={<Navigate to="/change-password" replace />} />
         <Route path="/password-change" element={<Navigate to="/change-password" replace />} />
         

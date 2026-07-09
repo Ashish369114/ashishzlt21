@@ -75,6 +75,8 @@ const LandingPage = () => {
       navigate('/silver-plan');
     } else if (planName === 'gold') {
       navigate('/gold-plan');
+    } else if (planName === 'platinum') {
+      navigate('/platinum-plan');
     } else {
       navigate('/silver-plan');
     }

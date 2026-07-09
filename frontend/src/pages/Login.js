@@ -1,16 +1,74 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../services/api';
 import '../styles/Login.css';
 
+const DEFAULT_CURRENCIES = {
+  'IN': { name: 'India', symbol: '₹', silver: '40,000', gold: '70,000', platinum: '1,00,000', tax: 'GST' },
+  'US': { name: 'United States', symbol: '$', silver: '599', gold: '899', platinum: '1,299', tax: 'Sales Tax' },
+  'GB': { name: 'United Kingdom', symbol: '£', silver: '499', gold: '799', platinum: '1,099', tax: 'VAT' },
+  'CA': { name: 'Canada', symbol: 'C$', silver: '799', gold: '1,199', platinum: '1,599', tax: 'HST/GST' },
+  'EU': { name: 'Europe', symbol: '€', silver: '549', gold: '849', platinum: '1,149', tax: 'VAT' }
+};
+
 const Login = ({ onLogin }) => {
+  const [selectedCountry, setSelectedCountry] = useState('IN');
+  const [currencies, setCurrencies] = useState(DEFAULT_CURRENCIES);
+  
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
+  
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [activePill, setActivePill] = useState('');
+  const [stars, setStars] = useState([]);
+  
+  const userIdRef = useRef(null);
+  const loginBtnRef = useRef(null);
   const navigate = useNavigate();
 
+  // Generate twinkling stars on mount
+  useEffect(() => {
+    const starsArray = [];
+    for (let i = 0; i < 70; i++) {
+      const size = Math.random() * 2.5 + 0.5;
+      starsArray.push({
+        id: i,
+        size,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        duration: Math.random() * 4 + 2,
+        delay: Math.random() * 6
+      });
+    }
+    setStars(starsArray);
+  }, []);
+
+  const activeCurrency = currencies[selectedCountry] || currencies['IN'];
+
+  // Handle Quick Login Click
+  const handleQuickLogin = (u, p) => {
+    setUserId(u);
+    setPassword(p);
+    setActivePill(u);
+    setError('');
+
+    // Smooth scroll and focus
+    if (userIdRef.current) {
+      userIdRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      userIdRef.current.focus();
+    }
+
+    // Button pulse animation
+    if (loginBtnRef.current) {
+      loginBtnRef.current.style.transform = 'scale(1.03)';
+      setTimeout(() => {
+        if (loginBtnRef.current) loginBtnRef.current.style.transform = '';
+      }, 250);
+    }
+  };
+
+  // Form Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -37,81 +95,139 @@ const Login = ({ onLogin }) => {
   };
 
   return (
-    <div className="login-wrapper">
-      {/* Background decoration */}
-      <div className="login-bg-decoration"></div>
+    <div className="login-page-root">
+      {/* Background elements */}
+      <div className="aurora-bg"></div>
+      <div className="mesh-grid"></div>
+      <div className="blob blob-1"></div>
+      <div className="blob blob-2"></div>
+      <div className="blob blob-3"></div>
       
-      <div className="login-container">
-        <div className="login-card">
-          {/* Header */}
-          <div className="login-header">
-            <div className="login-logo">
-              <span className="logo-icon">🎓</span>
-              <span className="logo-text">Zayn Levi Technologies</span>
+      {/* Twinkling star field */}
+      <div className="stars">
+        {stars.map(star => (
+          <div
+            key={star.id}
+            className="star"
+            style={{
+              width: `${star.size}px`,
+              height: `${star.size}px`,
+              left: `${star.left}%`,
+              top: `${star.top}%`,
+              animationDuration: `${star.duration}s`,
+              animationDelay: `${star.delay}s`
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Main card */}
+      <div className="login-wrapper">
+        
+        {/* Left Side: Login Form */}
+        <div className="form-side">
+          <div className="brand">
+            <div className="brand-icon">
+              <i className="fa-solid fa-graduation-cap"></i>
             </div>
-            <h2>School Operating System</h2>
-            <p>Welcome Back! Please login to your account</p>
+            <div>
+              <div className="brand-name">Zayn Levi Technologies</div>
+              <div className="brand-tag">School Operating System</div>
+            </div>
           </div>
 
-          {/* Error Message */}
-          {error && <div className="alert alert-error">{error}</div>}
+          <h1 className="headline">Welcome Back</h1>
+          <p className="subline">Sign in to access your school dashboard and modules.</p>
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="login-form">
+          {/* Region / Currency Selector */}
+          <div className="country-bar">
+            <label htmlFor="csel">
+              <i className="fa-solid fa-earth-asia"></i> Region / Currency
+            </label>
+            <select
+              id="csel"
+              className="country-select"
+              value={selectedCountry}
+              onChange={(e) => setSelectedCountry(e.target.value)}
+            >
+              {Object.entries(currencies).map(([key, val]) => (
+                <option key={key} value={key}>
+                  {val.name} ({val.symbol})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Messages */}
+          {error && (
+            <div className="alert alert-error">
+              <i className="fa-solid fa-circle-exclamation"></i> {error}
+            </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="userId">User ID</label>
-              <div className="input-wrapper">
-                <span className="input-icon">👤</span>
+              <label htmlFor="userId">User ID / Email</label>
+              <div className="input-wrap">
+                <i className="fa-solid fa-user"></i>
                 <input
-                  id="userId"
                   type="text"
+                  id="userId"
+                  ref={userIdRef}
                   value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
-                  placeholder="Enter your User ID or Email"
+                  onChange={(e) => {
+                    setUserId(e.target.value);
+                    setActivePill('');
+                  }}
+                  className="form-input"
+                  placeholder="e.g. SUPERADMIN001"
                   required
-                  disabled={loading}
+                  autoComplete="username"
                 />
               </div>
             </div>
 
             <div className="form-group">
               <label htmlFor="password">Password</label>
-              <div className="input-wrapper">
-                <span className="input-icon">🔒</span>
+              <div className="input-wrap">
+                <i className="fa-solid fa-lock"></i>
                 <input
+                  type="password"
                   id="password"
-                  type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setActivePill('');
+                  }}
+                  className="form-input"
+                  placeholder="••••••••"
                   required
-                  disabled={loading}
+                  autoComplete="current-password"
                 />
-                <button
-                  type="button"
-                  className="toggle-password"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={loading}
-                >
-                  {showPassword ? '👁️' : '👁️‍🗨️'}
-                </button>
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary btn-login" disabled={loading}>
+            <button
+              type="submit"
+              className="btn-login"
+              ref={loginBtnRef}
+              disabled={loading}
+            >
               {loading ? (
                 <>
-                  <span className="spinner-mini"></span>
-                  Logging in...
+                  <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }}></i>Authenticating...
                 </>
               ) : (
-                'Login to Dashboard'
+                <>
+                  <i className="fa-solid fa-arrow-right-to-bracket" style={{ marginRight: '8px' }}></i>Sign In to Portal
+                </>
               )}
             </button>
           </form>
 
           {/* Footer Links */}
-          <div className="login-footer">
+          <div className="login-footer-links">
             <Link to="/forgot-password" className="link">
               Forgot Password?
             </Link>
@@ -120,59 +236,156 @@ const Login = ({ onLogin }) => {
               Back to Home
             </Link>
           </div>
-
         </div>
 
-        {/* Right Side - Features */}
-        <div className="login-features">
-          <div className="features-content">
-            <h3>Why Choose Zayn Levi Technologies?</h3>
-            <ul className="features-list">
-              <li>
-                <span className="feature-icon">✅</span>
-                <div>
-                  <h4>Comprehensive Management</h4>
-                  <p>Manage all aspects of school operations in one platform</p>
+        {/* Right Side: Plans & Quick Login */}
+        <div className="plans-side">
+          <div className="plans-inner">
+            
+            {/* Plans List */}
+            <div>
+              <div className="plans-hdr">
+                <i className="fa-solid fa-gem"></i> Subscription Plans
+              </div>
+
+              {/* Silver Card */}
+              <div className="plan-card plan-silver">
+                <div className="plan-header">
+                  <span className="plan-name">Silver ({activeCurrency.symbol})</span>
+                  <span className="plan-badge badge-silver">Core</span>
                 </div>
-              </li>
-              <li>
-                <span className="feature-icon">⚡</span>
-                <div>
-                  <h4>Real-Time Updates</h4>
-                  <p>Get instant notifications and live updates on all activities</p>
+                <div style={{ padding: '10px 14px 2px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Yearly Price</span>
+                  <span className="plan-price">{activeCurrency.symbol}{activeCurrency.silver}/yr</span>
                 </div>
-              </li>
-              <li>
-                <span className="feature-icon">🔒</span>
-                <div>
-                  <h4>Secure & Reliable</h4>
-                  <p>Your data is protected with enterprise-grade security</p>
+                <ul className="plan-features">
+                  <li><i className="fa-solid fa-circle-check"></i> Core Academics Module</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Student Directory</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Daily Attendance Logs</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Basic Exam Schedules</li>
+                </ul>
+              </div>
+
+              {/* Gold Card */}
+              <div className="plan-card plan-gold">
+                <div className="plan-header">
+                  <span className="plan-name">Gold ({activeCurrency.symbol})</span>
+                  <span className="plan-badge badge-gold">Standard</span>
                 </div>
-              </li>
-              <li>
-                <span className="feature-icon">📊</span>
-                <div>
-                  <h4>Advanced Analytics</h4>
-                  <p>Get detailed reports and insights for better decision making</p>
+                <div style={{ padding: '10px 14px 2px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Yearly Price</span>
+                  <span className="plan-price">{activeCurrency.symbol}{activeCurrency.gold}/yr</span>
                 </div>
-              </li>
-              <li>
-                <span className="feature-icon">📱</span>
-                <div>
-                  <h4>Mobile Friendly</h4>
-                  <p>Access your dashboard from any device, anywhere, anytime</p>
+                <ul className="plan-features">
+                  <li><i className="fa-solid fa-circle-check"></i> Fee Management &amp; Receipts</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Homework &amp; Timetables</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Staff Leave &amp; Payroll</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Parent Communication</li>
+                </ul>
+              </div>
+
+              {/* Platinum Card */}
+              <div className="plan-card plan-platinum">
+                <div className="plan-header">
+                  <span className="plan-name">Platinum ({activeCurrency.symbol})</span>
+                  <span className="plan-badge badge-platinum">Elite</span>
                 </div>
-              </li>
-              <li>
-                <span className="feature-icon">🤝</span>
-                <div>
-                  <h4>24/7 Support</h4>
-                  <p>Our support team is always ready to help you succeed</p>
+                <div style={{ padding: '10px 14px 2px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Yearly Price</span>
+                  <span className="plan-price">{activeCurrency.symbol}{activeCurrency.platinum}/yr</span>
                 </div>
-              </li>
-            </ul>
+                <ul className="plan-features">
+                  <li><i className="fa-solid fa-circle-check"></i> Custom APIs &amp; Integrations</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Multi-branch Operations</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Advanced Role Access Control</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Dedicated Account Support</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Quick Login Pills */}
+            <div>
+              <div className="plans-hdr" style={{ marginBottom: '14px' }}>
+                <i className="fa-solid fa-wand-magic-sparkles"></i> Quick Login
+              </div>
+
+              {/* Platform Admin */}
+              <div className="tier-group tier-platinum">
+                <div className="tier-header">
+                  <span className="tier-name">👑 School Super Admin</span>
+                  <span className="tier-badge badge-platinum">Elite</span>
+                </div>
+                <div className="role-grid">
+                  <div
+                    className={`role-pill ${activePill === 'SUPERADMIN001' ? 'role-pill-clicked' : ''}`}
+                    onClick={() => handleQuickLogin('SUPERADMIN001', 'Admin@123')}
+                    style={{ gridColumn: 'span 3' }}
+                  >
+                    Super Admin (SUPERADMIN001)
+                  </div>
+                </div>
+              </div>
+
+              {/* Branch Roles */}
+              <div className="tier-group tier-gold">
+                <div className="tier-header">
+                  <span className="tier-name">🏫 School Branch Staff</span>
+                  <span className="tier-badge badge-gold">Standard</span>
+                </div>
+                <div className="role-grid">
+                  <div
+                    className={`role-pill ${activePill === 'PRINCIPAL001' ? 'role-pill-clicked' : ''}`}
+                    onClick={() => handleQuickLogin('PRINCIPAL001', 'Principal@123')}
+                  >
+                    Principal
+                  </div>
+                  <div
+                    className={`role-pill ${activePill === 'ACCOUNTANT001' ? 'role-pill-clicked' : ''}`}
+                    onClick={() => handleQuickLogin('ACCOUNTANT001', 'Accountant@123')}
+                  >
+                    Accountant
+                  </div>
+                  <div
+                    className={`role-pill ${activePill === 'TEACHER001' ? 'role-pill-clicked' : ''}`}
+                    onClick={() => handleQuickLogin('TEACHER001', 'Teacher@123')}
+                  >
+                    Teacher
+                  </div>
+                </div>
+              </div>
+
+              {/* Users */}
+              <div className="tier-group tier-silver">
+                <div className="tier-header">
+                  <span className="tier-name">👥 Students &amp; Parents</span>
+                  <span className="tier-badge badge-silver">Core</span>
+                </div>
+                <div className="role-grid">
+                  <div
+                    className={`role-pill ${activePill === 'STUDENT001' ? 'role-pill-clicked' : ''}`}
+                    onClick={() => handleQuickLogin('STUDENT001', 'Student@123')}
+                    style={{ gridColumn: 'span 1.5' }}
+                  >
+                    Student (STUDENT001)
+                  </div>
+                  <div
+                    className={`role-pill ${activePill === 'PAR-G1-001' ? 'role-pill-clicked' : ''}`}
+                    onClick={() => handleQuickLogin('PAR-G1-001', 'Parent@123')}
+                    style={{ gridColumn: 'span 1.5' }}
+                  >
+                    Parent (PAR-G1-001)
+                  </div>
+                </div>
+              </div>
+
+              <div className="pw-hint">
+                Auto-fills valid seed credentials on click.
+              </div>
+            </div>
+
           </div>
         </div>
+
       </div>
     </div>
   );
