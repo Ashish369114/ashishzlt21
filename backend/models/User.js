@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema(
     },
     subscriptionPlan: {
       type: String,
-      enum: ['silver', 'gold', 'platinum'],
+      enum: ['silver', 'gold', 'platinum', 'platinum_with_ocr', 'platinum_without_ocr'],
       default: 'silver',
     },
     firstName: {

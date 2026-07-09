@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { schoolService } from '../services/api';
 import '../styles/LandingPage.css';
 
@@ -7,6 +7,12 @@ const paymentProviders = ['PhonePe', 'Google Pay', 'Paytm', 'BharatPe'];
 
 const PlatinumPlan = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const isOcr = queryParams.get('ocr') === 'true';
+  const planKey = isOcr ? 'platinum_with_ocr' : 'platinum_without_ocr';
+  const planTitle = isOcr ? 'Platinum Plan (With OCR)' : 'Platinum Plan (Without OCR)';
+
   const [checkoutForm, setCheckoutForm] = useState({
     schoolName: '',
     schoolEmail: '',
@@ -53,14 +59,14 @@ const PlatinumPlan = () => {
         phone: checkoutForm.phone,
         address: checkoutForm.address,
         principalName: checkoutForm.principalName,
-        subscriptionPlan: 'platinum',
+        subscriptionPlan: planKey,
         subscriptionDurationMonths: planDuration,
         paymentMethod: `${selectedProvider} UPI`,
         paymentReference: `UPI-${selectedProvider.toUpperCase().replace(/\s+/g, '')}-${Date.now()}`,
       });
 
       const { school, credentials, emailSent } = response.data;
-      localStorage.setItem('subscriptionPlan', 'platinum');
+      localStorage.setItem('subscriptionPlan', planKey);
       setSuccessData({ school, credentials, emailSent });
       setPaymentStatus('Payment completed successfully!');
       setStep('success');
@@ -80,8 +86,8 @@ const PlatinumPlan = () => {
     <div className="landing-page gold-plan-page">
       <section className="hero-banner" style={{ minHeight: '60vh' }}>
         <div className="hero-content">
-          <div className="hero-badge">Platinum Plan Subscription</div>
-          <h1 className="hero-title">School Operating System Platinum Plan</h1>
+          <div className="hero-badge">{planTitle} Subscription</div>
+          <h1 className="hero-title">School Operating System {planTitle}</h1>
           <p className="hero-subtitle">
             Experience complete school automation at scale with a demo UPI payment and instant credential provisioning.
           </p>

@@ -278,10 +278,25 @@ const Login = ({ onLogin }) => {
                 </ul>
               </div>
 
-              {/* Platinum Card */}
+              {/* Platinum Without OCR Card */}
               <div className="plan-card plan-platinum">
                 <div className="plan-header">
-                  <span className="plan-name">Platinum ({activeCurrency.symbol})</span>
+                  <span className="plan-name">Platinum (Without OCR)</span>
+                  <span className="plan-badge badge-platinum">Elite</span>
+                </div>
+
+                <ul className="plan-features">
+                  <li><i className="fa-solid fa-circle-check"></i> Custom APIs &amp; Integrations</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Multi-branch Operations</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Advanced Role Access Control</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Dedicated Account Support</li>
+                </ul>
+              </div>
+
+              {/* Platinum With OCR Card */}
+              <div className="plan-card plan-platinum">
+                <div className="plan-header">
+                  <span className="plan-name">Platinum (With OCR)</span>
                   <span className="plan-badge badge-platinum">Elite</span>
                 </div>
 

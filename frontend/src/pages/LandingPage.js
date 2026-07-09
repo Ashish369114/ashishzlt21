@@ -24,22 +24,25 @@ const services = [
 const pricingTiers = [
   {
     name: 'Silver Plan',
-    price: '₹40,000',
     subtitle: 'Ideal for small schools getting started with digital operations.',
     features: ['Student admission and profile management', 'Attendance tracking', 'Fee collection and receipts', 'Basic exam scheduling'],
     featured: false
   },
   {
     name: 'Gold Plan',
-    price: '₹70,000',
     subtitle: 'Most popular for growing institutions that need deeper automation.',
     features: ['Everything in Silver', 'Homework and timetable management', 'Staff payroll and leave tracking', 'Parent communication portal', 'Advanced reporting and analytics'],
     featured: true
   },
   {
-    name: 'Platinum Plan',
-    price: '₹1,00,000',
+    name: 'Platinum Plan (Without OCR)',
     subtitle: 'Premium solution for large institutions with complex integrations.',
+    features: ['Everything in Gold', 'Custom integrations and APIs', 'Multi-branch management', 'Advanced role-based access', 'Dedicated implementation and support'],
+    featured: false
+  },
+  {
+    name: 'Platinum Plan (With OCR)',
+    subtitle: 'Premium solution with complete OCR capabilities enabled.',
     features: ['Everything in Gold', 'Custom integrations and APIs', 'Multi-branch management', 'Advanced role-based access', 'Dedicated implementation and support', 'OCR to Accountant (Teacher & Student upcoming)'],
     featured: false
   }
@@ -71,12 +74,15 @@ const LandingPage = () => {
   };
 
   const handlePlanSelection = (planName) => {
-    if (planName === 'silver') {
+    const nameLower = String(planName || '').toLowerCase();
+    if (nameLower.includes('silver')) {
       navigate('/silver-plan');
-    } else if (planName === 'gold') {
+    } else if (nameLower.includes('gold')) {
       navigate('/gold-plan');
-    } else if (planName === 'platinum') {
-      navigate('/platinum-plan');
+    } else if (nameLower.includes('with ocr')) {
+      navigate('/platinum-plan?ocr=true');
+    } else if (nameLower.includes('without ocr') || nameLower.includes('platinum')) {
+      navigate('/platinum-plan?ocr=false');
     } else {
       navigate('/silver-plan');
     }
@@ -218,13 +224,12 @@ const LandingPage = () => {
                 {tier.featured && <div className="popular-badge">Most Popular</div>}
                 <h3>{tier.name}</h3>
                 <p className="price-subtitle">{tier.subtitle}</p>
-                <div className="price">{tier.price}</div>
                 <ul>
                   {tier.features.map((feature) => (
                     <li key={feature}>{feature}</li>
                   ))}
                 </ul>
-                <button className="btn btn-primary" onClick={() => handlePlanSelection(tier.name.toLowerCase().includes('gold') ? 'gold' : tier.name.toLowerCase().includes('platinum') ? 'platinum' : 'silver')}>
+                <button className="btn btn-primary" onClick={() => handlePlanSelection(tier.name)}>
                   Choose Plan
                 </button>
               </div>

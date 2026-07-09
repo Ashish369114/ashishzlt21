@@ -196,7 +196,7 @@ const upgradePlan = async (req, res) => {
     const normalizedPlan = String(subscriptionPlan).toLowerCase();
     const durationMonths = Number(subscriptionDurationMonths) || 12;
 
-    if (!['silver', 'gold', 'platinum'].includes(normalizedPlan)) {
+    if (!['silver', 'gold', 'platinum', 'platinum_with_ocr', 'platinum_without_ocr'].includes(normalizedPlan)) {
       return res.status(400).json({ message: 'Invalid subscription plan.' });
     }
 

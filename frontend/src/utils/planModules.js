@@ -39,13 +39,19 @@ const platinumModules = [
 export const getPlanModules = (planName = 'silver') => {
   const normalizedPlan = String(planName || '').toLowerCase();
   if (normalizedPlan === 'gold') return goldModules;
-  if (normalizedPlan === 'platinum') return platinumModules;
+  if (normalizedPlan.startsWith('platinum')) {
+    if (normalizedPlan.includes('ocr')) {
+      return [...platinumModules, 'OCR Document Scanner'];
+    }
+    return platinumModules;
+  }
   return silverModules;
 };
 
 export const getPlanDisplayName = (planName = 'silver') => {
   const normalizedPlan = String(planName || '').toLowerCase();
   if (normalizedPlan === 'gold') return 'Gold Plan';
-  if (normalizedPlan === 'platinum') return 'Platinum Plan';
+  if (normalizedPlan === 'platinum_with_ocr') return 'Platinum Plan (With OCR)';
+  if (normalizedPlan === 'platinum_without_ocr' || normalizedPlan === 'platinum') return 'Platinum Plan (Without OCR)';
   return 'Silver Plan';
 };
