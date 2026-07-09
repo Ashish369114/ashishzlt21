@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { schoolService } from '../services/api';
+import { getPlanModules } from '../utils/planModules';
 import '../styles/LandingPage.css';
 
 const paymentProviders = ['PhonePe', 'Google Pay', 'Paytm', 'BharatPe'];
@@ -215,6 +216,81 @@ const PlatinumPlan = () => {
 
               {error && <div className="alert alert-error">{error}</div>}
               {paymentStatus && <p className="checkout-message">{paymentStatus}</p>}
+            </div>
+          </div>
+
+          <div className="modules-showcase-container" style={{ marginTop: '30px' }}>
+            <h3 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '20px', textAlign: 'center', color: '#1e293b' }}>
+              📋 Included Modules & Features
+            </h3>
+            <div className="modules-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px' }}>
+              {/* Category 1: Academics & Operations */}
+              <div className="category-card" style={{ background: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', transition: 'all 0.3s ease' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                  <span style={{ fontSize: '1.8rem' }}>📚</span>
+                  <h4 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#4f46e5', margin: 0 }}>Academics & Operations</h4>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {getPlanModules(planKey).filter(m => [
+                    'Core Academics Module', 'Timetable Management', 'Student Attendance', 'Courses and Batches', 'Examination Management', 'Homework Management', 'Gradebook', 'School & Events Calendar'
+                  ].includes(m)).map(m => (
+                    <div key={m} style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #edf2f7', fontSize: '0.88rem', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px', color: '#475569' }}>
+                      <span style={{ color: '#10b981' }}>✓</span> {m}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Category 2: Administration & Logistics */}
+              <div className="category-card" style={{ background: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', transition: 'all 0.3s ease' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                  <span style={{ fontSize: '1.8rem' }}>💼</span>
+                  <h4 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#10b981', margin: 0 }}>Administration & Finance</h4>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {getPlanModules(planKey).filter(m => [
+                    'Student Admission', 'Human Resources (HR)', 'Finance Management', 'User Management', 'Advance Fee Management', 'Multi-Branch Management', 'Payroll Automation'
+                  ].includes(m)).map(m => (
+                    <div key={m} style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #edf2f7', fontSize: '0.88rem', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px', color: '#475569' }}>
+                      <span style={{ color: '#10b981' }}>✓</span> {m}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Category 3: Access & Communication */}
+              <div className="category-card" style={{ background: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', transition: 'all 0.3s ease' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                  <span style={{ fontSize: '1.8rem' }}>💬</span>
+                  <h4 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#f59e0b', margin: 0 }}>Access & Portals</h4>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {getPlanModules(planKey).filter(m => [
+                    'Messaging System', 'Employee / Teacher Login', 'Student / Parent Login', 'Student Information Management', 'Custom Student Remarks', 'SMS Integration', 'Dedicated Support'
+                  ].includes(m)).map(m => (
+                    <div key={m} style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #edf2f7', fontSize: '0.88rem', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px', color: '#475569' }}>
+                      <span style={{ color: '#10b981' }}>✓</span> {m}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Category 4: Tools & Productivity */}
+              <div className="category-card" style={{ background: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', transition: 'all 0.3s ease' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                  <span style={{ fontSize: '1.8rem' }}>🛠️</span>
+                  <h4 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#ec4899', margin: 0 }}>Tools & Productivity</h4>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {getPlanModules(planKey).filter(m => [
+                    'News Management', 'Report Center', 'Certificate Generator', 'ID Card Generator', 'Advanced Analytics', 'OCR Document Scanner'
+                  ].includes(m)).map(m => (
+                    <div key={m} style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #edf2f7', fontSize: '0.88rem', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px', color: '#475569' }}>
+                      <span style={{ color: '#10b981' }}>✓</span> {m}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
