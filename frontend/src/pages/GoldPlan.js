@@ -84,6 +84,7 @@ const GoldPlan = () => {
       });
 
       const { school, credentials, emailSent } = response.data;
+      localStorage.setItem('subscriptionPlan', 'gold');
       localStorage.setItem('pendingPlan', 'gold');
       setSuccessData({ school, credentials, emailSent });
       setPaymentStatus('Payment completed successfully!');

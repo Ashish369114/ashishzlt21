@@ -101,9 +101,12 @@ const Login = ({ onLogin }) => {
       // If user selected a plan from the plans page before logging in, respect that.
       // Otherwise use the plan stored in their account in the DB.
       const pendingPlan = localStorage.getItem('pendingPlan');
-      const finalPlan = pendingPlan || response.data.user.subscriptionPlan || 'silver';
+      const existingPlan = localStorage.getItem('subscriptionPlan');
+      const dbPlan = response.data.user.subscriptionPlan || 'silver';
+      // Priority: pendingPlan (just paid) > existingPlan (already chosen) > DB plan
+      const finalPlan = pendingPlan || existingPlan || dbPlan;
       localStorage.setItem('subscriptionPlan', finalPlan);
-      if (pendingPlan) localStorage.removeItem('pendingPlan'); // clear after use
+      localStorage.removeItem('pendingPlan'); // always clear after use
       
       // Redirect to dashboard
       navigate('/dashboard', { replace: true });

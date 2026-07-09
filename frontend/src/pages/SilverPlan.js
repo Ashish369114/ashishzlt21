@@ -84,6 +84,7 @@ const SilverPlan = () => {
       });
 
       const { school, credentials, emailSent } = response.data;
+      localStorage.setItem('subscriptionPlan', 'silver');
       localStorage.setItem('pendingPlan', 'silver');
       setSuccessData({ school, credentials, emailSent });
       setPaymentStatus('Payment completed successfully!');
