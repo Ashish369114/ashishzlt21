@@ -67,10 +67,10 @@ function App() {
         
         {/* Protected Routes - Dashboard */}
         {user && user.role === 'super_admin' && (
-          <Route path="/dashboard/*" element={<SuperAdminDashboard user={user} onLogout={handleLogout} />} />
+          <Route path="/dashboard/*" element={<AccountantDashboard user={user} onLogout={handleLogout} />} />
         )}
         {user && user.role === 'principal' && (
-          <Route path="/dashboard/*" element={<PrincipalDashboard user={user} onLogout={handleLogout} />} />
+          <Route path="/dashboard/*" element={<AccountantDashboard user={user} onLogout={handleLogout} />} />
         )}
         {user && user.role === 'teacher' && (
           <Route path="/dashboard/*" element={<TeacherDashboard user={user} onLogout={handleLogout} />} />

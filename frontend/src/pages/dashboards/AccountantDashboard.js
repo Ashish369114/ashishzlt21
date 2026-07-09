@@ -72,7 +72,7 @@ const AccountantDashboard = ({ user, onLogout }) => {
     <div className="dashboard-layout">
       <div className="sidebar">
         <div className="sidebar-header">
-          <h2>💼 Accountant</h2>
+          <h2>💼 {user?.role === 'super_admin' ? 'Super Admin' : user?.role === 'principal' ? 'Principal' : 'Accountant'}</h2>
           <p>{user?.firstName} {user?.lastName}</p>
         </div>
         <ul className="nav-menu">
