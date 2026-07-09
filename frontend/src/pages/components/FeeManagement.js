@@ -1,26 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { feeService, classService, studentService } from '../../services/api';
 
+const initialFormData = {
+  student: '',
+  amount: '',
+  description: 'Annual Tuition Fees',
+  dueDate: '',
+  installments: 3,
+};
+
 const FeeManagement = () => {
   const [fees, setFees] = useState([]);
+  const [selectedStudentFees, setSelectedStudentFees] = useState([]);
   const [students, setStudents] = useState([]);
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
-  const [paymentAmounts, setPaymentAmounts] = useState({});
   const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
   const [selectedClassId, setSelectedClassId] = useState('');
   const [selectedStudent, setSelectedStudent] = useState('');
   const [editingFeeId, setEditingFeeId] = useState(null);
-  const [formData, setFormData] = useState({
-    student: '',
+  const [formData, setFormData] = useState(initialFormData);
+  const [editForm, setEditForm] = useState({
     amount: '',
-    description: 'Annual Tuition Fees',
-    dueDate: '',
-    installments: 3,
+    installments: '3',
+    paidAmount: '',
+    pendingAmount: '',
+    paymentMethod: '',
   });
 
   useEffect(() => {
@@ -59,11 +67,63 @@ const FeeManagement = () => {
     setSelectedStudent('');
   }, [classes, selectedGrade, selectedSection]);
 
+  useEffect(() => {
+    if (!selectedStudent) {
+      // If no student is selected but we have a section, load all fees for the section
+      if (!selectedClassId) {
+        setSelectedStudentFees([]);
+        return;
+      }
+      // Load section fees when section is selected
+      let isCancelled = false;
+      const loadSectionFees = async () => {
+        try {
+          const response = await feeService.getBySection(selectedClassId);
+          if (!isCancelled) {
+            // Convert section students to fee-like objects for compatibility
+            setSelectedStudentFees(response.data || []);
+          }
+        } catch (err) {
+          if (!isCancelled) {
+            console.error('Failed to fetch section fees', err);
+            setSelectedStudentFees([]);
+          }
+        }
+      };
+      loadSectionFees();
+      return () => {
+        isCancelled = true;
+      };
+    }
+
+    let isCancelled = false;
+
+    const loadStudentFees = async () => {
+      try {
+        const response = await feeService.getByStudent(selectedStudent);
+        if (!isCancelled) {
+          setSelectedStudentFees(response.data || []);
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          console.error('Failed to fetch fee details for selected student', err);
+          setSelectedStudentFees([]);
+        }
+      }
+    };
+
+    loadStudentFees();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [selectedStudent, selectedClassId]);
+
   const fetchFees = async () => {
     try {
       setLoading(true);
       const response = await feeService.getAll();
-      setFees(response.data);
+      setFees(response.data || []);
     } catch (err) {
       setError('Failed to fetch fees');
       console.error(err);
@@ -75,7 +135,7 @@ const FeeManagement = () => {
   const fetchStudents = async () => {
     try {
       const response = await studentService.getAll();
-      setStudents(response.data);
+      setStudents(response.data || []);
     } catch (err) {
       console.error('Failed to fetch students', err);
     }
@@ -84,42 +144,107 @@ const FeeManagement = () => {
   const fetchClasses = async () => {
     try {
       const response = await classService.getAll();
-      setClasses(response.data);
+      setClasses(response.data || []);
     } catch (err) {
       console.error('Failed to fetch classes', err);
     }
   };
 
+  const formatCurrency = (value) => `₹${Number(value || 0).toLocaleString('en-IN')}`;
+
+  const getStudentName = (student) => {
+    const firstName = student?.userId?.firstName || student?.firstName || '';
+    const lastName = student?.userId?.lastName || student?.lastName || '';
+    const name = [firstName, lastName].filter(Boolean).join(' ').trim();
+    return name || 'Unknown Student';
+  };
+
+  const getStudentIdentifier = (student) => student?.userId?._id || student?.userId || student?._id || '';
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const resetFeeForm = () => {
-    setFormData({
-      student: '',
-      amount: '',
-      description: 'Annual Tuition Fees',
-      dueDate: '',
-      installments: 3,
-    });
-    setSelectedStudent('');
+    setFormData(initialFormData);
     setEditingFeeId(null);
     setShowForm(false);
     setError('');
   };
 
-  const handleEditFee = (fee) => {
-    setEditingFeeId(fee._id);
-    setSelectedStudent(fee.student?._id || fee.student || '');
-    setFormData({
-      student: fee.student?._id || fee.student || '',
-      amount: fee.amount || '',
-      description: fee.description || 'Annual Tuition Fees',
-      dueDate: fee.dueDate ? new Date(fee.dueDate).toISOString().slice(0, 10) : '',
-      installments: fee.installments || 3,
+  const resetEditForm = () => {
+    setEditingFeeId(null);
+    setEditForm({
+      amount: '',
+      installments: '3',
+      paidAmount: '',
+      pendingAmount: '',
+      paymentMethod: '',
     });
-    setShowForm(true);
+  };
+
+  const handleEditFee = (fee) => {
+    const amount = Number(fee.amount || 0);
+    const paidAmount = Number(fee.paidAmount || 0);
+    const pendingAmount = Math.max(amount - paidAmount, 0);
+
+    setEditingFeeId(fee._id);
+    setEditForm({
+      amount: String(amount),
+      installments: String(fee.installments || 3),
+      paidAmount: String(paidAmount),
+      pendingAmount: String(pendingAmount),
+      paymentMethod: fee.paymentMethod || '',
+    });
+  };
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm((prev) => {
+      const next = { ...prev, [name]: value };
+
+      if (name === 'amount' && value !== '') {
+        const amount = Number(value);
+        const paidAmount = Number(next.paidAmount || 0);
+        next.pendingAmount = String(Math.max(amount - paidAmount, 0));
+      } else if (name === 'paidAmount' && value !== '') {
+        const amount = Number(next.amount || 0);
+        const paidAmount = Number(value);
+        next.pendingAmount = String(Math.max(amount - paidAmount, 0));
+      } else if (name === 'pendingAmount' && value !== '') {
+        const amount = Number(next.amount || 0);
+        const pendingAmount = Number(value);
+        next.paidAmount = String(Math.max(amount - pendingAmount, 0));
+      }
+
+      return next;
+    });
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    if (!editingFeeId) return;
+
+    try {
+      const payload = {
+        amount: Number(editForm.amount || 0),
+        installments: Number(editForm.installments || 3),
+        paidAmount: Number(editForm.paidAmount || 0),
+        paymentMethod: editForm.paymentMethod,
+        isPaid: Number(editForm.paidAmount || 0) >= Number(editForm.amount || 0),
+      };
+
+      await feeService.update(editingFeeId, payload);
+      resetEditForm();
+      fetchFees();
+      if (selectedStudent) {
+        const response = await feeService.getByStudent(selectedStudent);
+        setSelectedStudentFees(response.data || []);
+      }
+    } catch (err) {
+      setError('Failed to update fee');
+    }
   };
 
   const handleAddFee = async (e) => {
@@ -146,45 +271,26 @@ const FeeManagement = () => {
 
       resetFeeForm();
       fetchFees();
+      if (selectedStudent) {
+        const response = await feeService.getByStudent(selectedStudent);
+        setSelectedStudentFees(response.data || []);
+      }
     } catch (err) {
       setError(editingFeeId ? 'Failed to update fee' : 'Failed to add fee');
     }
   };
 
-  const handleDeleteFee = async (id) => {
-    if (window.confirm('Are you sure you want to delete this fee record?')) {
+  const handleDeleteStudentFees = async (studentId) => {
+    if (window.confirm('Are you sure you want to delete all fee records for this student?')) {
       try {
-        await feeService.delete(id);
+        await feeService.deleteByStudent(studentId);
+        setSelectedStudent('');
+        setSelectedStudentFees([]);
+        resetEditForm();
         fetchFees();
       } catch (err) {
-        setError('Failed to delete fee');
+        setError('Failed to delete fee records');
       }
-    }
-  };
-
-  const handlePayFee = async (feeId) => {
-    if (!selectedPaymentMethod) {
-      alert('Please select a payment method');
-      return;
-    }
-    const paymentAmount = Number(paymentAmounts[feeId]) || 0;
-    if (!paymentAmount || paymentAmount <= 0) {
-      alert('Please enter a valid payment amount');
-      return;
-    }
-
-    try {
-      await feeService.pay({
-        feeId,
-        paymentMethod: selectedPaymentMethod,
-        transactionId: `TXN${Date.now()}`,
-        amount: paymentAmount,
-      });
-      setPaymentAmounts((prev) => ({ ...prev, [feeId]: '' }));
-      setSelectedPaymentMethod('');
-      fetchFees();
-    } catch (err) {
-      setError('Failed to process payment');
     }
   };
 
@@ -193,20 +299,25 @@ const FeeManagement = () => {
   const sectionsForGrade = [...new Set(visibleClasses.map((cls) => cls.section).filter(Boolean))].sort();
   const sectionStudents = selectedClassId
     ? students.filter((student) => {
-      const studentClassId = student.class?._id || student.class || student.classId;
-      return String(studentClassId) === String(selectedClassId);
-    })
+        const studentClassId = student.class?._id || student.class || student.classId;
+        return String(studentClassId) === String(selectedClassId);
+      })
     : [];
-  const visibleFees = selectedClassId
-    ? sectionStudents.map((student) => {
-      const studentId = student._id;
-      const fee = fees.find((feeRecord) => String(feeRecord.student?._id || feeRecord.student) === String(studentId));
-      return {
-        ...student,
-        fee,
-      };
-    })
-    : [];
+  const selectedStudentRecord = sectionStudents.find((student) => String(getStudentIdentifier(student)) === String(selectedStudent)) || null;
+  
+  // Handle both fee objects and student summary objects
+  const isStudentSummaryData = Array.isArray(selectedStudentFees) && selectedStudentFees.length > 0 && selectedStudentFees[0].totalFee !== undefined;
+  const selectedFee = selectedStudent && selectedStudentFees.length
+    ? isStudentSummaryData
+      ? // Student summary data - find the matching student
+        selectedStudentFees.find((data) => String(data.studentId) === String(selectedStudent))
+      : // Fee data - find the latest fee
+        selectedStudentFees.reduce((latest, current) => {
+          const latestDate = new Date(latest.updatedAt || latest.createdAt || 0);
+          const currentDate = new Date(current.updatedAt || current.createdAt || 0);
+          return currentDate > latestDate ? current : latest;
+        }, selectedStudentFees[0])
+    : null;
 
   return (
     <div className="card">
@@ -217,7 +328,7 @@ const FeeManagement = () => {
       {error && <div className="alert alert-error">{error}</div>}
 
       <div className="form-container" style={{ marginBottom: '20px' }}>
-        <h3>Navigate by Grade and Section</h3>
+        <h3>Filter by Grade, Section, and Student</h3>
         <div className="form-row">
           <div className="form-group">
             <label>Grade</label>
@@ -249,15 +360,127 @@ const FeeManagement = () => {
               ))}
             </select>
           </div>
+          <div className="form-group">
+            <label>Particular Student</label>
+            <select
+              value={selectedStudent}
+              onChange={(e) => {
+                setSelectedStudent(e.target.value);
+                setEditingFeeId(null);
+              }}
+              disabled={!selectedClassId || !sectionStudents.length}
+            >
+              <option value="">Select student</option>
+              {sectionStudents.map((student) => {
+                const studentId = getStudentIdentifier(student);
+                return (
+                  <option key={student._id} value={studentId}>
+                    {getStudentName(student)} ({student.rollNumber})
+                  </option>
+                );
+              })}
+            </select>
+          </div>
         </div>
         {selectedGrade && !selectedSection && (
-          <div className="alert alert-success" style={{ marginTop: '10px' }}>Select a section to view students and fee details for Grade {selectedGrade}.</div>
+          <div className="alert alert-success" style={{ marginTop: '10px' }}>
+            Select a section to view students and fee details for Grade {selectedGrade}.
+          </div>
         )}
       </div>
 
+      {/* Section and Grade Student List */}
+      {selectedGrade && selectedSection && !selectedStudent && (
+        <div className="form-container" style={{ marginBottom: '20px' }}>
+          <h3>📚 Students in Grade {selectedGrade} - Section {selectedSection}</h3>
+          {sectionStudents.length > 0 ? (
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Roll No.</th>
+                    <th>Student Name</th>
+                    <th>Total Fee</th>
+                    <th>Paid Amount</th>
+                    <th>Pending Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sectionStudents.map((student) => {
+                    const studentId = getStudentIdentifier(student);
+                    // Check if selectedStudentFees contains section data (with totalFee property)
+                    const studentData = Array.isArray(selectedStudentFees) && selectedStudentFees.length > 0 && selectedStudentFees[0].totalFee !== undefined
+                      ? selectedStudentFees.find((data) => String(data.studentId) === String(studentId))
+                      : null;
+
+                    let totalFee, totalPaid, totalPending, allPaid;
+                    
+                    if (studentData) {
+                      // Using data from getBySection endpoint
+                      totalFee = studentData.totalFee || 0;
+                      totalPaid = studentData.totalPaid || 0;
+                      totalPending = studentData.totalPending || 0;
+                      allPaid = studentData.isPaid;
+                    } else {
+                      // Fallback to calculating from individual fees
+                      const studentFees = Array.isArray(selectedStudentFees) && selectedStudentFees[0]?.amount !== undefined
+                        ? selectedStudentFees.filter((fee) =>
+                            String(fee.student._id || fee.student) === String(studentId)
+                          )
+                        : [];
+                      totalFee = studentFees.reduce((sum, fee) => sum + (fee.amount || 0), 0);
+                      totalPaid = studentFees.reduce((sum, fee) => sum + (fee.paidAmount || 0), 0);
+                      totalPending = totalFee - totalPaid;
+                      allPaid = totalFee > 0 && totalPending <= 0;
+                    }
+
+                    return (
+                      <tr key={student._id} style={{ backgroundColor: allPaid ? '#e8f5e9' : totalPending > 0 ? '#fff3e0' : '#fff' }}>
+                        <td>{student.rollNumber || '-'}</td>
+                        <td>{getStudentName(student)}</td>
+                        <td>{formatCurrency(totalFee)}</td>
+                        <td>{formatCurrency(totalPaid)}</td>
+                        <td>{formatCurrency(totalPending)}</td>
+                        <td>
+                          <span
+                            style={{
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              fontSize: '0.85em',
+                              fontWeight: 'bold',
+                              backgroundColor: allPaid ? '#4caf50' : totalPending > 0 ? '#ff9800' : '#9e9e9e',
+                              color: '#fff',
+                            }}
+                          >
+                            {allPaid ? '✓ Paid' : totalPending > 0 ? '⚠ Pending' : '-'}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            className="btn btn-primary btn-small"
+                            onClick={() => setSelectedStudent(studentId)}
+                            style={{ whiteSpace: 'nowrap' }}
+                          >
+                            View Details
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="alert alert-warning">No students found in this section.</div>
+          )}
+        </div>
+      )}
+
       {showForm && (
         <div className="form-container" style={{ marginBottom: '30px' }}>
-          <h3>Add New Fee</h3>
+          <h3>{editingFeeId ? 'Update Fee' : 'Add New Fee'}</h3>
           <form onSubmit={handleAddFee}>
             <div className="form-row">
               <div className="form-group">
@@ -270,16 +493,17 @@ const FeeManagement = () => {
                 >
                   <option value="">Select student</option>
                   {sectionStudents.map((student) => {
+                    const studentId = getStudentIdentifier(student);
                     return (
-                      <option key={student._id} value={student._id}>
-                        {student.userId?.firstName} {student.userId?.lastName} ({student.rollNumber})
+                      <option key={student._id} value={studentId}>
+                        {getStudentName(student)} ({student.rollNumber})
                       </option>
                     );
                   })}
                 </select>
               </div>
               <div className="form-group">
-                <label>Amount</label>
+                <label>Total Fee</label>
                 <input
                   type="number"
                   name="amount"
@@ -327,120 +551,120 @@ const FeeManagement = () => {
         <div>
           {selectedGrade && selectedSection && (
             <>
-              <div className="form-row" style={{ marginBottom: '20px' }}>
-                <div className="form-group" style={{ flex: '1 1 260px' }}>
-                  <label>Payment Method</label>
-                  <select
-                    value={selectedPaymentMethod}
-                    onChange={(e) => setSelectedPaymentMethod(e.target.value)}
-                  >
-                    <option value="">Select payment method</option>
-                    <option value="PhonePe">PhonePe</option>
-                    <option value="Credit Card">Credit Card</option>
-                    <option value="Debit Card">Debit Card</option>
-                    <option value="Cash">Cash</option>
-                    <option value="Cheque">Cheque</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="summary-row" style={{ display: 'flex', gap: '16px', marginBottom: '20px' }}>
-                <div className="summary-card" style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px', flex: 1 }}>
-                  <strong>Total Amount</strong>
-                  <div>₹{visibleFees.reduce((sum, row) => sum + (row.fee?.amount || 0), 0)}</div>
-                </div>
-                <div className="summary-card" style={{ padding: '12px', background: '#f0fdf4', borderRadius: '8px', flex: 1 }}>
-                  <strong>Paid Amount</strong>
-                  <div>₹{visibleFees.reduce((sum, row) => sum + (row.fee?.paidAmount || 0), 0)}</div>
-                </div>
-                <div className="summary-card" style={{ padding: '12px', background: '#fff1f2', borderRadius: '8px', flex: 1 }}>
-                  <strong>Pending Amount</strong>
-                  <div>₹{visibleFees.reduce((sum, row) => sum + Math.max((row.fee?.amount || 0) - (row.fee?.paidAmount || 0), 0), 0)}</div>
-                </div>
-              </div>
-              <div className="table-container">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Student</th>
-                      <th>Roll No.</th>
-                      <th>Class</th>
-                      <th>Amount</th>
-                      <th>Paid</th>
-                      <th>Pending</th>
-                      <th>Installments</th>
-                      <th>Due Date</th>
-                      <th>Status</th>
-                      <th>Payment Method</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {visibleFees.map((row) => {
-                      const feeAmount = row.fee?.amount || 0;
-                      const paidAmount = row.fee?.paidAmount || 0;
-                      const pendingAmount = Math.max(feeAmount - paidAmount, 0);
-                      const feeStatus = row.fee ? (row.fee.isPaid ? 'Paid' : 'Pending') : 'Pending';
-                      return (
-                        <tr key={row._id}>
-                          <td>{row.userId?.firstName || 'Unknown'} {row.userId?.lastName || ''}</td>
-                          <td>{row.rollNumber || '-'}</td>
-                          <td>{row.class ? `Grade ${row.class.grade} - Section ${row.class.section}` : 'N/A'}</td>
-                          <td>₹{feeAmount}</td>
-                          <td>₹{paidAmount}</td>
-                          <td>₹{pendingAmount}</td>
-                          <td>{row.fee?.installments || 3}</td>
-                          <td>{row.fee?.dueDate ? new Date(row.fee.dueDate).toLocaleDateString() : 'N/A'}</td>
-                          <td>
-                            <span style={{
-                              padding: '5px 10px',
-                              borderRadius: '3px',
-                              backgroundColor: feeStatus === 'Paid' ? '#d1fae5' : '#fee2e2',
-                              color: feeStatus === 'Paid' ? '#065f46' : '#991b1b',
-                            }}>
-                              {feeStatus}
-                            </span>
-                          </td>
-                          <td>{row.fee?.paymentMethod || '-'}</td>
-                          <td>
-                            <div className="action-buttons">
-                              {row.fee && !row.fee.isPaid && (
-                                <>
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    placeholder="Pay amount"
-                                    value={paymentAmounts[row.fee._id] || ''}
-                                    onChange={(e) => setPaymentAmounts((prev) => ({ ...prev, [row.fee._id]: e.target.value }))}
-                                    style={{ width: '120px', marginRight: '8px' }}
-                                  />
-                                  <button
-                                    className="btn btn-small"
-                                    onClick={() => handlePayFee(row.fee._id)}
-                                    style={{ background: '#10b981', color: 'white' }}
-                                  >
-                                    Pay Now
-                                  </button>
-                                </>
-                              )}
-                              {row.fee && (
-                                <>
-                                  <button className="btn btn-secondary btn-small" onClick={() => handleEditFee(row.fee)}>
-                                    Edit
-                                  </button>
-                                  <button className="btn btn-danger btn-small" onClick={() => handleDeleteFee(row.fee._id)}>
-                                    Delete
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          </td>
+              {selectedStudent ? (
+                <div className="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Student Name</th>
+                        <th>Total Fee</th>
+                        <th>Installments</th>
+                        <th>Pending Amount</th>
+                        <th>Paid Amount</th>
+                        <th>Payment Method</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedFee ? (
+                        <tr>
+                          <td>{getStudentName(selectedStudentRecord)}</td>
+                          {editingFeeId === selectedFee._id ? (
+                            <>
+                              <td>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  name="amount"
+                                  value={editForm.amount}
+                                  onChange={handleEditInputChange}
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  name="installments"
+                                  value={editForm.installments}
+                                  onChange={handleEditInputChange}
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  name="pendingAmount"
+                                  value={editForm.pendingAmount}
+                                  onChange={handleEditInputChange}
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  name="paidAmount"
+                                  value={editForm.paidAmount}
+                                  onChange={handleEditInputChange}
+                                />
+                              </td>
+                              <td>
+                                <select
+                                  name="paymentMethod"
+                                  value={editForm.paymentMethod}
+                                  onChange={handleEditInputChange}
+                                >
+                                  <option value="">Select method</option>
+                                  <option value="PhonePe">PhonePe</option>
+                                  <option value="Credit Card">Credit Card</option>
+                                  <option value="Debit Card">Debit Card</option>
+                                  <option value="Cash">Cash</option>
+                                  <option value="Cheque">Cheque</option>
+                                </select>
+                              </td>
+                              <td colSpan="2">
+                                <div className="action-buttons">
+                                  <button className="btn btn-success btn-small" onClick={handleSaveEdit}>Save</button>
+                                  <button className="btn btn-secondary btn-small" onClick={resetEditForm}>Cancel</button>
+                                </div>
+                              </td>
+                            </>
+                          ) : (
+                            <>
+                              <td>{formatCurrency(selectedFee.amount || 0)}</td>
+                              <td>{selectedFee.installments || 3}</td>
+                              <td>{formatCurrency(Math.max((selectedFee.amount || 0) - (selectedFee.paidAmount || 0), 0))}</td>
+                              <td>{formatCurrency(selectedFee.paidAmount || 0)}</td>
+                              <td>{selectedFee.paymentMethod || '-'}</td>
+                              <td>
+                                <button className="btn btn-secondary btn-small" onClick={() => handleEditFee(selectedFee)}>
+                                  Edit
+                                </button>
+                              </td>
+                              <td>
+                                <button
+                                  className="btn btn-danger btn-small"
+                                  onClick={() => handleDeleteStudentFees(getStudentIdentifier(selectedStudentRecord))}
+                                >
+                                  Delete
+                                </button>
+                              </td>
+                            </>
+                          )}
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                      ) : (
+                        <tr>
+                          <td colSpan="8">No fee details found for the selected student.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="alert alert-info" style={{ marginTop: '10px' }}>
+                  Select a student to view and manage the fee details for that record.
+                </div>
+              )}
 
               <div style={{ marginTop: '16px' }}>
                 <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>

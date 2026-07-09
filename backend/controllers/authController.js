@@ -8,10 +8,13 @@ const login = async (req, res) => {
     const { userId, password } = req.body;
 
     if (!userId || !password) {
-      return res.status(400).json({ message: 'User ID and password are required' });
+      return res.status(400).json({ message: 'User ID or email and password are required' });
     }
 
-    const user = await User.findOne({ userId });
+    let user = await User.findOne({ userId });
+    if (!user) {
+      user = await User.findOne({ email: userId });
+    }
 
     if (!user || !(await user.comparePassword(password))) {
       return res.status(401).json({ message: 'Invalid credentials' });
@@ -41,6 +44,7 @@ const login = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        subscriptionPlan: user.subscriptionPlan || 'silver',
       },
     });
   } catch (error) {

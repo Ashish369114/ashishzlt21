@@ -24,11 +24,28 @@ const getRouteById = async (req, res) => {
 };
 
 const addRoute = async (req, res) => {
-  const route = new Transport({
-    ...req.body,
-    routeNumber: `RT-${Date.now()}`,
-  });
   try {
+    // Validate required fields
+    if (!req.body.routeName || !req.body.startPoint?.name || !req.body.endPoint?.name) {
+      return res.status(400).json({ message: 'Missing required fields: routeName, startPoint, endPoint' });
+    }
+
+    // Get first available school if not provided
+    let school = req.body.school;
+    if (!school) {
+      const School = require('../models/School');
+      const availableSchool = await School.findOne();
+      if (!availableSchool) {
+        return res.status(400).json({ message: 'No school configured in the system' });
+      }
+      school = availableSchool._id;
+    }
+
+    const route = new Transport({
+      ...req.body,
+      school,
+      routeNumber: `RT-${Date.now()}`,
+    });
     const newRoute = await route.save();
     res.status(201).json(newRoute);
   } catch (error) {
@@ -42,6 +59,14 @@ const updateRoute = async (req, res) => {
     if (!route) {
       return res.status(404).json({ message: 'Route not found' });
     }
+    
+    // Validate required fields if being updated
+    if (req.body.routeName === '' || 
+        (req.body.startPoint && req.body.startPoint.name === '') || 
+        (req.body.endPoint && req.body.endPoint.name === '')) {
+      return res.status(400).json({ message: 'Invalid field values: routeName, startPoint, endPoint cannot be empty' });
+    }
+    
     Object.assign(route, req.body);
     const updatedRoute = await route.save();
     res.json(updatedRoute);

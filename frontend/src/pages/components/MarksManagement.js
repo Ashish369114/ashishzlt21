@@ -159,11 +159,18 @@ const MarksManagement = ({ teacherUserId }) => {
       return;
     }
 
+    const payload = {
+      ...formData,
+      teacher: currentUser._id || currentUser.id || currentUser.userId,
+    };
+
+    if (!payload.student || !payload.subject || !payload.class || !payload.marks) {
+      setError('Please select a student, class, subject, and enter marks before saving.');
+      return;
+    }
+
     try {
-      await marksService.add({
-        ...formData,
-        teacher: currentUser._id || currentUser.id || currentUser.userId,
-      });
+      await marksService.add(payload);
       setFormData({
         student: '',
         subject: '',

@@ -4,13 +4,14 @@ import '../../styles/ManagementStyles.css';
 
 const HostelManagement = () => {
   const [hostels, setHostels] = useState([]);
+  const [error, setError] = useState('');
   const [newHostel, setNewHostel] = useState({
     hostelName: '',
     hostelType: 'boys',
     wardenName: '',
     wardenPhone: '',
-    totalRooms: 0,
-    totalBeds: 0,
+    totalRooms: 1,
+    totalBeds: 10,
     monthlyFee: 0,
   });
   const [editingHostelId, setEditingHostelId] = useState(null);
@@ -57,26 +58,43 @@ const HostelManagement = () => {
       hostelType: 'boys',
       wardenName: '',
       wardenPhone: '',
-      totalRooms: 0,
-      totalBeds: 0,
+      totalRooms: 1,
+      totalBeds: 10,
       monthlyFee: 0,
     });
+    setError('');
   };
 
   const handleAddHostel = async (e) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!newHostel.hostelName || !newHostel.hostelType) {
+      setError('Please fill in all required fields: Hostel Name and Hostel Type');
+      return;
+    }
+    
+    if (newHostel.totalRooms <= 0 || newHostel.totalBeds <= 0) {
+      setError('Total Rooms and Total Beds must be at least 1');
+      return;
+    }
+    
     try {
+      setError('');
       if (editingHostelId) {
         await api.put(`/hostels/${editingHostelId}`, newHostel);
+        alert('Hostel updated successfully!');
       } else {
         await api.post('/hostels', newHostel);
+        alert('Hostel added successfully!');
       }
       fetchHostels();
       resetHostelForm();
-      alert(editingHostelId ? 'Hostel updated successfully!' : 'Hostel added successfully!');
     } catch (error) {
       console.error('Error saving hostel:', error);
-      alert('Error saving hostel');
+      const errorMsg = error.response?.data?.message || 'Error saving hostel';
+      setError(errorMsg);
+      alert(errorMsg);
     }
   };
 
@@ -97,6 +115,7 @@ const HostelManagement = () => {
 
       <form onSubmit={handleAddHostel} className="management-form">
         <h3>Add New Hostel</h3>
+        {error && <div style={{ color: '#d32f2f', marginBottom: '10px', padding: '8px', backgroundColor: '#ffebee', borderRadius: '4px' }}>{error}</div>}
         <input
           type="text"
           name="hostelName"
@@ -129,7 +148,7 @@ const HostelManagement = () => {
         <input
           type="number"
           name="totalRooms"
-          placeholder="Total Rooms"
+          placeholder="Total Rooms (e.g., 10)"
           value={newHostel.totalRooms}
           onChange={handleInputChange}
           required
@@ -137,7 +156,7 @@ const HostelManagement = () => {
         <input
           type="number"
           name="totalBeds"
-          placeholder="Total Beds"
+          placeholder="Total Beds (e.g., 50)"
           value={newHostel.totalBeds}
           onChange={handleInputChange}
           required
@@ -145,7 +164,7 @@ const HostelManagement = () => {
         <input
           type="number"
           name="monthlyFee"
-          placeholder="Monthly Fee"
+          placeholder="Monthly Fee (₹)"
           value={newHostel.monthlyFee}
           onChange={handleInputChange}
           required

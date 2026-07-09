@@ -331,11 +331,27 @@ const deleteStudent = async (req, res) => {
 
 const getStudentByParent = async (req, res) => {
   try {
-    const parentUserId = req.user.userId;
-    const students = await Student.find({ parentId: parentUserId })
-      .populate('userId')
-      .populate('class')
-      .populate('parentId');
+    const parentIdentifier = req.user.userId;
+    let parentObjectId = parentIdentifier;
+    let students = [];
+
+    if (mongoose.Types.ObjectId.isValid(parentIdentifier)) {
+      students = await Student.find({ parentId: parentIdentifier })
+        .populate('userId')
+        .populate('class')
+        .populate('parentId');
+    }
+
+    if (!students.length) {
+      const parentUser = await User.findOne({ userId: parentIdentifier });
+      if (parentUser) {
+        parentObjectId = parentUser._id;
+        students = await Student.find({ parentId: parentObjectId })
+          .populate('userId')
+          .populate('class')
+          .populate('parentId');
+      }
+    }
 
     res.json(students);
   } catch (error) {

@@ -252,6 +252,13 @@ Advanced reporting system with multiple report types.
 - **Financial Report**: Fee collection and pending amounts
 - **Performance Report**: Student and class performance metrics
 
+**Role-Based Report Usage:**
+| Role | Primary Goal | Key Reports Used |
+| --- | --- | --- |
+| Principals & Admins | Oversee total school health | Financial summaries, enrollment trends, overall academic performance, staff attendance |
+| Teachers | Monitor student progress | Class grade distributions, individual student attendance, assignment completion rates |
+| Parents & Students | Track individual development | Term report cards, fee receipts, daily attendance logs, missing assignment lists |
+
 **API Endpoints:**
 ```
 GET    /api/reports

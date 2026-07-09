@@ -24,11 +24,28 @@ const getBookById = async (req, res) => {
 };
 
 const addBook = async (req, res) => {
-  const book = new Library({
-    ...req.body,
-    availableCopies: req.body.totalCopies,
-  });
   try {
+    // Validate required fields
+    if (!req.body.title || !req.body.isbn || !req.body.author || req.body.totalCopies === undefined || req.body.totalCopies === null) {
+      return res.status(400).json({ message: 'Missing required fields: title, isbn, author, totalCopies' });
+    }
+
+    // Get first available school if not provided
+    let school = req.body.school;
+    if (!school) {
+      const School = require('../models/School');
+      const availableSchool = await School.findOne();
+      if (!availableSchool) {
+        return res.status(400).json({ message: 'No school configured in the system' });
+      }
+      school = availableSchool._id;
+    }
+
+    const book = new Library({
+      ...req.body,
+      school,
+      availableCopies: req.body.totalCopies,
+    });
     const newBook = await book.save();
     res.status(201).json(newBook);
   } catch (error) {
@@ -42,6 +59,12 @@ const updateBook = async (req, res) => {
     if (!book) {
       return res.status(404).json({ message: 'Book not found' });
     }
+    
+    // Validate required fields if being updated
+    if (req.body.title === '' || req.body.isbn === '' || req.body.author === '' || (req.body.totalCopies !== undefined && req.body.totalCopies < 0)) {
+      return res.status(400).json({ message: 'Invalid field values: title, isbn, author cannot be empty, totalCopies must be non-negative' });
+    }
+    
     Object.assign(book, req.body);
     const updatedBook = await book.save();
     res.json(updatedBook);
@@ -61,8 +84,22 @@ const borrowBook = async (req, res) => {
       return res.status(400).json({ message: 'No copies available' });
     }
 
+    // Use authenticated user's ID from token, not from request body
+    const userId = req.user?.userId || req.body.userId;
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required. Please login again.' });
+    }
+
+    // Check if user already has this book borrowed
+    const existingBorrow = book.borrowHistory.find(
+      r => r.userId?.toString() === userId && r.status === 'borrowed'
+    );
+    if (existingBorrow) {
+      return res.status(400).json({ message: 'You have already borrowed this book. Please return it first.' });
+    }
+
     const borrowRecord = {
-      userId: req.body.userId,
+      userId: userId,
       borrowDate: new Date(),
       dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
       status: 'borrowed',
@@ -89,8 +126,14 @@ const returnBook = async (req, res) => {
       return res.status(404).json({ message: 'Book not found' });
     }
 
+    // Use authenticated user's ID from token, not from request body
+    const userId = req.user?.userId || req.body.userId;
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required. Please login again.' });
+    }
+
     const borrowRecord = book.borrowHistory.find(
-      r => r.userId.toString() === req.body.userId && r.status === 'borrowed'
+      r => r.userId?.toString() === userId && r.status === 'borrowed'
     );
 
     if (!borrowRecord) {

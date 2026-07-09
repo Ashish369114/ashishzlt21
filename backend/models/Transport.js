@@ -14,7 +14,6 @@ const transportSchema = new mongoose.Schema(
     school: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'School',
-      required: true,
     },
     vehicle: {
       vehicleNumber: String,

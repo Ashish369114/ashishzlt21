@@ -25,6 +25,7 @@ const Login = ({ onLogin }) => {
       localStorage.setItem('schoolId', response.data.user.school || '');
       localStorage.setItem('role', response.data.user.role);
       localStorage.setItem('userName', `${response.data.user.firstName} ${response.data.user.lastName}`);
+      localStorage.setItem('subscriptionPlan', response.data.user.subscriptionPlan || 'silver');
       
       // Redirect to dashboard
       navigate('/dashboard', { replace: true });
@@ -46,7 +47,7 @@ const Login = ({ onLogin }) => {
           <div className="login-header">
             <div className="login-logo">
               <span className="logo-icon">🎓</span>
-              <span className="logo-text">EduManage</span>
+              <span className="logo-text">Zayn Levi Technologies</span>
             </div>
             <h2>School Management System</h2>
             <p>Welcome Back! Please login to your account</p>
@@ -66,7 +67,7 @@ const Login = ({ onLogin }) => {
                   type="text"
                   value={userId}
                   onChange={(e) => setUserId(e.target.value)}
-                  placeholder="Enter your User ID"
+                  placeholder="Enter your User ID or Email"
                   required
                   disabled={loading}
                 />
@@ -125,7 +126,7 @@ const Login = ({ onLogin }) => {
         {/* Right Side - Features */}
         <div className="login-features">
           <div className="features-content">
-            <h3>Why Choose EduManage?</h3>
+            <h3>Why Choose Zayn Levi Technologies?</h3>
             <ul className="features-list">
               <li>
                 <span className="feature-icon">✅</span>

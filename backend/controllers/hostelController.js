@@ -24,8 +24,28 @@ const getHostelById = async (req, res) => {
 };
 
 const addHostel = async (req, res) => {
-  const hostel = new Hostel(req.body);
   try {
+    // Validate required fields
+    if (!req.body.hostelName || !req.body.hostelType) {
+      return res.status(400).json({ message: 'Missing required fields: hostelName, hostelType' });
+    }
+
+    // Get first available school if not provided
+    let school = req.body.school;
+    if (!school) {
+      const School = require('../models/School');
+      const availableSchool = await School.findOne();
+      if (!availableSchool) {
+        return res.status(400).json({ message: 'No school configured in the system' });
+      }
+      school = availableSchool._id;
+    }
+
+    const hostel = new Hostel({
+      ...req.body,
+      school,
+      availableBeds: req.body.totalBeds || 0,
+    });
     const newHostel = await hostel.save();
     res.status(201).json(newHostel);
   } catch (error) {
@@ -39,6 +59,12 @@ const updateHostel = async (req, res) => {
     if (!hostel) {
       return res.status(404).json({ message: 'Hostel not found' });
     }
+    
+    // Validate required fields if being updated
+    if (req.body.hostelName === '' || req.body.hostelType === '') {
+      return res.status(400).json({ message: 'Invalid field values: hostelName and hostelType cannot be empty' });
+    }
+    
     Object.assign(hostel, req.body);
     const updatedHostel = await hostel.save();
     res.json(updatedHostel);

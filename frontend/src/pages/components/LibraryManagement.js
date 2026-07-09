@@ -11,8 +11,9 @@ const LibraryManagement = () => {
     author: '',
     publisher: '',
     category: 'textbook',
-    totalCopies: 0,
+    totalCopies: 1,
   });
+  const [error, setError] = useState('');
   const [editingBookId, setEditingBookId] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -58,34 +59,57 @@ const LibraryManagement = () => {
       author: '',
       publisher: '',
       category: 'textbook',
-      totalCopies: 0,
+      totalCopies: 1,
     });
+    setError('');
   };
 
   const handleAddBook = async (e) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!newBook.title || !newBook.isbn || !newBook.author) {
+      setError('Please fill in all required fields: Title, ISBN, and Author');
+      return;
+    }
+    
+    if (newBook.totalCopies <= 0) {
+      setError('Total copies must be at least 1');
+      return;
+    }
+    
     try {
+      setError('');
       if (editingBookId) {
         await libraryService.update(editingBookId, newBook);
+        alert('Book updated successfully!');
       } else {
         await libraryService.add(newBook);
+        alert('Book added successfully!');
       }
       fetchBooks();
       resetBookForm();
-      alert(editingBookId ? 'Book updated successfully!' : 'Book added successfully!');
     } catch (error) {
       console.error('Error adding book:', error);
-      alert('Error adding book');
+      const errorMsg = error.response?.data?.message || 'Error adding book';
+      setError(errorMsg);
+      alert(errorMsg);
     }
   };
 
   const handleBorrowBook = async (bookId) => {
     try {
-      await libraryService.borrow(bookId, { userId: localStorage.getItem('userId') });
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        alert('Please login first to borrow books');
+        return;
+      }
+      await libraryService.borrow(bookId, { userId });
       fetchBooks();
       alert('Book borrowed successfully!');
     } catch (error) {
       console.error('Error borrowing book:', error);
+      setError(error.response?.data?.message || 'Error borrowing book');
       alert(error.response?.data?.message || 'Error borrowing book');
     }
   };
@@ -108,6 +132,7 @@ const LibraryManagement = () => {
 
       <form onSubmit={handleAddBook} className="management-form">
         <h3>Add New Book</h3>
+        {error && <div style={{ color: '#d32f2f', marginBottom: '10px', padding: '8px', backgroundColor: '#ffebee', borderRadius: '4px' }}>{error}</div>}
         <input
           type="text"
           name="title"

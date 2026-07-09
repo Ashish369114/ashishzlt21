@@ -14,12 +14,10 @@ const reportSchema = new mongoose.Schema(
     school: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'School',
-      required: true,
     },
     generatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
     },
     startDate: Date,
     endDate: Date,

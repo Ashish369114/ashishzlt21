@@ -63,3 +63,107 @@ test('addEvent populates organizer and attendees after saving', async () => {
     Event.findById = originalEventFindById;
   }
 });
+
+test('addEvent accepts organizer IDs with surrounding whitespace', async () => {
+  const originalEventSave = Event.prototype.save;
+  const originalEventFindById = Event.findById;
+
+  try {
+    let savedEvent = null;
+    Event.prototype.save = async function () {
+      savedEvent = this;
+      return this;
+    };
+
+    Event.findById = async () => ({
+      _id: 'event-2',
+      organizer: { _id: '507f191e810c19729de860ea', firstName: 'Jane', lastName: 'Doe' },
+      attendees: [],
+      populate: async function () {
+        return this;
+      },
+    });
+
+    const req = {
+      body: {
+        title: 'Science Fair',
+        description: 'Annual fair',
+        eventDate: '2026-06-27',
+        organizer: ' 507f191e810c19729de860ea ',
+      },
+    };
+
+    const res = {
+      statusCode: null,
+      body: null,
+      status(code) {
+        this.statusCode = code;
+        return this;
+      },
+      json(payload) {
+        this.body = payload;
+        return this;
+      },
+    };
+
+    await eventController.addEvent(req, res);
+
+    assert.strictEqual(res.statusCode, 201);
+    assert.strictEqual(savedEvent.organizer, undefined);
+  } finally {
+    Event.prototype.save = originalEventSave;
+    Event.findById = originalEventFindById;
+  }
+});
+
+test('addEvent ignores organizer field from payload', async () => {
+  const originalEventSave = Event.prototype.save;
+  const originalEventFindById = Event.findById;
+
+  try {
+    let savedEvent = null;
+    Event.prototype.save = async function () {
+      savedEvent = this;
+      return this;
+    };
+
+    Event.findById = async () => ({
+      _id: 'event-3',
+      organizer: null,
+      attendees: [],
+      populate: async function () {
+        return this;
+      },
+    });
+
+    const req = {
+      body: {
+        title: 'Science Fair',
+        description: 'Annual fair',
+        eventDate: '2026-06-27',
+        organizer: '507f191e810c19729de860ea',
+      },
+    };
+
+    const res = {
+      statusCode: null,
+      body: null,
+      status(code) {
+        this.statusCode = code;
+        return this;
+      },
+      json(payload) {
+        this.body = payload;
+        return this;
+      },
+    };
+
+    await eventController.addEvent(req, res);
+
+    assert.strictEqual(res.statusCode, 201);
+    assert.strictEqual(savedEvent.organizer, undefined);
+  } finally {
+    Event.prototype.save = originalEventSave;
+    Event.findById = originalEventFindById;
+  }
+});

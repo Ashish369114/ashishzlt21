@@ -6,17 +6,38 @@ const Fee = require('../models/Fee');
 
 const generateAttendanceReport = async (req, res) => {
   try {
-    const { schoolId, classId, startDate, endDate } = req.body;
+    const { classId, startDate, endDate } = req.body;
+
+    // Validate required fields
+    if (!startDate || !endDate) {
+      return res.status(400).json({ message: 'Missing required fields: startDate, endDate' });
+    }
+
+    // Get school and user info
+    let school = req.body.schoolId;
+    if (!school) {
+      const School = require('../models/School');
+      const availableSchool = await School.findOne();
+      if (!availableSchool) {
+        return res.status(400).json({ message: 'No school configured in the system' });
+      }
+      school = availableSchool._id;
+    }
+
+    const generatedBy = req.user?.userId || req.user?.id || req.body.generatedBy;
+    if (!generatedBy) {
+      return res.status(400).json({ message: 'User ID is required. Please login again.' });
+    }
 
     const attendanceData = await Attendance.find({
       date: { $gte: new Date(startDate), $lte: new Date(endDate) },
-    }).populate('studentId classId');
+    }).populate('student class');
 
     const report = new Report({
       title: `Attendance Report - ${new Date().toLocaleDateString()}`,
       reportType: 'attendance',
-      school: schoolId,
-      generatedBy: req.user.id,
+      school,
+      generatedBy,
       startDate: new Date(startDate),
       endDate: new Date(endDate),
       filters: { class: classId },
@@ -42,27 +63,49 @@ const generateAttendanceReport = async (req, res) => {
 
 const generateAcademicReport = async (req, res) => {
   try {
-    const { schoolId, classId, term } = req.body;
+    const { classId, term } = req.body;
+
+    // Validate required fields
+    if (!term) {
+      return res.status(400).json({ message: 'Missing required field: term' });
+    }
+
+    // Get school and user info
+    let school = req.body.schoolId;
+    if (!school) {
+      const School = require('../models/School');
+      const availableSchool = await School.findOne();
+      if (!availableSchool) {
+        return res.status(400).json({ message: 'No school configured in the system' });
+      }
+      school = availableSchool._id;
+    }
+
+    const generatedBy = req.user?.userId || req.user?.id || req.body.generatedBy;
+    if (!generatedBy) {
+      return res.status(400).json({ message: 'User ID is required. Please login again.' });
+    }
 
     const marksData = await Marks.find({
-      classId,
-    }).populate('studentId');
+      class: classId,
+    }).populate('student');
 
+    const marks = marksData.map(m => m.marks);
     const report = new Report({
       title: `Academic Report - Term ${term}`,
       reportType: 'academic',
-      school: schoolId,
-      generatedBy: req.user.id,
+      school,
+      generatedBy,
       filters: { class: classId },
       data: marksData,
       summary: {
         totalRecords: marksData.length,
         metrics: {
           averageMarks: marksData.length > 0 
-            ? (marksData.reduce((sum, m) => sum + m.marksObtained, 0) / marksData.length).toFixed(2)
+            ? (marksData.reduce((sum, m) => sum + m.marks, 0) / marksData.length).toFixed(2)
             : 0,
-          topScore: Math.max(...marksData.map(m => m.marksObtained)),
-          lowestScore: Math.min(...marksData.map(m => m.marksObtained)),
+          topScore: marks.length > 0 ? Math.max(...marks) : 0,
+          lowestScore: marks.length > 0 ? Math.min(...marks) : 0,
         },
       },
       format: req.body.format || 'pdf',
@@ -83,7 +126,7 @@ const generateFinancialReport = async (req, res) => {
     const feeData = await Fee.find({
       school: schoolId,
       createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) },
-    }).populate('studentId');
+    }).populate('student');
 
     const totalCollected = feeData.reduce((sum, f) => sum + (f.amountPaid || 0), 0);
     const totalPending = feeData.reduce((sum, f) => sum + (f.amountPending || 0), 0);
@@ -119,20 +162,41 @@ const generateFinancialReport = async (req, res) => {
 
 const generatePerformanceReport = async (req, res) => {
   try {
-    const { schoolId, classId } = req.body;
+    const { classId } = req.body;
+
+    // Validate required fields
+    if (!classId) {
+      return res.status(400).json({ message: 'Missing required field: classId' });
+    }
+
+    // Get school and user info
+    let school = req.body.schoolId;
+    if (!school) {
+      const School = require('../models/School');
+      const availableSchool = await School.findOne();
+      if (!availableSchool) {
+        return res.status(400).json({ message: 'No school configured in the system' });
+      }
+      school = availableSchool._id;
+    }
+
+    const generatedBy = req.user?.userId || req.user?.id || req.body.generatedBy;
+    if (!generatedBy) {
+      return res.status(400).json({ message: 'User ID is required. Please login again.' });
+    }
 
     const students = await Student.find({ class: classId }).populate('userId');
-    const marksData = await Marks.find({ classId });
+    const marksData = await Marks.find({ class: classId });
 
     const performanceData = students.map(student => {
-      const studentMarks = marksData.filter(m => m.studentId.toString() === student._id.toString());
+      const studentMarks = marksData.filter(m => m.student.toString() === student._id.toString());
       const averageMarks = studentMarks.length > 0
-        ? (studentMarks.reduce((sum, m) => sum + m.marksObtained, 0) / studentMarks.length).toFixed(2)
+        ? (studentMarks.reduce((sum, m) => sum + m.marks, 0) / studentMarks.length).toFixed(2)
         : 0;
 
       return {
         studentId: student._id,
-        name: student.userId.firstName + ' ' + student.userId.lastName,
+        name: (student.userId?.firstName || '') + ' ' + (student.userId?.lastName || ''),
         averageMarks,
         totalSubjects: studentMarks.length,
       };
@@ -141,16 +205,16 @@ const generatePerformanceReport = async (req, res) => {
     const report = new Report({
       title: `Performance Report - Class ${classId}`,
       reportType: 'performance',
-      school: schoolId,
-      generatedBy: req.user.id,
+      school,
+      generatedBy,
       filters: { class: classId },
       data: performanceData,
       summary: {
         totalRecords: performanceData.length,
-        metrics: {
+        metrics: performanceData.length > 0 ? {
           topPerformer: performanceData.reduce((max, p) => parseFloat(p.averageMarks) > parseFloat(max.averageMarks) ? p : max),
           classAverage: (performanceData.reduce((sum, p) => sum + parseFloat(p.averageMarks), 0) / performanceData.length).toFixed(2),
-        },
+        } : {},
       },
       format: req.body.format || 'pdf',
       status: 'completed',

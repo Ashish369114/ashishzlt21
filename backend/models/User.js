@@ -18,6 +18,11 @@ const userSchema = new mongoose.Schema(
       enum: ['super_admin', 'principal', 'teacher', 'student', 'parent', 'accountant_admin'],
       required: true,
     },
+    subscriptionPlan: {
+      type: String,
+      enum: ['silver', 'gold', 'platinum'],
+      default: 'silver',
+    },
     firstName: {
       type: String,
       required: true,

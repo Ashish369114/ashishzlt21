@@ -1,12 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { teacherService } from '../../services/api';
+import { teacherService, classService, studentService } from '../../services/api';
 
 const PrincipalTeacherManagement = () => {
   const [teachers, setTeachers] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [classes, setClasses] = useState([]);
+  const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('attendance');
   const [leaves, setLeaves] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    userId: '',
+    password: '',
+    subject: '',
+    assignedClasses: [],
+    email: '',
+    phone: '',
+    gender: 'Male',
+    qualifications: '',
+    experience: 0,
+    isAllSubjectTeacher: false,
+    teachingSubjects: [],
+  });
 
   useEffect(() => {
     fetchData();
@@ -15,9 +34,18 @@ const PrincipalTeacherManagement = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await teacherService.getAll();
-      setTeachers(response.data || []);
-      
+      const [teachersResponse, subjectsResponse, classesResponse, studentsResponse] = await Promise.all([
+        teacherService.getAll(),
+        classService.getSubjects(),
+        classService.getAll(),
+        studentService.getAll(),
+      ]);
+
+      setTeachers(teachersResponse.data || []);
+      setSubjects(subjectsResponse.data || []);
+      setClasses(classesResponse.data || []);
+      setStudents(studentsResponse.data || []);
+
       // Simulate leaves data (in real implementation, this would come from an API)
       setLeaves([
         { id: 1, teacher: 'John Doe', type: 'Sick Leave', fromDate: '2024-07-10', toDate: '2024-07-12', status: 'Pending', reason: 'Medical checkup' },
@@ -42,6 +70,43 @@ const PrincipalTeacherManagement = () => {
     setLeaves(leaves.map(leave =>
       leave.id === id ? { ...leave, status: 'Rejected' } : leave
     ));
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value, type } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: type === 'number' ? Number(value) : value }));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      firstName: '',
+      lastName: '',
+      userId: '',
+      password: '',
+      subject: '',
+      assignedClasses: [],
+      email: '',
+      phone: '',
+      gender: 'Male',
+      qualifications: '',
+      experience: 0,
+      isAllSubjectTeacher: false,
+      teachingSubjects: [],
+    });
+    setShowForm(false);
+    setError('');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await teacherService.add(formData);
+      resetForm();
+      fetchData();
+    } catch (err) {
+      setError('Failed to save teacher: ' + (err.response?.data?.message || 'Unknown error'));
+      console.error(err);
+    }
   };
 
   const getAttendanceStats = () => {
@@ -97,6 +162,71 @@ const PrincipalTeacherManagement = () => {
           onClick={() => setActiveTab('performance')}
         >
           📊 Performance
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="form-container" style={{ marginBottom: '20px' }}>
+          <h3>Add New Teacher</h3>
+          <form onSubmit={handleSubmit}>
+            <div className="form-row">
+              <div className="form-group">
+                <label>First Name</label>
+                <input name="firstName" value={formData.firstName} onChange={handleInputChange} required />
+              </div>
+              <div className="form-group">
+                <label>Last Name</label>
+                <input name="lastName" value={formData.lastName} onChange={handleInputChange} required />
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>User ID (optional)</label>
+                <input name="userId" value={formData.userId} onChange={handleInputChange} placeholder="Leave blank to auto-generate" />
+              </div>
+              <div className="form-group">
+                <label>Password</label>
+                <input type="password" name="password" value={formData.password} onChange={handleInputChange} required />
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Email</label>
+                <input type="email" name="email" value={formData.email} onChange={handleInputChange} />
+              </div>
+              <div className="form-group">
+                <label>Phone</label>
+                <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} />
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Subject</label>
+                <select name="subject" value={formData.subject} onChange={handleInputChange} required>
+                  <option value="">Select a subject</option>
+                  {subjects.map((subject) => (
+                    <option key={subject._id} value={subject._id}>{subject.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Assigned Classes</label>
+                <select name="assignedClasses" value={formData.assignedClasses} onChange={handleInputChange} multiple size={Math.min(6, classes.length || 6)}>
+                  {classes.map((cls) => (
+                    <option key={cls._id} value={cls._id}>{`Grade ${cls.grade} - Section ${cls.section}`}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <button type="submit" className="btn btn-success">Save Teacher</button>
+            <button type="button" className="btn btn-secondary" style={{ marginLeft: '10px' }} onClick={resetForm}>Cancel</button>
+          </form>
+        </div>
+      )}
+
+      <div style={{ marginBottom: '20px' }}>
+        <button className="btn btn-primary" onClick={() => setShowForm((prev) => !prev)}>
+          {showForm ? 'Cancel' : '➕ Add Teacher'}
         </button>
       </div>
 

@@ -28,14 +28,7 @@ const getEventById = async (req, res) => {
 
 const sanitizeEventBody = (body) => {
   const payload = { ...body };
-
-  if (payload.organizer && typeof payload.organizer === 'string' && payload.organizer.trim() === '') {
-    delete payload.organizer;
-  }
-
-  if (payload.organizer && !mongoose.Types.ObjectId.isValid(payload.organizer)) {
-    throw new Error('Organizer must be a valid user ID.');
-  }
+  delete payload.organizer;
 
   if (payload.attendees && Array.isArray(payload.attendees)) {
     payload.attendees = payload.attendees.filter((attendee) => attendee && attendee.toString().trim() !== '');

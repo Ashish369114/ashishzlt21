@@ -158,6 +158,8 @@ const TeacherDashboard = ({ user, onLogout }) => {
           <Route path="communication" element={<TeacherCommunication teacherId={user?._id || user?.id || user?.userId} user={user} />} />
           <Route path="leave" element={<TeacherLeaveManagement teacherId={user?._id || user?.id || user?.userId} user={user} />} />
           <Route path="timetable" element={<TeacherClassTimetable teacherId={user?._id || user?.id || user?.userId} user={user} />} />
+          <Route path="performance" element={<TeacherDashboardHome stats={stats} user={user} />} />
+          <Route path="*" element={<TeacherDashboardHome stats={stats} user={user} />} />
         </Routes>
       </div>
     </div>

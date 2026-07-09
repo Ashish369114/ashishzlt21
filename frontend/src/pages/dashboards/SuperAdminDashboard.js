@@ -106,6 +106,7 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
           <Route path="reports" element={<ReportManagement />} />
           <Route path="settings" element={<SettingsManagement />} />
           <Route path="events" element={<EventList />} />
+          <Route path="*" element={<DashboardHome stats={stats} />} />
         </Routes>
       </div>
     </div>

@@ -15,6 +15,25 @@ const getHomework = async (req, res) => {
   }
 };
 
+const getHomeworkById = async (req, res) => {
+  try {
+    const homework = await Homework.findById(req.params.id)
+      .populate('class')
+      .populate('subject')
+      .populate('teacher')
+      .populate('submissions.student')
+      .populate('submissions.verifiedBy');
+
+    if (!homework) {
+      return res.status(404).json({ message: 'Homework not found' });
+    }
+
+    res.json(homework);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const getHomeworkByClass = async (req, res) => {
   try {
     const classId = req.params.classId;
@@ -208,6 +227,7 @@ const deleteHomework = async (req, res) => {
 
 module.exports = {
   getHomework,
+  getHomeworkById,
   getHomeworkByClass,
   getHomeworkBySubject,
   getHomeworkByStudent,

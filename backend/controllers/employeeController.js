@@ -32,8 +32,10 @@ const addEmployee = async (req, res) => {
   });
   try {
     const newEmployee = await employee.save();
-    const populatedEmployee = await newEmployee.populate('userId').populate('school').execPopulate();
-    
+    const populatedEmployee = await Employee.findById(newEmployee._id)
+      .populate('userId')
+      .populate('school');
+
     // Emit socket event to notify real-time updates
     const io = req.app.locals.io;
     if (io) {
@@ -42,7 +44,7 @@ const addEmployee = async (req, res) => {
       io.to(`role:principal`).emit('employee:added', populatedEmployee.toObject());
       io.to(`role:admin`).emit('employee:added', populatedEmployee.toObject());
     }
-    
+
     res.status(201).json(populatedEmployee);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -57,8 +59,10 @@ const updateEmployee = async (req, res) => {
     }
     Object.assign(employee, req.body);
     const updatedEmployee = await employee.save();
-    const populatedEmployee = await updatedEmployee.populate('userId').populate('school').execPopulate();
-    
+    const populatedEmployee = await Employee.findById(updatedEmployee._id)
+      .populate('userId')
+      .populate('school');
+
     // Emit socket event to notify real-time updates
     const io = req.app.locals.io;
     if (io) {
@@ -67,7 +71,7 @@ const updateEmployee = async (req, res) => {
       io.to(`role:principal`).emit('employee:updated', populatedEmployee.toObject());
       io.to(`role:admin`).emit('employee:updated', populatedEmployee.toObject());
     }
-    
+
     res.json(populatedEmployee);
   } catch (error) {
     res.status(400).json({ message: error.message });

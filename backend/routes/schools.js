@@ -5,6 +5,7 @@ const roleMiddleware = require('../middleware/roleMiddleware');
 
 const router = express.Router();
 
+router.post('/upgrade-plan', schoolController.upgradePlan);
 router.get('/', authMiddleware, schoolController.getSchools);
 router.get('/:id', authMiddleware, schoolController.getSchoolById);
 router.get('/:id/statistics', authMiddleware, schoolController.getSchoolStatistics);

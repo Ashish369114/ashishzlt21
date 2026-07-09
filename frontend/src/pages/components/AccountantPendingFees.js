@@ -7,6 +7,13 @@ const AccountantPendingFees = () => {
   const [error, setError] = useState('');
   const [paymentState, setPaymentState] = useState({});
 
+  const getFeeSummary = (fee) => {
+    const amount = Number(fee?.amount || 0);
+    const paidAmount = Number(fee?.paidAmount || 0);
+    const balance = Math.max(amount - paidAmount, 0);
+    return { amount, paidAmount, balance };
+  };
+
   useEffect(() => {
     const fetchPendingFees = async () => {
       try {
@@ -136,10 +143,16 @@ const AccountantPendingFees = () => {
                     <td colSpan="5">No pending fees found.</td>
                   </tr>
                 ) : (
-                  fees.map((fee) => (
+                  fees.map((fee) => {
+                    const summary = getFeeSummary(fee);
+                    return (
                     <tr key={fee._id}>
                       <td>{fee.student?.firstName} {fee.student?.lastName}</td>
-                      <td>₹{fee.amount}</td>
+                      <td>
+                        <div>Total: ₹{summary.amount}</div>
+                        <div>Paid: ₹{summary.paidAmount}</div>
+                        <div>Balance: ₹{summary.balance}</div>
+                      </td>
                       <td>{new Date(fee.dueDate).toLocaleDateString()}</td>
                       <td>{fee.remarks || '-'}</td>
                       <td>
@@ -290,7 +303,8 @@ const AccountantPendingFees = () => {
                         </div>
                       </td>
                     </tr>
-                  ))
+                    );
+                  })
                 )}
               </tbody>
             </table>

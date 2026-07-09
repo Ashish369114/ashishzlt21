@@ -160,10 +160,14 @@ body {
 
 .nav-menu {
   list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .nav-menu li {
-  margin-bottom: 10px;
+  display: block;
+  margin-bottom: 0;
 }
 
 .nav-menu a {
@@ -172,6 +176,7 @@ body {
   padding: 12px 15px;
   border-radius: 5px;
   display: block;
+  width: 100%;
   transition: all 0.3s ease;
 }
 

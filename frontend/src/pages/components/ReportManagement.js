@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../services/api';
+import api, { classService } from '../../services/api';
 import '../../styles/ManagementStyles.css';
 
 const ReportManagement = () => {
   const [reports, setReports] = useState([]);
+  const [classes, setClasses] = useState([]);
+  const [error, setError] = useState('');
   const [reportFilters, setReportFilters] = useState({
     reportType: 'attendance',
     startDate: '',
     endDate: '',
+    classId: '',
+    term: '',
     format: 'pdf',
   });
   const [editingReportId, setEditingReportId] = useState(null);
@@ -23,7 +27,17 @@ const ReportManagement = () => {
 
   useEffect(() => {
     fetchReports();
+    fetchClasses();
   }, []);
+
+  const fetchClasses = async () => {
+    try {
+      const response = await classService.getAll();
+      setClasses(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      console.error('Error fetching classes:', error);
+    }
+  };
 
   const fetchReports = async () => {
     try {
@@ -73,14 +87,39 @@ const ReportManagement = () => {
 
   const handleGenerateReport = async (e) => {
     e.preventDefault();
+    
+    // Validate based on report type
+    if (['attendance', 'financial'].includes(reportFilters.reportType)) {
+      if (!reportFilters.startDate || !reportFilters.endDate) {
+        setError('Please fill in both Start Date and End Date');
+        return;
+      }
+    }
+    
+    if (reportFilters.reportType === 'academic') {
+      if (!reportFilters.term) {
+        setError('Please select a Term');
+        return;
+      }
+    }
+    
+    if (reportFilters.reportType === 'performance') {
+      if (!reportFilters.classId) {
+        setError('Please select a Class');
+        return;
+      }
+    }
+    
     try {
-      const endpoint = `/api/reports/generate/${reportFilters.reportType}`;
-      await api.post(endpoint.replace('/api', ''), reportFilters);
+      setError('');
+      await api.post(`/reports/generate/${reportFilters.reportType}`, reportFilters);
       fetchReports();
       alert('Report generated successfully!');
     } catch (error) {
       console.error('Error generating report:', error);
-      alert('Error generating report');
+      const errorMsg = error.response?.data?.message || 'Error generating report';
+      setError(errorMsg);
+      alert(errorMsg);
     }
   };
 
@@ -88,13 +127,16 @@ const ReportManagement = () => {
     e.preventDefault();
     try {
       if (!editingReportId) return;
+      setError('');
       await api.put(`/reports/${editingReportId}`, reportForm);
       fetchReports();
       resetReportForm();
       alert('Report updated successfully!');
     } catch (error) {
       console.error('Error updating report:', error);
-      alert('Error updating report');
+      const errorMsg = error.response?.data?.message || 'Error updating report';
+      setError(errorMsg);
+      alert(errorMsg);
     }
   };
 
@@ -126,24 +168,54 @@ const ReportManagement = () => {
 
       <form onSubmit={handleGenerateReport} className="management-form">
         <h3>Generate Report</h3>
+        {error && <div style={{ color: '#d32f2f', marginBottom: '10px', padding: '8px', backgroundColor: '#ffebee', borderRadius: '4px' }}>{error}</div>}
         <select name="reportType" value={reportFilters.reportType} onChange={handleFilterChange}>
           <option value="attendance">Attendance</option>
           <option value="academic">Academic</option>
           <option value="financial">Financial</option>
           <option value="performance">Performance</option>
         </select>
-        <input
-          type="date"
-          name="startDate"
-          value={reportFilters.startDate}
-          onChange={handleFilterChange}
-        />
-        <input
-          type="date"
-          name="endDate"
-          value={reportFilters.endDate}
-          onChange={handleFilterChange}
-        />
+        
+        {['attendance', 'financial'].includes(reportFilters.reportType) && (
+          <>
+            <input
+              type="date"
+              name="startDate"
+              placeholder="Start Date"
+              value={reportFilters.startDate}
+              onChange={handleFilterChange}
+            />
+            <input
+              type="date"
+              name="endDate"
+              placeholder="End Date"
+              value={reportFilters.endDate}
+              onChange={handleFilterChange}
+            />
+          </>
+        )}
+        
+        {reportFilters.reportType === 'academic' && (
+          <input
+            type="text"
+            name="term"
+            placeholder="Term (e.g., 1st Term, 2nd Term)"
+            value={reportFilters.term}
+            onChange={handleFilterChange}
+          />
+        )}
+        
+        {reportFilters.reportType === 'performance' && (
+          <select name="classId" value={reportFilters.classId} onChange={handleFilterChange}>
+            <option value="">Select Class</option>
+            {classes.map(cls => (
+              <option key={cls._id} value={cls._id}>
+                {cls.grade} - {cls.section}
+              </option>
+            ))}
+          </select>
+        )}
+        
         <select name="format" value={reportFilters.format} onChange={handleFilterChange}>
           <option value="pdf">PDF</option>
           <option value="excel">Excel</option>

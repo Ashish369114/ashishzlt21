@@ -1,5 +1,6 @@
 const Fee = require('../models/Fee');
 const Student = require('../models/Student');
+const User = require('../models/User');
 
 const getFees = async (req, res) => {
   try {
@@ -31,9 +32,25 @@ const getPendingFees = async (req, res) => {
 
 const getFeesByParent = async (req, res) => {
   try {
-    const parentUserId = req.user.userId;
-    const students = await Student.find({ parentId: parentUserId });
-    const studentIds = students.map((student) => student.userId);
+    const parentIdentifier = req.user.userId;
+    let studentIds = [];
+
+    const loadStudentsForParent = async (parentRef) => {
+      const students = await Student.find({ parentId: parentRef });
+      return students.map((student) => student.userId);
+    };
+
+    if (mongoose.Types.ObjectId.isValid(parentIdentifier)) {
+      studentIds = await loadStudentsForParent(parentIdentifier);
+    }
+
+    if (!studentIds.length) {
+      const parentUser = await User.findOne({ userId: parentIdentifier });
+      if (parentUser) {
+        studentIds = await loadStudentsForParent(parentUser._id);
+      }
+    }
+
     const fees = await Fee.find({ student: { $in: studentIds } }).populate('student');
     res.json(fees);
   } catch (error) {
@@ -109,8 +126,27 @@ const payFee = async (req, res) => {
 
 const updateFee = async (req, res) => {
   try {
-    const fee = await Fee.findByIdAndUpdate(req.params.id, req.body, { new: true }).populate('student');
-    res.json(fee);
+    const fee = await Fee.findById(req.params.id);
+    if (!fee) {
+      return res.status(404).json({ message: 'Fee not found' });
+    }
+
+    const updateData = { ...req.body };
+
+    if (updateData.amount !== undefined) {
+      const nextAmount = Number(updateData.amount);
+      fee.amount = nextAmount;
+      if ((fee.paidAmount || 0) > nextAmount) {
+        fee.paidAmount = nextAmount;
+      }
+      fee.isPaid = (fee.paidAmount || 0) >= nextAmount;
+    }
+
+    Object.assign(fee, updateData);
+    await fee.save();
+
+    const populatedFee = await fee.populate('student');
+    res.json(populatedFee);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -128,6 +164,64 @@ const deleteFee = async (req, res) => {
   }
 };
 
+const deleteFeesByStudent = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const result = await Fee.deleteMany({ student: studentId });
+    res.json({ message: 'Fees deleted', deletedCount: result.deletedCount || 0 });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getStudentsBySection = async (req, res) => {
+  try {
+    const { classId } = req.params;
+    
+    if (!classId) {
+      return res.status(400).json({ message: 'Class ID is required' });
+    }
+
+    // Get all students in this class
+    const students = await Student.find({ class: classId }).populate('userId');
+    
+    if (!students || students.length === 0) {
+      return res.json([]);
+    }
+
+    // Get all fees for students in this class
+    const studentIds = students.map((student) => student.userId?._id || student.userId || student._id);
+    const fees = await Fee.find({ student: { $in: studentIds } });
+
+    // Build response with student data and fee summary
+    const studentsWithFees = students.map((student) => {
+      const studentId = student.userId?._id || student.userId || student._id;
+      const studentFees = fees.filter((fee) => String(fee.student) === String(studentId));
+      
+      const totalFee = studentFees.reduce((sum, fee) => sum + (fee.amount || 0), 0);
+      const totalPaid = studentFees.reduce((sum, fee) => sum + (fee.paidAmount || 0), 0);
+      const totalPending = totalFee - totalPaid;
+
+      return {
+        _id: student._id,
+        studentId: studentId,
+        rollNumber: student.rollNumber,
+        firstName: student.userId?.firstName || student.firstName || '',
+        lastName: student.userId?.lastName || student.lastName || '',
+        totalFee,
+        totalPaid,
+        totalPending,
+        isPaid: totalFee > 0 && totalPending <= 0,
+        feeCount: studentFees.length,
+      };
+    });
+
+    res.json(studentsWithFees);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getFees,
   getFeesByStudent,
@@ -137,4 +231,6 @@ module.exports = {
   payFee,
   updateFee,
   deleteFee,
+  deleteFeesByStudent,
+  getStudentsBySection,
 };

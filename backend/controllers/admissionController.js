@@ -2,6 +2,32 @@ const Admission = require('../models/Admission');
 const User = require('../models/User');
 const Student = require('../models/Student');
 
+const generateStudentUserId = async () => {
+  const latestStudent = await User.find({
+    role: 'student',
+    userId: /^STUDENT\d{3}$/,
+  })
+    .sort({ userId: -1 })
+    .limit(1)
+    .lean();
+
+  let nextNumber = 1;
+  if (latestStudent.length) {
+    const match = latestStudent[0].userId.match(/^STUDENT(\d{3})$/);
+    if (match) {
+      nextNumber = Number(match[1]) + 1;
+    }
+  }
+
+  let generatedId = `STUDENT${String(nextNumber).padStart(3, '0')}`;
+  while (await User.findOne({ userId: generatedId })) {
+    nextNumber += 1;
+    generatedId = `STUDENT${String(nextNumber).padStart(3, '0')}`;
+  }
+
+  return generatedId;
+};
+
 const getAdmissions = async (req, res) => {
   try {
     const admissions = await Admission.find()
@@ -75,7 +101,9 @@ const approveAdmission = async (req, res) => {
     await admission.save();
 
     // Create user account for approved student
+    const studentUserId = await generateStudentUserId();
     const user = new User({
+      userId: studentUserId,
       email: admission.parentEmail,
       password: 'defaultPassword123', // Should be generated securely
       firstName: admission.firstName,

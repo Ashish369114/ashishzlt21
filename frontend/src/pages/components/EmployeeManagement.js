@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 import api, { schoolService } from '../../services/api';
 import '../../styles/ManagementStyles.css';
@@ -7,6 +7,7 @@ const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([]);
   const [schools, setSchools] = useState([]);
   const [socket, setSocket] = useState(null);
+  const socketRef = useRef(null);
   const [newEmployee, setNewEmployee] = useState({
     firstName: '',
     lastName: '',
@@ -24,8 +25,8 @@ const EmployeeManagement = () => {
     setupSocket();
 
     return () => {
-      if (socket) {
-        socket.disconnect();
+      if (socketRef.current) {
+        socketRef.current.disconnect();
       }
     };
   }, []);
@@ -86,6 +87,8 @@ const EmployeeManagement = () => {
       );
     });
 
+    socketRef.current = newSocket;
+
     newSocket.on('employee:deleted', (data) => {
       console.log('Employee deleted:', data);
       setEmployees(prev => prev.filter(emp => emp._id !== data.id));
@@ -97,12 +100,13 @@ const EmployeeManagement = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    if (name.includes('salary')) {
+    if (name.startsWith('salary.')) {
+      const key = name.split('.')[1];
       setNewEmployee({
         ...newEmployee,
         salary: {
           ...newEmployee.salary,
-          [name.split('.')[1]]: value,
+          [key]: key === 'baseSalary' ? Number(value) : value,
         },
       });
     } else {
@@ -146,15 +150,9 @@ const EmployeeManagement = () => {
     e.preventDefault();
     try {
       if (editingEmployeeId) {
-        const response = await api.put(`/employees/${editingEmployeeId}`, newEmployee);
-        if (socket) {
-          socket.emit('employee:updated', response.data);
-        }
+        await api.put(`/employees/${editingEmployeeId}`, newEmployee);
       } else {
-        const response = await api.post('/employees', newEmployee);
-        if (socket) {
-          socket.emit('employee:added', response.data);
-        }
+        await api.post('/employees', newEmployee);
       }
       fetchEmployees();
       resetForm();
@@ -169,9 +167,6 @@ const EmployeeManagement = () => {
     if (window.confirm('Are you sure?')) {
       try {
         await api.delete(`/employees/${id}`);
-        if (socket) {
-          socket.emit('employee:deleted', { id });
-        }
         fetchEmployees();
       } catch (error) {
         console.error('Error deleting employee:', error);

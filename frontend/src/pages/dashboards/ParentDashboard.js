@@ -114,6 +114,7 @@ const ParentDashboard = ({ user, onLogout }) => {
           <Route path="communication" element={<ParentCommunication />} />
           <Route path="downloads" element={<ParentDownloads />} />
           <Route path="settings" element={<ParentProfileSettings />} />
+          <Route path="*" element={<DashboardHome stats={stats} />} />
         </Routes>
       </div>
     </div>

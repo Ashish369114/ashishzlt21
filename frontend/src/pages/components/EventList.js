@@ -8,7 +8,6 @@ const emptyForm = {
   startTime: '',
   endTime: '',
   location: '',
-  organizer: '',
   eventType: 'Other',
 };
 
@@ -55,14 +54,7 @@ const EventList = ({ showActions = true }) => {
     setSuccessMessage('');
 
     const payload = { ...formData };
-    if (!payload.organizer || payload.organizer.trim() === '') {
-      delete payload.organizer;
-    }
-
-    if (payload.organizer && !/^[0-9a-fA-F]{24}$/.test(payload.organizer)) {
-      setError('Organizer ID must be a valid 24-character MongoDB ObjectId or left empty.');
-      return;
-    }
+    delete payload.organizer;
 
     if (!payload.eventDate) {
       setError('Event date is required.');
@@ -95,7 +87,6 @@ const EventList = ({ showActions = true }) => {
       startTime: event.startTime || '',
       endTime: event.endTime || '',
       location: event.location || '',
-      organizer: event.organizer?._id || '',
       eventType: event.eventType || 'Other',
     });
     setShowForm(true);
@@ -179,11 +170,6 @@ const EventList = ({ showActions = true }) => {
               <textarea name="description" value={formData.description} onChange={handleInputChange} rows="3" />
             </div>
 
-            <div className="form-group">
-              <label>Organizer ID</label>
-              <input name="organizer" value={formData.organizer} onChange={handleInputChange} placeholder="Optional user id" />
-            </div>
-
             <button type="submit" className="btn btn-primary">{editingId ? 'Update Event' : 'Save Event'}</button>
           </form>
         </div>
@@ -201,7 +187,6 @@ const EventList = ({ showActions = true }) => {
                 <th>Date</th>
                 <th>Time</th>
                 <th>Location</th>
-                <th>Organizer</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -218,7 +203,6 @@ const EventList = ({ showActions = true }) => {
                     <td>{event.eventDate ? new Date(event.eventDate).toLocaleDateString() : '-'}</td>
                     <td>{event.startTime ? `${event.startTime} - ${event.endTime || ''}` : '-'}</td>
                     <td>{event.location || '-'}</td>
-                    <td>{event.organizer ? `${event.organizer.firstName || ''} ${event.organizer.lastName || ''}`.trim() || event.organizer._id : '-'}</td>
                     {showActions && (
                       <td>
                         <>

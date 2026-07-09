@@ -160,6 +160,7 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           <Route path="performance" element={<PrincipalPerformance />} />
           <Route path="finance" element={<PrincipalFinanceReport />} />
           <Route path="reports" element={<PrincipalComprehensiveReports />} />
+          <Route path="*" element={<DashboardHome stats={stats} />} />
         </Routes>
       </div>
     </div>

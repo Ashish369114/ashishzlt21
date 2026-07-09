@@ -59,23 +59,47 @@ const AdmissionManagement = () => {
 
   const handleSubmitApplication = async (e) => {
     e.preventDefault();
+
+    if (!newApplication.school || !newApplication.appliedForClass) {
+      alert('Please select a school and class before submitting.');
+      return;
+    }
+
+    const payload = {
+      firstName: newApplication.firstName,
+      lastName: newApplication.lastName,
+      dateOfBirth: newApplication.dateOfBirth,
+      gender: newApplication.gender,
+      parentName: newApplication.parentName,
+      parentEmail: newApplication.parentEmail,
+      parentPhone: newApplication.parentPhone,
+      school: newApplication.school,
+      appliedForClass: newApplication.appliedForClass,
+      address: newApplication.address,
+    };
+
+    console.log('Submitting admission payload:', payload);
+
     try {
-      await api.post('/admissions', newApplication);
+      await api.post('/admissions', payload);
       fetchAdmissions();
       setNewApplication({
         firstName: '',
         lastName: '',
         dateOfBirth: '',
+        gender: 'male',
         parentName: '',
         parentEmail: '',
         parentPhone: '',
-        address: {},
+        school: '',
         appliedForClass: '',
+        address: {},
       });
       alert('Application submitted successfully!');
     } catch (error) {
-      console.error('Error submitting application:', error);
-      alert('Error submitting application');
+      const serverMessage = error.response?.data?.message || error.response?.data || error.message;
+      console.error('Error submitting application:', serverMessage, error);
+      alert(`Error submitting application: ${serverMessage}`);
     }
   };
 

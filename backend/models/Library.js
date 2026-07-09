@@ -40,7 +40,6 @@ const librarySchema = new mongoose.Schema(
     school: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'School',
-      required: true,
     },
     borrowHistory: [
       {

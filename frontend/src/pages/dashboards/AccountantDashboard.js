@@ -30,19 +30,19 @@ const AccountantDashboard = ({ user, onLogout }) => {
         expenseService.getAll(),
       ]);
 
-      const allPaidFees = Array.isArray(allFees.data) ? allFees.data.filter((fee) => fee.isPaid) : [];
+      const allPaidFees = Array.isArray(allFees.data) ? allFees.data.filter((fee) => fee.isPaid || Number(fee.paidAmount || 0) > 0) : [];
       const totalExpenses = Array.isArray(expenses.data) ? expenses.data.reduce((sum, expense) => sum + Number(expense.amount || 0), 0) : 0;
       const today = new Date();
       const todayCollection = allPaidFees.reduce((sum, fee) => {
         if (!fee.paymentDate) return sum;
         const paidDate = new Date(fee.paymentDate);
-        return paidDate.toDateString() === today.toDateString() ? sum + Number(fee.amount || 0) : sum;
+        return paidDate.toDateString() === today.toDateString() ? sum + Number(fee.paidAmount || fee.amount || 0) : sum;
       }, 0);
       const monthlyCollection = allPaidFees.reduce((sum, fee) => {
         if (!fee.paymentDate) return sum;
         const paidDate = new Date(fee.paymentDate);
         return paidDate.getMonth() === today.getMonth() && paidDate.getFullYear() === today.getFullYear()
-          ? sum + Number(fee.amount || 0)
+          ? sum + Number(fee.paidAmount || fee.amount || 0)
           : sum;
       }, 0);
 
@@ -50,10 +50,10 @@ const AccountantDashboard = ({ user, onLogout }) => {
         totalStudents: students.data.length,
         totalTeachers: teachers.data.length,
         pendingFees: pendingFees.data.length,
-        pendingAmount: pendingFees.data.reduce((sum, fee) => sum + Number(fee.amount || 0), 0),
+        pendingAmount: pendingFees.data.reduce((sum, fee) => sum + Math.max(Number(fee.amount || 0) - Number(fee.paidAmount || 0), 0), 0),
         totalAmount: allFees.data.reduce((sum, fee) => sum + Number(fee.amount || 0), 0),
         totalExpenses,
-        netIncome: allPaidFees.reduce((sum, fee) => sum + Number(fee.amount || 0), 0) - totalExpenses,
+        netIncome: allPaidFees.reduce((sum, fee) => sum + Number(fee.paidAmount || fee.amount || 0), 0) - totalExpenses,
         todayCollection,
         monthlyCollection,
       });
@@ -109,6 +109,7 @@ const AccountantDashboard = ({ user, onLogout }) => {
           <Route path="reports" element={<AccountantReports />} />
           <Route path="expenses" element={<AccountantExpenses />} />
           <Route path="salary" element={<AccountantPayroll />} />
+          <Route path="*" element={<DashboardHome stats={stats} />} />
         </Routes>
       </div>
     </div>

@@ -20,6 +20,7 @@ const RemarkList = ({ teacherUserId, studentId, showActions = true }) => {
     remark: '',
     type: 'Neutral',
   });
+  const [editingRemarkId, setEditingRemarkId] = useState(null);
 
   const fetchRemarks = useCallback(async (parsedUser) => {
     try {
@@ -117,22 +118,62 @@ const RemarkList = ({ teacherUserId, studentId, showActions = true }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const resetForm = () => {
+    setFormData({ student: '', class: '', subject: '', remark: '', type: 'Neutral' });
+    setEditingRemarkId(null);
+  };
+
+  const handleEditClick = (remark) => {
+    setEditingRemarkId(remark._id);
+    setFormData({
+      student: remark.student?._id || remark.student || '',
+      class: remark.class?._id || remark.class || '',
+      subject: remark.subject?._id || remark.subject || '',
+      remark: remark.remark || '',
+      type: remark.type || 'Neutral',
+    });
+    setShowForm(true);
+  };
+
+  const handleDeleteRemark = async (id) => {
+    if (!window.confirm('Delete this remark?')) return;
+
+    try {
+      await remarkService.delete(id);
+      setSuccessMessage('Remark deleted successfully.');
+      setError('');
+      await fetchRemarks(currentUser || JSON.parse(localStorage.getItem('user') || 'null'));
+    } catch (err) {
+      setError('Failed to delete remark: ' + (err.response?.data?.message || 'Unknown error'));
+      console.error(err);
+    }
+  };
+
   const handleAddRemark = async (e) => {
     e.preventDefault();
     setError('');
     setSuccessMessage('');
 
     try {
-      await remarkService.add({
-        ...formData,
-        teacher: currentUser?.id || currentUser?.userId,
-      });
-      setFormData({ student: '', class: '', subject: '', remark: '', type: 'Neutral' });
+      if (editingRemarkId) {
+        await remarkService.update(editingRemarkId, {
+          ...formData,
+          teacher: currentUser?.id || currentUser?.userId,
+        });
+        setSuccessMessage('Remark updated successfully.');
+      } else {
+        await remarkService.add({
+          ...formData,
+          teacher: currentUser?.id || currentUser?.userId,
+        });
+        setSuccessMessage('Remark added successfully.');
+      }
+
+      resetForm();
       setShowForm(false);
-      setSuccessMessage('Remark added successfully.');
       await fetchRemarks(currentUser || JSON.parse(localStorage.getItem('user') || 'null'));
     } catch (err) {
-      setError('Failed to add remark: ' + (err.response?.data?.message || 'Unknown error'));
+      setError('Failed to save remark: ' + (err.response?.data?.message || 'Unknown error'));
       console.error(err);
     }
   };
@@ -142,7 +183,12 @@ const RemarkList = ({ teacherUserId, studentId, showActions = true }) => {
       <div className="card-header">
         <h2>💬 Remarks</h2>
           {showActions && (
-            <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
+            <button className="btn btn-primary" onClick={() => {
+              if (showForm) {
+                resetForm();
+              }
+              setShowForm(!showForm);
+            }}>
               {showForm ? 'Cancel' : '➕ Add Remark'}
             </button>
           )}
@@ -152,7 +198,7 @@ const RemarkList = ({ teacherUserId, studentId, showActions = true }) => {
 
       {showActions && showForm && (
         <div className="form-container" style={{ marginBottom: '20px' }}>
-          <h3>Add Remark</h3>
+          <h3>{editingRemarkId ? 'Edit Remark' : 'Add Remark'}</h3>
           <form onSubmit={handleAddRemark}>
             <div className="form-row">
               <div className="form-group">
@@ -204,7 +250,7 @@ const RemarkList = ({ teacherUserId, studentId, showActions = true }) => {
               <textarea name="remark" value={formData.remark} onChange={handleInputChange} required rows="3" />
             </div>
 
-            <button type="submit" className="btn btn-success">Save Remark</button>
+            <button type="submit" className="btn btn-success">{editingRemarkId ? 'Update Remark' : 'Save Remark'}</button>
           </form>
         </div>
       )}
@@ -222,6 +268,7 @@ const RemarkList = ({ teacherUserId, studentId, showActions = true }) => {
                 <th>Class</th>
                 <th>Type</th>
                 <th>Remark</th>
+                {showActions && <th>Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -238,6 +285,16 @@ const RemarkList = ({ teacherUserId, studentId, showActions = true }) => {
                     <td>{remark.class ? `Grade ${remark.class.grade} - Section ${remark.class.section}` : '-'}</td>
                     <td>{remark.type || 'Neutral'}</td>
                     <td>{remark.remark}</td>
+                    {showActions && (
+                      <td>
+                        <button type="button" className="btn btn-sm btn-secondary" onClick={() => handleEditClick(remark)}>
+                          Edit
+                        </button>
+                        <button type="button" className="btn btn-sm btn-danger" onClick={() => handleDeleteRemark(remark._id)} style={{ marginLeft: '8px' }}>
+                          Delete
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}

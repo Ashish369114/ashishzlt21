@@ -4,6 +4,7 @@ import '../../styles/ManagementStyles.css';
 
 const TransportManagement = () => {
   const [routes, setRoutes] = useState([]);
+  const [error, setError] = useState('');
   const [newRoute, setNewRoute] = useState({
     routeName: '',
     startPoint: { name: '' },
@@ -69,22 +70,34 @@ const TransportManagement = () => {
       vehicle: { vehicleNumber: '' },
       driver: { driverName: '' },
     });
+    setError('');
   };
 
   const handleAddRoute = async (e) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!newRoute.routeName || !newRoute.startPoint.name || !newRoute.endPoint.name) {
+      setError('Please fill in all required fields: Route Name, Start Point, and End Point');
+      return;
+    }
+    
     try {
+      setError('');
       if (editingRouteId) {
         await api.put(`/transport/${editingRouteId}`, newRoute);
+        alert('Route updated successfully!');
       } else {
         await api.post('/transport', newRoute);
+        alert('Route added successfully!');
       }
       fetchRoutes();
       resetRouteForm();
-      alert(editingRouteId ? 'Route updated successfully!' : 'Route added successfully!');
     } catch (error) {
       console.error('Error saving route:', error);
-      alert('Error saving route');
+      const errorMsg = error.response?.data?.message || 'Error saving route';
+      setError(errorMsg);
+      alert(errorMsg);
     }
   };
 
@@ -105,6 +118,7 @@ const TransportManagement = () => {
 
       <form onSubmit={handleAddRoute} className="management-form">
         <h3>Add New Route</h3>
+        {error && <div style={{ color: '#d32f2f', marginBottom: '10px', padding: '8px', backgroundColor: '#ffebee', borderRadius: '4px' }}>{error}</div>}
         <input
           type="text"
           name="routeName"

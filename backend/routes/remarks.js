@@ -10,6 +10,6 @@ router.get('/student/:studentId', authMiddleware, remarkController.getRemarksByS
 router.get('/class/:classId', authMiddleware, remarkController.getRemarksByClass);
 router.post('/', authMiddleware, roleMiddleware(['teacher', 'super_admin', 'principal']), remarkController.addRemark);
 router.put('/:id', authMiddleware, roleMiddleware(['teacher', 'super_admin', 'principal']), remarkController.updateRemark);
-router.delete('/:id', authMiddleware, roleMiddleware(['super_admin', 'principal']), remarkController.deleteRemark);
+router.delete('/:id', authMiddleware, roleMiddleware(['teacher', 'super_admin', 'principal']), remarkController.deleteRemark);
 
 module.exports = router;

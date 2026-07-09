@@ -21,6 +21,7 @@ const HomeworkManagement = () => {
   });
   const [selectedHomework, setSelectedHomework] = useState(null);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
+  const [selectedDate, setSelectedDate] = useState('');
   const [reviewData, setReviewData] = useState({
     status: 'Reviewed',
     teacherFeedback: '',
@@ -76,11 +77,45 @@ const HomeworkManagement = () => {
     setSelectedClassId(matchedClass?._id || '');
   }, [classes, selectedGrade, selectedSection]);
 
+  const formatDateKey = (date) => {
+    const value = new Date(date);
+    value.setHours(0, 0, 0, 0);
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const getDefaultSelectedDate = (homeworkItems = []) => {
+    const upcomingDates = (homeworkItems || [])
+      .filter((hw) => {
+        const dueDate = hw.dueDate ? new Date(hw.dueDate) : null;
+        if (!dueDate) return false;
+        const isCompleted = (hw.submissions?.length || 0) > 0 && hw.submissions.every((submission) => ['Completed', 'Reviewed'].includes(submission?.status));
+        return !isCompleted;
+      })
+      .map((hw) => hw.dueDate ? new Date(hw.dueDate) : null)
+      .filter(Boolean)
+      .sort((a, b) => a - b);
+
+    if (upcomingDates.length) {
+      const selectedDateValue = new Date(upcomingDates[0]);
+      selectedDateValue.setHours(0, 0, 0, 0);
+      return formatDateKey(selectedDateValue);
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return formatDateKey(today);
+  };
+
   const fetchHomework = async () => {
     try {
       setLoading(true);
       const response = await homeworkService.getAll();
-      setHomework(response.data);
+      const homeworkItems = response.data || [];
+      setHomework(homeworkItems);
+      setSelectedDate((current) => current || getDefaultSelectedDate(homeworkItems));
     } catch (err) {
       setError('Failed to fetch homework');
       console.error(err);
@@ -181,6 +216,7 @@ const HomeworkManagement = () => {
         subject: '',
         dueDate: '',
       });
+      setSelectedDate(data.dueDate);
       setShowForm(false);
       fetchHomework();
       setError('');
@@ -193,10 +229,27 @@ const HomeworkManagement = () => {
   const gradeOptions = [...new Set(classes.map((cls) => String(cls.grade)).filter(Boolean))].sort((a, b) => Number(a) - Number(b));
   const visibleClasses = classes.filter((cls) => String(cls.grade) === String(selectedGrade));
   const sectionsForGrade = [...new Set(visibleClasses.map((cls) => cls.section).filter(Boolean))].sort();
+  const selectedDateValue = selectedDate ? new Date(`${selectedDate}T00:00:00`) : null;
   const visibleHomework = homework.filter((hw) => {
-    if (!selectedClassId) return true;
     const hwClassId = hw.class?._id || hw.class || hw.classId;
-    return String(hwClassId) === String(selectedClassId);
+    const matchesClass = !selectedClassId || String(hwClassId) === String(selectedClassId);
+    if (!matchesClass) return false;
+
+    const dueDate = hw.dueDate ? new Date(hw.dueDate) : null;
+    const isCompleted = (hw.submissions?.length || 0) > 0 && hw.submissions.every((submission) => ['Completed', 'Reviewed'].includes(submission?.status));
+    if (isCompleted) return false;
+
+    if (!selectedDateValue || !dueDate) return false;
+    const dueDay = new Date(dueDate);
+    dueDay.setHours(0, 0, 0, 0);
+    return dueDay.getTime() === selectedDateValue.getTime();
+  });
+
+  const calendarDays = Array.from({ length: 35 }, (_, index) => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() - 7 + index);
+    return date;
   });
 
   return (
@@ -320,37 +373,88 @@ const HomeworkManagement = () => {
         <div className="spinner"></div>
       ) : (
         <>
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>Select Date</label>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              style={{ padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: '8px', marginBottom: '20px' }}>
+            {calendarDays.map((date) => {
+              const dateKey = formatDateKey(date);
+              const hasHomework = homework.some((hw) => {
+                const dueDate = hw.dueDate ? new Date(hw.dueDate) : null;
+                if (!dueDate) return false;
+                const isCompleted = (hw.submissions?.length || 0) > 0 && hw.submissions.every((submission) => ['Completed', 'Reviewed'].includes(submission?.status));
+                if (isCompleted) return false;
+                const compareDate = new Date(dueDate);
+                compareDate.setHours(0, 0, 0, 0);
+                const selectedDay = new Date(date);
+                selectedDay.setHours(0, 0, 0, 0);
+                return compareDate.getTime() === selectedDay.getTime();
+              });
+              return (
+                <button
+                  key={dateKey}
+                  type="button"
+                  onClick={() => setSelectedDate(dateKey)}
+                  style={{
+                    padding: '10px 6px',
+                    borderRadius: '6px',
+                    border: selectedDate === dateKey ? '2px solid #2563eb' : '1px solid #e5e7eb',
+                    backgroundColor: selectedDate === dateKey ? '#dbeafe' : '#fff',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>{date.toLocaleDateString('en', { weekday: 'short' })}</div>
+                  <div style={{ fontWeight: '700' }}>{date.getDate()}</div>
+                  {hasHomework && <div style={{ fontSize: '0.7rem', color: '#2563eb' }}>●</div>}
+                </button>
+              );
+            })}
+          </div>
+
           <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Description</th>
-                <th>Assigned Date</th>
-                <th>Due Date</th>
-                <th>Submissions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visibleHomework.map((hw) => (
-                <tr key={hw._id}>
-                  <td><strong>{hw.title}</strong></td>
-                  <td>{hw.description}</td>
-                  <td>{new Date(hw.assignedDate).toLocaleDateString()}</td>
-                  <td>{new Date(hw.dueDate).toLocaleDateString()}</td>
-                  <td>
-                    <div>{hw.submissions?.length || 0} submission(s)</div>
-                    {hw.submissions?.length > 0 && (
-                      <button className="btn btn-sm btn-secondary" type="button" onClick={() => handleSelectHomework(hw)}>
-                        Review Submissions
-                      </button>
-                    )}
-                  </td>
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Description</th>
+                  <th>Assigned Date</th>
+                  <th>Due Date</th>
+                  <th>Submissions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {visibleHomework.length === 0 ? (
+                  <tr>
+                    <td colSpan="5">No homework for this date.</td>
+                  </tr>
+                ) : (
+                  visibleHomework.map((hw) => (
+                    <tr key={hw._id}>
+                      <td><strong>{hw.title}</strong></td>
+                      <td>{hw.description}</td>
+                      <td>{new Date(hw.assignedDate).toLocaleDateString()}</td>
+                      <td>{new Date(hw.dueDate).toLocaleDateString()}</td>
+                      <td>
+                        <div>{hw.submissions?.length || 0} submission(s)</div>
+                        {hw.submissions?.length > 0 && (
+                          <button className="btn btn-sm btn-secondary" type="button" onClick={() => handleSelectHomework(hw)}>
+                            Review Submissions
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
 
           {selectedHomework && (
             <div className="form-container" style={{ marginTop: '24px' }}>

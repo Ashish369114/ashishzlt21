@@ -19,7 +19,7 @@ import RemarkList from '../components/RemarkList';
 const StudentDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
-  const studentId = user?.id || user?.userId;
+  const studentId = user?.id || user?._id || user?.userId;
 
   useEffect(() => {
     const loadData = async () => {
@@ -102,6 +102,7 @@ const StudentDashboard = ({ user, onLogout }) => {
           <Route path="exams" element={<ExamList studentId={studentId} showActions={false} />} />
           <Route path="events" element={<EventList showActions={false} />} />
           <Route path="remarks" element={<RemarkList studentId={studentId} showActions={false} />} />
+          <Route path="*" element={<DashboardHome stats={stats} />} />
         </Routes>
       </div>
     </div>

@@ -1,6 +1,13 @@
 import React from 'react';
+import useRealtimeUpdates from '../../hooks/useRealtimeUpdates';
+import { getPlanDisplayName, getPlanModules } from '../../utils/planModules';
 
 const DashboardHome = ({ stats }) => {
+  const userId = localStorage.getItem('userId');
+  const schoolId = localStorage.getItem('schoolId');
+  const role = localStorage.getItem('role');
+  const { notifications } = useRealtimeUpdates(userId, schoolId, role);
+  const planName = localStorage.getItem('subscriptionPlan') || 'silver';
   const cards = [];
 
   const addCard = (label, value, formatter = (item) => item) => {
@@ -102,7 +109,33 @@ const DashboardHome = ({ stats }) => {
           <h2>📊 Quick Overview</h2>
         </div>
         <p>Welcome to the School Management System. Use the navigation menu to access different modules.</p>
+        <div style={{ marginTop: '12px' }}>
+          <strong>Active Plan:</strong> {getPlanDisplayName(planName)}
+        </div>
+        <div style={{ marginTop: '10px' }}>
+          <strong>Included Modules:</strong>
+          <ul style={{ lineHeight: '1.8', paddingLeft: '20px', marginTop: '8px' }}>
+            {getPlanModules(planName).slice(0, 10).map((module) => (
+              <li key={module}>{module}</li>
+            ))}
+          </ul>
+        </div>
       </div>
+
+      {notifications.length > 0 && (
+        <div className="card">
+          <div className="card-header">
+            <h2>🔔 Live Activity</h2>
+          </div>
+          <ul style={{ lineHeight: '1.8', paddingLeft: '20px' }}>
+            {notifications.slice(0, 6).map((notification) => (
+              <li key={notification.id}>
+                <strong>{notification.title}</strong>: {notification.message}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {stats?.sectionSummary?.length ? (
         <div className="card">

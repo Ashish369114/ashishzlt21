@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../services/api';
-import { classService } from '../../services/api';
+import api, { classService, subjectService } from '../../services/api';
 
 const AcademicManagement = () => {
   const [subjects, setSubjects] = useState([]);
@@ -9,6 +8,7 @@ const AcademicManagement = () => {
   const [subjectName, setSubjectName] = useState('');
   const [subjectCode, setSubjectCode] = useState('');
   const [subjectDescription, setSubjectDescription] = useState('');
+  const [editingSubjectId, setEditingSubjectId] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -39,18 +39,64 @@ const AcademicManagement = () => {
     setError('');
     setSuccess('');
     try {
-      await api.post('/subjects', {
-        name: subjectName,
-        code: subjectCode,
-        description: subjectDescription,
-      });
-      setSuccess('Subject added successfully.');
+      if (editingSubjectId) {
+        await subjectService.update(editingSubjectId, {
+          name: subjectName,
+          code: subjectCode,
+          description: subjectDescription,
+        });
+        setSuccess('Subject updated successfully.');
+      } else {
+        await subjectService.add({
+          name: subjectName,
+          code: subjectCode,
+          description: subjectDescription,
+        });
+        setSuccess('Subject added successfully.');
+      }
       setSubjectName('');
       setSubjectCode('');
       setSubjectDescription('');
+      setEditingSubjectId(null);
       fetchData();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to add subject');
+      setError(err.response?.data?.message || (editingSubjectId ? 'Failed to update subject' : 'Failed to add subject'));
+      console.error(err);
+    }
+  };
+
+  const handleEditSubject = (subject) => {
+    setEditingSubjectId(subject._id);
+    setSubjectName(subject.name || '');
+    setSubjectCode(subject.code || '');
+    setSubjectDescription(subject.description || '');
+    setError('');
+    setSuccess('');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingSubjectId(null);
+    setSubjectName('');
+    setSubjectCode('');
+    setSubjectDescription('');
+    setError('');
+    setSuccess('');
+  };
+
+  const handleDeleteSubject = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this subject?')) return;
+
+    setError('');
+    setSuccess('');
+    try {
+      await subjectService.delete(id);
+      setSuccess('Subject deleted successfully.');
+      if (editingSubjectId === id) {
+        handleCancelEdit();
+      }
+      fetchData();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to delete subject');
       console.error(err);
     }
   };
@@ -97,7 +143,14 @@ const AcademicManagement = () => {
               />
             </div>
           </div>
-          <button type="submit" className="btn btn-primary">Add Subject</button>
+          <button type="submit" className="btn btn-primary">
+            {editingSubjectId ? 'Update Subject' : 'Add Subject'}
+          </button>
+          {editingSubjectId && (
+            <button type="button" className="btn btn-secondary" style={{ marginLeft: '12px' }} onClick={handleCancelEdit}>
+              Cancel
+            </button>
+          )}
         </form>
       </div>
 
@@ -113,6 +166,7 @@ const AcademicManagement = () => {
                   <th>Name</th>
                   <th>Code</th>
                   <th>Description</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -121,6 +175,14 @@ const AcademicManagement = () => {
                     <td>{subject.name}</td>
                     <td>{subject.code || '-'}</td>
                     <td>{subject.description || '-'}</td>
+                    <td>
+                      <button className="btn btn-secondary btn-small" onClick={() => handleEditSubject(subject)}>
+                        Edit
+                      </button>
+                      <button className="btn btn-danger btn-small" style={{ marginLeft: '8px' }} onClick={() => handleDeleteSubject(subject._id)}>
+                        Delete
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

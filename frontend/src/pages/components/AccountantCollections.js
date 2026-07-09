@@ -13,32 +13,46 @@ const AccountantCollections = () => {
     fetchFees();
   }, []);
 
+  const getFeeSummary = (fee) => {
+    const amount = Number(fee?.amount || 0);
+    const paidAmount = Number(fee?.paidAmount || 0);
+    const balance = Math.max(amount - paidAmount, 0);
+
+    return { amount, paidAmount, balance };
+  };
+
   const fetchFees = async () => {
     try {
       setLoading(true);
       const [pendingRes, allRes] = await Promise.all([feeService.getPending(), feeService.getAll()]);
       const pending = Array.isArray(pendingRes.data) ? pendingRes.data : [];
       const allFees = Array.isArray(allRes.data) ? allRes.data : [];
-      const paid = allFees.filter((fee) => fee.isPaid);
+      const paid = allFees.filter((fee) => fee.isPaid || Number(fee.paidAmount || 0) > 0);
 
       const today = new Date();
       const todayTotal = paid.reduce((sum, fee) => {
         if (!fee.paymentDate) return sum;
         const paidDate = new Date(fee.paymentDate);
-        return paidDate.toDateString() === today.toDateString() ? sum + Number(fee.amount || 0) : sum;
+        return paidDate.toDateString() === today.toDateString() ? sum + Number(fee.paidAmount || fee.amount || 0) : sum;
       }, 0);
 
       const monthTotal = paid.reduce((sum, fee) => {
         if (!fee.paymentDate) return sum;
         const paidDate = new Date(fee.paymentDate);
         return paidDate.getMonth() === today.getMonth() && paidDate.getFullYear() === today.getFullYear()
-          ? sum + Number(fee.amount || 0)
+          ? sum + Number(fee.paidAmount || fee.amount || 0)
           : sum;
       }, 0);
 
       setPendingFees(pending);
       setPaidFees(paid);
-      setStats({ todayTotal, monthTotal, pendingCount: pending.length, pendingAmount: pending.reduce((sum, fee) => sum + Number(fee.amount || 0), 0), totalCollected: paid.reduce((sum, fee) => sum + Number(fee.amount || 0), 0) });
+      setStats({
+        todayTotal,
+        monthTotal,
+        pendingCount: pending.length,
+        pendingAmount: pending.reduce((sum, fee) => sum + Number(fee.amount || 0), 0),
+        totalCollected: paid.reduce((sum, fee) => sum + Number(fee.paidAmount || fee.amount || 0), 0),
+      });
     } catch (err) {
       console.error(err);
       setError('Unable to load collection data at this time.');
@@ -97,8 +111,9 @@ const AccountantCollections = () => {
 
   const generateReceipt = (fee) => {
     const studentName = fee.student?.firstName ? `${fee.student.firstName} ${fee.student.lastName || ''}` : 'Unknown Student';
+    const summary = getFeeSummary(fee);
     const paymentDate = fee.paymentDate ? new Date(fee.paymentDate).toLocaleString() : 'N/A';
-    const receiptText = `Receipt\n-------\nStudent: ${studentName}\nFee ID: ${fee._id}\nAmount Paid: ₹${fee.amount}\nPayment Method: ${fee.paymentMethod || 'N/A'}\nTransaction ID: ${fee.transactionId || 'N/A'}\nPayment Date: ${paymentDate}\nDescription: ${fee.description || 'Fee collection'}\n\nThank you for your payment.`;
+    const receiptText = `Receipt\n-------\nStudent: ${studentName}\nFee ID: ${fee._id}\nTotal Amount: ₹${summary.amount}\nPaid Amount: ₹${summary.paidAmount}\nBalance: ₹${summary.balance}\nPayment Method: ${fee.paymentMethod || 'N/A'}\nTransaction ID: ${fee.transactionId || 'N/A'}\nPayment Date: ${paymentDate}\nDescription: ${fee.description || 'Fee collection'}\n\nThank you for your payment.`;
     const blob = new Blob([receiptText], { type: 'text/plain;charset=utf-8' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -164,10 +179,15 @@ const AccountantCollections = () => {
                   ) : (
                     pendingFees.map((fee) => {
                       const state = paymentState[fee._id] || {};
+                      const summary = getFeeSummary(fee);
                       return (
                         <tr key={fee._id}>
                           <td>{fee.student?.firstName} {fee.student?.lastName}</td>
-                          <td>{formatCurrency(fee.amount)}</td>
+                          <td>
+                            <div>Due: {formatCurrency(summary.amount)}</div>
+                            <div>Paid: {formatCurrency(summary.paidAmount)}</div>
+                            <div>Balance: {formatCurrency(summary.balance)}</div>
+                          </td>
                           <td>{fee.dueDate ? new Date(fee.dueDate).toLocaleDateString() : '-'}</td>
                           <td>
                             <select
@@ -227,10 +247,15 @@ const AccountantCollections = () => {
                       <td colSpan="5">No collection records available.</td>
                     </tr>
                   ) : (
-                    paidFees.slice(0, 10).map((fee) => (
+                    paidFees.slice(0, 10).map((fee) => {
+                      const summary = getFeeSummary(fee);
+                      return (
                       <tr key={fee._id}>
                         <td>{fee.student?.firstName} {fee.student?.lastName}</td>
-                        <td>{formatCurrency(fee.amount)}</td>
+                        <td>
+                          <div>Paid: {formatCurrency(summary.paidAmount)}</div>
+                          <div>Balance: {formatCurrency(summary.balance)}</div>
+                        </td>
                         <td>{fee.paymentMethod || '-'}</td>
                         <td>{fee.paymentDate ? new Date(fee.paymentDate).toLocaleDateString() : '-'}</td>
                         <td>
@@ -239,7 +264,8 @@ const AccountantCollections = () => {
                           </button>
                         </td>
                       </tr>
-                    ))
+                      );
+                    })
                   )}
                 </tbody>
               </table>

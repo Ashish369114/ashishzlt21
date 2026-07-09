@@ -106,11 +106,13 @@ export const feeService = {
   getAll: () => api.get('/fees'),
   getByParent: () => api.get('/fees/parent'),
   getByStudent: (studentId) => api.get(`/fees/student/${studentId}`),
+  getBySection: (classId) => api.get(`/fees/section/${classId}`),
   getPending: () => api.get('/fees/pending'),
   add: (data) => api.post('/fees', data),
   pay: (data) => api.post('/fees/pay', data),
   update: (id, data) => api.put(`/fees/${id}`, data),
   delete: (id) => api.delete(`/fees/${id}`),
+  deleteByStudent: (studentId) => api.delete(`/fees/student/${studentId}`),
 };
 
 export const expenseService = {
@@ -153,6 +155,7 @@ export const schoolService = {
   add: (data) => api.post('/schools', data),
   update: (id, data) => api.put(`/schools/${id}`, data),
   delete: (id) => api.delete(`/schools/${id}`),
+  upgradePlan: (data) => api.post('/schools/upgrade-plan', data),
 };
 
 export const libraryService = {

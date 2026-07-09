@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const initializeSocket = require('./config/socket');
+const { ensureAdminRoles } = require('./utils/roleFixer');
 
 // Routes
 const authRoutes = require('./routes/auth');
@@ -74,6 +75,8 @@ const startServer = async () => {
     app.get('/api/health', (req, res) => {
       res.json({ message: 'Server is running' });
     });
+
+    await ensureAdminRoles();
 
     const PORT = process.env.PORT || 5000;
     server.listen(PORT, () => {

@@ -45,7 +45,13 @@ const addRemark = async (req, res) => {
   try {
     const remark = new Remark(req.body);
     await remark.save();
-    const populated = await remark.populate('student').populate('teacher').populate('subject').populate('class');
+
+    const populated = await Remark.findById(remark._id)
+      .populate('student')
+      .populate('teacher')
+      .populate('subject')
+      .populate('class');
+
     res.status(201).json(populated);
   } catch (error) {
     res.status(400).json({ message: error.message });
