@@ -128,16 +128,25 @@ const UserManagement = () => {
                   readOnly={!!editingUserId}
                 />
               </div>
-              <div className="form-group">
-                <label>Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  required={!editingUserId}
-                />
-              </div>
+              {!editingUserId ? (
+                <div className="form-group">
+                  <label>Password</label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              ) : (
+                <div className="form-group">
+                  <label>Password</label>
+                  <div style={{ padding: '10px', background: '#f3f4f6', borderRadius: '4px', color: '#6b7280', fontSize: '0.85rem' }}>
+                    Cannot be changed by Admin. User must use Forgot Password.
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="form-row">

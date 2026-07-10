@@ -54,10 +54,48 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'User account is inactive' });
     }
 
-    if (user.role === 'principal' || user.role === 'accountant_admin') {
+    // Record lastLogin for all roles
+    if (isDbConnected && typeof user.save === 'function') {
       user.lastLogin = new Date();
-      if (isDbConnected && typeof user.save === 'function') {
-        await user.save();
+      await user.save();
+    }
+
+    // Notify super admin of non-admin logins
+    if (['principal', 'teacher', 'accountant_admin', 'student', 'parent'].includes(user.role)) {
+      try {
+        const adminEmails = isDbConnected
+          ? (await User.find({ role: 'super_admin', isActive: true }).select('email firstName'))
+          : mockUsers.filter(u => u.role === 'super_admin');
+
+        for (const admin of adminEmails) {
+          if (admin.email) {
+            const loginTime = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+            await sendEmail(
+              admin.email,
+              `🔔 Login Alert: ${user.firstName} ${user.lastName} (${user.role.replace('_', ' ')})`,
+              `<div style="font-family:Arial,sans-serif;max-width:500px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
+                <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb);padding:20px;">
+                  <h2 style="color:#fff;margin:0;">🔔 User Login Alert</h2>
+                  <p style="color:rgba(255,255,255,0.8);margin:4px 0 0;">School Operating System</p>
+                </div>
+                <div style="padding:24px;">
+                  <p>Hello <strong>${admin.firstName || 'Admin'}</strong>,</p>
+                  <p>A user has logged in to the system:</p>
+                  <table style="width:100%;border-collapse:collapse;">
+                    <tr><td style="padding:8px;font-weight:700;color:#374151;">👤 Name</td><td style="padding:8px;">${user.firstName} ${user.lastName}</td></tr>
+                    <tr style="background:#f9fafb;"><td style="padding:8px;font-weight:700;color:#374151;">🆔 User ID</td><td style="padding:8px;">${user.userId}</td></tr>
+                    <tr><td style="padding:8px;font-weight:700;color:#374151;">🎭 Role</td><td style="padding:8px;">${user.role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</td></tr>
+                    <tr style="background:#f9fafb;"><td style="padding:8px;font-weight:700;color:#374151;">🕐 Time</td><td style="padding:8px;">${loginTime} IST</td></tr>
+                  </table>
+                  <p style="margin-top:16px;color:#6b7280;font-size:0.85rem;">This is an automated security alert. If this login was not expected, please review user accounts immediately.</p>
+                </div>
+              </div>`
+            );
+          }
+        }
+      } catch (notifErr) {
+        // Non-blocking — login still succeeds if notification fails
+        console.warn('Login notification failed:', notifErr.message);
       }
     }
 
@@ -241,6 +279,52 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// Forgot User ID — sends userId to registered email
+const forgotUserId = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: 'Email address is required.' });
+    }
+
+    const isDbConnected = mongoose.connection.readyState === 1;
+    let user;
+    if (isDbConnected) {
+      user = await User.findOne({ email });
+    } else {
+      user = mockUsers.find(u => u.email === email);
+    }
+
+    if (!user || !user.userId) {
+      // Don't reveal if email exists — always respond success for security
+      return res.json({ message: 'If an account with that email exists, your User ID has been sent.' });
+    }
+
+    const html = `
+      <div style="font-family:Arial,sans-serif;max-width:500px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb);padding:24px;">
+          <h2 style="color:#fff;margin:0;">🆔 Your User ID</h2>
+          <p style="color:rgba(255,255,255,0.8);margin:4px 0 0;">School Operating System</p>
+        </div>
+        <div style="padding:28px;">
+          <p>Hello <strong>${user.firstName || 'User'}</strong>,</p>
+          <p>You requested your login User ID. Here it is:</p>
+          <div style="background:#f0f4ff;border:2px dashed #2563eb;border-radius:8px;padding:16px;text-align:center;margin:16px 0;">
+            <span style="font-size:1.5rem;font-weight:800;color:#1e3a5f;letter-spacing:2px;">${user.userId}</span>
+          </div>
+          <p style="color:#6b7280;font-size:0.85rem;">Use this ID along with your password to log in. If you have also forgotten your password, use the <strong>Forgot Password</strong> option on the login page.</p>
+          <p style="color:#ef4444;font-size:0.8rem;">⚠️ Do not share your User ID with anyone.</p>
+        </div>
+      </div>
+    `;
+
+    await sendEmail(user.email, 'Your School OS User ID', html);
+    res.json({ message: 'If an account with that email exists, your User ID has been sent.' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   login,
   logout,
@@ -249,5 +333,7 @@ module.exports = {
   resetPassword,
   changePassword,
   updateProfile,
+  forgotUserId,
   mockUsers,
 };
+

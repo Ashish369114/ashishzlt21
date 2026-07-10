@@ -87,19 +87,37 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
       <div className="main-content">
         <div className="header">
           <h1>Super Admin Dashboard</h1>
-          <div>{new Date().toLocaleDateString()}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{
+              padding: '4px 12px',
+              borderRadius: '20px',
+              fontSize: '0.78rem',
+              fontWeight: '700',
+              letterSpacing: '0.04em',
+              background: plan.startsWith('platinum') ? 'linear-gradient(135deg, #06b6d4, #0891b2)' :
+                          plan === 'gold' ? 'linear-gradient(135deg, #f59e0b, #d97706)' :
+                          'linear-gradient(135deg, #64748b, #475569)',
+              color: '#fff',
+              textTransform: 'uppercase',
+            }}>
+              {plan === 'platinum_with_ocr' ? '⭐ Platinum + OCR' :
+               plan === 'platinum_without_ocr' || plan === 'platinum' ? '⭐ Platinum' :
+               plan === 'gold' ? '🏆 Gold' : '🥈 Silver'} Plan
+            </span>
+            <span>{new Date().toLocaleDateString()}</span>
+          </div>
         </div>
 
         <Routes>
           <Route index element={<DashboardHome stats={stats} />} />
           <Route path="schools" element={isPlatinum ? <SchoolManagement /> : <PlanUpgradeRequired featureName="Schools Management" requiredPlan="Platinum" />} />
-          <Route path="users" element={isPlatinum ? <UserManagement /> : <PlanUpgradeRequired featureName="User Management" requiredPlan="Platinum" />} />
+          <Route path="users" element={<UserManagement />} />
           <Route path="academics" element={<AcademicManagement />} />
           <Route path="admissions" element={isPlatinum ? <AdmissionManagement /> : <PlanUpgradeRequired featureName="Admissions" requiredPlan="Platinum" />} />
           <Route path="employees" element={isGoldOrBetter ? <EmployeeManagement /> : <PlanUpgradeRequired featureName="Employees" requiredPlan="Gold" />} />
           <Route path="students" element={<StudentManagement />} />
           <Route path="teachers" element={isGoldOrBetter ? <TeacherManagement /> : <PlanUpgradeRequired featureName="Teachers" requiredPlan="Gold" />} />
-          <Route path="fees" element={isGoldOrBetter ? <FeeManagement /> : <PlanUpgradeRequired featureName="Fees Management" requiredPlan="Gold" />} />
+          <Route path="fees" element={<FeeManagement />} />
           <Route path="classes" element={<ClassManagement />} />
           <Route path="marks" element={isGoldOrBetter ? <MarksManagement /> : <PlanUpgradeRequired featureName="Marks Management" requiredPlan="Gold" />} />
           <Route path="attendance" element={<AttendanceManagement />} />

@@ -30,6 +30,7 @@ const subjectRoutes = require('./routes/subjects');
 const expensesRoutes = require('./routes/expenses');
 const concessionRoutes = require('./routes/concessions');
 const leaveRoutes = require('./routes/leaves');
+const contactRoutes = require('./routes/contact');
 
 const app = express();
 
@@ -78,6 +79,7 @@ const startServer = async () => {
     app.use('/api/expenses', expensesRoutes);
     app.use('/api/concessions', concessionRoutes);
     app.use('/api/leaves', leaveRoutes);
+    app.use('/api/contact', contactRoutes);
 
     // Health check
     app.get('/api/health', (req, res) => {

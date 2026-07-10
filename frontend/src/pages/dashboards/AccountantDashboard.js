@@ -169,7 +169,7 @@ const AccountantDashboard = ({ user, onLogout }) => {
           <Route path="students" element={<StudentManagement />} />
           <Route path="teachers" element={isGoldOrBetter ? <AccountantTeachers /> : <PlanUpgradeRequired featureName="Teachers List" requiredPlan="Gold" />} />
           <Route path="collections" element={isGoldOrBetter ? <AccountantCollections /> : <PlanUpgradeRequired featureName="Collections Overview" requiredPlan="Gold" />} />
-          <Route path="fees" element={isGoldOrBetter ? <FeeManagement /> : <PlanUpgradeRequired featureName="Fee Management" requiredPlan="Gold" />} />
+          <Route path="fees" element={<FeeManagement />} />
           <Route path="pending" element={isGoldOrBetter ? <AccountantPendingFees /> : <PlanUpgradeRequired featureName="Pending Fees Tracking" requiredPlan="Gold" />} />
           <Route path="payments" element={isGoldOrBetter ? <AccountantPayments /> : <PlanUpgradeRequired featureName="Payments Overview" requiredPlan="Gold" />} />
           <Route path="reports" element={isPlatinum ? <AccountantReports isPremiumFeatureAllowed={isPremiumFeatureAllowed} /> : <PlanUpgradeRequired featureName="Advanced Reports" requiredPlan="Platinum" />} />

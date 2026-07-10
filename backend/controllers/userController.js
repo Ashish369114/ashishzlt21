@@ -70,7 +70,7 @@ const updateUser = async (req, res) => {
       user.email = email;
     }
 
-    if (password) user.password = password;
+    // Password updates are explicitly forbidden here; users must use forgot password
     if (role) user.role = role;
     if (firstName) user.firstName = firstName;
     if (lastName) user.lastName = lastName;

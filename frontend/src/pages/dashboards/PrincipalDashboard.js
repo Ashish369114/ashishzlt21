@@ -134,9 +134,25 @@ const PrincipalDashboard = ({ user, onLogout }) => {
 
       <div className="main-content">
         <div className="header">
-          <div>
-            <h1>Principal Dashboard</h1>
-            <div style={{ fontSize: '0.9em', color: '#6b7280' }}>{new Date().toLocaleDateString()}</div>
+          <h1>Principal Dashboard</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{
+              padding: '4px 12px',
+              borderRadius: '20px',
+              fontSize: '0.78rem',
+              fontWeight: '700',
+              letterSpacing: '0.04em',
+              background: plan.startsWith('platinum') ? 'linear-gradient(135deg, #06b6d4, #0891b2)' :
+                          plan === 'gold' ? 'linear-gradient(135deg, #f59e0b, #d97706)' :
+                          'linear-gradient(135deg, #64748b, #475569)',
+              color: '#fff',
+              textTransform: 'uppercase',
+            }}>
+              {plan === 'platinum_with_ocr' ? '⭐ Platinum + OCR' :
+               plan === 'platinum_without_ocr' || plan === 'platinum' ? '⭐ Platinum' :
+               plan === 'gold' ? '🏆 Gold' : '🥈 Silver'} Plan
+            </span>
+            <span style={{ fontSize: '0.9em', color: '#6b7280' }}>{new Date().toLocaleDateString()}</span>
           </div>
           {notifications.length > 0 && (
             <div style={{ 
@@ -173,8 +189,8 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           <Route path="payroll" element={isGoldOrBetter ? <PrincipalPayrollManagement /> : <PlanUpgradeRequired featureName="Teacher Payroll" requiredPlan="Gold" />} />
           <Route path="finance" element={isPlatinum ? <PrincipalFinanceReport /> : <PlanUpgradeRequired featureName="Finance Overview" requiredPlan="Platinum" />} />
           <Route path="reports" element={isPlatinum ? <PrincipalComprehensiveReports /> : <PlanUpgradeRequired featureName="Comprehensive Reports" requiredPlan="Platinum" />} />
-          <Route path="leaves" element={isGoldOrBetter ? <PrincipalLeaveManagement /> : <PlanUpgradeRequired featureName="Leave Requests" requiredPlan="Gold" />} />
-          <Route path="fees" element={isGoldOrBetter ? <PrincipalFinanceReport /> : <PlanUpgradeRequired featureName="Fees Management" requiredPlan="Gold" />} />
+          <Route path="leaves" element={isPlatinum ? <PrincipalLeaveManagement /> : <PlanUpgradeRequired featureName="Leave Management" requiredPlan="Platinum" />} />
+          <Route path="fees" element={<PrincipalFinanceReport />} />
           <Route path="*" element={<DashboardHome stats={stats} />} />
         </Routes>
       </div>

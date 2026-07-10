@@ -30,13 +30,91 @@ const Login = ({ onLogin }) => {
     setContactForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleContactSubmit = (e) => {
+  const [contactSending, setContactSending] = useState(false);
+  const [contactError, setContactError] = useState('');
+
+  const handleContactSubmit = async (e) => {
     e.preventDefault();
-    setContactSent(true);
-    setContactForm({ name: '', email: '', phone: '', subject: '', message: '' });
-    setTimeout(() => setContactSent(false), 5000);
+    setContactSending(true);
+    setContactError('');
+    try {
+      // Send to backend which will email business@zaynlevi.com
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...contactForm,
+          to: 'business@zaynlevi.com'
+        })
+      });
+      if (!res.ok) throw new Error('Failed');
+      setContactSent(true);
+      setContactForm({ name: '', email: '', phone: '', subject: '', message: '' });
+      setTimeout(() => setContactSent(false), 6000);
+    } catch {
+      // Fallback: open mail client pre-filled
+      const body = `Name: ${contactForm.name}%0AEmail: ${contactForm.email}%0APhone: ${contactForm.phone}%0A%0A${contactForm.message}`;
+      window.location.href = `mailto:business@zaynlevi.com?subject=${encodeURIComponent(contactForm.subject || 'School OS Inquiry')}&body=${body}`;
+      setContactSent(true);
+      setContactForm({ name: '', email: '', phone: '', subject: '', message: '' });
+      setTimeout(() => setContactSent(false), 6000);
+    } finally {
+      setContactSending(false);
+    }
   };
+
   
+  const [showForgotId, setShowForgotId] = useState(false);
+  const [showForgotPw, setShowForgotPw] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotMsg, setForgotMsg] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+
+  const handleForgotId = async (e) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    setForgotMsg('');
+    try {
+      const res = await fetch('/api/auth/forgot-id', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail })
+      });
+      const data = await res.json();
+      setForgotMsg(data.message || 'Your User ID has been sent to your email.');
+    } catch {
+      setForgotMsg('Something went wrong. Please try again.');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  const handleForgotPw = async (e) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    setForgotMsg('');
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail })
+      });
+      const data = await res.json();
+      setForgotMsg(data.message || 'Password reset link sent to your email.');
+    } catch {
+      setForgotMsg('Something went wrong. Please try again.');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  const closeForgotModal = () => {
+    setShowForgotId(false);
+    setShowForgotPw(false);
+    setForgotEmail('');
+    setForgotMsg('');
+  };
+
   const userIdRef = useRef(null);
   const loginBtnRef = useRef(null);
   const navigate = useNavigate();
@@ -236,19 +314,88 @@ const Login = ({ onLogin }) => {
 
           {/* Footer Links */}
           <div className="login-footer-links">
-            <Link to="/forgot-password" className="link">
+            <button type="button" className="link" style={{ background:'none', border:'none', cursor:'pointer', color:'inherit', font:'inherit', padding:0 }}
+              onClick={() => { setShowForgotPw(true); setShowForgotId(false); setForgotMsg(''); setForgotEmail(''); }}>
               Forgot Password?
-            </Link>
+            </button>
             <span className="divider">•</span>
-            <a href="#about" className="link" onClick={(e) => { e.preventDefault(); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); }}>
-              About Us
-            </a>
+            <button type="button" className="link" style={{ background:'none', border:'none', cursor:'pointer', color:'inherit', font:'inherit', padding:0 }}
+              onClick={() => { setShowForgotId(true); setShowForgotPw(false); setForgotMsg(''); setForgotEmail(''); }}>
+              Forgot User ID?
+            </button>
             <span className="divider">•</span>
             <a href="#contact" className="link" onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }}>
               Contact Us
             </a>
           </div>
-        </div>
+
+          {/* Forgot Password / Forgot ID Modal */}
+          {(showForgotId || showForgotPw) && (
+            <div style={{
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 9999,
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}>
+              <div style={{
+                background: '#fff', borderRadius: '16px', padding: '32px', maxWidth: '420px',
+                width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', position: 'relative'
+              }}>
+                <button onClick={closeForgotModal} style={{
+                  position: 'absolute', top: '14px', right: '16px', background: 'none',
+                  border: 'none', fontSize: '1.4rem', cursor: 'pointer', color: '#6b7280'
+                }}>✕</button>
+
+                <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+                  <span style={{ fontSize: '2.5rem' }}>{showForgotId ? '🆔' : '🔑'}</span>
+                  <h3 style={{ margin: '8px 0 4px', fontWeight: '700', color: '#1e3a5f' }}>
+                    {showForgotId ? 'Forgot User ID?' : 'Forgot Password?'}
+                  </h3>
+                  <p style={{ color: '#6b7280', fontSize: '0.88rem', margin: 0 }}>
+                    {showForgotId
+                      ? 'Enter your registered email address and we\'ll send your User ID.'
+                      : 'Enter your registered email and we\'ll send a password reset link.'}
+                  </p>
+                </div>
+
+                <form onSubmit={showForgotId ? handleForgotId : handleForgotPw} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  <input
+                    type="email"
+                    placeholder="Your registered email address"
+                    value={forgotEmail}
+                    onChange={e => setForgotEmail(e.target.value)}
+                    required
+                    style={{
+                      padding: '12px 16px', borderRadius: '10px',
+                      border: '1.5px solid #d1d5db', fontSize: '0.95rem',
+                      outline: 'none', width: '100%', boxSizing: 'border-box'
+                    }}
+                  />
+                  {forgotMsg && (
+                    <div style={{
+                      padding: '10px 14px', borderRadius: '8px',
+                      background: forgotMsg.includes('wrong') ? '#fef2f2' : '#f0fdf4',
+                      color: forgotMsg.includes('wrong') ? '#dc2626' : '#16a34a',
+                      fontSize: '0.85rem', fontWeight: '600'
+                    }}>
+                      {forgotMsg.includes('wrong') ? '⚠️' : '✅'} {forgotMsg}
+                    </div>
+                  )}
+                  <button type="submit" disabled={forgotLoading} style={{
+                    padding: '12px', borderRadius: '10px', border: 'none', cursor: 'pointer',
+                    background: 'linear-gradient(135deg, #1e3a5f, #2563eb)',
+                    color: '#fff', fontWeight: '700', fontSize: '0.95rem'
+                  }}>
+                    {forgotLoading ? '⏳ Sending...' : (showForgotId ? '📧 Send My User ID' : '📧 Send Reset Link')}
+                  </button>
+                </form>
+
+                <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.8rem', color: '#9ca3af' }}>
+                  Only you can recover your credentials using your registered email.
+                </p>
+              </div>
+            </div>
+          )}
+
+        </div>{/* end form-side */}
 
         {/* Right Side: Plans & Quick Login */}
         <div className="plans-side">
@@ -496,7 +643,13 @@ const Login = ({ onLogin }) => {
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <textarea name="message" placeholder="Tell us about your project" rows="3" value={contactForm.message} onChange={handleContactChange} required className="form-input" style={{ width: '100%', resize: 'none' }}></textarea>
               </div>
-              <button type="submit" className="btn-login" style={{ width: '100%', marginTop: '5px' }}>Send Inquiry</button>
+              {contactError && <div style={{ color: '#dc2626', fontSize: '0.85rem' }}>{contactError}</div>}
+              <button type="submit" className="btn-login" style={{ width: '100%', marginTop: '5px' }} disabled={contactSending}>
+                {contactSending ? '⏳ Sending...' : '📨 Send Inquiry'}
+              </button>
+              <p style={{ fontSize: '0.75rem', color: '#6b7280', textAlign: 'center', margin: 0 }}>
+                Your inquiry will be sent to <strong>business@zaynlevi.com</strong>
+              </p>
             </form>
           )}
         </div>
