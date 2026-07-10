@@ -301,7 +301,6 @@ const Login = ({ onLogin }) => {
                 </div>
 
                 <ul className="plan-features">
-                  <li><i className="fa-solid fa-circle-check"></i> Manage multiple campuses easily</li>
                   <li><i className="fa-solid fa-circle-check"></i> Advanced security and staff permissions</li>
                   <li><i className="fa-solid fa-circle-check"></i> 24/7 personal support helpline</li>
                 </ul>
@@ -318,7 +317,6 @@ const Login = ({ onLogin }) => {
                 </div>
 
                 <ul className="plan-features">
-                  <li><i className="fa-solid fa-circle-check"></i> Manage multiple campuses easily</li>
                   <li><i className="fa-solid fa-circle-check"></i> Advanced security and staff permissions</li>
                   <li><i className="fa-solid fa-circle-check"></i> 24/7 personal support helpline</li>
                   <li><i className="fa-solid fa-circle-check"></i> Scan and upload documents automatically</li>
