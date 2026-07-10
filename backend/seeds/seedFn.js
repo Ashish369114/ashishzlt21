@@ -359,6 +359,10 @@ const seedDataFn = async () => {
     { title: 'Science Fair', description: 'Students present innovative projects and experiments.', eventDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), eventType: 'Cultural', location: 'Science Lab' },
     { title: 'Annual Sports Day', description: 'Track and field activities for all grades.', eventDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000), eventType: 'Sports', location: 'Playground' },
     { title: 'Cultural Festival', description: 'Dance, drama, and music performances by students.', eventDate: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000), eventType: 'Cultural', location: 'Auditorium' },
+    { title: 'Annual Art & Craft Exhibition', description: 'Showcase of student paintings, sculptures, and handmade crafts.', eventDate: new Date(Date.now() + 35 * 24 * 60 * 60 * 1000), eventType: 'Cultural', location: 'Art Room & Gallery' },
+    { title: 'Inter-School Debate Championship', description: 'Declamation and debate competition on modern global issues.', eventDate: new Date(Date.now() + 42 * 24 * 60 * 60 * 1000), eventType: 'Academic', location: 'Seminar Hall' },
+    { title: 'Career Counseling Seminar', description: 'Expert lectures for high school students regarding college admissions.', eventDate: new Date(Date.now() + 49 * 24 * 60 * 60 * 1000), eventType: 'Academic', location: 'Auditorium' },
+    { title: 'Independence Day Celebration', description: 'Flag hoisting ceremony followed by patriotic songs and dance performances.', eventDate: new Date(Date.now() + 56 * 24 * 60 * 60 * 1000), eventType: 'Celebration', location: 'School Assembly Ground' }
   ];
 
   for (const event of eventData) {
