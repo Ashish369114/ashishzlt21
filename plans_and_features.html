@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Zayn Levi Technologies - School Operating System Plans & Features</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #1e293b;
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      line-height: 1.5;
+      -webkit-print-color-adjust: exact;
+    }
+    
+    .page {
+      padding: 40px;
+      box-sizing: border-box;
+      page-break-after: always;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .brand-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: #0b4d8c;
+      margin: 0;
+    }
+    
+    .brand-tag {
+      font-size: 9px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 600;
+    }
+    
+    .doc-title {
+      text-align: right;
+    }
+    
+    .doc-title h1 {
+      font-size: 22px;
+      font-weight: 800;
+      margin: 0;
+      color: #1e293b;
+    }
+    
+    .doc-title p {
+      font-size: 11px;
+      color: #64748b;
+      margin: 4px 0 0 0;
+      font-weight: 500;
+    }
+    
+    h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0b4d8c;
+      margin-top: 0;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .update-section {
+      background: #f8fafc;
+      border-left: 4px solid #00a2e8;
+      padding: 20px;
+      border-radius: 0 12px 12px 0;
+      margin-bottom: 30px;
+    }
+    
+    .update-list {
+      margin: 0;
+      padding-left: 20px;
+    }
+    
+    .update-list li {
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    
+    .update-list strong {
+      color: #0f172a;
+    }
+
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .plan-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 20px;
+      background: #ffffff;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    
+    .plan-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 12px;
+    }
+    
+    .plan-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0;
+    }
+    
+    .plan-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+    
+    .silver-badge { background: #e2e8f0; color: #475569; }
+    .gold-badge { background: #fef3c7; color: #d97706; }
+    .platinum-badge { background: #e0f2fe; color: #0369a1; }
+    .ocr-badge { background: #fae8ff; color: #a21caf; }
+    
+    .features-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    
+    .features-list li {
+      font-size: 13px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .features-list li::before {
+      content: "✓";
+      color: #10b981;
+      font-weight: 800;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    
+    .comparison-table th, .comparison-table td {
+      border: 1px solid #e2e8f0;
+      padding: 10px 12px;
+      font-size: 12px;
+      text-align: left;
+    }
+    
+    .comparison-table th {
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 700;
+    }
+    
+    .comparison-table tr:nth-child(even) {
+      background: #fafafa;
+    }
+
+    .check-yes {
+      color: #10b981;
+      font-weight: bold;
+    }
+    
+    .check-no {
+      color: #cbd5e1;
+    }
+    
+    .footer {
+      border-top: 1px solid #e2e8f0;
+      padding-top: 15px;
+      margin-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PAGE 1: Overview & Changes -->
+  <div class="page">
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 100 100" style="width: 26px; height: 26px; overflow: visible;">
+            <path d="M 24 45 V 32 A 8 8 0 0 1 32 24 H 76 L 46 54" fill="none" stroke="#0b4d8c" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M 76 55 V 68 A 8 8 0 0 1 68 76 H 24 L 54 46" fill="none" stroke="#00a2e8" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-name">Zayn Levi Technologies</h1>
+          <div class="brand-tag">School Operating System</div>
+        </div>
+      </div>
+      <div class="doc-title">
+        <h1>Plans & Features Guide</h1>
+        <p>Release Updates & Tier Comparisons</p>
+      </div>
+    </div>
+
+    <h2>🔄 System Changes & Updates Summary</h2>
+    <div class="update-section">
+      <ul class="update-list">
+        <li><strong>Single School Optimization:</strong> Removed all multi-campus selection dropdowns, region configs, and currency select menus. The system is now dedicated entirely to serving a single school environment.</li>
+        <li><strong>Company Logo & Branding:</strong> Replaced the generic graduation cap icon with the stylized split <strong>Z</strong> logo framed inside a premium white square border. Color schemes updated to match the company colors (Deep Blue <code>#0b4d8c</code> and Bright Sky Blue <code>#00a2e8</code>).</li>
+        <li><strong>On-Click Feature Locks:</strong> Instead of hiding dashboard links for lower-tier plans, all modules are fully visible on the sidebar. When a user clicks a restricted link, a premium glassmorphic <strong>Plan Upgrade Required</strong> screen is displayed, prompting them to upgrade to Gold or Platinum.</li>
+        <li><strong>Streamlined Dashboard Home:</strong> Removed the generic "Quick Overview" list and static "Features" details cards to make the dashboard workspace cleaner and faster to navigate.</li>
+      </ul>
+    </div>
+
+    <h2>📦 Subscription Plans Summary</h2>
+    <div class="plans-grid">
+      <div class="plan-card">
+        <div class="plan-header">
+          <h3 class="plan-title">🥈 Silver Plan</h3>
+          <span class="plan-badge silver-badge">Core</span>
+        </div>
+        <ul class="features-list">
+          <li>Core Academics & Classes</li>
+          <li>Student Directory & Profiles</li>
+          <li>Daily Attendance & Tracking</li>
+          <li>School & Events Calendar</li>
+          <li>Exams Scheduling & Timing</li>
+          <li>Student / Parent Portals</li>
+        </ul>
+      </div>
+
+      <div class="plan-card">
+        <div class="plan-header">
+          <h3 class="plan-title">🏆 Gold Plan</h3>
+          <span class="plan-badge gold-badge">Professional</span>
+        </div>
+        <ul class="features-list">
+          <li>All Silver Plan Features</li>
+          <li>Fee Management & Invoices</li>
+          <li>Homework Assignments</li>
+          <li>Employee / Staff Management</li>
+          <li>Gradebook & Marks Tracker</li>
+          <li>Leave Requests & Approvals</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <span>Zayn Levi Technologies Pvt Ltd</span>
+      <span>Page 1 of 2</span>
+    </div>
+  </div>
+
+  <!-- PAGE 2: Advanced Plans & Detail Matrix -->
+  <div class="page">
+    <div class="header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 100 100" style="width: 26px; height: 26px; overflow: visible;">
+            <path d="M 24 45 V 32 A 8 8 0 0 1 32 24 H 76 L 46 54" fill="none" stroke="#0b4d8c" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M 76 55 V 68 A 8 8 0 0 1 68 76 H 24 L 54 46" fill="none" stroke="#00a2e8" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-name">Zayn Levi Technologies</h1>
+          <div class="brand-tag">School Operating System</div>
+        </div>
+      </div>
+      <div class="doc-title">
+        <h1>Detailed Comparison</h1>
+        <p>Feature Mapping Matrix</p>
+      </div>
+    </div>
+
+    <div class="plans-grid" style="margin-bottom: 30px;">
+      <div class="plan-card">
+        <div class="plan-header">
+          <h3 class="plan-title">⭐ Platinum Plan</h3>
+          <span class="plan-badge platinum-badge">Enterprise</span>
+        </div>
+        <ul class="features-list">
+          <li>All Gold Plan Features</li>
+          <li>Comprehensive Finance Reports</li>
+          <li>Advanced Reports & Analytics</li>
+          <li>Hostel & Dorm Management</li>
+          <li>Library Resource Tracker</li>
+          <li>Transport & Route Monitor</li>
+        </ul>
+      </div>
+
+      <div class="plan-card">
+        <div class="plan-header">
+          <h3 class="plan-title">🛡️ Platinum + OCR</h3>
+          <span class="plan-badge ocr-badge">Premium OCR</span>
+        </div>
+        <ul class="features-list">
+          <li>All Platinum Plan Features</li>
+          <li>AI OCR Document Scanner</li>
+          <li>Automatic Document Digitization</li>
+          <li>Intelligent Text Extraction</li>
+          <li>Fast Search & Indexing</li>
+          <li>Paperless School Workflows</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>📊 Detailed Feature Inclusion Matrix</h2>
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Module / Feature Area</th>
+          <th>Silver</th>
+          <th>Gold</th>
+          <th>Platinum</th>
+          <th>Platinum + OCR</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Dashboard Analytics (Core)</td>
+          <td class="check-yes">✓ Included</td>
+          <td class="check-yes">✓ Included</td>
+          <td class="check-yes">✓ Included</td>
+          <td class="check-yes">✓ Included</td>
+        </tr>
+        <tr>
+          <td>Students & Classes Directories</td>
+          <td class="check-yes">✓ Included</td>
+          <td class="check-yes">✓ Included</td>
+          <td class="check-yes">✓ Included</td>
+          <td class="check-yes">✓ Included</td>
+        </tr>
+        <tr>
+          <td>Attendance & Calendar Events</td>
+          <td class="check-yes">✓ Included</td>
+          <td class="check-yes">✓ Included</td>
+          <td class="check-yes">✓ Included</td>
+          <td class="check-yes">✓ Included</td>
+        </tr>
+        <tr>
+          <td>Fee Management & Receipts</td>
+          <td class="check-no">— Locked</td>
+          <td class="check-yes">✓ Included</td>
+          <td class="check-yes">✓ Included</td>
+          <td class="check-yes">✓ Included</td>
+        </tr>
+        <tr>
+          <td>Homework & Teacher Modules</td>
+          <td class="check-no">— Locked</td>
+          <td class="check-yes">✓ Included</td>
+          <td class="check-yes">✓ Included</td>
+          <td class="check-yes">✓ Included</td>
+        </tr>
+        <tr>
+          <td>Finance Overview & Reports</td>
+          <td class="check-no">— Locked</td>
+          <td class="check-no">— Locked</td>
+          <td class="check-yes">✓ Included</td>
+          <td class="check-yes">✓ Included</td>
+        </tr>
+        <tr>
+          <td>Library, Transport & Hostels</td>
+          <td class="check-no">— Locked</td>
+          <td class="check-no">— Locked</td>
+          <td class="check-yes">✓ Included</td>
+          <td class="check-yes">✓ Included</td>
+        </tr>
+        <tr>
+          <td>AI OCR Document Scanner</td>
+          <td class="check-no">— Locked</td>
+          <td class="check-no">— Locked</td>
+          <td class="check-no">— Locked</td>
+          <td class="check-yes">✓ Included</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="footer">
+      <span>Zayn Levi Technologies Pvt Ltd</span>
+      <span>Page 2 of 2</span>
+    </div>
+  </div>
+
+</body>
+</html>

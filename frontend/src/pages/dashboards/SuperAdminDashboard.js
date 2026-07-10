@@ -21,6 +21,7 @@ import DashboardHome from '../components/DashboardHome';
 import UserManagement from '../components/UserManagement';
 import AcademicManagement from '../components/AcademicManagement';
 import SettingsManagement from '../components/SettingsManagement';
+import PlanUpgradeRequired from '../components/PlanUpgradeRequired';
 
 const SuperAdminDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -43,6 +44,10 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
     onLogout();
     navigate('/login');
   };
+
+  const plan = (localStorage.getItem('subscriptionPlan') || user?.subscriptionPlan || 'silver').toLowerCase();
+  const isGoldOrBetter = plan === 'gold' || plan.startsWith('platinum');
+  const isPlatinum = plan.startsWith('platinum');
 
   return (
     <div className="dashboard-layout">
@@ -87,24 +92,24 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
 
         <Routes>
           <Route index element={<DashboardHome stats={stats} />} />
-          <Route path="schools" element={<SchoolManagement />} />
-          <Route path="users" element={<UserManagement />} />
+          <Route path="schools" element={isPlatinum ? <SchoolManagement /> : <PlanUpgradeRequired featureName="Schools Management" requiredPlan="Platinum" />} />
+          <Route path="users" element={isPlatinum ? <UserManagement /> : <PlanUpgradeRequired featureName="User Management" requiredPlan="Platinum" />} />
           <Route path="academics" element={<AcademicManagement />} />
-          <Route path="admissions" element={<AdmissionManagement />} />
-          <Route path="employees" element={<EmployeeManagement />} />
+          <Route path="admissions" element={isPlatinum ? <AdmissionManagement /> : <PlanUpgradeRequired featureName="Admissions" requiredPlan="Platinum" />} />
+          <Route path="employees" element={isGoldOrBetter ? <EmployeeManagement /> : <PlanUpgradeRequired featureName="Employees" requiredPlan="Gold" />} />
           <Route path="students" element={<StudentManagement />} />
-          <Route path="teachers" element={<TeacherManagement />} />
-          <Route path="fees" element={<FeeManagement />} />
+          <Route path="teachers" element={isGoldOrBetter ? <TeacherManagement /> : <PlanUpgradeRequired featureName="Teachers" requiredPlan="Gold" />} />
+          <Route path="fees" element={isGoldOrBetter ? <FeeManagement /> : <PlanUpgradeRequired featureName="Fees Management" requiredPlan="Gold" />} />
           <Route path="classes" element={<ClassManagement />} />
-          <Route path="marks" element={<MarksManagement />} />
+          <Route path="marks" element={isGoldOrBetter ? <MarksManagement /> : <PlanUpgradeRequired featureName="Marks Management" requiredPlan="Gold" />} />
           <Route path="attendance" element={<AttendanceManagement />} />
-          <Route path="homework" element={<HomeworkManagement />} />
+          <Route path="homework" element={isGoldOrBetter ? <HomeworkManagement /> : <PlanUpgradeRequired featureName="Homework" requiredPlan="Gold" />} />
           <Route path="exams" element={<ExamManagement />} />
-          <Route path="library" element={<LibraryManagement />} />
-          <Route path="transport" element={<TransportManagement />} />
-          <Route path="hostel" element={<HostelManagement />} />
-          <Route path="reports" element={<ReportManagement />} />
-          <Route path="settings" element={<SettingsManagement />} />
+          <Route path="library" element={isPlatinum ? <LibraryManagement /> : <PlanUpgradeRequired featureName="Library" requiredPlan="Platinum" />} />
+          <Route path="transport" element={isPlatinum ? <TransportManagement /> : <PlanUpgradeRequired featureName="Transport" requiredPlan="Platinum" />} />
+          <Route path="hostel" element={isPlatinum ? <HostelManagement /> : <PlanUpgradeRequired featureName="Hostel" requiredPlan="Platinum" />} />
+          <Route path="reports" element={isPlatinum ? <ReportManagement /> : <PlanUpgradeRequired featureName="Reports & Analytics" requiredPlan="Platinum" />} />
+          <Route path="settings" element={isPlatinum ? <SettingsManagement /> : <PlanUpgradeRequired featureName="System Settings" requiredPlan="Platinum" />} />
           <Route path="events" element={<EventList />} />
           <Route path="*" element={<DashboardHome stats={stats} />} />
         </Routes>

@@ -12,6 +12,7 @@ import AccountantCollections from '../components/AccountantCollections';
 import AccountantExpenses from '../components/AccountantExpenses';
 import AccountantPayroll from '../components/AccountantPayroll';
 import ConcessionManagement from '../components/ConcessionManagement';
+import PlanUpgradeRequired from '../components/PlanUpgradeRequired';
 
 // Shows a locked feature banner WITHIN a page (not a full block)
 const FeatureLockBanner = ({ featureName, requiredPlan = 'Gold' }) => (
@@ -110,6 +111,10 @@ const AccountantDashboard = ({ user, onLogout }) => {
     navigate('/login');
   };
 
+  const planName = String(plan).toLowerCase();
+  const isGoldOrBetter = planName === 'gold' || planName.startsWith('platinum');
+  const isPlatinum = planName.startsWith('platinum');
+
   return (
     <div className="dashboard-layout">
       <div className="sidebar">
@@ -162,18 +167,14 @@ const AccountantDashboard = ({ user, onLogout }) => {
         <Routes>
           <Route index element={<DashboardHome stats={stats} />} />
           <Route path="students" element={<StudentManagement />} />
-          <Route path="teachers" element={<AccountantTeachers />} />
-          <Route path="collections" element={<AccountantCollections />} />
-          <Route path="fees" element={<FeeManagement />} />
-          <Route path="pending" element={<AccountantPendingFees />} />
-          <Route path="payments" element={<AccountantPayments />} />
-          <Route path="reports" element={<AccountantReports isPremiumFeatureAllowed={isPremiumFeatureAllowed} />} />
-          <Route path="expenses" element={<AccountantExpenses />} />
-          <Route path="concessions" element={
-            isPremiumFeatureAllowed('concessions')
-              ? <ConcessionManagement />
-              : <FeatureLockBanner featureName="Fee Concession Approvals" requiredPlan="Gold" />
-          } />
+          <Route path="teachers" element={isGoldOrBetter ? <AccountantTeachers /> : <PlanUpgradeRequired featureName="Teachers List" requiredPlan="Gold" />} />
+          <Route path="collections" element={isGoldOrBetter ? <AccountantCollections /> : <PlanUpgradeRequired featureName="Collections Overview" requiredPlan="Gold" />} />
+          <Route path="fees" element={isGoldOrBetter ? <FeeManagement /> : <PlanUpgradeRequired featureName="Fee Management" requiredPlan="Gold" />} />
+          <Route path="pending" element={isGoldOrBetter ? <AccountantPendingFees /> : <PlanUpgradeRequired featureName="Pending Fees Tracking" requiredPlan="Gold" />} />
+          <Route path="payments" element={isGoldOrBetter ? <AccountantPayments /> : <PlanUpgradeRequired featureName="Payments Overview" requiredPlan="Gold" />} />
+          <Route path="reports" element={isPlatinum ? <AccountantReports isPremiumFeatureAllowed={isPremiumFeatureAllowed} /> : <PlanUpgradeRequired featureName="Advanced Reports" requiredPlan="Platinum" />} />
+          <Route path="expenses" element={isGoldOrBetter ? <AccountantExpenses /> : <PlanUpgradeRequired featureName="Expenses Tracking" requiredPlan="Gold" />} />
+          <Route path="concessions" element={isGoldOrBetter ? <ConcessionManagement /> : <PlanUpgradeRequired featureName="Fee Concession Approvals" requiredPlan="Gold" />} />
           <Route path="*" element={<DashboardHome stats={stats} />} />
         </Routes>
       </div>

@@ -132,23 +132,7 @@ const DashboardHome = ({ stats }) => {
         })}
       </div>
 
-      <div className="card">
-        <div className="card-header">
-          <h2>📊 Quick Overview</h2>
-        </div>
-        <p>Welcome to the School Operating System. Use the navigation menu to access different modules.</p>
-        <div style={{ marginTop: '12px' }}>
-          <strong>Active Plan:</strong> {getPlanDisplayName(planName)}
-        </div>
-        <div style={{ marginTop: '10px' }}>
-          <strong>Included Modules:</strong>
-          <ul style={{ lineHeight: '1.8', paddingLeft: '20px', marginTop: '8px' }}>
-            {getPlanModules(planName).slice(0, 10).map((module) => (
-              <li key={module}>{module}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
+
 
       {notifications.length > 0 && (
         <div className="card">
@@ -227,21 +211,7 @@ const DashboardHome = ({ stats }) => {
         </div>
       ) : null}
 
-      <div className="card">
-        <div className="card-header">
-          <h2>🎯 Features</h2>
-        </div>
-        <ul style={{ lineHeight: '2', paddingLeft: '20px' }}>
-          <li>✅ Student Management - Add, edit, delete and view student records</li>
-          <li>✅ Teacher Management - Manage teacher information and assignments</li>
-          <li>✅ Marks Management - Track student academic performance</li>
-          <li>✅ Attendance Tracking - Monitor student attendance</li>
-          <li>✅ Homework Assignment - Assign and track homework</li>
-          <li>✅ Fee Management - Manage student fees and payments</li>
-          <li>✅ Real-time Synchronization - Data updates across all dashboards</li>
-          <li>✅ Role-based Access Control - Secure access for different user roles</li>
-        </ul>
-      </div>
+
     </div>
   );
 };

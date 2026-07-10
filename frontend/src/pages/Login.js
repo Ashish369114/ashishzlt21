@@ -151,7 +151,10 @@ const Login = ({ onLogin }) => {
         <div className="form-side">
           <div className="brand">
             <div className="brand-icon">
-              <i className="fa-solid fa-graduation-cap"></i>
+              <svg viewBox="0 0 100 100" style={{ width: '28px', height: '28px', overflow: 'visible' }}>
+                <path d="M 24 45 V 32 A 8 8 0 0 1 32 24 H 76 L 46 54" fill="none" stroke="#0b4d8c" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M 76 55 V 68 A 8 8 0 0 1 68 76 H 24 L 54 46" fill="none" stroke="#00a2e8" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </div>
             <div>
               <div className="brand-name">Zayn Levi Technologies</div>

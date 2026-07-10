@@ -14,6 +14,7 @@ import PrincipalLeaveManagement from '../components/PrincipalLeaveManagement';
 import PrincipalPendingFees from '../components/PrincipalPendingFees';
 import PrincipalConcessionGrant from '../components/PrincipalConcessionGrant';
 import PrincipalPayrollManagement from '../components/PrincipalPayrollManagement';
+import PlanUpgradeRequired from '../components/PlanUpgradeRequired';
 
 
 const PrincipalDashboard = ({ user, onLogout }) => {
@@ -87,6 +88,10 @@ const PrincipalDashboard = ({ user, onLogout }) => {
     navigate('/login');
   };
 
+  const plan = (localStorage.getItem('subscriptionPlan') || user?.subscriptionPlan || 'silver').toLowerCase();
+  const isGoldOrBetter = plan === 'gold' || plan.startsWith('platinum');
+  const isPlatinum = plan.startsWith('platinum');
+
   return (
     <div className="dashboard-layout">
       <div className="sidebar">
@@ -159,17 +164,17 @@ const PrincipalDashboard = ({ user, onLogout }) => {
         <Routes>
           <Route index element={<DashboardHome stats={stats} />} />
           <Route path="students" element={<StudentManagement />} />
-          <Route path="teachers" element={<PrincipalTeacherManagement />} />
+          <Route path="teachers" element={isGoldOrBetter ? <PrincipalTeacherManagement /> : <PlanUpgradeRequired featureName="Teachers Management" requiredPlan="Gold" />} />
           <Route path="exams" element={<PrincipalExamManagement />} />
           <Route path="attendance" element={<PrincipalAttendance />} />
           <Route path="performance" element={<PrincipalPerformance />} />
-          <Route path="pending" element={<PrincipalPendingFees />} />
-          <Route path="concessions" element={<PrincipalConcessionGrant />} />
-          <Route path="payroll" element={<PrincipalPayrollManagement />} />
-          <Route path="finance" element={<PrincipalFinanceReport />} />
-          <Route path="reports" element={<PrincipalComprehensiveReports />} />
-          <Route path="leaves" element={<PrincipalLeaveManagement />} />
-          <Route path="fees" element={<PrincipalFinanceReport />} />
+          <Route path="pending" element={isGoldOrBetter ? <PrincipalPendingFees /> : <PlanUpgradeRequired featureName="Fee Overview" requiredPlan="Gold" />} />
+          <Route path="concessions" element={isGoldOrBetter ? <PrincipalConcessionGrant /> : <PlanUpgradeRequired featureName="Concessions Granting" requiredPlan="Gold" />} />
+          <Route path="payroll" element={isGoldOrBetter ? <PrincipalPayrollManagement /> : <PlanUpgradeRequired featureName="Teacher Payroll" requiredPlan="Gold" />} />
+          <Route path="finance" element={isPlatinum ? <PrincipalFinanceReport /> : <PlanUpgradeRequired featureName="Finance Overview" requiredPlan="Platinum" />} />
+          <Route path="reports" element={isPlatinum ? <PrincipalComprehensiveReports /> : <PlanUpgradeRequired featureName="Comprehensive Reports" requiredPlan="Platinum" />} />
+          <Route path="leaves" element={isGoldOrBetter ? <PrincipalLeaveManagement /> : <PlanUpgradeRequired featureName="Leave Requests" requiredPlan="Gold" />} />
+          <Route path="fees" element={isGoldOrBetter ? <PrincipalFinanceReport /> : <PlanUpgradeRequired featureName="Fees Management" requiredPlan="Gold" />} />
           <Route path="*" element={<DashboardHome stats={stats} />} />
         </Routes>
       </div>
