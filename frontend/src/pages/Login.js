@@ -162,24 +162,6 @@ const Login = ({ onLogin }) => {
           <h1 className="headline">Welcome Back</h1>
           <p className="subline">Sign in to access your school dashboard and modules.</p>
 
-          {/* Region / Currency Selector */}
-          <div className="country-bar">
-            <label htmlFor="csel">
-              <i className="fa-solid fa-earth-asia"></i> Region / Currency
-            </label>
-            <select
-              id="csel"
-              className="country-select"
-              value={selectedCountry}
-              onChange={(e) => setSelectedCountry(e.target.value)}
-            >
-              {Object.entries(currencies).map(([key, val]) => (
-                <option key={key} value={key}>
-                  {val.name} ({val.symbol})
-                </option>
-              ))}
-            </select>
-          </div>
 
           {/* Messages */}
           {error && (
@@ -283,9 +265,9 @@ const Login = ({ onLogin }) => {
                 </div>
 
                 <ul className="plan-features">
-                  <li><i className="fa-solid fa-circle-check"></i> Core Academics Module</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Class &amp; Subject Schedules</li>
                   <li><i className="fa-solid fa-circle-check"></i> Student Directory</li>
-                  <li><i className="fa-solid fa-circle-check"></i> Daily Attendance Logs</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Daily Student Attendance Tracking</li>
                   <li><i className="fa-solid fa-circle-check"></i> Basic Exam Schedules</li>
                 </ul>
                 <button className="btn-login" style={{ marginTop: '14px', width: '100%', padding: '10px', fontSize: '0.9rem' }} onClick={() => navigate('/silver-plan')}>
@@ -319,10 +301,9 @@ const Login = ({ onLogin }) => {
                 </div>
 
                 <ul className="plan-features">
-                  <li><i className="fa-solid fa-circle-check"></i> Custom APIs &amp; Integrations</li>
-                  <li><i className="fa-solid fa-circle-check"></i> Multi-branch Operations</li>
-                  <li><i className="fa-solid fa-circle-check"></i> Advanced Role Access Control</li>
-                  <li><i className="fa-solid fa-circle-check"></i> Dedicated Account Support</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Manage multiple campuses easily</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Advanced security and staff permissions</li>
+                  <li><i className="fa-solid fa-circle-check"></i> 24/7 personal support helpline</li>
                 </ul>
                 <button className="btn-login" style={{ marginTop: '14px', width: '100%', padding: '10px', fontSize: '0.9rem' }} onClick={() => navigate('/platinum-plan?ocr=false')}>
                   Choose Plan
@@ -337,11 +318,10 @@ const Login = ({ onLogin }) => {
                 </div>
 
                 <ul className="plan-features">
-                  <li><i className="fa-solid fa-circle-check"></i> Custom APIs &amp; Integrations</li>
-                  <li><i className="fa-solid fa-circle-check"></i> Multi-branch Operations</li>
-                  <li><i className="fa-solid fa-circle-check"></i> Advanced Role Access Control</li>
-                  <li><i className="fa-solid fa-circle-check"></i> Dedicated Account Support</li>
-                  <li><i className="fa-solid fa-circle-check"></i> OCR to Accountant (Teacher &amp; Student upcoming)</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Manage multiple campuses easily</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Advanced security and staff permissions</li>
+                  <li><i className="fa-solid fa-circle-check"></i> 24/7 personal support helpline</li>
+                  <li><i className="fa-solid fa-circle-check"></i> Scan and upload documents automatically</li>
                 </ul>
                 <button className="btn-login" style={{ marginTop: '14px', width: '100%', padding: '10px', fontSize: '0.9rem' }} onClick={() => navigate('/platinum-plan?ocr=true')}>
                   Choose Plan
