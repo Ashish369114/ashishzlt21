@@ -1,0 +1,11 @@
+# Local development files
+bin/
+*.log
+.env
+node_modules/
+dist/
+build/
+.pnpm-store/
+.pnpm-debug.log
+frontend/pnpm-lock.yaml
+frontend/pnpm-workspace.yaml
