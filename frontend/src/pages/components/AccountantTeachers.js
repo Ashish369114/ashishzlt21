@@ -8,6 +8,8 @@ const AccountantTeachers = () => {
   const [statusFilter, setStatusFilter] = useState('All');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [sortField, setSortField] = useState('employeeId');
+  const [sortOrder, setSortOrder] = useState('asc');
 
   useEffect(() => {
     const fetchTeachers = async () => {
@@ -46,8 +48,52 @@ const AccountantTeachers = () => {
       return matchesSearch && matchesStatus;
     });
 
+    // Sort the filtered results
+    filtered.sort((a, b) => {
+      let valA = '';
+      let valB = '';
+
+      if (sortField === 'name') {
+        valA = `${a.userId?.firstName || ''} ${a.userId?.lastName || ''}`.trim();
+        valB = `${b.userId?.firstName || ''} ${b.userId?.lastName || ''}`.trim();
+      } else if (sortField === 'employeeId') {
+        valA = a.userId?.userId || '';
+        valB = b.userId?.userId || '';
+      } else if (sortField === 'designation') {
+        valA = a.designation || 'Teacher';
+        valB = b.designation || 'Teacher';
+      } else if (sortField === 'status') {
+        valA = a.status || 'Active';
+        valB = b.status || 'Active';
+      }
+
+      return sortOrder === 'asc'
+        ? valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' })
+        : valB.localeCompare(valA, undefined, { numeric: true, sensitivity: 'base' });
+    });
+
     setFilteredTeachers(filtered);
-  }, [searchTerm, statusFilter, teachers]);
+  }, [searchTerm, statusFilter, teachers, sortField, sortOrder]);
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const getSortIcon = (field) => {
+    if (sortField !== field) {
+      return <span style={{ color: '#9ca3af', marginLeft: '6px', fontSize: '0.85em' }}>⇅</span>;
+    }
+    return sortOrder === 'asc' ? (
+      <span style={{ color: '#2563eb', marginLeft: '6px', fontSize: '0.85em' }}>▲</span>
+    ) : (
+      <span style={{ color: '#2563eb', marginLeft: '6px', fontSize: '0.85em' }}>▼</span>
+    );
+  };
 
   const formatAssignedClasses = (assignedClasses) => {
     if (!assignedClasses?.length) {
@@ -106,14 +152,22 @@ const AccountantTeachers = () => {
           <table>
             <thead>
               <tr>
-                <th>Teacher Name</th>
-                <th>Employee ID</th>
+                <th onClick={() => handleSort('name')} style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}>
+                  Teacher Name {getSortIcon('name')}
+                </th>
+                <th onClick={() => handleSort('employeeId')} style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}>
+                  Employee ID {getSortIcon('employeeId')}
+                </th>
                 <th>Contact Details</th>
                 <th>Profile / Bio</th>
-                <th>Designation</th>
+                <th onClick={() => handleSort('designation')} style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}>
+                  Designation {getSortIcon('designation')}
+                </th>
                 <th>Assigned Classes</th>
                 <th>Assigned Subjects</th>
-                <th>Status</th>
+                <th onClick={() => handleSort('status')} style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}>
+                  Status {getSortIcon('status')}
+                </th>
               </tr>
             </thead>
             <tbody>

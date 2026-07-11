@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { feeService, classService, studentService, concessionService } from '../../services/api';
+import { feeService, classService, studentService } from '../../services/api';
 
 const initialFormData = {
   student: '',
@@ -9,7 +9,7 @@ const initialFormData = {
   installments: 3,
 };
 
-const FeeManagement = () => {
+const FeeManagement = ({ user }) => {
   const [fees, setFees] = useState([]);
   const [selectedStudentFees, setSelectedStudentFees] = useState([]);
   const [students, setStudents] = useState([]);
@@ -23,13 +23,10 @@ const FeeManagement = () => {
   const [selectedStudent, setSelectedStudent] = useState('');
   const [editingFeeId, setEditingFeeId] = useState(null);
   const [formData, setFormData] = useState(initialFormData);
-  const [showConcessionModal, setShowConcessionModal] = useState(false);
-  const [concessionForm, setConcessionForm] = useState({
-    concessionAmount: '',
-    reason: '',
-  });
-  const [concessionTargetFee, setConcessionTargetFee] = useState(null);
-  const [concessionSuccess, setConcessionSuccess] = useState('');
+
+  const userRole = user?.role || JSON.parse(localStorage.getItem('user') || '{}').role;
+  const isAccountant = userRole === 'accountant';
+
   const [editForm, setEditForm] = useState({
     amount: '',
     installments: '3',
@@ -301,39 +298,6 @@ const FeeManagement = () => {
     }
   };
 
-  const handleOpenConcessionModal = (fee) => {
-    setConcessionTargetFee(fee);
-    setConcessionForm({ concessionAmount: '', reason: '' });
-    setShowConcessionModal(true);
-    setConcessionSuccess('');
-  };
-
-  const handleConcessionSubmit = async (e) => {
-    e.preventDefault();
-    if (!concessionForm.concessionAmount || !concessionForm.reason || !concessionTargetFee) {
-      setError('Please fill in all concession request fields.');
-      return;
-    }
-
-    try {
-      const studentId = concessionTargetFee.student?._id || concessionTargetFee.student || selectedStudent;
-      await concessionService.create({
-        studentId,
-        feeId: concessionTargetFee._id,
-        concessionAmount: concessionForm.concessionAmount,
-        reason: concessionForm.reason,
-      });
-
-      setConcessionSuccess('Concession request submitted to Principal successfully!');
-      setTimeout(() => {
-        setShowConcessionModal(false);
-        setConcessionTargetFee(null);
-        setConcessionSuccess('');
-      }, 3000);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to submit concession request.');
-    }
-  };
 
   const gradeOptions = [...new Set(classes.map((cls) => String(cls.grade)).filter(Boolean))].sort((a, b) => Number(a) - Number(b));
   const visibleClasses = selectedGrade ? classes.filter((cls) => String(cls.grade) === String(selectedGrade)) : [];
@@ -364,9 +328,11 @@ const FeeManagement = () => {
     <div className="card">
       <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2>💰 Fee Management</h2>
-        <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-          {showForm ? 'Cancel' : '➕ Add Fee'}
-        </button>
+        {isAccountant && (
+          <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
+            {showForm ? 'Cancel' : '➕ Add Fee'}
+          </button>
+        )}
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
@@ -374,7 +340,6 @@ const FeeManagement = () => {
       <div className="form-container" style={{ marginBottom: '20px' }}>
         <div className="form-row">
           <div className="form-group">
-            <label>Grade</label>
             <select
               value={selectedGrade}
               onChange={(e) => {
@@ -391,7 +356,6 @@ const FeeManagement = () => {
             </select>
           </div>
           <div className="form-group">
-            <label>Section</label>
             <select
               value={selectedSection}
               onChange={(e) => setSelectedSection(e.target.value)}
@@ -404,7 +368,6 @@ const FeeManagement = () => {
             </select>
           </div>
           <div className="form-group">
-            <label>Particular Student</label>
             <select
               value={selectedStudent}
               onChange={(e) => {
@@ -521,7 +484,7 @@ const FeeManagement = () => {
         </div>
       )}
 
-      {showForm && (
+      {isAccountant && showForm && (
         <div className="form-container" style={{ marginBottom: '30px' }}>
           <h3>{editingFeeId ? 'Update Fee' : 'Add New Fee'}</h3>
           <form onSubmit={handleAddFee}>
@@ -543,6 +506,19 @@ const FeeManagement = () => {
                       </option>
                     );
                   })}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Fee Type / Description</label>
+                <select
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="Annual Tuition Fees">Annual Tuition Fees</option>
+                  <option value="Pocket Money">Pocket Money</option>
+                  <option value="Caution Deposit">Caution Deposit</option>
                 </select>
               </div>
               <div className="form-group">
@@ -605,9 +581,12 @@ const FeeManagement = () => {
                         <th>Pending Amount</th>
                         <th>Paid Amount</th>
                         <th>Payment Method</th>
-                        <th>Concession</th>
-                        <th>Edit</th>
-                        <th>Delete</th>
+                        {isAccountant && (
+                          <>
+                            <th>Edit</th>
+                            <th>Delete</th>
+                          </>
+                        )}
                       </tr>
                     </thead>
                     <tbody>
@@ -666,7 +645,7 @@ const FeeManagement = () => {
                                   <option value="Cheque">Cheque</option>
                                 </select>
                               </td>
-                              <td colSpan="3">
+                              <td colSpan="2">
                                 <div className="action-buttons">
                                   <button className="btn btn-success btn-small" onClick={handleSaveEdit}>Save</button>
                                   <button className="btn btn-secondary btn-small" onClick={resetEditForm}>Cancel</button>
@@ -680,27 +659,23 @@ const FeeManagement = () => {
                               <td>{formatCurrency(Math.max((selectedFee.amount || 0) - (selectedFee.paidAmount || 0), 0))}</td>
                               <td>{formatCurrency(selectedFee.paidAmount || 0)}</td>
                               <td>{selectedFee.paymentMethod || '-'}</td>
-                              <td>
-                                <button
-                                  className="btn btn-primary btn-small"
-                                  onClick={() => handleOpenConcessionModal(selectedFee)}
-                                >
-                                  Request Concession
-                                </button>
-                              </td>
-                              <td>
-                                <button className="btn btn-secondary btn-small" onClick={() => handleEditFee(selectedFee)}>
-                                  Edit
-                                </button>
-                              </td>
-                              <td>
-                                <button
-                                  className="btn btn-danger btn-small"
-                                  onClick={() => handleDeleteStudentFees(getStudentIdentifier(selectedStudentRecord))}
-                                >
-                                  Delete
-                                </button>
-                              </td>
+                              {isAccountant && (
+                                <>
+                                  <td>
+                                    <button className="btn btn-secondary btn-small" onClick={() => handleEditFee(selectedFee)}>
+                                      Edit
+                                    </button>
+                                  </td>
+                                  <td>
+                                    <button
+                                      className="btn btn-danger btn-small"
+                                      onClick={() => handleDeleteStudentFees(getStudentIdentifier(selectedStudentRecord))}
+                                    >
+                                      Delete
+                                    </button>
+                                  </td>
+                                </>
+                              )}
                             </>
                           )}
                         </tr>
@@ -719,75 +694,6 @@ const FeeManagement = () => {
               )}
             </>
           )}
-        </div>
-      )}
-
-      {showConcessionModal && concessionTargetFee && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }}>
-          <div className="card" style={{ width: '450px', padding: '20px', position: 'relative' }}>
-            <div className="card-header" style={{ marginBottom: '15px' }}>
-              <h3>Request Fee Concession</h3>
-            </div>
-            {concessionSuccess && <div className="alert alert-success">{concessionSuccess}</div>}
-            <form onSubmit={handleConcessionSubmit}>
-              <div className="form-group" style={{ marginBottom: '15px' }}>
-                <label>Current Fee Amount</label>
-                <input
-                  type="text"
-                  value={`₹${concessionTargetFee.amount}`}
-                  disabled
-                  style={{ backgroundColor: '#f3f4f6' }}
-                />
-              </div>
-              <div className="form-group" style={{ marginBottom: '15px' }}>
-                <label>Concession Amount (Discount)</label>
-                <input
-                  type="number"
-                  min="1"
-                  max={concessionTargetFee.amount}
-                  placeholder="Enter discount amount"
-                  value={concessionForm.concessionAmount}
-                  onChange={(e) => setConcessionForm(prev => ({ ...prev, concessionAmount: e.target.value }))}
-                  required
-                />
-              </div>
-              <div className="form-group" style={{ marginBottom: '20px' }}>
-                <label>Reason / Justification</label>
-                <textarea
-                  placeholder="e.g. Merit discount, sports quota..."
-                  value={concessionForm.reason}
-                  onChange={(e) => setConcessionForm(prev => ({ ...prev, reason: e.target.value }))}
-                  required
-                  rows="3"
-                  style={{ width: '100%', padding: '8px', border: '1px solid #d1d5db', borderRadius: '4px' }}
-                />
-              </div>
-              <div className="action-buttons" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                <button type="submit" className="btn btn-success">Submit Request</button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => {
-                    setShowConcessionModal(false);
-                    setConcessionTargetFee(null);
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
         </div>
       )}
     </div>

@@ -44,6 +44,20 @@ const AccountantCollections = () => {
           : sum;
       }, 0);
 
+      const pocketCollected = paid.reduce((sum, fee) => {
+        if (/pocket/i.test(fee.description || '')) {
+          return sum + Number(fee.paidAmount || fee.amount || 0);
+        }
+        return sum;
+      }, 0);
+
+      const cautionCollected = paid.reduce((sum, fee) => {
+        if (/caution/i.test(fee.description || '')) {
+          return sum + Number(fee.paidAmount || fee.amount || 0);
+        }
+        return sum;
+      }, 0);
+
       setPendingFees(pending);
       setPaidFees(paid);
       setStats({
@@ -52,6 +66,8 @@ const AccountantCollections = () => {
         pendingCount: pending.length,
         pendingAmount: pending.reduce((sum, fee) => sum + Number(fee.amount || 0), 0),
         totalCollected: paid.reduce((sum, fee) => sum + Number(fee.paidAmount || fee.amount || 0), 0),
+        pocketCollected,
+        cautionCollected,
       });
     } catch (err) {
       console.error(err);
@@ -137,7 +153,7 @@ const AccountantCollections = () => {
         <div className="spinner"></div>
       ) : (
         <>
-          <div className="stats-grid" style={{ marginBottom: '20px' }}>
+          <div className="stats-grid" style={{ marginBottom: '20px', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
             <div className="stat-card">
               <h3>Today's Collection</h3>
               <div className="value">{formatCurrency(stats.todayTotal)}</div>
@@ -153,6 +169,14 @@ const AccountantCollections = () => {
             <div className="stat-card">
               <h3>Total Collected</h3>
               <div className="value">{formatCurrency(stats.totalCollected)}</div>
+            </div>
+            <div className="stat-card" style={{ background: 'linear-gradient(135deg, #eff6ff, #dbeafe)', borderLeft: '4px solid #3b82f6' }}>
+              <h3 style={{ color: '#1e40af' }}>Pocket Money Collected</h3>
+              <div className="value" style={{ color: '#1d4ed8' }}>{formatCurrency(stats.pocketCollected)}</div>
+            </div>
+            <div className="stat-card" style={{ background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', borderLeft: '4px solid #10b981' }}>
+              <h3 style={{ color: '#166534' }}>Caution Deposit Collected</h3>
+              <div className="value" style={{ color: '#15803d' }}>{formatCurrency(stats.cautionCollected)}</div>
             </div>
           </div>
 
@@ -182,7 +206,12 @@ const AccountantCollections = () => {
                       const summary = getFeeSummary(fee);
                       return (
                         <tr key={fee._id}>
-                          <td>{fee.student?.firstName} {fee.student?.lastName}</td>
+                          <td>
+                            <strong>{fee.student?.firstName} {fee.student?.lastName}</strong>
+                            <div style={{ fontSize: '0.82em', color: '#6b7280', marginTop: '3px' }}>
+                              Type: {fee.description || 'Annual Tuition Fees'}
+                            </div>
+                          </td>
                           <td>
                             <div>Due: {formatCurrency(summary.amount)}</div>
                             <div>Paid: {formatCurrency(summary.paidAmount)}</div>
@@ -251,7 +280,12 @@ const AccountantCollections = () => {
                       const summary = getFeeSummary(fee);
                       return (
                       <tr key={fee._id}>
-                        <td>{fee.student?.firstName} {fee.student?.lastName}</td>
+                        <td>
+                          <strong>{fee.student?.firstName} {fee.student?.lastName}</strong>
+                          <div style={{ fontSize: '0.82em', color: '#6b7280', marginTop: '3px' }}>
+                            Type: {fee.description || 'Annual Tuition Fees'}
+                          </div>
+                        </td>
                         <td>
                           <div>Paid: {formatCurrency(summary.paidAmount)}</div>
                           <div>Balance: {formatCurrency(summary.balance)}</div>
