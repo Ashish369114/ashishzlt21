@@ -30,6 +30,7 @@ const PrincipalFinanceAndFees = ({ isPlatinum }) => {
           style={{
             padding: '8px 16px',
             borderRadius: '6px',
+            
             border: 'none',
             background: activeSubTab === 'finance' ? '#7c3aed' : 'transparent',
             color: activeSubTab === 'finance' ? '#fff' : '#4b5563',
