@@ -251,8 +251,7 @@ const Login = ({ onLogin }) => {
             One intelligent platform to manage admissions, attendance, examinations, fees, payroll, transport, library, hostel, communication, and analytics.
           </p>
           <div className="hero-cta">
-            <a href="#login" className="btn-primary">Login</a>
-            <a href="#contact" className="btn-secondary">Book Free Demo</a>
+            <a href="#contact" className="btn-primary">Book a Free Demo</a>
           </div>
         </section>
 
@@ -314,9 +313,6 @@ const Login = ({ onLogin }) => {
                 </div>
 
                 <div className="cta-action-group">
-                  <button type="button" className="btn-book-demo-large" onClick={() => setShowDemoModal(true)}>
-                    🚀 Book Free Demo
-                  </button>
                   <button type="submit" className="btn-login-secondary" disabled={loading}>
                     {loading ? (
                       <><i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }}></i>Authenticating...</>
