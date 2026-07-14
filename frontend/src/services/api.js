@@ -15,6 +15,22 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Auto-logout on 401 (stale/invalid token — e.g., after backend restart)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      // Redirect to login without a full page reload loop
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
+        window.location.href = '/';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const authService = {
   login: (userId, password) => api.post('/auth/login', { userId, password }),
   logout: () => api.post('/auth/logout'),
@@ -265,7 +281,37 @@ export const studentNotesService = {
   },
   getByStudent: async (studentId) => {
     const all = getLocalStudentNotes();
-    const studentNotes = all.filter(n => n.studentId === studentId);
+    let studentNotes = all.filter(n => n.studentId === studentId);
+    
+    // Auto-seed dummy data if empty for demonstration
+    if (studentNotes.length === 0) {
+      studentNotes = [
+        {
+          _id: 'dummy_note_1_' + Date.now(),
+          studentId,
+          category: 'Excellent Performance',
+          subject: 'Mathematics',
+          priority: 'Low',
+          description: 'Consistently performing well in class tests and assignments. Keep up the good work!',
+          visibleToParent: true,
+          addedBy: 'Mr. Sharma',
+          date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          _id: 'dummy_note_2_' + Date.now(),
+          studentId,
+          category: 'Behaviour Issue',
+          subject: '',
+          priority: 'Medium',
+          description: 'Very talkative during lectures. Needs to focus more on the lesson.',
+          visibleToParent: true,
+          addedBy: 'Ms. Gupta',
+          date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+        }
+      ];
+      saveLocalStudentNotes([...all, ...studentNotes]);
+    }
+    
     return { data: studentNotes };
   },
   add: async (data) => {

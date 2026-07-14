@@ -12,10 +12,11 @@ const TransportManagement = () => {
     pickupTime: '',
     dropTime: '',
     vehicle: { vehicleNumber: '' },
-    driver: { driverName: '' },
+    driver: { driverName: '', phone: '' },
   });
   const [editingRouteId, setEditingRouteId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   useEffect(() => {
     fetchRoutes();
@@ -55,8 +56,9 @@ const TransportManagement = () => {
       pickupTime: route.pickupTime || '',
       dropTime: route.dropTime || '',
       vehicle: { vehicleNumber: route.vehicle?.vehicleNumber || '' },
-      driver: { driverName: route.driver?.driverName || '' },
+      driver: { driverName: route.driver?.driverName || '', phone: route.driver?.phone || '' },
     });
+    setShowAddForm(true);
   };
 
   const resetRouteForm = () => {
@@ -116,73 +118,94 @@ const TransportManagement = () => {
     <div className="management-container">
       <h1>Transport Management</h1>
 
-      <form onSubmit={handleAddRoute} className="management-form">
-        <h3>Add New Route</h3>
-        {error && <div style={{ color: '#d32f2f', marginBottom: '10px', padding: '8px', backgroundColor: '#ffebee', borderRadius: '4px' }}>{error}</div>}
-        <input
-          type="text"
-          name="routeName"
-          placeholder="Route Name"
-          value={newRoute.routeName}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="text"
-          name="startPoint.name"
-          placeholder="Starting Point"
-          value={newRoute.startPoint.name}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="text"
-          name="endPoint.name"
-          placeholder="Ending Point"
-          value={newRoute.endPoint.name}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="time"
-          name="pickupTime"
-          value={newRoute.pickupTime}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="time"
-          name="dropTime"
-          value={newRoute.dropTime}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="text"
-          name="vehicle.vehicleNumber"
-          placeholder="Vehicle Number"
-          value={newRoute.vehicle.vehicleNumber}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="text"
-          name="driver.driverName"
-          placeholder="Driver Name"
-          value={newRoute.driver.driverName}
-          onChange={handleInputChange}
-          required
-        />
-        <button type="submit">{editingRouteId ? 'Update Route' : 'Add Route'}</button>
-        {editingRouteId && (
-          <button type="button" onClick={resetRouteForm} style={{ marginLeft: '10px' }}>
-            Cancel
-          </button>
-        )}
-      </form>
+      {showAddForm && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', width: '90%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, color: '#374151', fontSize: '1.25rem' }}>{editingRouteId ? 'Update Route' : 'Add New Route'}</h3>
+              <button onClick={() => { resetRouteForm(); setShowAddForm(false); }} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#6b7280', padding: '0 5px' }}>&times;</button>
+            </div>
+            <form onSubmit={handleAddRoute} className="management-form" style={{ marginBottom: 0, boxShadow: 'none', padding: 0 }}>
+              {error && <div style={{ color: '#d32f2f', marginBottom: '10px', padding: '8px', backgroundColor: '#ffebee', borderRadius: '4px' }}>{error}</div>}
+              <input
+                type="text"
+                name="routeName"
+                placeholder="Route Name"
+                value={newRoute.routeName}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="text"
+                name="startPoint.name"
+                placeholder="Starting Point"
+                value={newRoute.startPoint.name}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="text"
+                name="endPoint.name"
+                placeholder="Ending Point"
+                value={newRoute.endPoint.name}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="time"
+                name="pickupTime"
+                value={newRoute.pickupTime}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="time"
+                name="dropTime"
+                value={newRoute.dropTime}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="text"
+                name="vehicle.vehicleNumber"
+                placeholder="Vehicle Number"
+                value={newRoute.vehicle.vehicleNumber}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="text"
+                name="driver.driverName"
+                placeholder="Driver Name"
+                value={newRoute.driver.driverName}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="tel"
+                name="driver.phone"
+                placeholder="Driver Phone"
+                value={newRoute.driver.phone || ''}
+                onChange={handleInputChange}
+              />
+              <button type="submit" className="btn btn-primary">{editingRouteId ? 'Update Route' : 'Add Route'}</button>
+              {editingRouteId && (
+                <button type="button" className="btn btn-secondary" onClick={() => { resetRouteForm(); setShowAddForm(false); }} style={{ marginLeft: '10px' }}>
+                  Cancel
+                </button>
+              )}
+            </form>
+          </div>
+        </div>
+      )}
 
       <div className="routes-list">
-        <h3>Transport Routes</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h3 style={{ margin: 0 }}>Transport Routes</h3>
+          <button onClick={() => setShowAddForm(true)} className="btn-primary" style={{ padding: '8px 20px', borderRadius: '8px', cursor: 'pointer', width: 'fit-content' }}>
+            + Add Route
+          </button>
+        </div>
         {loading ? (
           <p>Loading...</p>
         ) : (
@@ -195,7 +218,8 @@ const TransportManagement = () => {
                 <th>Pickup Time</th>
                 <th>Drop Time</th>
                 <th>Vehicle</th>
-                <th>Driver</th>
+                <th>Driver Name</th>
+                <th>Driver Phone</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -209,6 +233,7 @@ const TransportManagement = () => {
                   <td>{route.dropTime}</td>
                   <td>{route.vehicle?.vehicleNumber}</td>
                   <td>{route.driver?.driverName}</td>
+                  <td>{route.driver?.phone || 'N/A'}</td>
                   <td>
                     <button onClick={() => handleEditRoute(route)} style={{ marginRight: '8px' }}>
                       Edit

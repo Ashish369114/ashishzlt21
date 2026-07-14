@@ -37,9 +37,18 @@ const getAttendanceByClass = async (req, res) => {
 
 const markAttendance = async (req, res) => {
   try {
-    const attendance = new Attendance(req.body);
-    await attendance.save();
-    await attendance.populate('student class');
+    const { student, class: classId, date, status, remarks } = req.body;
+    
+    // Normalize date to start of day to prevent time-based duplicates
+    const queryDate = new Date(date);
+    queryDate.setHours(0, 0, 0, 0);
+
+    const attendance = await Attendance.findOneAndUpdate(
+      { student, class: classId, date: queryDate },
+      { $set: { status, remarks } },
+      { new: true, upsert: true }
+    ).populate('student class');
+    
     res.status(201).json(attendance);
   } catch (error) {
     res.status(400).json({ message: error.message });

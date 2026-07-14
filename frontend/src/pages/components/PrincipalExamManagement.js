@@ -19,8 +19,6 @@ const PrincipalExamManagement = () => {
   const [selectedSection, setSelectedSection] = useState('');
   const [selectedExamType, setSelectedExamType] = useState('');
   const [selectedExamName, setSelectedExamName] = useState('');
-  const [searchSubject, setSearchSubject] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('');
 
   // Top Performers Filters
   const [perfGrade, setPerfGrade] = useState('');
@@ -88,20 +86,9 @@ const PrincipalExamManagement = () => {
     ? [...new Set(classExams.map(e => e.name).filter(Boolean))].sort()
     : [];
 
-  const filteredExams = (selectedExamType
+  const rawFilteredExams = (selectedExamType
     ? classExams.filter(e => e.examType === selectedExamType)
-    : classExams).filter(exam => {
-      const matchSubject = !searchSubject || (exam.subject?.name || exam.subject || '').toLowerCase().includes(searchSubject.toLowerCase());
-      
-      const now = new Date();
-      const examDate = new Date(exam.date);
-      let status = 'Upcoming';
-      if (examDate < now) status = 'Completed';
-      else if (examDate.toDateString() === now.toDateString()) status = 'Today';
-      
-      const matchStatus = !selectedStatus || status === selectedStatus || (selectedStatus === 'Ongoing' && status === 'Today');
-      return matchSubject && matchStatus;
-    }).sort((a, b) => new Date(a.date || new Date()) - new Date(b.date || new Date()));
+    : classExams).sort((a, b) => new Date(a.date || new Date()) - new Date(b.date || new Date()));
 
   const classStudents = students.filter(s => {
     const cid = s.class?._id || s.class;
@@ -171,20 +158,39 @@ const PrincipalExamManagement = () => {
     return 'Unassigned';
   };
 
+  const uniqueFilteredExamsMap = new Map();
+  rawFilteredExams.forEach(exam => {
+    const formattedDate = exam.date ? new Date(exam.date).toLocaleDateString('en-GB') : 'N/A';
+    const key = `${formattedDate}-${exam.subject?.name || exam.subject}`;
+    if (!uniqueFilteredExamsMap.has(key)) {
+      uniqueFilteredExamsMap.set(key, {
+        ...exam,
+        rooms: [exam.room].filter(Boolean),
+        invigilators: [getExamTeacher(exam)].filter(t => t !== 'Unassigned')
+      });
+    } else {
+      const existing = uniqueFilteredExamsMap.get(key);
+      if (exam.room && !existing.rooms.includes(exam.room)) existing.rooms.push(exam.room);
+      const invig = getExamTeacher(exam);
+      if (invig !== 'Unassigned' && !existing.invigilators.includes(invig)) existing.invigilators.push(invig);
+    }
+  });
+
+  const filteredExams = Array.from(uniqueFilteredExamsMap.values()).map(g => ({
+    ...g,
+    room: g.rooms.length > 2 ? `${g.rooms[0]}, ${g.rooms[1]} (+${g.rooms.length - 2} more)` : (g.rooms.join(', ') || 'N/A'),
+    teacherName: g.invigilators.length > 2 ? `${g.invigilators[0]}, ${g.invigilators[1]} (+${g.invigilators.length - 2} more)` : (g.invigilators.join(', ') || 'Unassigned')
+  }));
+
   // ── CSV Download ──────────────────────────────────────────────────────────────
   const downloadTimetableCSV = () => {
     if (!filteredExams.length) return;
-    const headers = ['Exam Type', 'Subject', 'Date', 'Start Time', 'End Time', 'Duration', 'Room', 'Teacher', 'Status'];
+    const headers = ['Subject', 'Date', 'Room', 'Teacher'];
     const rows = filteredExams.map(exam => [
-      exam.examType || exam.name || '',
       exam.subject?.name || '',
       exam.date ? new Date(exam.date).toLocaleDateString() : '',
-      exam.startTime || exam.time || '',
-      exam.endTime || '',
-      getDuration(exam),
-      exam.room || 'N/A',
-      getExamTeacher(exam),
-      getExamStatus(exam),
+      exam.room,
+      exam.teacherName,
     ]);
     const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -249,19 +255,6 @@ const PrincipalExamManagement = () => {
             <option value="">Select Exam Type</option>
             {uniqueExamTypes.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
-          <select value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)} style={selectStyle()}>
-            <option value="">All Statuses</option>
-            <option value="Upcoming">Upcoming</option>
-            <option value="Today">Today/Ongoing</option>
-            <option value="Completed">Completed</option>
-          </select>
-          <input 
-            type="text" 
-            placeholder="🔍 Search by Subject..." 
-            value={searchSubject} 
-            onChange={(e) => setSearchSubject(e.target.value)}
-            style={{ ...selectStyle(), flex: '1' }}
-          />
         </>
       )}
     </div>
@@ -337,15 +330,9 @@ const PrincipalExamManagement = () => {
                       <tr style={{ background: '#f1f5f9', color: '#475569', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                         <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Date</th>
                         <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Day</th>
-                        <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Time</th>
                         <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Subject</th>
-                        <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Exam Type</th>
-                        <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Grade</th>
-                        <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Section</th>
                         <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Room</th>
                         <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Invigilator</th>
-                        <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Duration</th>
-                        <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Status</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -359,28 +346,17 @@ const PrincipalExamManagement = () => {
                           <tr key={exam._id} style={{ borderBottom: '1px solid #e2e8f0', background: isHighlight ? '#eff6ff' : '#fff', transition: 'background 0.2s' }}>
                             <td style={{ padding: '14px 16px', color: '#0f172a', fontWeight: '500', whiteSpace: 'nowrap' }}>{examDate}</td>
                             <td style={{ padding: '14px 16px', color: '#64748b' }}>{examDay}</td>
-                            <td style={{ padding: '14px 16px', color: '#0f172a', whiteSpace: 'nowrap' }}>{exam.startTime && exam.endTime ? `${exam.startTime} – ${exam.endTime}` : exam.time || 'N/A'}</td>
                             <td style={{ padding: '14px 16px', color: '#3b82f6', fontWeight: '600' }}>{exam.subject?.name || 'N/A'}</td>
-                            <td style={{ padding: '14px 16px', color: '#475569' }}>{exam.examType || exam.name}</td>
-                            <td style={{ padding: '14px 16px', color: '#475569', whiteSpace: 'nowrap' }}>Grade {selectedGrade}</td>
-                            <td style={{ padding: '14px 16px', color: '#475569' }}>{selectedSection}</td>
-                            <td style={{ padding: '14px 16px', color: '#475569' }}>{exam.room || 'N/A'}</td>
-                            <td style={{ padding: '14px 16px', color: '#475569' }}>{getExamTeacher(exam)}</td>
-                            <td style={{ padding: '14px 16px', color: '#475569' }}>{getDuration(exam)}</td>
-                            <td style={{ padding: '14px 16px' }}>
-                              <span style={{
-                                padding: '4px 10px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: '600',
-                                background: status === 'Completed' ? '#dcfce7' : status === 'Today' ? '#fef3c7' : '#e0f2fe',
-                                color: status === 'Completed' ? '#166534' : status === 'Today' ? '#b45309' : '#0369a1'
-                              }}>
-                                {status}
-                              </span>
-                            </td>
+                            <td style={{ padding: '14px 16px', color: '#475569' }}>{exam.room}</td>
+                            <td style={{ padding: '14px 16px', color: '#475569' }}>{exam.teacherName}</td>
                           </tr>
                         );
                       })}
                     </tbody>
                   </table>
+                  <p style={{ marginTop: '20px', marginBottom: '20px', fontWeight: 'bold', textAlign: 'center', color: '#1e293b' }}>
+                    NOTE: - EXAMS WILL BEGIN AT 09:00 A.M. AND ENDS AT 11:00 A.M.
+                  </p>
                 </div>
               )}
             </div>

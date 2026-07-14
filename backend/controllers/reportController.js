@@ -453,8 +453,20 @@ const downloadReport = async (req, res) => {
       const uniqueStudentIds = [...new Set(records.map(r => String(r.student?._id || r.student)))].filter(Boolean);
       const studentCount = uniqueStudentIds.length || 1;
 
-      let presentDays = records.filter(r => String(r.status).toLowerCase() === 'present').length;
-      let absentDays = records.filter(r => String(r.status).toLowerCase() === 'absent').length;
+      // Helper: is a date a working day (not Sunday, not 2nd Saturday)?
+      const isWorkingDay = (d) => {
+        const day = d.getDay();
+        const dateNum = d.getDate();
+        if (day === 0) return false; // Sunday
+        if (day === 6 && dateNum >= 8 && dateNum <= 14) return false; // 2nd Saturday
+        return true;
+      };
+
+      // Only count present/absent on actual working days
+      let presentDays = records.filter(r => {
+        if (String(r.status).toLowerCase() !== 'present') return false;
+        return r.date ? isWorkingDay(new Date(r.date)) : false;
+      }).length;
 
       let totalCalendarDays = 0;
       let rangeHolidays = 0;
@@ -463,32 +475,35 @@ const downloadReport = async (req, res) => {
       if (report.startDate && report.endDate) {
         const start = new Date(report.startDate);
         const end = new Date(report.endDate);
-        const diffTime = Math.abs(end - start);
-        totalCalendarDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
-        const holidaysList = report.school?.schoolSettings?.holidays || [];
-        rangeHolidays = holidaysList.filter(hDate => {
-          const d = new Date(hDate);
-          d.setHours(0,0,0,0);
-          const compareStart = new Date(start);
-          compareStart.setHours(0,0,0,0);
-          const compareEnd = new Date(end);
-          compareEnd.setHours(0,0,0,0);
-          const day = d.getDay();
-          const isSunday = day === 0;
-          const isSecondSaturday = (day === 6 && d.getDate() >= 8 && d.getDate() <= 14);
-          return d >= compareStart && d <= compareEnd && !isSunday && !isSecondSaturday;
-        }).length;
+        const today = new Date();
+        today.setHours(23, 59, 59, 999);
+        const effectiveEnd = end > today ? today : end;
 
-        let tempDate = new Date(start);
-        while (tempDate <= end) {
-          const day = tempDate.getDay();
-          const isSunday = day === 0;
-          const isSecondSaturday = (day === 6 && tempDate.getDate() >= 8 && tempDate.getDate() <= 14);
-          if (isSunday || isSecondSaturday) {
-            weekendCount++;
+        if (start <= effectiveEnd) {
+          const diffTime = Math.abs(effectiveEnd - start);
+          totalCalendarDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+          const holidaysList = report.school?.schoolSettings?.holidays || [];
+          rangeHolidays = holidaysList.filter(hDate => {
+            const d = new Date(hDate);
+            d.setHours(0,0,0,0);
+            const compareStart = new Date(start); compareStart.setHours(0,0,0,0);
+            const compareEnd = new Date(effectiveEnd); compareEnd.setHours(0,0,0,0);
+            const day = d.getDay();
+            const isSunday = day === 0;
+            const isSecondSat = (day === 6 && d.getDate() >= 8 && d.getDate() <= 14);
+            return d >= compareStart && d <= compareEnd && !isSunday && !isSecondSat;
+          }).length;
+
+          let tempDate = new Date(start);
+          while (tempDate <= effectiveEnd) {
+            const day = tempDate.getDay();
+            const isSunday = day === 0;
+            const isSecondSat = (day === 6 && tempDate.getDate() >= 8 && tempDate.getDate() <= 14);
+            if (isSunday || isSecondSat) weekendCount++;
+            tempDate.setDate(tempDate.getDate() + 1);
           }
-          tempDate.setDate(tempDate.getDate() + 1);
         }
       } else {
         totalCalendarDays = records.length;
@@ -500,9 +515,11 @@ const downloadReport = async (req, res) => {
       if (uniqueStudentIds.length > 1) {
         presentDays = Math.round(presentDays / studentCount);
       }
-      absentDays = Math.max(0, schoolWorkingDays - presentDays);
-
+      const absentDays = Math.max(0, schoolWorkingDays - presentDays);
       const attendancePercentage = schoolWorkingDays > 0 ? ((presentDays / schoolWorkingDays) * 100).toFixed(2) : '0.00';
+
+      // Filter table records to only show working-day records
+      const workingDayRecords = records.filter(r => r.date ? isWorkingDay(new Date(r.date)) : false);
 
       dataHtml = `
         <div style="margin-bottom: 25px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; background: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; font-family: sans-serif;">
@@ -539,13 +556,15 @@ const downloadReport = async (req, res) => {
             </tr>
           </thead>
           <tbody>
-            ${records.map(record => {
+            ${workingDayRecords.map(record => {
               const studentName = record.student
                 ? `${record.student.firstName || ''} ${record.student.lastName || ''}`.trim() || record.student.userId || 'N/A'
                 : 'N/A';
+              const d = record.date ? new Date(record.date) : null;
+              const localDate = d ? `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}` : 'N/A';
               return `
                 <tr>
-                  <td>${record.date ? new Date(record.date).toLocaleDateString() : 'N/A'}</td>
+                  <td>${localDate}</td>
                   <td>${studentName}</td>
                   <td><strong style="color: ${String(record.status).toLowerCase() === 'present' ? 'green' : String(record.status).toLowerCase() === 'absent' ? 'red' : 'orange'}">${record.status}</strong></td>
                   <td>${record.remarks || '-'}</td>
@@ -555,33 +574,150 @@ const downloadReport = async (req, res) => {
           </tbody>
         </table>
       `;
+
     } else if (report.reportType === 'academic') {
       const records = report.data || [];
-      dataHtml = `
-        <h3>Academic Records (Marks)</h3>
-        <table border="1" cellpadding="8" style="border-collapse:collapse; width:100%; font-size: 14px;">
-          <thead>
-            <tr style="background:#f2f2f2;">
-              <th>Student Name</th>
-              <th>Subject</th>
-              <th>Marks</th>
-              <th>Exam Type</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${records.map(record => `
-              <tr>
-                <td>${record.student?.firstName ? `${record.student.firstName} ${record.student.lastName}` : 'N/A'}</td>
-                <td>${record.subject?.name || 'N/A'}</td>
-                <td><strong>${record.marks}</strong> / 100</td>
-                <td>${record.examType || 'N/A'}</td>
-                <td>${record.examDate ? new Date(record.examDate).toLocaleDateString() : 'N/A'}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      `;
+      const school = report.school || {};
+      const schoolName = school.name || 'Kids Science Academy, Roorkee';
+      const schoolAddress = school.address ? `${school.address.street || ''}, ${school.address.city || ''}, ${school.address.state || ''}` : 'Address: Kids Science Academy, Roorkee, Uttarakhand';
+      const schoolPhone = school.phone || '+919999999999';
+      const schoolEmail = school.email || 'school@xyzmail.com';
+      const academicYear = school.academicYear || '2024-25';
+      const logoUrl = school.logo || 'https://via.placeholder.com/100?text=Logo';
+
+      const studentsMap = {};
+      const uniqueExamsSet = new Set();
+      
+      records.forEach(record => {
+        if (!record.student) return;
+        const sId = record.student._id ? record.student._id.toString() : record.student.toString();
+        if (!studentsMap[sId]) {
+          studentsMap[sId] = {
+            info: record.student,
+            subjects: {}
+          };
+        }
+        
+        const subjName = record.subject?.name || 'Unknown Subject';
+        const exType = record.examType || 'Unknown Exam';
+        
+        uniqueExamsSet.add(exType);
+        
+        if (!studentsMap[sId].subjects[subjName]) {
+          studentsMap[sId].subjects[subjName] = {};
+        }
+        studentsMap[sId].subjects[subjName][exType] = record.marks;
+      });
+      
+      const examColumns = Array.from(uniqueExamsSet).sort();
+      let htmlBlocks = [];
+      
+      Object.values(studentsMap).forEach(studentData => {
+        const student = studentData.info;
+        const studentName = `${student.firstName || ''} ${student.lastName || ''}`.trim() || 'Unknown Student';
+        const dob = student.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
+        const attendance = '85'; // Placeholder
+        
+        let subjectsHtml = '';
+        Object.keys(studentData.subjects).sort().forEach(subj => {
+          let rowHtml = `<tr><td style="padding: 10px; border: 1px solid #204e2e;">${subj}</td>`;
+          let total = 0;
+          let count = 0;
+          
+          examColumns.forEach(ex => {
+            const mark = studentData.subjects[subj][ex];
+            if (mark !== undefined) {
+              total += Number(mark);
+              count++;
+              rowHtml += `<td style="padding: 10px; border: 1px solid #204e2e; text-align: center;">${mark}</td>`;
+            } else {
+              rowHtml += `<td style="padding: 10px; border: 1px solid #204e2e; text-align: center;">-</td>`;
+            }
+          });
+          
+          const average = count > 0 ? (total / count).toFixed(1) : '-';
+          rowHtml += `<td style="padding: 10px; border: 1px solid #204e2e; text-align: center; font-weight: bold;">${average}</td></tr>`;
+          subjectsHtml += rowHtml;
+        });
+
+        const examHeadersHtml = examColumns.map(ex => `<th style="padding: 10px; border: 1px solid #ddd; text-align: center;">${ex}</th>`).join('');
+
+        const studentHtml = `
+          <div style="page-break-after: always; font-family: sans-serif; max-width: 800px; margin: 0 auto; border: 1px solid #ddd; padding: 30px; box-sizing: border-box; position: relative; background: #fff;">
+            
+            <div style="position: absolute; top: 0; left: 0; width: 150px; height: 150px; background: linear-gradient(135deg, #b91c1c 50%, transparent 50%); z-index: 0;"></div>
+
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 1;">
+              <div style="flex: 1;">
+                <h1 style="color: #166534; margin: 0 0 20px 0; font-size: 24px; text-transform: uppercase; text-align: center;">PRE-SCHOOL REPORT CARD</h1>
+                <h3 style="color: #166534; margin: 0 0 5px 0; font-size: 16px;">${schoolName}</h3>
+                <p style="margin: 2px 0; font-size: 12px; color: #555;">Address: ${schoolAddress}</p>
+                <p style="margin: 2px 0; font-size: 12px; color: #555;">Phone Number: ${schoolPhone}</p>
+                <p style="margin: 2px 0; font-size: 12px; color: #555;">Email: ${schoolEmail}</p>
+              </div>
+              <div style="text-align: right; width: 120px;">
+                <img src="${logoUrl}" alt="School Logo" style="width: 80px; height: 80px; object-fit: contain; border: 1px solid #eee; padding: 5px; border-radius: 4px;" />
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: center; margin: 10px 0;">
+              <div style="width: 80px; height: 100px; background: #f3f4f6; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                <span style="color: #9ca3af; font-size: 10px;">Photo</span>
+              </div>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; border: 1px solid #166534;">
+              <tbody>
+                <tr>
+                  <td colspan="3" style="padding: 10px; border: 1px solid #166534;">
+                    Name of the Student: <strong>${studentName}</strong>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px; border: 1px solid #166534; width: 33%;">Date of Birth: ${dob}</td>
+                  <td style="padding: 10px; border: 1px solid #166534; width: 33%;">Academic Year: ${academicYear}</td>
+                  <td style="padding: 10px; border: 1px solid #166534; width: 34%;">Attendance %: ${attendance}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div style="background: #166534; color: white; text-align: center; padding: 10px; font-weight: bold; font-size: 14px; text-transform: uppercase;">
+              Marks of Each Subject
+            </div>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; border: 1px solid #166534;">
+              <thead>
+                <tr style="background: #204e2e; color: white;">
+                  <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">SUBJECTS</th>
+                  ${examHeadersHtml}
+                  <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">AVERAGE</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${subjectsHtml}
+              </tbody>
+            </table>
+
+            <div style="font-size: 12px; margin-bottom: 20px; color: #333;">
+              <strong>GRADE SCALE:</strong> A: 90%-100% &nbsp;&nbsp; B: 80%-89% &nbsp;&nbsp; C: 70%-79% &nbsp;&nbsp; D: 60%-69% &nbsp;&nbsp; F: Fail
+            </div>
+
+            <div style="border: 1px solid #333; padding: 15px; min-height: 120px; position: relative;">
+              <div style="font-size: 13px; margin-bottom: 60px;">
+                <strong>COMMENTS:</strong> _________________________________________________________________________<br/><br/>
+                __________________________________________________________________________________________
+              </div>
+              
+              <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; padding: 0 20px;">
+                <span>Class Teacher Sign</span>
+                <span>Principal Sign with Stamp</span>
+              </div>
+            </div>
+
+          </div>
+        `;
+        htmlBlocks.push(studentHtml);
+      });
+      dataHtml = htmlBlocks.join('');
     } else if (report.reportType === 'performance') {
       const records = report.data || [];
       dataHtml = `
@@ -706,21 +842,27 @@ const downloadReport = async (req, res) => {
         <head>
           <title>${reportTitle}</title>
           <style>
-            body { font-family: sans-serif; margin: 40px; color: #333; }
-            h1 { color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; }
+            body { font-family: sans-serif; margin: ${report.reportType === 'academic' ? '0' : '40px'}; color: #333; background: #f9f9f9; }
+            h1.global-title { color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; }
             .meta { margin-bottom: 20px; background: #fafafa; padding: 15px; border-radius: 5px; font-size: 14px; }
             .meta p { margin: 5px 0; }
+            @media print {
+              body { background: white; margin: 0; }
+              .page-break { page-break-after: always; }
+            }
           </style>
         </head>
         <body onload="window.print()">
-          <h1>🏫 School OS - ${reportTitle}</h1>
-          <div class="meta">
-            <p><strong>Report Type:</strong> ${report.reportType.toUpperCase()}</p>
-            <p><strong>Format:</strong> ${report.format.toUpperCase()}</p>
-            <p><strong>Generated on:</strong> ${new Date(report.createdAt).toLocaleString()}</p>
-            ${report.startDate ? `<p><strong>Start Date:</strong> ${new Date(report.startDate).toLocaleDateString()}</p>` : ''}
-            ${report.endDate ? `<p><strong>End Date:</strong> ${new Date(report.endDate).toLocaleDateString()}</p>` : ''}
-          </div>
+          ${report.reportType === 'academic' ? '' : `
+            <h1 class="global-title">🏫 School OS - ${reportTitle}</h1>
+            <div class="meta">
+              <p><strong>Report Type:</strong> ${report.reportType.toUpperCase()}</p>
+              <p><strong>Format:</strong> ${report.format.toUpperCase()}</p>
+              <p><strong>Generated on:</strong> ${new Date(report.createdAt).toLocaleString()}</p>
+              ${report.startDate ? `<p><strong>Start Date:</strong> ${new Date(report.startDate).toLocaleDateString()}</p>` : ''}
+              ${report.endDate ? `<p><strong>End Date:</strong> ${new Date(report.endDate).toLocaleDateString()}</p>` : ''}
+            </div>
+          `}
           ${dataHtml}
         </body>
       </html>

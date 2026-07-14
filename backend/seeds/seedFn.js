@@ -379,15 +379,20 @@ const seedDataFn = async () => {
   console.log(`Created ${insertedMarks.length} mark records`);
 
   const allDates = [];
-  const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Seeding last 30 days only
+  const currentYear = new Date().getFullYear();
+  const startDate = new Date(Date.UTC(currentYear, 0, 1)); // Jan 1st of current year in UTC
   const endDate = new Date();
+  endDate.setHours(23, 59, 59, 999);
   let tempDate = new Date(startDate);
   while (tempDate <= endDate) {
-    const day = tempDate.getDay();
-    if (day !== 0 && day !== 6) { // Exclude Sundays and Saturdays
-      allDates.push(new Date(tempDate));
+    const day = tempDate.getUTCDay();
+    const dateNum = tempDate.getUTCDate();
+    const isSecondSaturday = (day === 6 && dateNum >= 8 && dateNum <= 14);
+    if (day !== 0 && !isSecondSaturday) { // Exclude Sundays and 2nd Saturdays
+      // Use UTC noon so date stays correct for IST (+5:30) timezone
+      allDates.push(new Date(Date.UTC(tempDate.getUTCFullYear(), tempDate.getUTCMonth(), tempDate.getUTCDate(), 12, 0, 0, 0)));
     }
-    tempDate.setDate(tempDate.getDate() + 1);
+    tempDate.setUTCDate(tempDate.getUTCDate() + 1);
   }
 
   const attendanceDocs = [];
@@ -425,7 +430,7 @@ const seedDataFn = async () => {
           startTime: '09:00',
           endTime: '11:00',
           totalMarks: 100,
-          room: `Room ${20 + classItem.grade}`,
+          room: `Room ${100 + (classItem.grade - 1) * 10 + (j % 8) + 1}`,
           description: `Scheduled evaluation for ${type} in Grade ${classItem.grade} Section ${classItem.section}.`,
         });
         await exam.save();

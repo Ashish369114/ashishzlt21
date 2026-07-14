@@ -30,6 +30,7 @@ const ReportManagement = () => {
   const [selectedSection, setSelectedSection] = useState('');
   const [classStudents, setClassStudents] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState('');
+  const [generatedReportData, setGeneratedReportData] = useState(null);
 
   useEffect(() => {
     const fetchStudentsForClass = async () => {
@@ -153,8 +154,9 @@ const ReportManagement = () => {
     
     try {
       setError('');
-      await api.post(`/reports/generate/${reportFilters.reportType}`, reportFilters);
+      const response = await api.post(`/reports/generate/${reportFilters.reportType}`, reportFilters);
       fetchReports();
+      setGeneratedReportData(response.data);
       alert('Report generated successfully!');
     } catch (error) {
       console.error('Error generating report:', error);
@@ -306,6 +308,59 @@ const ReportManagement = () => {
         </select>
         <button type="submit">Generate Report</button>
       </form>
+
+      {generatedReportData && generatedReportData.reportType === 'attendance' && generatedReportData.data && (
+        <div style={{ marginTop: '30px', background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <h3 style={{ margin: 0, color: '#1e293b' }}>{generatedReportData.title}</h3>
+            {generatedReportData.fileUrl && (
+              <a href={`http://localhost:5000${generatedReportData.fileUrl}`} target="_blank" rel="noopener noreferrer" style={{ padding: '8px 16px', background: '#4f46e5', color: '#fff', textDecoration: 'none', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600 }}>
+                Download PDF
+              </a>
+            )}
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+              <thead>
+                <tr style={{ background: '#f8fafc', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <th style={{ padding: '12px 16px', borderBottom: '2px solid #cbd5e1' }}>Date</th>
+                  <th style={{ padding: '12px 16px', borderBottom: '2px solid #cbd5e1' }}>Name</th>
+                  <th style={{ padding: '12px 16px', borderBottom: '2px solid #cbd5e1' }}>Status</th>
+                  <th style={{ padding: '12px 16px', borderBottom: '2px solid #cbd5e1' }}>Late Minutes</th>
+                  <th style={{ padding: '12px 16px', borderBottom: '2px solid #cbd5e1' }}>Remarks</th>
+                </tr>
+              </thead>
+              <tbody>
+                {generatedReportData.data.map((item, index) => {
+                  const sId = item.student?._id || item.student;
+                  const st = classStudents.find(s => String(s._id) === String(sId));
+                  const name = st ? `${st.userId?.firstName || ''} ${st.userId?.lastName || ''}`.trim() : 'Unknown Student';
+                  const d = new Date(item.date).toLocaleDateString('en-GB');
+                  
+                  return (
+                    <tr key={item._id || index} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '12px 16px', color: '#475569' }}>{d}</td>
+                      <td style={{ padding: '12px 16px', fontWeight: 500, color: '#0f172a' }}>{name}</td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <span style={{ padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', background: item.status?.toLowerCase() === 'present' ? '#dcfce7' : item.status?.toLowerCase() === 'absent' ? '#fee2e2' : '#fef9c3', color: item.status?.toLowerCase() === 'present' ? '#166534' : item.status?.toLowerCase() === 'absent' ? '#991b1b' : '#854d0e' }}>
+                          {item.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px 16px', color: '#64748b' }}>{item.lateMinutes || 0}</td>
+                      <td style={{ padding: '12px 16px', color: '#64748b' }}>{item.remarks || '-'}</td>
+                    </tr>
+                  );
+                })}
+                {generatedReportData.data.length === 0 && (
+                  <tr>
+                    <td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>No data found for the selected criteria</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       <div className="reports-list">
         <h3>Generated Reports</h3>

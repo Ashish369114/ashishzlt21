@@ -27,6 +27,7 @@ const StudentManagement = () => {
   const [marksList, setMarksList] = useState([]);
   const [marksLoading, setMarksLoading] = useState(false);
   const [marksError, setMarksError] = useState('');
+  const [marksExamTypeFilter, setMarksExamTypeFilter] = useState('');
 
   const [viewingAttendanceStudent, setViewingAttendanceStudent] = useState(null);
   const [attendanceList, setAttendanceList] = useState([]);
@@ -1270,9 +1271,30 @@ const StudentManagement = () => {
             color: '#1f2937',
             fontFamily: 'sans-serif'
           }}>
-            <h3 style={{ margin: '0 0 10px', fontSize: '1.35rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              📝 Marks Details
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <h3 style={{ margin: '0', fontSize: '1.35rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                📝 Marks Details
+              </h3>
+              <select
+                value={marksExamTypeFilter}
+                onChange={(e) => setMarksExamTypeFilter(e.target.value)}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #d1d5db',
+                  fontSize: '0.85rem',
+                  outline: 'none',
+                  background: '#f9fafb',
+                  color: '#374151',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="">All Exams</option>
+                {[...new Set(marksList.map(m => m.examType))].filter(Boolean).map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
             <p style={{ color: '#6b7280', fontSize: '0.9rem', margin: '0 0 20px' }}>
               Showing marks for <strong>{viewingMarksStudent.userId?.firstName} {viewingMarksStudent.userId?.lastName}</strong> (Roll: {viewingMarksStudent.rollNumber || 'N/A'})
             </p>
@@ -1294,31 +1316,23 @@ const StudentManagement = () => {
                         <th style={{ padding: '10px', textAlign: 'left', fontSize: '0.85rem' }}>Exam</th>
                         <th style={{ padding: '10px', textAlign: 'left', fontSize: '0.85rem' }}>Subject</th>
                         <th style={{ padding: '10px', textAlign: 'right', fontSize: '0.85rem' }}>Marks</th>
-                        <th style={{ padding: '10px', textAlign: 'center', fontSize: '0.85rem' }}>Status</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {marksList.map(mark => (
+                      {(marksExamTypeFilter ? marksList.filter(m => m.examType === marksExamTypeFilter) : marksList).map(mark => (
                         <tr key={mark._id} style={{ borderBottom: '1px solid #e5e7eb' }}>
                           <td style={{ padding: '10px' }}>{mark.examType || 'Unknown Exam'}</td>
                           <td style={{ padding: '10px' }}>{mark.subject?.name || mark.subject || 'Unknown'}</td>
                           <td style={{ padding: '10px', textAlign: 'right' }}>
                             {mark.marks} / 100
                           </td>
-                          <td style={{ padding: '10px', textAlign: 'center' }}>
-                            <span style={{
-                              padding: '4px 8px',
-                              borderRadius: '4px',
-                              fontSize: '0.75rem',
-                              fontWeight: 'bold',
-                              background: mark.status === 'Pass' ? '#dcfce7' : mark.status === 'Fail' ? '#fee2e2' : '#f3f4f6',
-                              color: mark.status === 'Pass' ? '#166534' : mark.status === 'Fail' ? '#991b1b' : '#374151'
-                            }}>
-                              {mark.status || 'N/A'}
-                            </span>
-                          </td>
                         </tr>
                       ))}
+                      {(marksExamTypeFilter ? marksList.filter(m => m.examType === marksExamTypeFilter) : marksList).length === 0 && (
+                        <tr>
+                          <td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: '#6b7280', fontSize: '0.85rem' }}>No marks found for this exam type.</td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1328,7 +1342,10 @@ const StudentManagement = () => {
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button
                 type="button"
-                onClick={() => setViewingMarksStudent(null)}
+                onClick={() => {
+                  setViewingMarksStudent(null);
+                  setMarksExamTypeFilter(''); // Reset filter on close
+                }}
                 style={{
                   padding: '10px 20px',
                   background: '#f3f4f6',

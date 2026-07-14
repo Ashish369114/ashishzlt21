@@ -133,68 +133,75 @@ const AttendanceManagement = () => {
     if (!selectedClassId) return null;
 
     let presentDays = visibleAttendance.filter(r => String(r.status).toLowerCase() === 'present').length;
-    let absentDays = visibleAttendance.filter(r => String(r.status).toLowerCase() === 'absent').length;
-
+    let absentDays = 0;
     let totalCalendarDays = 0;
-    let rangeHolidays = 0;
-    let weekendCount = 0;
+    let schoolWorkingDays = 0;
 
     const currentYear = new Date().getFullYear();
-    let startDate, endDate;
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const holidaysList = school?.schoolSettings?.holidays || [];
 
-    if (selectedMonth) {
-      startDate = new Date(currentYear, parseInt(selectedMonth, 10) - 1, 1);
-      endDate = new Date(currentYear, parseInt(selectedMonth, 10), 0);
-      if (selectedWeek) {
-        const startDay = selectedWeek === '1' ? 1 :
-                         selectedWeek === '2' ? 8 :
-                         selectedWeek === '3' ? 15 :
-                         selectedWeek === '4' ? 22 : 29;
-        const endDay = selectedWeek === '1' ? 7 :
-                       selectedWeek === '2' ? 14 :
-                       selectedWeek === '3' ? 21 :
-                       selectedWeek === '4' ? 28 : endDate.getDate();
-        startDate.setDate(startDay);
-        endDate.setDate(endDay);
-      }
-    } else if (visibleAttendance.length > 0) {
-      const dates = visibleAttendance.map(r => new Date(r.date));
-      startDate = new Date(Math.min(...dates));
-      endDate = new Date(Math.max(...dates));
-    }
+    const calculateMonthStats = (startD, endD) => {
+      startD.setHours(0,0,0,0);
+      endD.setHours(0,0,0,0);
+      if (endD > today) endD = new Date(today);
+      if (startD > endD) return { calDays: 0, workDays: 0 };
 
-    if (startDate && endDate) {
-      startDate.setHours(0,0,0,0);
-      endDate.setHours(0,0,0,0);
-      const diffTime = Math.abs(endDate - startDate);
-      totalCalendarDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      const diffTime = Math.abs(endD - startD);
+      const calDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
-      const holidaysList = school?.schoolSettings?.holidays || [];
-      rangeHolidays = holidaysList.filter(hDate => {
+      const rHolidays = holidaysList.filter(hDate => {
         const d = new Date(hDate);
         d.setHours(0,0,0,0);
         const day = d.getDay();
-        const isSunday = day === 0;
-        const isSecondSaturday = (day === 6 && d.getDate() >= 8 && d.getDate() <= 14);
-        return d >= startDate && d <= endDate && !isSunday && !isSecondSaturday;
+        const isSun = day === 0;
+        const isSecondSat = (day === 6 && d.getDate() >= 8 && d.getDate() <= 14);
+        return d >= startD && d <= endD && !isSun && !isSecondSat;
       }).length;
 
-      let tempDate = new Date(startDate);
-      while (tempDate <= endDate) {
+      let wCount = 0;
+      let tempDate = new Date(startD);
+      while (tempDate <= endD) {
         const day = tempDate.getDay();
-        const isSunday = day === 0;
-        const isSecondSaturday = (day === 6 && tempDate.getDate() >= 8 && tempDate.getDate() <= 14);
-        if (isSunday || isSecondSaturday) {
-          weekendCount++;
-        }
+        const isSun = day === 0;
+        const isSecondSat = (day === 6 && tempDate.getDate() >= 8 && tempDate.getDate() <= 14);
+        if (isSun || isSecondSat) wCount++;
         tempDate.setDate(tempDate.getDate() + 1);
       }
-    } else {
-      totalCalendarDays = visibleAttendance.length;
-      rangeHolidays = 0;
-    }
+      return { calDays, workDays: Math.max(0, calDays - rHolidays - wCount) };
+    };
 
-    const schoolWorkingDays = Math.max(0, totalCalendarDays - rangeHolidays - weekendCount);
+    if (selectedMonth) {
+      const sDate = new Date(currentYear, parseInt(selectedMonth, 10) - 1, 1);
+      const eDate = new Date(currentYear, parseInt(selectedMonth, 10), 0);
+      if (selectedWeek) {
+        const startDay = selectedWeek === '1' ? 1 : selectedWeek === '2' ? 8 : selectedWeek === '3' ? 15 : selectedWeek === '4' ? 22 : 29;
+        const endDay = selectedWeek === '1' ? 7 : selectedWeek === '2' ? 14 : selectedWeek === '3' ? 21 : selectedWeek === '4' ? 28 : eDate.getDate();
+        sDate.setDate(startDay);
+        eDate.setDate(endDay);
+      }
+      const stats = calculateMonthStats(sDate, eDate);
+      totalCalendarDays = stats.calDays;
+      schoolWorkingDays = stats.workDays;
+    } else {
+      const uniqueMonths = new Set();
+      visibleAttendance.forEach(record => {
+        if (record.date) {
+          const d = new Date(record.date);
+          uniqueMonths.add(`${d.getFullYear()}-${d.getMonth()}`);
+        }
+      });
+      
+      uniqueMonths.forEach(monthStr => {
+        const [y, m] = monthStr.split('-');
+        const sDate = new Date(parseInt(y), parseInt(m), 1);
+        const eDate = new Date(parseInt(y), parseInt(m) + 1, 0);
+        const stats = calculateMonthStats(sDate, eDate);
+        totalCalendarDays += stats.calDays;
+        schoolWorkingDays += stats.workDays;
+      });
+    }
 
     if (!selectedStudentId && sectionStudents.length > 0) {
       presentDays = Math.round(presentDays / sectionStudents.length);
@@ -224,7 +231,8 @@ const AttendanceManagement = () => {
   const getAttendanceRecord = (studentId) => {
     return visibleAttendance.find((record) => {
       const recordStudentId = record.student?._id || record.student;
-      const recordDate = record.date ? new Date(record.date).toISOString().slice(0, 10) : '';
+      const dObj = record.date ? new Date(record.date) : null;
+      const recordDate = dObj ? `${dObj.getFullYear()}-${String(dObj.getMonth() + 1).padStart(2, '0')}-${String(dObj.getDate()).padStart(2, '0')}` : '';
       return String(recordStudentId) === String(studentId) && recordDate === selectedDate;
     });
   };
@@ -466,7 +474,8 @@ const AttendanceManagement = () => {
                           const dateStr = `${year}-${String(selectedMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                           const record = visibleAttendance.find(r => {
                             const rSid = String(r.student?._id || r.student);
-                            const rDate = r.date ? new Date(r.date).toISOString().slice(0,10) : '';
+                            const dObj = r.date ? new Date(r.date) : null;
+                            const rDate = dObj ? `${dObj.getFullYear()}-${String(dObj.getMonth() + 1).padStart(2, '0')}-${String(dObj.getDate()).padStart(2, '0')}` : '';
                             return rSid === sId && rDate === dateStr;
                           });
                           
@@ -474,7 +483,10 @@ const AttendanceManagement = () => {
                           const day = tempDate.getDay();
                           const isSunday = day === 0;
                           const isSecondSaturday = (day === 6 && d >= 8 && d <= 14);
-                          const isHoliday = school?.schoolSettings?.holidays?.some(hDate => new Date(hDate).toISOString().slice(0, 10) === dateStr);
+                          const isHoliday = school?.schoolSettings?.holidays?.some(hDate => {
+                            const hdObj = new Date(hDate);
+                            return `${hdObj.getFullYear()}-${String(hdObj.getMonth() + 1).padStart(2, '0')}-${String(hdObj.getDate()).padStart(2, '0')}` === dateStr;
+                          });
                           
                           let statusChar = '-';
                           let bgColor = 'transparent';

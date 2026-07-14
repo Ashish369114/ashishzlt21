@@ -251,7 +251,7 @@ const Login = ({ onLogin }) => {
             One intelligent platform to manage admissions, attendance, examinations, fees, payroll, transport, library, hostel, communication, and analytics.
           </p>
           <div className="hero-cta">
-            <a href="#contact" className="btn-primary">Book a Free Demo</a>
+            <a href="#contact" className="btn-primary" style={{ width: 'fit-content' }}>Book a Free Demo</a>
           </div>
         </section>
 
@@ -511,38 +511,27 @@ const Login = ({ onLogin }) => {
 
         {/* 6. About Section */}
         <section id="about" className="saas-section">
-          <div className="about-grid">
-            <div className="about-content">
-              <h3>About Zayn Levi Technologies</h3>
-              <p>
-                Zayn Levi Technologies is a forward-thinking AI-powered education technology company dedicated to creating digital solutions that simplify complexity and unlock growth for modern educational organizations.
-              </p>
-              <p>
-                Our vision is to blend innovation, reliability, and user-focused design to deliver a complete School Operating System that empowers administrators, improves student experiences, and scales with ambition.
-              </p>
-              <div className="about-features">
-                <div className="about-feature">
-                  <div className="about-feature-icon"><i className="fa-solid fa-rocket"></i></div>
-                  End-to-end digital transformation
-                </div>
-                <div className="about-feature">
-                  <div className="about-feature-icon"><i className="fa-solid fa-shield-halved"></i></div>
-                  Reliable post-launch maintenance
-                </div>
+          <div className="about-content" style={{ textAlign: 'center', maxWidth: '900px', margin: '0 auto' }}>
+            <h3 style={{ whiteSpace: 'nowrap' }}>About Zayn Levi Technologies</h3>
+            <p>
+              Zayn Levi Technologies is a forward-thinking AI-powered education technology company dedicated to creating digital solutions that simplify complexity and unlock growth for modern educational organizations.
+            </p>
+            <p>
+              Our vision is to blend innovation, reliability, and user-focused design to deliver a complete School Operating System that empowers administrators, improves student experiences, and scales with ambition.
+            </p>
+            <div className="about-features" style={{ display: 'flex', justifyContent: 'center', gap: '40px', marginTop: '30px' }}>
+              <div className="about-feature" style={{ display: 'flex', alignItems: 'center', gap: '15px', textAlign: 'left' }}>
+                <div className="about-feature-icon"><i className="fa-solid fa-rocket"></i></div>
+                <span>End-to-end digital transformation</span>
               </div>
-            </div>
-            <div style={{ position: 'relative', height: '400px', background: 'rgba(255,255,255,0.5)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.8)', backdropFilter: 'blur(10px)' }}>
-                <div style={{ position: 'absolute', inset: '20px', background: 'linear-gradient(135deg, rgba(124,58,237,0.1), rgba(6,182,212,0.1))', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                   <div className="nav-logo-icon" style={{ width: '100px', height: '100px', borderRadius: '24px', boxShadow: '0 10px 40px rgba(124,58,237,0.2)' }}>
-                      <svg viewBox="0 0 100 100" style={{ width: '60px', height: '60px', overflow: 'visible' }}>
-                        <path d="M 24 45 V 32 A 8 8 0 0 1 32 24 H 76 L 46 54" fill="none" stroke="#0b4d8c" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M 76 55 V 68 A 8 8 0 0 1 68 76 H 24 L 54 46" fill="none" stroke="#00a2e8" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                   </div>
-                </div>
+              <div className="about-feature" style={{ display: 'flex', alignItems: 'center', gap: '15px', textAlign: 'left' }}>
+                <div className="about-feature-icon"><i className="fa-solid fa-shield-halved"></i></div>
+                <span>Reliable post-launch maintenance</span>
+              </div>
             </div>
           </div>
         </section>
+
 
         {/* 7. Contact Section */}
         <section id="contact" className="saas-section">
@@ -606,7 +595,7 @@ const Login = ({ onLogin }) => {
                     <textarea name="message" placeholder="Tell us about your specific needs..." rows="3" value={contactForm.message} onChange={handleContactChange} required className="form-input" style={{ resize: 'none' }}></textarea>
                   </div>
                   {contactError && <div style={{ color: '#dc2626', fontSize: '14px', marginBottom: '15px' }}>{contactError}</div>}
-                  <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '10px' }} disabled={contactSending}>
+                  <button type="submit" className="btn-primary" style={{ width: 'fit-content', marginTop: '10px', padding: '14px 40px' }} disabled={contactSending}>
                     {contactSending ? '⏳ Sending Request...' : 'Book My Demo'}
                   </button>
                 </form>

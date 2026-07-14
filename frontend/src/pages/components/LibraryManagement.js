@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { libraryService } from '../../services/api';
+import { libraryService, studentService } from '../../services/api';
 import '../../styles/ManagementStyles.css';
 import { Bell, MoreVertical, BookOpen, Clock, AlertCircle } from 'lucide-react';
 
@@ -17,6 +17,7 @@ const LibraryManagement = () => {
   const [error, setError] = useState('');
   const [editingBookId, setEditingBookId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
   
   const [actionMenuOpenFor, setActionMenuOpenFor] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -25,6 +26,7 @@ const LibraryManagement = () => {
   const [borrowModalOpenFor, setBorrowModalOpenFor] = useState(null);
   const [historyModalOpenFor, setHistoryModalOpenFor] = useState(null);
   const [borrowUserId, setBorrowUserId] = useState('');
+  const [students, setStudents] = useState([]);
 
   // Mock Notification Data
   const [notifications] = useState([
@@ -52,9 +54,13 @@ const LibraryManagement = () => {
   const fetchBooks = async () => {
     try {
       setLoading(true);
-      const response = await libraryService.getAll();
-      setBooks(response.data);
-      setAvailableBooks(response.data.filter(b => b.availableCopies > 0).length);
+      const [libRes, stuRes] = await Promise.all([
+        libraryService.getAll(),
+        studentService.getAll()
+      ]);
+      setBooks(libRes.data);
+      setAvailableBooks(libRes.data.filter(b => b.availableCopies > 0).length);
+      setStudents(stuRes.data || []);
     } catch (error) {
       console.error('Error fetching books:', error);
     } finally {
@@ -77,6 +83,7 @@ const LibraryManagement = () => {
       category: book.category || 'textbook',
       totalCopies: book.totalCopies,
     });
+    setShowAddForm(true);
   };
 
   const resetBookForm = () => {
@@ -90,6 +97,7 @@ const LibraryManagement = () => {
       totalCopies: 1,
     });
     setError('');
+    setShowAddForm(false);
   };
 
   const handleAddBook = async (e) => {
@@ -284,64 +292,78 @@ const LibraryManagement = () => {
         </div>
       </div>
 
-      <form onSubmit={handleAddBook} className="management-form">
-        <h3>Add New Book</h3>
-        {error && <div style={{ color: '#d32f2f', marginBottom: '10px', padding: '8px', backgroundColor: '#ffebee', borderRadius: '4px' }}>{error}</div>}
-        <input
-          type="text"
-          name="title"
-          placeholder="Book Title"
-          value={newBook.title}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="text"
-          name="isbn"
-          placeholder="ISBN"
-          value={newBook.isbn}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="text"
-          name="author"
-          placeholder="Author"
-          value={newBook.author}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="text"
-          name="publisher"
-          placeholder="Publisher"
-          value={newBook.publisher}
-          onChange={handleInputChange}
-        />
-        <select name="category" value={newBook.category} onChange={handleInputChange}>
-          <option value="textbook">Textbook</option>
-          <option value="fiction">Fiction</option>
-          <option value="non-fiction">Non-Fiction</option>
-          <option value="reference">Reference</option>
-        </select>
-        <input
-          type="number"
-          name="totalCopies"
-          placeholder="Total Copies"
-          value={newBook.totalCopies}
-          onChange={handleInputChange}
-          required
-        />
-        <button type="submit">{editingBookId ? 'Update Book' : 'Add Book'}</button>
-        {editingBookId && (
-          <button type="button" onClick={resetBookForm} style={{ marginLeft: '10px' }}>
-            Cancel
-          </button>
-        )}
-      </form>
+      {showAddForm && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', width: '90%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, color: '#374151', fontSize: '1.25rem' }}>{editingBookId ? 'Update Book' : 'Add New Book'}</h3>
+              <button onClick={() => { resetBookForm(); setShowAddForm(false); }} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#6b7280', padding: '0 5px' }}>&times;</button>
+            </div>
+            <form onSubmit={handleAddBook} className="management-form" style={{ marginBottom: 0, boxShadow: 'none', padding: 0 }}>
+              {error && <div style={{ color: '#d32f2f', marginBottom: '10px', padding: '8px', backgroundColor: '#ffebee', borderRadius: '4px' }}>{error}</div>}
+              <input
+                type="text"
+                name="title"
+                placeholder="Book Title"
+                value={newBook.title}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="text"
+                name="isbn"
+                placeholder="ISBN"
+                value={newBook.isbn}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="text"
+                name="author"
+                placeholder="Author"
+                value={newBook.author}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="text"
+                name="publisher"
+                placeholder="Publisher"
+                value={newBook.publisher}
+                onChange={handleInputChange}
+              />
+              <select name="category" value={newBook.category} onChange={handleInputChange}>
+                <option value="textbook">Textbook</option>
+                <option value="fiction">Fiction</option>
+                <option value="non-fiction">Non-Fiction</option>
+                <option value="reference">Reference</option>
+              </select>
+              <input
+                type="number"
+                name="totalCopies"
+                placeholder="Total Copies"
+                value={newBook.totalCopies}
+                onChange={handleInputChange}
+                required
+              />
+              <button type="submit" className="btn btn-primary">{editingBookId ? 'Update Book' : 'Add Book'}</button>
+              {editingBookId && (
+                <button type="button" className="btn btn-secondary" onClick={() => { resetBookForm(); setShowAddForm(false); }} style={{ marginLeft: '10px' }}>
+                  Cancel
+                </button>
+              )}
+            </form>
+          </div>
+        </div>
+      )}
 
       <div className="books-list" style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
-        <h3 style={{ padding: '16px 20px', margin: 0, borderBottom: '1px solid #e2e8f0', background: '#f8fafc', color: '#1e293b' }}>Library Books</h3>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ margin: 0, color: '#1e293b' }}>Library Books</h3>
+          <button onClick={() => setShowAddForm(true)} className="btn-primary" style={{ padding: '8px 20px', borderRadius: '8px', cursor: 'pointer', width: 'fit-content' }}>
+            + Add Book
+          </button>
+        </div>
         {loading ? (
           <p style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Loading books...</p>
         ) : (
@@ -446,14 +468,19 @@ const LibraryManagement = () => {
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
           <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', width: '400px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
             <h3 style={{ marginTop: 0, color: '#0f172a' }}>Borrow: {borrowModalOpenFor.title}</h3>
-            <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '16px' }}>Enter the User ID of the student/staff borrowing the book.</p>
-            <input 
-              type="text" 
-              placeholder="User ID (e.g. 64b8c9...)" 
+            <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '16px' }}>Select the student borrowing the book.</p>
+            <select 
               value={borrowUserId} 
               onChange={e => setBorrowUserId(e.target.value)} 
-              style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '6px', marginBottom: '16px' }}
-            />
+              style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '6px', marginBottom: '16px', background: '#fff' }}
+            >
+              <option value="">Select Student...</option>
+              {students.map(s => (
+                <option key={s._id} value={s.userId?._id || s.userId}>
+                  {s.userId?.firstName} {s.userId?.lastName} - Class {s.class?.grade} {s.class?.section}
+                </option>
+              ))}
+            </select>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
               <button onClick={() => { setBorrowModalOpenFor(null); setBorrowUserId(''); }} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 500 }}>Cancel</button>
               <button onClick={handleBorrowBookSubmit} style={{ padding: '8px 16px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 500 }}>Confirm Borrow</button>

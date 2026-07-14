@@ -18,9 +18,11 @@ const EmployeeManagement = () => {
     employeeType: 'teaching',
     designation: '',
     dateOfJoining: '',
+    employeeStatus: 'Working',
     salary: { baseSalary: 0, allowances: {}, deductions: {} },
   });
   const [loading, setLoading] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   // Sub-tabs state
   const [activeTab, setActiveTab] = useState('directory');
@@ -169,16 +171,19 @@ const EmployeeManagement = () => {
       employeeType: employee.employeeType || 'staff',
       designation: employee.designation || '',
       dateOfJoining: employee.dateOfJoining ? employee.dateOfJoining.split('T')[0] : '',
+      employeeStatus: employee.status === 'terminated' || employee.status === 'inactive' ? 'Terminated' : employee.inNoticePeriod ? 'Serving Notice Period' : 'Working',
       salary: {
         baseSalary: employee.salary?.baseSalary || 0,
         allowances: employee.salary?.allowances || {},
         deductions: employee.salary?.deductions || {},
       },
     });
+    setShowAddForm(true);
   };
 
   const resetForm = () => {
     setEditingEmployeeId(null);
+    setShowAddForm(false);
     setAssignClassId('');
     setNewEmployee({
       firstName: '',
@@ -187,6 +192,7 @@ const EmployeeManagement = () => {
       employeeType: 'teaching',
       designation: '',
       dateOfJoining: '',
+      employeeStatus: 'Working',
       salary: { baseSalary: 0, allowances: {}, deductions: {} },
     });
   };
@@ -197,7 +203,10 @@ const EmployeeManagement = () => {
       const employeePayload = {
         ...newEmployee,
         school: newEmployee.school || schools[0]?._id,
+        status: newEmployee.employeeStatus === 'Terminated' ? 'terminated' : 'active',
+        inNoticePeriod: newEmployee.employeeStatus === 'Serving Notice Period',
       };
+      delete employeePayload.employeeStatus;
       let response;
       if (editingEmployeeId) {
         response = await api.put(`/employees/${editingEmployeeId}`, employeePayload);
@@ -213,6 +222,7 @@ const EmployeeManagement = () => {
 
       fetchEmployees();
       resetForm();
+      setShowAddForm(false);
       if (!editingEmployeeId && response && response.data) {
         setEditingEmployeePayroll(response.data);
       } else {
@@ -326,8 +336,8 @@ const EmployeeManagement = () => {
                 padding: '18px 24px',
                 borderRadius: '12px',
                 border: '2px solid',
-                borderColor: selectedTypeFilter === 'Non-Teaching Staff' ? '#0891b2' : '#e5e7eb',
-                background: selectedTypeFilter === 'Non-Teaching Staff' ? 'linear-gradient(135deg, #0891b2, #06b6d4)' : '#fff',
+                borderColor: selectedTypeFilter === 'Non-Teaching Staff' ? '#4f46e5' : '#e5e7eb',
+                background: selectedTypeFilter === 'Non-Teaching Staff' ? 'linear-gradient(135deg, #4f46e5, #6366f1)' : '#fff',
                 color: selectedTypeFilter === 'Non-Teaching Staff' ? '#fff' : '#374151',
                 fontSize: '1rem',
                 fontWeight: 700,
@@ -336,7 +346,7 @@ const EmployeeManagement = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '10px',
-                boxShadow: selectedTypeFilter === 'Non-Teaching Staff' ? '0 4px 20px rgba(8,145,178,0.3)' : '0 1px 4px rgba(0,0,0,0.08)',
+                boxShadow: selectedTypeFilter === 'Non-Teaching Staff' ? '0 4px 20px rgba(79,70,229,0.3)' : '0 1px 4px rgba(0,0,0,0.08)',
                 transition: 'all 0.2s ease',
               }}
             >
@@ -351,9 +361,15 @@ const EmployeeManagement = () => {
             </div>
           ) : (
             <>
-              {/* Add / Edit Employee Form */}
-              <form onSubmit={handleAddEmployee} className="management-form">
-                <h3>{editingEmployeeId ? 'Update Employee' : `Add New ${selectedTypeFilter === 'teaching' ? 'Teaching' : 'Non-Teaching'} Staff`}</h3>
+              {/* Add / Edit Employee Form Modal */}
+              {showAddForm && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+                  <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', width: '90%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                      <h3 style={{ margin: 0, color: '#374151', fontSize: '1.25rem' }}>{editingEmployeeId ? 'Update Employee' : `Add New ${selectedTypeFilter === 'teaching' ? 'Teaching' : 'Non-Teaching'} Staff`}</h3>
+                      <button onClick={resetForm} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#6b7280', padding: '0 5px' }}>&times;</button>
+                    </div>
+                  <form onSubmit={handleAddEmployee} className="management-form" style={{ background: 'none', padding: 0, boxShadow: 'none', border: 'none' }}>
                 <input
                   type="text"
                   name="firstName"
@@ -498,6 +514,17 @@ const EmployeeManagement = () => {
                   onChange={handleInputChange}
                   required
                 />
+                <select
+                  name="employeeStatus"
+                  value={newEmployee.employeeStatus}
+                  onChange={handleInputChange}
+                  required
+                  style={{ padding: '14px 18px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem', width: '100%', color: '#111827', height: '52px' }}
+                >
+                  <option value="Working">Working</option>
+                  <option value="Serving Notice Period">Serving Notice Period</option>
+                  <option value="Terminated">Terminated</option>
+                </select>
                 {selectedTypeFilter === 'teaching' && (
                   <div style={{ marginTop: '4px' }}>
                     <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#4b5563', marginBottom: '6px', display: 'block' }}>
@@ -537,10 +564,18 @@ const EmployeeManagement = () => {
                   </button>
                 )}
               </form>
+                  </div>
+                </div>
+              )}
 
               {/* Employees List */}
               <div className="employees-list">
-                <h3>{selectedTypeFilter === 'teaching' ? '📖 Teaching Staff' : '💼 Non-Teaching Staff'} — Employees List</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <h3 style={{ margin: 0 }}>{selectedTypeFilter === 'teaching' ? '📖 Teaching Staff' : '💼 Non-Teaching Staff'} — Employees List</h3>
+                  <button onClick={() => setShowAddForm(true)} className="btn-primary" style={{ padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}>
+                    + Add Employee
+                  </button>
+                </div>
                 {loading ? (
                   <p>Loading...</p>
                 ) : filteredEmployees.length === 0 ? (
@@ -549,12 +584,13 @@ const EmployeeManagement = () => {
                   <table>
                     <thead>
                       <tr>
-                        <th>Name</th>
-                        <th>Designation</th>
-                        <th>Type</th>
-                        <th>Base Salary</th>
-                        <th>Joining Date</th>
-                        <th>Actions</th>
+                        <th style={{ whiteSpace: 'nowrap' }}>Name</th>
+                        <th style={{ whiteSpace: 'nowrap' }}>Designation</th>
+                        <th style={{ whiteSpace: 'nowrap' }}>Type</th>
+                        <th style={{ whiteSpace: 'nowrap' }}>Base Salary</th>
+                        <th style={{ whiteSpace: 'nowrap' }}>Joining Date</th>
+                        <th style={{ whiteSpace: 'nowrap' }}>Remarks</th>
+                        <th style={{ width: '180px', textAlign: 'center', whiteSpace: 'nowrap' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -565,6 +601,17 @@ const EmployeeManagement = () => {
                           <td>{employee.employeeType}</td>
                           <td>{formatCurrency(employee.salary?.baseSalary || 0)}</td>
                           <td>{new Date(employee.dateOfJoining).toLocaleDateString()}</td>
+                          <td>
+                            {employee.status === 'terminated' || employee.status === 'inactive' ? (
+                               <span style={{ color: '#ef4444', fontWeight: '500', padding: '4px 8px', background: '#fee2e2', borderRadius: '4px', fontSize: '0.85rem' }}>Terminated</span>
+                            ) : employee.inNoticePeriod ? (
+                              <span style={{ color: '#d97706', fontWeight: '500', padding: '4px 8px', background: '#fef3c7', borderRadius: '4px', fontSize: '0.85rem' }}>Serving Notice Period</span>
+                            ) : employee.remarks ? (
+                              <span style={{ color: '#4b5563', fontSize: '0.85rem' }}>{employee.remarks}</span>
+                            ) : (
+                              <span style={{ color: '#059669', fontWeight: '500', padding: '4px 8px', background: '#d1fae5', borderRadius: '4px', fontSize: '0.85rem' }}>Working</span>
+                            )}
+                          </td>
                           <td>
                             {selectedTypeFilter === 'teaching' && (
                               <button
@@ -593,15 +640,6 @@ const EmployeeManagement = () => {
                                 style={{ marginRight: '8px', background: 'linear-gradient(135deg,#4f46e5,#6366f1)', color: '#fff', border: 'none', borderRadius: '6px', padding: '5px 10px', cursor: 'pointer', fontSize: '0.8rem' }}
                               >
                                 📚 Classes
-                              </button>
-                            )}
-                            {selectedTypeFilter === 'teaching' && (
-                              <button 
-                                className="btn btn-secondary btn-small" 
-                                onClick={() => setComplaintsModalTeacher(employee)} 
-                                style={{ marginRight: '8px' }}
-                              >
-                                📝 Remarks
                               </button>
                             )}
                             <button onClick={() => handleEditEmployee(employee)} className="btn btn-secondary btn-small" style={{ marginRight: '8px' }}>
@@ -822,12 +860,11 @@ const EmployeeManagement = () => {
               <table>
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Subject</th>
-                    <th>Designation</th>
-                    <th>Experience</th>
-                    <th>Base Salary</th>
-                    <th>Action</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Name</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Subject / Role</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Experience</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Base Salary</th>
+                    <th style={{ width: '150px', textAlign: 'center', whiteSpace: 'nowrap' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -854,7 +891,7 @@ const EmployeeManagement = () => {
                       })()}</td>
                       <td>{getYearsWorked(teacher.dateOfJoining)} yrs</td>
                       <td>{formatCurrency(teacher.salary?.baseSalary || 0)}</td>
-                      <td>
+                      <td style={{ textAlign: 'center' }}>
                         <button
                           onClick={() => setEditingTeacher(teacher)}
                           className="btn btn-primary btn-small"
@@ -873,12 +910,12 @@ const EmployeeManagement = () => {
               <table>
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Designation</th>
-                    <th>Experience</th>
-                    <th>Joining Date</th>
-                    <th>Base Salary</th>
-                    <th>Action</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Name</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Designation</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Experience</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Joining Date</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Base Salary</th>
+                    <th style={{ width: '150px', textAlign: 'center', whiteSpace: 'nowrap' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -889,7 +926,7 @@ const EmployeeManagement = () => {
                       <td>{getYearsWorked(emp.dateOfJoining)} yrs</td>
                       <td>{new Date(emp.dateOfJoining).toLocaleDateString()}</td>
                       <td>{formatCurrency(emp.salary?.baseSalary || 0)}</td>
-                      <td>
+                      <td style={{ textAlign: 'center' }}>
                         <button
                           onClick={() => setEditingEmployeePayroll(emp)}
                           className="btn btn-primary btn-small"

@@ -17,6 +17,7 @@ import ParentPocketMoney from '../components/ParentPocketMoney';
 import DashboardHome from '../components/DashboardHome';
 import RemarkList from '../components/RemarkList';
 import ParentTeacherComplaints from '../components/ParentTeacherComplaints';
+import ParentStudentNotes from '../components/ParentStudentNotes';
 
 const ParentDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -96,6 +97,7 @@ const ParentDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/pocket-money">💵 Pocket Money</Link></li>
           <li><Link to="/dashboard/exams">📋 Exams</Link></li>
           <li><Link to="/dashboard/remarks">💬 Remarks</Link></li>
+          <li><Link to="/dashboard/notes">📋 Important Notes</Link></li>
           <li><Link to="/dashboard/feedback">⚠️ Teacher Feedback</Link></li>
           <li><Link to="/dashboard/timetable">🕒 Timetable</Link></li>
           <li><Link to="/dashboard/notices">📰 Notices</Link></li>
@@ -126,6 +128,7 @@ const ParentDashboard = ({ user, onLogout }) => {
           <Route path="pocket-money" element={<ParentPocketMoney />} />
           <Route path="exams" element={<ParentExams />} />
           <Route path="remarks" element={<RemarkList />} />
+          <Route path="notes" element={<ParentStudentNotes studentId={students.length > 0 ? (students[0].userId?._id || students[0].userId || students[0]._id) : null} />} />
           <Route path="feedback" element={<ParentTeacherComplaints currentUser={user} />} />
           <Route path="timetable" element={<ParentTimetable />} />
           <Route path="notices" element={<ParentNotices />} />

@@ -17,6 +17,7 @@ const HostelManagement = () => {
   });
   const [editingHostelId, setEditingHostelId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   useEffect(() => {
     fetchHostels();
@@ -50,6 +51,7 @@ const HostelManagement = () => {
       totalBeds: hostel.totalBeds,
       monthlyFee: hostel.monthlyFee,
     });
+    setShowAddForm(true);
   };
 
   const resetHostelForm = () => {
@@ -114,72 +116,86 @@ const HostelManagement = () => {
     <div className="management-container">
       <h1>Hostel Management</h1>
 
-      <form onSubmit={handleAddHostel} className="management-form">
-        <h3>Add New Hostel</h3>
-        {error && <div style={{ color: '#d32f2f', marginBottom: '10px', padding: '8px', backgroundColor: '#ffebee', borderRadius: '4px' }}>{error}</div>}
-        <input
-          type="text"
-          name="hostelName"
-          placeholder="Hostel Name"
-          value={newHostel.hostelName}
-          onChange={handleInputChange}
-          required
-        />
-        <select name="hostelType" value={newHostel.hostelType} onChange={handleInputChange}>
-          <option value="boys">Boys</option>
-          <option value="girls">Girls</option>
-          <option value="mixed">Mixed</option>
-        </select>
-        <input
-          type="text"
-          name="wardenName"
-          placeholder="Warden Name"
-          value={newHostel.wardenName}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="tel"
-          name="wardenPhone"
-          placeholder="Warden Phone"
-          value={newHostel.wardenPhone}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="number"
-          name="totalRooms"
-          placeholder="Total Rooms (e.g., 10)"
-          value={newHostel.totalRooms}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="number"
-          name="totalBeds"
-          placeholder="Total Beds (e.g., 50)"
-          value={newHostel.totalBeds}
-          onChange={handleInputChange}
-          required
-        />
-        <input
-          type="number"
-          name="monthlyFee"
-          placeholder="Monthly Fee (₹)"
-          value={newHostel.monthlyFee}
-          onChange={handleInputChange}
-          required
-        />
-        <button type="submit">{editingHostelId ? 'Update Hostel' : 'Add Hostel'}</button>
-        {editingHostelId && (
-          <button type="button" onClick={resetHostelForm} style={{ marginLeft: '10px' }}>
-            Cancel
-          </button>
-        )}
-      </form>
+      {showAddForm && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', width: '90%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, color: '#374151', fontSize: '1.25rem' }}>{editingHostelId ? 'Update Hostel' : 'Add New Hostel'}</h3>
+              <button onClick={() => { resetHostelForm(); setShowAddForm(false); }} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#6b7280', padding: '0 5px' }}>&times;</button>
+            </div>
+            <form onSubmit={handleAddHostel} className="management-form" style={{ marginBottom: 0, boxShadow: 'none', padding: 0 }}>
+              {error && <div style={{ color: '#d32f2f', marginBottom: '10px', padding: '8px', backgroundColor: '#ffebee', borderRadius: '4px' }}>{error}</div>}
+              <input
+                type="text"
+                name="hostelName"
+                placeholder="Hostel Name"
+                value={newHostel.hostelName}
+                onChange={handleInputChange}
+                required
+              />
+              <select name="hostelType" value={newHostel.hostelType} onChange={handleInputChange}>
+                <option value="boys">Boys</option>
+                <option value="girls">Girls</option>
+                <option value="mixed">Mixed</option>
+              </select>
+              <input
+                type="text"
+                name="wardenName"
+                placeholder="Warden Name"
+                value={newHostel.wardenName}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="tel"
+                name="wardenPhone"
+                placeholder="Warden Phone"
+                value={newHostel.wardenPhone}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="number"
+                name="totalRooms"
+                placeholder="Total Rooms (e.g., 10)"
+                value={newHostel.totalRooms}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="number"
+                name="totalBeds"
+                placeholder="Total Beds (e.g., 50)"
+                value={newHostel.totalBeds}
+                onChange={handleInputChange}
+                required
+              />
+              <input
+                type="number"
+                name="monthlyFee"
+                placeholder="Monthly Fee (₹)"
+                value={newHostel.monthlyFee}
+                onChange={handleInputChange}
+                required
+              />
+              <button type="submit" className="btn btn-primary">{editingHostelId ? 'Update Hostel' : 'Add Hostel'}</button>
+              {editingHostelId && (
+                <button type="button" onClick={() => { resetHostelForm(); setShowAddForm(false); }} style={{ marginLeft: '10px' }}>
+                  Cancel
+                </button>
+              )}
+            </form>
+          </div>
+        </div>
+      )}
 
       <div className="hostels-list">
-        <h3>Hostels</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h3 style={{ margin: 0 }}>Hostels</h3>
+          <button onClick={() => setShowAddForm(true)} className="btn-primary" style={{ padding: '8px 20px', borderRadius: '8px', cursor: 'pointer', width: 'fit-content' }}>
+            + Add Hostel
+          </button>
+        </div>
         {loading ? (
           <p>Loading...</p>
         ) : (

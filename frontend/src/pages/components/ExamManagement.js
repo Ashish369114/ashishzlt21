@@ -9,13 +9,12 @@ const ExamManagement = () => {
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [selectedExamName, setSelectedExamName] = useState('');
-  const [searchSubject, setSearchSubject] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('');
   const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
   const [selectedClassId, setSelectedClassId] = useState('');
   const [formData, setFormData] = useState({
     name: '',
+    examType: 'Unit Test',
     class: '',
     subject: '',
     examDate: '',
@@ -153,13 +152,13 @@ const ExamManagement = () => {
     }
   };
 
-  const handleDeleteExam = async (id) => {
-    if (window.confirm('Are you sure you want to delete this exam?')) {
+  const handleDeleteExamGroup = async (ids) => {
+    if (window.confirm('Are you sure you want to delete these exams?')) {
       try {
-        await examService.delete(id);
+        await Promise.all(ids.map(id => examService.delete(id)));
         fetchExams();
       } catch (err) {
-        setError('Failed to delete exam');
+        setError('Failed to delete exams');
       }
     }
   };
@@ -173,20 +172,8 @@ const ExamManagement = () => {
     const matchClass = !selectedClassId || String(exam.class?._id || exam.class || exam.classId) === String(selectedClassId);
     const examNameClean = exam.examType || exam.name?.split(' - ')[0] || 'Unknown';
     const matchExamName = !selectedExamName || examNameClean === selectedExamName;
-    const matchSubject = !searchSubject || (exam.subject?.name || exam.subject || '').toLowerCase().includes(searchSubject.toLowerCase());
-    
-    // Calculate simulated status for filtering
-    const examDate = exam.examDate ? new Date(exam.examDate) : new Date();
-    const today = new Date();
-    examDate.setHours(0,0,0,0);
-    today.setHours(0,0,0,0);
-    let status = 'Upcoming';
-    if (examDate < today) status = 'Completed';
-    else if (examDate.getTime() === today.getTime()) status = 'Ongoing';
-    
-    const matchStatus = !selectedStatus || status === selectedStatus;
 
-    return matchClass && matchExamName && matchSubject && matchStatus;
+    return matchClass && matchExamName;
   }).sort((a, b) => new Date(a.examDate || new Date()) - new Date(b.examDate || new Date()));
 
   const getExamDate = (dateString) => {
@@ -198,6 +185,33 @@ const ExamManagement = () => {
     const d = dateString ? new Date(dateString) : new Date();
     return d.toLocaleDateString('en-GB', { weekday: 'short' });
   };
+
+  const uniqueExamsMap = new Map();
+  visibleExams.forEach(exam => {
+    const key = `${getExamDate(exam.examDate)}-${exam.subject?.name || exam.subject}`;
+    if (!uniqueExamsMap.has(key)) {
+      uniqueExamsMap.set(key, { 
+        ...exam, 
+        _ids: [exam._id], 
+        rooms: [exam.room].filter(Boolean),
+        invigilators: [`${exam.invigilator?.firstName || ''} ${exam.invigilator?.lastName || ''}`.trim()].filter(Boolean)
+      });
+    } else {
+      const existing = uniqueExamsMap.get(key);
+      if (exam._id) existing._ids.push(exam._id);
+      if (exam.room && !existing.rooms.includes(exam.room)) existing.rooms.push(exam.room);
+      const invig = `${exam.invigilator?.firstName || ''} ${exam.invigilator?.lastName || ''}`.trim();
+      if (invig && !existing.invigilators.includes(invig)) existing.invigilators.push(invig);
+    }
+  });
+
+  const uniqueVisibleExams = Array.from(uniqueExamsMap.values()).map(g => ({
+    ...g,
+    room: g.rooms.length > 2 ? `${g.rooms[0]}, ${g.rooms[1]} (+${g.rooms.length - 2} more)` : (g.rooms.join(', ') || 'N/A'),
+    invigilatorName: g.invigilators.length > 2 ? `${g.invigilators[0]}, ${g.invigilators[1]} (+${g.invigilators.length - 2} more)` : (g.invigilators.join(', ') || 'N/A')
+  }));
+
+
 
   const getStatus = (dateString) => {
     const examDate = dateString ? new Date(dateString) : new Date();
@@ -231,50 +245,29 @@ const ExamManagement = () => {
           <div style={{ display: 'flex', gap: '10px' }}>
             <button className="btn btn-primary" onClick={() => {
               const printWin = window.open('', '_blank');
-              const rows = visibleExams.map(exam => {
-                const status = getStatus(exam.examDate);
-                let durationStr = '120 mins';
-                if (exam.startTime && exam.endTime) {
-                  const start = new Date(`1970-01-01T${exam.startTime}`);
-                  const end = new Date(`1970-01-01T${exam.endTime}`);
-                  const diff = (end - start) / 60000;
-                  if (diff > 0) durationStr = `${diff} mins`;
-                }
+              const rows = uniqueVisibleExams.map(exam => {
                 return `<tr>
                   <td>${getExamDate(exam.examDate)}</td>
                   <td>${getExamDay(exam.examDate)}</td>
-                  <td>${exam.startTime ? `${exam.startTime} – ${exam.endTime}` : '09:00 – 11:00'}</td>
                   <td>${exam.subject?.name || exam.subject || 'Unknown'}</td>
-                  <td>${exam.examType || exam.name?.split(' - ')[0] || 'Term Exam'}</td>
-                  <td>Grade ${exam.class?.grade || 'N/A'}</td>
-                  <td>${exam.class?.section || 'A'}</td>
-                  <td>${exam.room || 'Room 21'}</td>
-                  <td>${durationStr}</td>
-                  <td>${status}</td>
+                  <td>${exam.room === 'N/A' ? '-' : exam.room}</td>
                 </tr>`;
               }).join('');
               printWin.document.write(`<html><head><title>Exam Timetable</title>
                 <style>body{font-family:Arial,sans-serif;padding:20px}h1{text-align:center;color:#1e293b}
                 table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #cbd5e1;padding:10px;text-align:left;font-size:13px}
                 th{background:#f1f5f9;color:#475569;text-transform:uppercase;font-size:11px}</style></head>
-                <body><h1>📋 Exam Timetable</h1><p style="text-align:center;color:#64748b">${new Date().toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}</p>
-                <table><thead><tr><th>Date</th><th>Day</th><th>Time</th><th>Subject</th><th>Type</th><th>Grade</th><th>Section</th><th>Room</th><th>Duration</th><th>Status</th></tr></thead>
-                <tbody>${rows}</tbody></table></body></html>`);
+                <body><h1>📋 Exam Timetable</h1><p style="text-align:center;color:#64748b;font-weight:bold;font-size:14px;text-transform:uppercase;">${selectedExamName ? selectedExamName + ' EXAMS' : 'ALL EXAMS'}</p>
+                <table><thead><tr><th>Date</th><th>Day</th><th>Subject</th><th>Room</th></tr></thead>
+                <tbody>${rows}</tbody></table>
+                </body></html>`);
               printWin.document.close();
               printWin.print();
             }} style={{ background: '#475569', borderColor: '#475569' }}>🖨️ Print Timetable</button>
             <button className="btn btn-primary" onClick={() => {
-              let csv = 'Date,Day,Time,Subject,Exam Type,Grade,Section,Room,Invigilator,Duration,Status\n';
-              visibleExams.forEach(exam => {
-                const status = getStatus(exam.examDate);
-                let durationStr = '120 mins';
-                if (exam.startTime && exam.endTime) {
-                  const start = new Date(`1970-01-01T${exam.startTime}`);
-                  const end = new Date(`1970-01-01T${exam.endTime}`);
-                  const diff = (end - start) / 60000;
-                  if (diff > 0) durationStr = `${diff} mins`;
-                }
-                csv += `"${getExamDate(exam.examDate)}","${getExamDay(exam.examDate)}","${exam.startTime ? `${exam.startTime} – ${exam.endTime}` : '09:00 – 11:00'}","${exam.subject?.name || exam.subject || 'Unknown'}","${exam.examType || exam.name?.split(' - ')[0] || 'Term Exam'}","Grade ${exam.class?.grade || 'N/A'}","${exam.class?.section || 'A'}","${exam.room || 'Room 21'}","${exam.invigilator?.firstName || 'Ramesh'} ${exam.invigilator?.lastName || 'Sharma'}","${durationStr}","${status}"\n`;
+              let csv = 'Date,Day,Subject,Room,Invigilator\n';
+              uniqueVisibleExams.forEach(exam => {
+                csv += `"${getExamDate(exam.examDate)}","${getExamDay(exam.examDate)}","${exam.subject?.name || exam.subject || 'Unknown'}","${exam.room}","${exam.invigilatorName}"\n`;
               });
               const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
               const url = URL.createObjectURL(blob);
@@ -315,23 +308,6 @@ const ExamManagement = () => {
               ))}
             </select>
           </div>
-          <div className="form-group" style={{ flex: '1 1 150px' }}>
-            <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
-              <option value="">All Statuses</option>
-              <option value="Upcoming">Upcoming</option>
-              <option value="Ongoing">Ongoing</option>
-              <option value="Completed">Completed</option>
-            </select>
-          </div>
-          <div className="form-group" style={{ flex: '2 1 200px' }}>
-            <input 
-              type="text" 
-              placeholder="🔍 Search by Subject..." 
-              value={searchSubject} 
-              onChange={(e) => setSearchSubject(e.target.value)}
-              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
-            />
-          </div>
         </div>
       </div>
 
@@ -352,6 +328,21 @@ const ExamManagement = () => {
                 />
               </div>
               <div className="form-group">
+                <label>Exam Type</label>
+                <select name="examType" value={formData.examType || 'Unit Test'} onChange={handleInputChange} required>
+                  <option value="Unit Test">Unit Test</option>
+                  <option value="Mid-Term">Mid-Term</option>
+                  <option value="Final">Final</option>
+                  <option value="Half-Yearly">Half-Yearly</option>
+                  <option value="Quarterly">Quarterly</option>
+                  <option value="Annual">Annual</option>
+                  <option value="Practical">Practical</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
                 <label>Class</label>
                 <select name="class" value={formData.class} onChange={handleInputChange} required>
                   <option value="">Select a class</option>
@@ -362,9 +353,6 @@ const ExamManagement = () => {
                   ))}
                 </select>
               </div>
-            </div>
-
-            <div className="form-row">
               <div className="form-group">
                 <label>Exam Date</label>
                 <input
@@ -439,7 +427,7 @@ const ExamManagement = () => {
         </div>
       )}
 
-      {visibleExams.length === 0 ? (
+      {uniqueVisibleExams.length === 0 ? (
         <p style={{ textAlign: 'center', padding: '40px 20px', color: '#9ca3af' }}>
           No exams found matching your criteria.
         </p>
@@ -450,58 +438,29 @@ const ExamManagement = () => {
               <tr style={{ background: '#f1f5f9', color: '#475569', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Date</th>
                 <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Day</th>
-                <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Time</th>
                 <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Subject</th>
-                <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Exam Type</th>
-                <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Grade</th>
-                <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Section</th>
                 <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Room</th>
                 <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Invigilator</th>
-                <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Duration</th>
-                <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Status</th>
                 <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {visibleExams.map((exam) => {
+              {uniqueVisibleExams.map((exam) => {
                 const status = getStatus(exam.examDate);
                 const isHighlight = isToday(exam.examDate);
                 
-                // Calculate simulated duration if missing
-                let durationStr = '120 mins';
-                if (exam.startTime && exam.endTime) {
-                  const start = new Date(`1970-01-01T${exam.startTime}`);
-                  const end = new Date(`1970-01-01T${exam.endTime}`);
-                  const diff = (end - start) / 60000;
-                  if (diff > 0) durationStr = `${diff} mins`;
-                }
-                
                 return (
-                  <tr key={exam._id} style={{ borderBottom: '1px solid #e2e8f0', background: isHighlight ? '#eff6ff' : '#fff', transition: 'background 0.2s' }}>
+                  <tr key={exam._ids[0]} style={{ borderBottom: '1px solid #e2e8f0', background: isHighlight ? '#eff6ff' : '#fff', transition: 'background 0.2s' }}>
                     <td style={{ padding: '14px 16px', color: '#0f172a', fontWeight: '500', whiteSpace: 'nowrap' }}>
                       {getExamDate(exam.examDate)}
                     </td>
                     <td style={{ padding: '14px 16px', color: '#64748b' }}>{getExamDay(exam.examDate)}</td>
-                    <td style={{ padding: '14px 16px', color: '#0f172a', whiteSpace: 'nowrap' }}>{exam.startTime ? `${exam.startTime} – ${exam.endTime}` : '09:00 – 11:00'}</td>
                     <td style={{ padding: '14px 16px', color: '#3b82f6', fontWeight: '600' }}>{exam.subject?.name || exam.subject || 'Unknown'}</td>
-                    <td style={{ padding: '14px 16px', color: '#475569' }}>{exam.examType || exam.name?.split(' - ')[0] || 'Term Exam'}</td>
-                    <td style={{ padding: '14px 16px', color: '#475569', whiteSpace: 'nowrap' }}>Grade {exam.class?.grade || 'N/A'}</td>
-                    <td style={{ padding: '14px 16px', color: '#475569' }}>{exam.class?.section || 'A'}</td>
-                    <td style={{ padding: '14px 16px', color: '#475569' }}>{exam.room || 'Room 21'}</td>
-                    <td style={{ padding: '14px 16px', color: '#475569' }}>{exam.invigilator?.firstName || 'Ramesh'} {exam.invigilator?.lastName || 'Sharma'}</td>
-                    <td style={{ padding: '14px 16px', color: '#475569' }}>{durationStr}</td>
-                    <td style={{ padding: '14px 16px' }}>
-                      <span style={{
-                        padding: '4px 10px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: '600',
-                        background: status === 'Completed' ? '#dcfce7' : status === 'Ongoing' ? '#fef3c7' : '#e0f2fe',
-                        color: status === 'Completed' ? '#166534' : status === 'Ongoing' ? '#b45309' : '#0369a1'
-                      }}>
-                        {status}
-                      </span>
-                    </td>
+                    <td style={{ padding: '14px 16px', color: '#475569' }}>{exam.room}</td>
+                    <td style={{ padding: '14px 16px', color: '#475569' }}>{exam.invigilatorName}</td>
                     <td style={{ padding: '14px 16px' }}>
                       <button
-                        onClick={() => handleDeleteExam(exam._id)}
+                        onClick={() => handleDeleteExamGroup(exam._ids)}
                         style={{ padding: '6px 12px', background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' }}
                       >
                         Delete
@@ -512,6 +471,9 @@ const ExamManagement = () => {
               })}
             </tbody>
           </table>
+          <p style={{ marginTop: '20px', marginBottom: '20px', fontWeight: 'bold', textAlign: 'center', color: '#1e293b' }}>
+            NOTE: - EXAMS WILL BEGIN AT 09:00 A.M. AND ENDS AT 11:00 A.M.
+          </p>
         </div>
       )}
     </div>
