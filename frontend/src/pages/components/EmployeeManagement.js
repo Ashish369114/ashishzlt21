@@ -686,10 +686,6 @@ const EmployeeManagement = () => {
             </div>
           )}
 
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Teacher Classes Modal */}
           {viewingTeacherClasses && (
