@@ -44,7 +44,8 @@ const getClasses = async (req, res) => {
   try {
     const classes = await Class.find()
       .populate('classTeacher')
-      .populate('students');
+      .populate('students')
+      .sort({ grade: 1, section: 1 });
     res.json(classes);
   } catch (error) {
     res.status(500).json({ message: error.message });

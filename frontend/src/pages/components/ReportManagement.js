@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api, { classService } from '../../services/api';
+import api, { classService, studentService } from '../../services/api';
 import '../../styles/ManagementStyles.css';
 
 const ReportManagement = () => {
@@ -20,10 +20,51 @@ const ReportManagement = () => {
     reportType: 'attendance',
     startDate: '',
     endDate: '',
+    classId: '',
+    studentId: '',
     format: 'pdf',
     visibility: 'private',
   });
   const [loading, setLoading] = useState(false);
+  const [selectedGrade, setSelectedGrade] = useState('');
+  const [selectedSection, setSelectedSection] = useState('');
+  const [classStudents, setClassStudents] = useState([]);
+  const [selectedStudent, setSelectedStudent] = useState('');
+
+  useEffect(() => {
+    const fetchStudentsForClass = async () => {
+      if (!reportFilters.classId) {
+        setClassStudents([]);
+        setSelectedStudent('');
+        setReportFilters(prev => ({ ...prev, studentId: '' }));
+        return;
+      }
+      try {
+        const response = await studentService.getByClass(reportFilters.classId);
+        setClassStudents(Array.isArray(response.data) ? response.data : []);
+      } catch (error) {
+        console.error('Error fetching class students:', error);
+      }
+    };
+    fetchStudentsForClass();
+  }, [reportFilters.classId]);
+
+  useEffect(() => {
+    if (!selectedGrade) {
+      setSelectedSection('');
+      setReportFilters(prev => ({ ...prev, classId: '' }));
+      return;
+    }
+    const gradeClasses = classes.filter(cls => String(cls.grade) === String(selectedGrade));
+    const sections = [...new Set(gradeClasses.map(cls => cls.section).filter(Boolean))].sort();
+    if (!selectedSection || !sections.includes(selectedSection)) {
+      setSelectedSection('');
+      setReportFilters(prev => ({ ...prev, classId: '' }));
+      return;
+    }
+    const matchedClass = gradeClasses.find(cls => String(cls.section) === String(selectedSection));
+    setReportFilters(prev => ({ ...prev, classId: matchedClass?._id || '' }));
+  }, [classes, selectedGrade, selectedSection]);
 
   useEffect(() => {
     fetchReports();
@@ -144,7 +185,10 @@ const ReportManagement = () => {
     try {
       const response = await api.get(`/reports/${reportId}`);
       if (response.data.fileUrl) {
-        window.open(response.data.fileUrl, '_blank');
+        const absoluteUrl = response.data.fileUrl.startsWith('http')
+          ? response.data.fileUrl
+          : `http://localhost:5000${response.data.fileUrl}`;
+        window.open(absoluteUrl, '_blank');
       }
     } catch (error) {
       console.error('Error downloading report:', error);
@@ -176,14 +220,58 @@ const ReportManagement = () => {
           <option value="performance">Performance</option>
         </select>
         
+        <div style={{ display: 'flex', gap: '12px', width: '100%', marginBottom: '10px' }}>
+          <select
+            value={selectedGrade}
+            onChange={e => setSelectedGrade(e.target.value)}
+            style={{ flex: 1, padding: '10px 14px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.95rem' }}
+          >
+            <option value="">Select Grade (Optional)</option>
+            {[...new Set(classes.map(c => String(c.grade)).filter(Boolean))].sort((a, b) => Number(a) - Number(b)).map(g => (
+              <option key={g} value={g}>Grade {g}</option>
+            ))}
+          </select>
+
+          <select
+            value={selectedSection}
+            disabled={!selectedGrade}
+            onChange={e => setSelectedSection(e.target.value)}
+            style={{ flex: 1, padding: '10px 14px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.95rem', opacity: selectedGrade ? 1 : 0.5 }}
+          >
+            <option value="">Select Section</option>
+            {classes.filter(c => String(c.grade) === String(selectedGrade)).map(c => c.section).filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).sort().map(s => (
+              <option key={s} value={s}>Section {s}</option>
+            ))}
+          </select>
+        </div>
+
+        {reportFilters.classId && (
+          <select
+            value={selectedStudent}
+            onChange={e => {
+              setSelectedStudent(e.target.value);
+              setReportFilters(prev => ({ ...prev, studentId: e.target.value }));
+            }}
+            style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.95rem', marginBottom: '10px' }}
+          >
+            <option value="">Select Student (Optional - All Students)</option>
+            {classStudents.map(student => (
+              <option key={student._id} value={student._id}>
+                {student.userId?.firstName} {student.userId?.lastName} ({student.rollNumber || 'No Roll #'})
+              </option>
+            ))}
+          </select>
+        )}
+
         {['attendance', 'financial'].includes(reportFilters.reportType) && (
-          <>
+          <div style={{ display: 'flex', gap: '12px', width: '100%', marginBottom: '10px' }}>
             <input
               type="date"
               name="startDate"
               placeholder="Start Date"
               value={reportFilters.startDate}
               onChange={handleFilterChange}
+              style={{ flex: 1 }}
             />
             <input
               type="date"
@@ -191,28 +279,23 @@ const ReportManagement = () => {
               placeholder="End Date"
               value={reportFilters.endDate}
               onChange={handleFilterChange}
+              style={{ flex: 1 }}
             />
-          </>
+          </div>
         )}
-        
+
         {reportFilters.reportType === 'academic' && (
-          <input
-            type="text"
+          <select
             name="term"
-            placeholder="Term (e.g., 1st Term, 2nd Term)"
             value={reportFilters.term}
             onChange={handleFilterChange}
-          />
-        )}
-        
-        {reportFilters.reportType === 'performance' && (
-          <select name="classId" value={reportFilters.classId} onChange={handleFilterChange}>
-            <option value="">Select Class</option>
-            {classes.map(cls => (
-              <option key={cls._id} value={cls._id}>
-                {cls.grade} - {cls.section}
-              </option>
-            ))}
+            style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.95rem', marginBottom: '10px' }}
+          >
+            <option value="">Select Exam Type</option>
+            <option value="Unit Test">Unit Test</option>
+            <option value="Mid-Term">Mid-Term</option>
+            <option value="Final">Final</option>
+            <option value="Practical">Practical</option>
           </select>
         )}
         
@@ -297,7 +380,7 @@ const ReportManagement = () => {
                 <tr key={report._id}>
                   <td>{report.title}</td>
                   <td>{report.reportType}</td>
-                  <td>{new Date(report.createdAt).toLocaleDateString()}</td>
+                  <td>{new Date(report.createdAt).toLocaleString()}</td>
                   <td>{report.format}</td>
                   <td><span className={`status-${report.status}`}>{report.status}</span></td>
                   <td>

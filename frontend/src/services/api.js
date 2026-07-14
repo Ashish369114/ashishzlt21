@@ -196,5 +196,115 @@ export const leaveService = {
   reject:     (id, rem)  => api.put(`/leaves/${id}/reject`, { remarks: rem }),
   remove:     (id)       => api.delete(`/leaves/${id}`),
 };
+const getLocalComplaints = () => {
+  const data = localStorage.getItem('school_complaints');
+  return data ? JSON.parse(data) : [];
+};
+const saveLocalComplaints = (complaints) => {
+  localStorage.setItem('school_complaints', JSON.stringify(complaints));
+};
+
+export const complaintService = {
+  getAll: async () => {
+    return { data: getLocalComplaints() };
+  },
+  getByUser: async (userId) => {
+    const all = getLocalComplaints();
+    const userComplaints = all.filter(c => c.submittedByUserId === userId);
+    return { data: userComplaints };
+  },
+  add: async (data) => {
+    const all = getLocalComplaints();
+    const newComplaint = {
+      _id: 'comp_' + Date.now(),
+      ...data,
+      status: 'New',
+      createdAt: new Date().toISOString(),
+      principalNotes: '',
+      history: [{ action: 'Created', date: new Date().toISOString() }]
+    };
+    all.push(newComplaint);
+    saveLocalComplaints(all);
+    return { data: newComplaint };
+  },
+  updateStatus: async (id, status) => {
+    const all = getLocalComplaints();
+    const idx = all.findIndex(c => c._id === id);
+    if (idx !== -1) {
+      all[idx].status = status;
+      all[idx].history.push({ action: `Status changed to ${status}`, date: new Date().toISOString() });
+      saveLocalComplaints(all);
+      return { data: all[idx] };
+    }
+    throw new Error('Not found');
+  },
+  addNote: async (id, note) => {
+    const all = getLocalComplaints();
+    const idx = all.findIndex(c => c._id === id);
+    if (idx !== -1) {
+      all[idx].principalNotes = note;
+      all[idx].history.push({ action: 'Principal Note added', date: new Date().toISOString() });
+      saveLocalComplaints(all);
+      return { data: all[idx] };
+    }
+    throw new Error('Not found');
+  }
+};
+
+const getLocalStudentNotes = () => {
+  const data = localStorage.getItem('school_student_notes');
+  return data ? JSON.parse(data) : [];
+};
+const saveLocalStudentNotes = (notes) => {
+  localStorage.setItem('school_student_notes', JSON.stringify(notes));
+};
+
+export const studentNotesService = {
+  getAll: async () => {
+    return { data: getLocalStudentNotes() };
+  },
+  getByStudent: async (studentId) => {
+    const all = getLocalStudentNotes();
+    const studentNotes = all.filter(n => n.studentId === studentId);
+    return { data: studentNotes };
+  },
+  add: async (data) => {
+    const all = getLocalStudentNotes();
+    const newNote = {
+      _id: 'note_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      ...data,
+      date: new Date().toISOString(),
+    };
+    all.push(newNote);
+    
+    // Remedial classes logic
+    if (newNote.category === 'Weak in Subject' && newNote.subject) {
+      const subjectNotes = all.filter(n => 
+        n.studentId === newNote.studentId && 
+        n.category === 'Weak in Subject' && 
+        n.subject === newNote.subject
+      );
+      
+      if (subjectNotes.length === 3) {
+        // Auto flag
+        const autoNote = {
+          _id: 'note_' + Date.now() + '_auto',
+          studentId: newNote.studentId,
+          subject: newNote.subject,
+          category: 'Needs Remedial Classes',
+          priority: 'High',
+          description: `SYSTEM AUTOMATED: Student has been flagged as weak in ${newNote.subject} 3 times. Remedial classes are highly recommended.`,
+          addedBy: 'System Auto-Flag',
+          visibleToParent: true,
+          date: new Date().toISOString(),
+        };
+        all.push(autoNote);
+      }
+    }
+    
+    saveLocalStudentNotes(all);
+    return { data: newNote };
+  }
+};
 
 export default api;

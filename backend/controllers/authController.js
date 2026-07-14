@@ -15,6 +15,7 @@ const mockUsers = [
   { _id: 'mock_t5_id_123',  userId: 'TEACHER005',    password: 'Teacher@123',    role: 'teacher',         firstName: 'Suresh', lastName: 'Rao',    email: 'suresh5@school.com',     subscriptionPlan: 'silver',            isActive: true },
   { _id: 'mock_s_id_123',   userId: 'STUDENT001',    password: 'Student@123',    role: 'student',         firstName: 'Aarav',  lastName: 'Singh',  email: 'aarav1@school.com',      subscriptionPlan: 'silver',            isActive: true },
   { _id: 'mock_pa_id_123',  userId: 'PAR-G1-001',    password: 'Parent@123',     role: 'parent',          firstName: 'Rajesh', lastName: 'Sharma', email: 'parent-g1-001@school.com',subscriptionPlan: 'silver',            isActive: true },
+  { _id: 'mock_ex_id_123',  userId: 'EXAMINER001',   password: 'Examiner@123',   role: 'examiner',        firstName: 'Amit',   lastName: 'Jha',    email: 'examiner@school.com',    subscriptionPlan: 'gold',              isActive: true },
 ];
 
 const login = async (req, res) => {
@@ -61,7 +62,7 @@ const login = async (req, res) => {
     }
 
     // Notify super admin of non-admin logins
-    if (['principal', 'teacher', 'accountant_admin', 'student', 'parent'].includes(user.role)) {
+    if (['principal', 'teacher', 'accountant_admin', 'student', 'parent', 'examiner'].includes(user.role)) {
       try {
         const adminEmails = isDbConnected
           ? (await User.find({ role: 'super_admin', isActive: true }).select('email firstName'))

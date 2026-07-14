@@ -23,12 +23,17 @@ const employeeSchema = new mongoose.Schema(
     school: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'School',
-      required: true,
+      required: false,
     },
     employeeType: {
       type: String,
-      enum: ['staff', 'admin', 'support', 'maintenance'],
-      required: true,
+      enum: ['Pre-Primary', 'Junior School', 'High School', 'Non-Teaching Staff', 'teaching', 'non_teaching', 'staff', 'admin', 'support', 'maintenance'],
+      required: false,
+    },
+    class: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Class',
+      required: false,
     },
     designation: {
       type: String,
@@ -39,6 +44,10 @@ const employeeSchema = new mongoose.Schema(
     dateOfJoining: {
       type: Date,
       required: true,
+    },
+    inNoticePeriod: {
+      type: Boolean,
+      default: false,
     },
     salary: {
       baseSalary: Number,
@@ -93,6 +102,10 @@ const employeeSchema = new mongoose.Schema(
         },
       ],
     },
+    remarks: {
+      type: String,
+      default: ''
+    }
   },
   { timestamps: true }
 );

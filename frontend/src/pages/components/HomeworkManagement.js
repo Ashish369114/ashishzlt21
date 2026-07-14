@@ -256,18 +256,18 @@ const HomeworkManagement = () => {
     <div className="card">
       <div className="card-header">
         <h2>📖 Homework Management</h2>
-        <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-          {showForm ? 'Cancel' : '➕ Assign Homework'}
-        </button>
+        {(currentUser?.role === 'teacher' || currentUser?.role === 'principal') && (
+          <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
+            {showForm ? 'Cancel' : '➕ Assign Homework'}
+          </button>
+        )}
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
 
       <div className="form-container" style={{ marginBottom: '20px' }}>
-        <h3>Filter homework by class</h3>
         <div className="form-row">
           <div className="form-group">
-            <label>Grade</label>
             <select value={selectedGrade} onChange={(e) => setSelectedGrade(e.target.value)}>
               <option value="">Select grade</option>
               {gradeOptions.map((grade) => (
@@ -276,7 +276,6 @@ const HomeworkManagement = () => {
             </select>
           </div>
           <div className="form-group">
-            <label>Section</label>
             <select value={selectedSection} onChange={(e) => setSelectedSection(e.target.value)} disabled={!sectionsForGrade.length}>
               <option value="">Select section</option>
               {sectionsForGrade.map((section) => (
@@ -287,7 +286,7 @@ const HomeworkManagement = () => {
         </div>
       </div>
 
-      {showForm && (
+      {(currentUser?.role === 'teacher' || currentUser?.role === 'principal') && showForm && (
         <div className="form-container" style={{ marginBottom: '30px' }}>
           <h3>Assign New Homework</h3>
           <form onSubmit={handleAddHomework}>
@@ -371,6 +370,10 @@ const HomeworkManagement = () => {
 
       {loading ? (
         <div className="spinner"></div>
+      ) : !selectedClassId ? (
+        <p style={{ textAlign: 'center', padding: '40px 20px', color: '#9ca3af' }}>
+          Select a grade and section to view homework.
+        </p>
       ) : (
         <>
           <div style={{ marginBottom: '16px' }}>
@@ -405,14 +408,14 @@ const HomeworkManagement = () => {
                   style={{
                     padding: '10px 6px',
                     borderRadius: '6px',
-                    border: selectedDate === dateKey ? '2px solid #2563eb' : '1px solid #e5e7eb',
-                    backgroundColor: selectedDate === dateKey ? '#dbeafe' : '#fff',
+                    border: selectedDate === dateKey ? '2px solid #7c3aed' : '1px solid #e5e7eb',
+                    backgroundColor: selectedDate === dateKey ? '#f3e8ff' : '#fff',
                     cursor: 'pointer',
                   }}
                 >
                   <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>{date.toLocaleDateString('en', { weekday: 'short' })}</div>
                   <div style={{ fontWeight: '700' }}>{date.getDate()}</div>
-                  {hasHomework && <div style={{ fontSize: '0.7rem', color: '#2563eb' }}>●</div>}
+                  {hasHomework && <div style={{ fontSize: '0.7rem', color: '#7c3aed' }}>●</div>}
                 </button>
               );
             })}

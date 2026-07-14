@@ -10,6 +10,11 @@ const Attendance = require('../models/Attendance');
 const Exam = require('../models/Exam');
 const Event = require('../models/Event');
 const Leave = require('../models/Leave');
+const Employee = require('../models/Employee');
+const School = require('../models/School');
+const Library = require('../models/Library');
+const Transport = require('../models/Transport');
+const Hostel = require('../models/Hostel');
 
 const seedDataFn = async () => {
   // Clear lists first
@@ -26,9 +31,24 @@ const seedDataFn = async () => {
     Exam.deleteMany({}),
     Event.deleteMany({}),
     Leave.deleteMany({}),
+    Employee.deleteMany({}),
+    School.deleteMany({}),
+    Library.deleteMany({}),
+    Transport.deleteMany({}),
+    Hostel.deleteMany({}),
   ]);
 
   console.log('Cleared existing data');
+
+  const defaultSchool = new School({
+    name: 'Greenwood High School',
+    code: 'GHS101',
+    email: 'info@greenwood.edu',
+    phone: '1234567890',
+    academicYear: '2026-2027',
+  });
+  await defaultSchool.save();
+  console.log('Created default school Greenwood High School');
 
   const subjectsData = [
     { name: 'Mathematics' },
@@ -63,7 +83,7 @@ const seedDataFn = async () => {
     lastName: 'Kumar',
     email: 'principal@school.com',
     phone: '9876543211',
-    subscriptionPlan: 'gold',
+    subscriptionPlan: 'platinum_with_ocr',
   });
   await principal.save();
 
@@ -78,22 +98,46 @@ const seedDataFn = async () => {
     subscriptionPlan: 'gold',
   });
   await accountant.save();
-  console.log('Created admin accounts');
 
-  const teacherData = [
-    { firstName: 'Ramesh', lastName: 'Sharma', subjectIndex: 0, isAllSubjectTeacher: true, grade: 1 },
-    { firstName: 'Priya', lastName: 'Patel', subjectIndex: 1, isAllSubjectTeacher: true, grade: 2 },
-    { firstName: 'Rajesh', lastName: 'Singh', subjectIndex: 2, isAllSubjectTeacher: true, grade: 3 },
-    { firstName: 'Sneha', lastName: 'Gupta', subjectIndex: 3, isAllSubjectTeacher: true, grade: 4 },
-    { firstName: 'Suresh', lastName: 'Rao', subjectIndex: 5, isAllSubjectTeacher: true, grade: 5 },
-    { firstName: 'Neha', lastName: 'Verma', subjectIndex: 5, isAllSubjectTeacher: false, grade: 6 },
-    { firstName: 'Vikram', lastName: 'Joshi', subjectIndex: 6, isAllSubjectTeacher: false, grade: 7 },
-    { firstName: 'Asha', lastName: 'Mehta', subjectIndex: 0, isAllSubjectTeacher: false, grade: 8 },
-    { firstName: 'Karthik', lastName: 'Iyer', subjectIndex: 2, isAllSubjectTeacher: false, grade: 9 },
-    { firstName: 'Nisha', lastName: 'Reddy', subjectIndex: 4, isAllSubjectTeacher: false, grade: 10 },
-  ];
+  const examiner = new User({
+    userId: 'EXAMINER001',
+    password: 'Examiner@123',
+    role: 'examiner',
+    firstName: 'Amit',
+    lastName: 'Jha',
+    email: 'examiner@school.com',
+    phone: '9876543290',
+    subscriptionPlan: 'gold',
+  });
+  await examiner.save();
 
-  const teacherUsersByGrade = {};
+  console.log('Created admin and examiner accounts');
+
+  const firstNames = ['Ramesh', 'Priya', 'Rajesh', 'Sneha', 'Suresh', 'Neha', 'Vikram', 'Asha', 'Karthik', 'Nisha',
+                      'Amit', 'Deepa', 'Sanjay', 'Ritu', 'Vijay', 'Kiran', 'Alok', 'Shweta', 'Manoj', 'Anjali',
+                      'Sunil', 'Kavita', 'Pradeep', 'Pooja', 'Rakesh', 'Jyoti', 'Harish', 'Nidhi', 'Sanjeev', 'Preeti'];
+  const lastNames = ['Sharma', 'Patel', 'Singh', 'Gupta', 'Rao', 'Verma', 'Joshi', 'Mehta', 'Iyer', 'Reddy',
+                     'Kumar', 'Das', 'Mishra', 'Choudhury', 'Prasad', 'Nair', 'Goel', 'Sen', 'Tripathi', 'Dubey',
+                     'Saxena', 'Pandey', 'Joshi', 'Bose', 'Gill', 'Malhotra', 'Kapoor', 'Roy', 'Jadhav', 'Kulkarni'];
+
+  const teacherData = [];
+  let count = 0;
+  for (let grade = 1; grade <= 10; grade++) {
+    for (const section of ['A', 'B', 'C']) {
+      const idx = count;
+      teacherData.push({
+        firstName: firstNames[idx % firstNames.length],
+        lastName: lastNames[idx % lastNames.length],
+        subjectIndex: idx % subjects.length,
+        isAllSubjectTeacher: grade <= 5,
+        grade,
+        section
+      });
+      count++;
+    }
+  }
+
+  const teacherUsersByClass = {};
   const teachers = [];
   let teacherCount = 1;
 
@@ -121,7 +165,7 @@ const seedDataFn = async () => {
     });
     await teacher.save();
     teachers.push(teacher);
-    teacherUsersByGrade[tData.grade] = user._id;
+    teacherUsersByClass[`${tData.grade}-${tData.section}`] = user._id;
     teacherCount += 1;
   }
   console.log(`Created ${teachers.length} teachers`);
@@ -129,10 +173,12 @@ const seedDataFn = async () => {
   const classes = [];
   for (let grade = 1; grade <= 10; grade += 1) {
     for (const section of ['A', 'B', 'C']) {
+      const classTeacherUserId = teacherUsersByClass[`${grade}-${section}`];
       const classData = new Class({
         grade,
         section,
-        subject: 'Core',
+        subject: 'General Curriculum',
+        classTeacher: classTeacherUserId
       });
       await classData.save();
       classes.push(classData);
@@ -140,16 +186,24 @@ const seedDataFn = async () => {
   }
   console.log(`Created ${classes.length} classes`);
 
-  for (let teacherIndex = 0; teacherIndex < teachers.length; teacherIndex += 1) {
-    const teacherDataItem = teacherData[teacherIndex];
-    const matchingClasses = classes.filter((cls) => Number(cls.grade) === Number(teacherDataItem.grade));
-    for (const classItem of matchingClasses) {
-      await Teacher.findByIdAndUpdate(teachers[teacherIndex]._id, {
+  // Assign multiple teachers to teach different subjects in each class
+  for (const classItem of classes) {
+    const classTeacher = teachers.find(t => String(t.userId) === String(classItem.classTeacher));
+    if (classTeacher) {
+      await Teacher.findByIdAndUpdate(classTeacher._id, {
         $addToSet: { assignedClasses: classItem._id },
       });
-      await Class.findByIdAndUpdate(classItem._id, {
-        classTeacher: teachers[teacherIndex].userId,
-      });
+    }
+
+    const tIndex = classes.indexOf(classItem);
+    const altTeacher1 = teachers[(tIndex + 10) % teachers.length];
+    const altTeacher2 = teachers[(tIndex + 20) % teachers.length];
+    for (const t of [altTeacher1, altTeacher2]) {
+      if (t) {
+        await Teacher.findByIdAndUpdate(t._id, {
+          $addToSet: { assignedClasses: classItem._id },
+        });
+      }
     }
   }
 
@@ -214,18 +268,48 @@ const seedDataFn = async () => {
     const dueDate = new Date();
     dueDate.setMonth(dueDate.getMonth() + 1);
     dueDate.setDate(15);
-    const isPaid = student.rollNumber.endsWith('0') || student.rollNumber.endsWith('5') || student.rollNumber.endsWith('7') ? true : false;
+    
+    const rollEnd = student.rollNumber.slice(-1);
+    let isPaid = false;
+    let paidAmount = 0;
+    let paymentHistory = [];
+
+    if (['0', '5', '7'].includes(rollEnd)) {
+      isPaid = true;
+      paidAmount = amount;
+      paymentHistory = [{
+        amount,
+        paymentMethod: ['PhonePe', 'Credit Card', 'Debit Card', 'Cash'][Math.floor(Math.random() * 4)],
+        paymentDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+        remark: 'Paid on time',
+      }];
+    } else if (['1', '6'].includes(rollEnd)) {
+      isPaid = false;
+      paidAmount = Math.round(amount * 0.4);
+      paymentHistory = [{
+        amount: Math.round(amount * 0.4),
+        paymentMethod: ['PhonePe', 'Cash'][Math.floor(Math.random() * 2)],
+        paymentDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+        remark: 'First installment paid',
+      }];
+    } else {
+      isPaid = false;
+      paidAmount = 0;
+    }
+
     const fee = new Fee({
       student: student.userId,
       amount,
       description: classItem.grade >= 6 ? 'Annual Tuition Fees' : 'Quarterly Tuition Fees',
       dueDate,
       isPaid,
+      paidAmount,
+      paymentHistory,
       ...(isPaid ? {
         paymentDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-        paymentMethod: ['PhonePe', 'Credit Card', 'Debit Card', 'Cash'][Math.floor(Math.random() * 4)],
+        paymentMethod: paymentHistory[0]?.paymentMethod || 'Cash',
       } : {}),
-      remarks: isPaid ? 'Paid on time' : 'Pending review',
+      remarks: isPaid ? 'Paid on time' : paidAmount > 0 ? 'Partially Paid' : 'Pending review',
     });
     await fee.save();
     feeRecords.push(fee);
@@ -241,7 +325,7 @@ const seedDataFn = async () => {
 
   const homeworkRecords = [];
   for (const classItem of classes) {
-    const teacherUserId = teacherUsersByGrade[classItem.grade];
+    const teacherUserId = teacherUsersByClass[`${classItem.grade}-${classItem.section}`];
     const subjectPool = subjects.filter((_, index) => index < 4);
     const selectedSubject = subjectPool[(classItem.grade + classItem.section.charCodeAt(0)) % subjectPool.length];
     for (let index = 0; index < 2; index += 1) {
@@ -266,103 +350,104 @@ const seedDataFn = async () => {
   console.log(`Created ${homeworkRecords.length} homework records`);
 
   const marksRecords = [];
-  const subjectPoolForMarks = [subjects[0], subjects[3], subjects[1]];
-  for (const { student, classItem, user } of studentRecords) {
-    const teacherUserId = teacherUsersByGrade[classItem.grade];
-    const baseSubject = subjectPoolForMarks[(classItem.grade + classItem.section.charCodeAt(0)) % subjectPoolForMarks.length];
-    const secondSubject = subjectPoolForMarks[(classItem.grade + 1 + classItem.section.charCodeAt(0)) % subjectPoolForMarks.length];
-    const scoreOne = 58 + ((studentIndex + classItem.grade) % 35);
-    const scoreTwo = 62 + ((studentIndex + classItem.grade + 2) % 30);
+  const examTypes = ['Unit Test', 'Mid-Term', 'Final'];
+  for (let idx = 0; idx < studentRecords.length; idx++) {
+    const { student, classItem, user } = studentRecords[idx];
     const examDate = new Date();
-    examDate.setDate(examDate.getDate() - 7);
+    examDate.setDate(examDate.getDate() - 15);
 
-    const markOne = new Marks({
-      student: user._id,
-      teacher: teacherUserId,
-      subject: baseSubject._id,
-      class: classItem._id,
-      marks: scoreOne,
-      examType: classItem.grade >= 6 ? 'Mid-Term' : 'Unit Test',
-      examDate,
-    });
-    await markOne.save();
-    marksRecords.push(markOne);
+    subjects.forEach((subject, subIdx) => {
+      const teacherUserId = teacherUsersByClass[`${classItem.grade}-${classItem.section}`] || teachers[subIdx % teachers.length].userId;
 
-    const markTwo = new Marks({
-      student: user._id,
-      teacher: teacherUserId,
-      subject: secondSubject._id,
-      class: classItem._id,
-      marks: scoreTwo,
-      examType: classItem.grade >= 6 ? 'Final' : 'Mid-Term',
-      examDate: new Date(examDate.getTime() + 12 * 24 * 60 * 60 * 1000),
+      examTypes.forEach((examType, examIdx) => {
+        const baseScore = 60 + ((idx + subIdx + classItem.grade + examIdx * 5) % 25);
+        const marksValue = idx % 8 >= 6 ? baseScore - 12 : baseScore + 8;
+
+        marksRecords.push({
+          student: user._id,
+          teacher: teacherUserId,
+          subject: subject._id,
+          class: classItem._id,
+          marks: Math.min(100, Math.max(0, marksValue)),
+          examType,
+          examDate: new Date(examDate.getTime() + examIdx * 5 * 24 * 60 * 60 * 1000),
+        });
+      });
     });
-    await markTwo.save();
-    marksRecords.push(markTwo);
   }
-  console.log(`Created ${marksRecords.length} mark records`);
+  const insertedMarks = await Marks.insertMany(marksRecords);
+  console.log(`Created ${insertedMarks.length} mark records`);
 
-  const attendanceRecords = [];
-  for (const { student, classItem, user } of studentRecords) {
-    const dates = [new Date(), new Date(Date.now() - 24 * 60 * 60 * 1000), new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)];
-    const statuses = ['Present', 'Present', 'Absent'];
-    for (let index = 0; index < 3; index += 1) {
-      const attendance = new Attendance({
+  const allDates = [];
+  const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // Seeding last 30 days only
+  const endDate = new Date();
+  let tempDate = new Date(startDate);
+  while (tempDate <= endDate) {
+    const day = tempDate.getDay();
+    if (day !== 0 && day !== 6) { // Exclude Sundays and Saturdays
+      allDates.push(new Date(tempDate));
+    }
+    tempDate.setDate(tempDate.getDate() + 1);
+  }
+
+  const attendanceDocs = [];
+  studentRecords.forEach(({ student, classItem, user }, idx) => {
+    // Each student gets a distinct attendance rate (75% to 98%) so their percentages differ
+    const studentRate = 0.75 + ((idx % 23) / 100);
+    for (const d of allDates) {
+      const isPresent = Math.random() < studentRate;
+      const status = isPresent ? 'Present' : 'Absent';
+      attendanceDocs.push({
         student: user._id,
         class: classItem._id,
-        date: dates[index],
-        status: statuses[index],
-        remarks: statuses[index] === 'Absent' ? 'Medical leave' : 'On time',
+        date: d,
+        status: status,
+        remarks: status === 'Absent' ? 'Medical leave' : 'On time',
       });
-      await attendance.save();
-      attendanceRecords.push(attendance);
     }
-  }
-  console.log(`Created ${attendanceRecords.length} attendance records`);
+  });
+  const insertedAttendance = await Attendance.insertMany(attendanceDocs);
+  console.log(`Created ${insertedAttendance.length} attendance records`);
 
   const examRecords = [];
+  const types = ['Unit Test', 'Half-Yearly', 'Quarterly', 'Annual', 'Mid-Term', 'Final', 'Practical'];
   for (const classItem of classes) {
-    const subject = subjects[(classItem.grade + classItem.section.charCodeAt(0)) % subjects.length];
-    const examOne = new Exam({
-      name: classItem.grade <= 5 ? 'Unit Test 1' : 'Mid-Term Examination',
-      class: classItem._id,
-      subject: subject._id,
-      examDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
-      startTime: '09:00',
-      endTime: '10:30',
-      totalMarks: 100,
-      room: `Room ${20 + classItem.grade}`,
-      description: `Scheduled for Grade ${classItem.grade} Section ${classItem.section}. Results will be announced next week.`,
-    });
-    await examOne.save();
-    examRecords.push(examOne);
-
-    const examTwo = new Exam({
-      name: classItem.grade <= 5 ? 'Weekly Assessment' : 'Final Assessment',
-      class: classItem._id,
-      subject: subjects[(classItem.grade + 2 + classItem.section.charCodeAt(0)) % subjects.length]._id,
-      examDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000),
-      startTime: '11:00',
-      endTime: '12:00',
-      totalMarks: 50,
-      room: `Room ${25 + classItem.grade}`,
-      description: `Practical evaluation for Grade ${classItem.grade} Section ${classItem.section}.`,
-    });
-    await examTwo.save();
-    examRecords.push(examTwo);
+    for (let i = 0; i < types.length; i++) {
+      const type = types[i];
+      for (let j = 0; j < subjects.length; j++) {
+        const subject = subjects[j];
+        const exam = new Exam({
+          name: `${type} - ${subject.name}`,
+          class: classItem._id,
+          subject: subject._id,
+          examDate: new Date(Date.now() + (i + 1) * 3 * 24 * 60 * 60 * 1000 + j * 24 * 60 * 60 * 1000),
+          examType: type,
+          startTime: '09:00',
+          endTime: '11:00',
+          totalMarks: 100,
+          room: `Room ${20 + classItem.grade}`,
+          description: `Scheduled evaluation for ${type} in Grade ${classItem.grade} Section ${classItem.section}.`,
+        });
+        await exam.save();
+        examRecords.push(exam);
+      }
+    }
   }
   console.log(`Created ${examRecords.length} examination records`);
 
   const eventRecords = [];
   const eventData = [
-    { title: 'Parent-Teacher Meeting', description: 'Discuss term progress and classroom goals.', eventDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), eventType: 'Academic', location: 'Main Hall' },
+    { title: 'Parent-Teacher Meeting (PTM)', description: 'Discuss term progress and classroom goals.', eventDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), eventType: 'Academic', location: 'Main Hall' },
     { title: 'Science Fair', description: 'Students present innovative projects and experiments.', eventDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), eventType: 'Cultural', location: 'Science Lab' },
     { title: 'Annual Sports Day', description: 'Track and field activities for all grades.', eventDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000), eventType: 'Sports', location: 'Playground' },
-    { title: 'Cultural Festival', description: 'Dance, drama, and music performances by students.', eventDate: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000), eventType: 'Cultural', location: 'Auditorium' },
-    { title: 'Annual Art & Craft Exhibition', description: 'Showcase of student paintings, sculptures, and handmade crafts.', eventDate: new Date(Date.now() + 35 * 24 * 60 * 60 * 1000), eventType: 'Cultural', location: 'Art Room & Gallery' },
+    { title: 'Cultural Festival (CCA)', description: 'Dance, drama, and music performances by students.', eventDate: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000), eventType: 'Cultural', location: 'Auditorium' },
+    { title: 'CCA Drawing & Craft Activity', description: 'Showcase of student paintings, sculptures, and handmade crafts.', eventDate: new Date(Date.now() + 35 * 24 * 60 * 60 * 1000), eventType: 'Cultural', location: 'Art Room & Gallery' },
     { title: 'Inter-School Debate Championship', description: 'Declamation and debate competition on modern global issues.', eventDate: new Date(Date.now() + 42 * 24 * 60 * 60 * 1000), eventType: 'Academic', location: 'Seminar Hall' },
     { title: 'Career Counseling Seminar', description: 'Expert lectures for high school students regarding college admissions.', eventDate: new Date(Date.now() + 49 * 24 * 60 * 60 * 1000), eventType: 'Academic', location: 'Auditorium' },
-    { title: 'Independence Day Celebration', description: 'Flag hoisting ceremony followed by patriotic songs and dance performances.', eventDate: new Date(Date.now() + 56 * 24 * 60 * 60 * 1000), eventType: 'Celebration', location: 'School Assembly Ground' }
+    { title: 'Independence Day Celebration', description: 'Flag hoisting ceremony followed by patriotic songs and dance performances.', eventDate: new Date(Date.now() + 56 * 24 * 60 * 60 * 1000), eventType: 'Celebration', location: 'School Assembly Ground' },
+    { title: 'Mid-Term Examinations', description: 'Formal mid-term examination for all grades.', eventDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), eventType: 'Academic', location: 'Respective Classrooms' },
+    { title: 'Weekly Teachers Meeting', description: 'Staff meeting to discuss weekly syllabus progress and evaluations.', eventDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), eventType: 'Teachers Meeting', location: 'Staff Room' },
+    { title: 'Inter-House Basketball Tournament', description: 'Annual inter-house sports event.', eventDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), eventType: 'Sports', location: 'Basketball Court' }
   ];
 
   for (const event of eventData) {
@@ -445,6 +530,186 @@ const seedDataFn = async () => {
     await Leave.insertMany(validLeaves);
     console.log(`Created ${validLeaves.length} demo leave requests`);
   }
+
+  // Seed employees
+  const employeeData = [
+    { firstName: 'Amit', lastName: 'Kumar', employeeType: 'High School', designation: 'Mathematics PGT', dateOfJoining: new Date('2020-07-15'), baseSalary: 45000 },
+    { firstName: 'Vikram', lastName: 'Rathore', employeeType: 'High School', designation: 'Physics PGT', dateOfJoining: new Date('2019-09-05'), baseSalary: 48000 },
+    { firstName: 'Meera', lastName: 'Nair', employeeType: 'High School', designation: 'Chemistry PGT', dateOfJoining: new Date('2020-11-20'), baseSalary: 47000 },
+    { firstName: 'Sunita', lastName: 'Rani', employeeType: 'Junior School', designation: 'Science TGT', dateOfJoining: new Date('2021-08-20'), baseSalary: 38000 },
+    { firstName: 'Rahul', lastName: 'Verma', employeeType: 'Junior School', designation: 'English Primary Teacher', dateOfJoining: new Date('2022-06-01'), baseSalary: 35000 },
+    { firstName: 'Preeti', lastName: 'Joshi', employeeType: 'Junior School', designation: 'Mathematics TGT', dateOfJoining: new Date('2021-04-18'), baseSalary: 37000 },
+    { firstName: 'Nisha', lastName: 'Sharma', employeeType: 'Pre-Primary', designation: 'Kindergarten Teacher', dateOfJoining: new Date('2023-01-10'), baseSalary: 28000 },
+    { firstName: 'Sanjana', lastName: 'Sen', employeeType: 'Pre-Primary', designation: 'Nursery Teacher', dateOfJoining: new Date('2024-02-15'), baseSalary: 27000 },
+    { firstName: 'Pooja', lastName: 'Mehta', employeeType: 'Pre-Primary', designation: 'Kindergarten Assistant', dateOfJoining: new Date('2025-05-10'), baseSalary: 22000 },
+    { firstName: 'Anil', lastName: 'Kapoor', employeeType: 'Non-Teaching Staff', designation: 'Accountant Clerk', dateOfJoining: new Date('2018-05-10'), baseSalary: 30000 },
+    { firstName: 'Geeta', lastName: 'Kumari', employeeType: 'Non-Teaching Staff', designation: 'Librarian', dateOfJoining: new Date('2019-11-01'), baseSalary: 32000 },
+    { firstName: 'Ravi', lastName: 'Teja', employeeType: 'Non-Teaching Staff', designation: 'IT Support Specialist', dateOfJoining: new Date('2022-03-12'), baseSalary: 35000 },
+    { firstName: 'Kiran', lastName: 'Bedi', employeeType: 'Non-Teaching Staff', designation: 'Administrative Officer', dateOfJoining: new Date('2015-06-01'), baseSalary: 55000 },
+    { firstName: 'Suresh', lastName: 'Raina', employeeType: 'Non-Teaching Staff', designation: 'Office Assistant', dateOfJoining: new Date('2023-08-01'), baseSalary: 25000 },
+    { firstName: 'Deepa', lastName: 'Rao', employeeType: 'Non-Teaching Staff', designation: 'Senior Receptionist', dateOfJoining: new Date('2017-03-15'), baseSalary: 29000 },
+  ];
+
+  const employeeDocs = employeeData.map((emp, i) => ({
+    firstName: emp.firstName,
+    lastName: emp.lastName,
+    employeeId: `EMP-${1000 + i}`,
+    employeeType: emp.employeeType,
+    designation: emp.designation,
+    dateOfJoining: emp.dateOfJoining,
+    salary: { baseSalary: emp.baseSalary }
+  }));
+
+  await Employee.insertMany(employeeDocs);
+  console.log(`Created ${employeeDocs.length} employees`);
+
+  // Seed Library Books
+  const libraryBooks = [
+    {
+      title: "Introduction to Algorithms",
+      isbn: "9780262033848",
+      author: "Thomas H. Cormen",
+      publisher: "MIT Press",
+      publicationYear: 2009,
+      category: "textbook",
+      subject: "Computer Science",
+      description: "A comprehensive guide to algorithm design and analysis.",
+      totalCopies: 10,
+      availableCopies: 8,
+      school: defaultSchool._id,
+      status: "available"
+    },
+    {
+      title: "To Kill a Mockingbird",
+      isbn: "9780446310789",
+      author: "Harper Lee",
+      publisher: "Grand Central Publishing",
+      publicationYear: 1988,
+      category: "fiction",
+      subject: "English Literature",
+      description: "The classic novel about racial injustice and the destruction of innocence.",
+      totalCopies: 5,
+      availableCopies: 3,
+      school: defaultSchool._id,
+      status: "available"
+    },
+    {
+      title: "A Brief History of Time",
+      isbn: "9780553380163",
+      author: "Stephen Hawking",
+      publisher: "Bantam Books",
+      publicationYear: 1998,
+      category: "non-fiction",
+      subject: "Physics",
+      description: "A landmark volume in science writing by one of the great minds of our time.",
+      totalCopies: 7,
+      availableCopies: 7,
+      school: defaultSchool._id,
+      status: "available"
+    }
+  ];
+  await Library.insertMany(libraryBooks);
+  console.log(`Created ${libraryBooks.length} library books`);
+
+  // Seed Transport Routes
+  const transportRoutes = [
+    {
+      routeName: "Route A - North City",
+      routeNumber: "RT-101",
+      school: defaultSchool._id,
+      vehicle: {
+        vehicleNumber: "TS 09 UA 1234",
+        vehicleType: "Bus",
+        manufacturer: "Tata Motors",
+        capacity: 40,
+        registrationNumber: "REG-991122"
+      },
+      driver: {
+        driverId: "DRV-101",
+        driverName: "Ram Singh",
+        licenseNumber: "DL-123456789",
+        phone: "9848022338",
+        address: "Secunderabad, Hyderabad"
+      },
+      startPoint: { name: "North Station" },
+      endPoint: { name: "Greenwood High School" },
+      pickupTime: "07:30",
+      dropTime: "16:30",
+      distance: 12.5,
+      fare: 1500,
+      status: "active"
+    },
+    {
+      routeName: "Route B - West suburbs",
+      routeNumber: "RT-102",
+      school: defaultSchool._id,
+      vehicle: {
+        vehicleNumber: "TS 09 UB 5678",
+        vehicleType: "Bus",
+        manufacturer: "Leyland",
+        capacity: 35,
+        registrationNumber: "REG-993344"
+      },
+      driver: {
+        driverId: "DRV-102",
+        driverName: "Krishna Rao",
+        licenseNumber: "DL-987654321",
+        phone: "9848033445",
+        address: "Kukatpally, Hyderabad"
+      },
+      startPoint: { name: "West Gate" },
+      endPoint: { name: "Greenwood High School" },
+      pickupTime: "07:45",
+      dropTime: "16:45",
+      distance: 10.2,
+      fare: 1200,
+      status: "active"
+    }
+  ];
+  await Transport.insertMany(transportRoutes);
+  console.log(`Created ${transportRoutes.length} transport routes`);
+
+  // Seed Hostels
+  const hostels = [
+    {
+      hostelName: "Newton Boys Hostel",
+      hostelType: "boys",
+      school: defaultSchool._id,
+      address: {
+        street: "Hostel Block A, School Campus",
+        city: "Hyderabad",
+        state: "Telangana",
+        zipCode: "500001"
+      },
+      wardenName: "Mr. Ramesh Sharma",
+      wardenPhone: "9848099887",
+      totalRooms: 50,
+      totalBeds: 150,
+      availableBeds: 120,
+      monthlyFee: 3500,
+      status: "active"
+    },
+    {
+      hostelName: "Curie Girls Hostel",
+      hostelType: "girls",
+      school: defaultSchool._id,
+      address: {
+        street: "Hostel Block B, School Campus",
+        city: "Hyderabad",
+        state: "Telangana",
+        zipCode: "500001"
+      },
+      wardenName: "Mrs. Lalitha Prasad",
+      wardenPhone: "9848088776",
+      totalRooms: 40,
+      totalBeds: 120,
+      availableBeds: 100,
+      monthlyFee: 3500,
+      status: "active"
+    }
+  ];
+  await Hostel.insertMany(hostels);
+  console.log(`Created ${hostels.length} hostels`);
 };
 
 module.exports = seedDataFn;

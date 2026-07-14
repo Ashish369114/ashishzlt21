@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import io from 'socket.io-client';
+import { formatCurrency } from '../utils/currencyFormatter';
 
 const useRealtimeUpdates = (userId, schoolId, role) => {
   const [socket, setSocket] = useState(null);
@@ -67,11 +68,11 @@ const useRealtimeUpdates = (userId, schoolId, role) => {
     });
 
     newSocket.on('fee:pending', (data) => {
-      addNotification('Pending Fee', `You have pending fees of ₹${data.amount}`);
+      addNotification('Pending Fee', `You have pending fees of ${formatCurrency(data.amount)}`);
     });
 
     newSocket.on('fee:confirmation', (data) => {
-      addNotification('Fee Paid', `Your fee payment of ₹${data.amount} has been confirmed`);
+      addNotification('Fee Paid', `Your fee payment of ${formatCurrency(data.amount)} has been confirmed`);
     });
 
     // Homework Updates
@@ -228,3 +229,4 @@ const useRealtimeUpdates = (userId, schoolId, role) => {
 };
 
 export default useRealtimeUpdates;
+

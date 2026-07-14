@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { feeService, expenseService } from '../../services/api';
+import { formatCurrency } from '../../utils/currencyFormatter';
 
 const FeatureLockBanner = ({ featureName, requiredPlan = 'Platinum' }) => (
   <div style={{
@@ -110,22 +111,22 @@ const AccountantReports = ({ isPremiumFeatureAllowed }) => {
             </div>
             <div className="stat-card">
               <h3>Total Amount</h3>
-              <div className="value">₹{stats?.totalAmount ?? 0}</div>
+              <div className="value">{formatCurrency(stats?.totalAmount ?? 0)}</div>
             </div>
             <div className="stat-card">
               <h3>Pending</h3>
-              <div className="value">{stats?.pendingCount ?? 0} / ₹{stats?.pendingAmount ?? 0}</div>
+              <div className="value">{stats?.pendingCount ?? 0} / {formatCurrency(stats?.pendingAmount ?? 0)}</div>
             </div>
             <div className="stat-card">
               <h3>Paid</h3>
-              <div className="value">{stats?.paidCount ?? 0} / ₹{stats?.paidAmount ?? 0}</div>
+              <div className="value">{stats?.paidCount ?? 0} / {formatCurrency(stats?.paidAmount ?? 0)}</div>
             </div>
           </div>
 
           <div className="stats-grid" style={{ marginTop: '20px' }}>
             <div className="stat-card">
               <h3>Total Expenses</h3>
-              <div className="value">₹{stats?.totalExpenses ?? 0}</div>
+              <div className="value">{formatCurrency(stats?.totalExpenses ?? 0)}</div>
             </div>
             <div className="stat-card">
               <h3>Expense Count</h3>
@@ -133,11 +134,11 @@ const AccountantReports = ({ isPremiumFeatureAllowed }) => {
             </div>
             <div className="stat-card">
               <h3>Net Income</h3>
-              <div className="value">₹{stats?.netIncome ?? 0}</div>
+              <div className="value">{formatCurrency(stats?.netIncome ?? 0)}</div>
             </div>
             <div className="stat-card">
               <h3>Today's Collection</h3>
-              <div className="value">₹{stats?.todaysCollection ?? 0}</div>
+              <div className="value">{formatCurrency(stats?.todaysCollection ?? 0)}</div>
             </div>
           </div>
 
@@ -165,7 +166,7 @@ const AccountantReports = ({ isPremiumFeatureAllowed }) => {
                       <tr key={expense._id}>
                         <td>{expense.title}</td>
                         <td>{expense.category || 'General'}</td>
-                        <td>₹{expense.amount}</td>
+                        <td>{formatCurrency(expense.amount)}</td>
                         <td>{expense.date ? new Date(expense.date).toLocaleDateString() : '-'}</td>
                       </tr>
                     ))
@@ -203,7 +204,7 @@ const AccountantReports = ({ isPremiumFeatureAllowed }) => {
                     paidFees.slice(0, 8).map((fee) => (
                       <tr key={fee._id}>
                         <td>{fee.student?.firstName} {fee.student?.lastName}</td>
-                        <td>₹{fee.amount}</td>
+                        <td>{formatCurrency(fee.amount)}</td>
                         <td>{fee.paymentMethod || '-'}</td>
                         <td>{fee.paymentDate ? new Date(fee.paymentDate).toLocaleDateString() : '-'}</td>
                       </tr>

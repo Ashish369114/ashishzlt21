@@ -1,19 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/api';
 import '../styles/Login.css';
 
-const DEFAULT_CURRENCIES = {
-  'IN': { name: 'India', symbol: '₹', silver: '40,000', gold: '70,000', platinum: '1,00,000', tax: 'GST' },
-  'US': { name: 'United States', symbol: '$', silver: '599', gold: '899', platinum: '1,299', tax: 'Sales Tax' },
-  'GB': { name: 'United Kingdom', symbol: '£', silver: '499', gold: '799', platinum: '1,099', tax: 'VAT' },
-  'CA': { name: 'Canada', symbol: 'C$', silver: '799', gold: '1,199', platinum: '1,599', tax: 'HST/GST' },
-  'EU': { name: 'Europe', symbol: '€', silver: '549', gold: '849', platinum: '1,149', tax: 'VAT' }
-};
-
 const Login = ({ onLogin }) => {
-  const [selectedCountry, setSelectedCountry] = useState('IN');
-  const [currencies, setCurrencies] = useState(DEFAULT_CURRENCIES);
   
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
@@ -22,41 +12,63 @@ const Login = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [activePill, setActivePill] = useState('');
   const [stars, setStars] = useState([]);
-  const [contactForm, setContactForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+  
+  const [showDemoModal, setShowDemoModal] = useState(false);
+  const [demoFormData, setDemoFormData] = useState({
+    schoolName: '',
+    contactPerson: '',
+    mobile: '',
+    email: '',
+    city: '',
+    students: '',
+    message: ''
+  });
+  const [demoSubmitted, setDemoSubmitted] = useState(false);
+
+  const handleDemoSubmit = (e) => {
+    e.preventDefault();
+    setDemoSubmitted(true);
+    setTimeout(() => {
+      setDemoSubmitted(false);
+      setShowDemoModal(false);
+      setDemoFormData({ schoolName: '', contactPerson: '', mobile: '', email: '', city: '', students: '', message: '' });
+    }, 4000);
+  };
+  
+  // Updated Contact Form Fields
+  const [contactForm, setContactForm] = useState({ schoolName: '', contactPerson: '', email: '', phone: '', students: '', message: '' });
   const [contactSent, setContactSent] = useState(false);
+  const [contactSending, setContactSending] = useState(false);
+  const [contactError, setContactError] = useState('');
 
   const handleContactChange = (e) => {
     const { name, value } = e.target;
     setContactForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const [contactSending, setContactSending] = useState(false);
-  const [contactError, setContactError] = useState('');
-
   const handleContactSubmit = async (e) => {
     e.preventDefault();
     setContactSending(true);
     setContactError('');
     try {
-      // Send to backend which will email business@zaynlevi.com
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...contactForm,
+          subject: 'School OS Demo Request',
           to: 'business@zaynlevi.com'
         })
       });
       if (!res.ok) throw new Error('Failed');
       setContactSent(true);
-      setContactForm({ name: '', email: '', phone: '', subject: '', message: '' });
+      setContactForm({ schoolName: '', contactPerson: '', email: '', phone: '', students: '', message: '' });
       setTimeout(() => setContactSent(false), 6000);
     } catch {
-      // Fallback: open mail client pre-filled
-      const body = `Name: ${contactForm.name}%0AEmail: ${contactForm.email}%0APhone: ${contactForm.phone}%0A%0A${contactForm.message}`;
-      window.location.href = `mailto:business@zaynlevi.com?subject=${encodeURIComponent(contactForm.subject || 'School OS Inquiry')}&body=${body}`;
+      const body = `School Name: ${contactForm.schoolName}%0AContact Person: ${contactForm.contactPerson}%0AEmail: ${contactForm.email}%0APhone: ${contactForm.phone}%0AStudents: ${contactForm.students}%0A%0A${contactForm.message}`;
+      window.location.href = `mailto:business@zaynlevi.com?subject=School OS Demo Request&body=${body}`;
       setContactSent(true);
-      setContactForm({ name: '', email: '', phone: '', subject: '', message: '' });
+      setContactForm({ schoolName: '', contactPerson: '', email: '', phone: '', students: '', message: '' });
       setTimeout(() => setContactSent(false), 6000);
     } finally {
       setContactSending(false);
@@ -116,7 +128,6 @@ const Login = ({ onLogin }) => {
   };
 
   const userIdRef = useRef(null);
-  const loginBtnRef = useRef(null);
   const navigate = useNavigate();
 
   // Generate twinkling stars on mount
@@ -136,8 +147,6 @@ const Login = ({ onLogin }) => {
     setStars(starsArray);
   }, []);
 
-  const activeCurrency = currencies[selectedCountry] || currencies['IN'];
-
   // Handle Quick Login Click
   const handleQuickLogin = (u, p) => {
     setUserId(u);
@@ -145,18 +154,9 @@ const Login = ({ onLogin }) => {
     setActivePill(u);
     setError('');
 
-    // Smooth scroll and focus
     if (userIdRef.current) {
       userIdRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
       userIdRef.current.focus();
-    }
-
-    // Button pulse animation
-    if (loginBtnRef.current) {
-      loginBtnRef.current.style.transform = 'scale(1.03)';
-      setTimeout(() => {
-        if (loginBtnRef.current) loginBtnRef.current.style.transform = '';
-      }, 250);
     }
   };
 
@@ -170,23 +170,18 @@ const Login = ({ onLogin }) => {
       const response = await authService.login(userId, password);
       onLogin(response.data.user, response.data.token);
       
-      // Store additional user info for socket.io
       localStorage.setItem('userId', response.data.user._id);
       localStorage.setItem('schoolId', response.data.user.school || '');
       localStorage.setItem('role', response.data.user.role);
       localStorage.setItem('userName', `${response.data.user.firstName} ${response.data.user.lastName}`);
 
-      // If user selected a plan from the plans page before logging in, respect that.
-      // Otherwise use the plan stored in their account in the DB.
       const pendingPlan = localStorage.getItem('pendingPlan');
       const existingPlan = localStorage.getItem('subscriptionPlan');
       const dbPlan = response.data.user.subscriptionPlan || 'silver';
-      // Priority: pendingPlan (just paid) > existingPlan (already chosen) > DB plan
       const finalPlan = pendingPlan || existingPlan || dbPlan;
       localStorage.setItem('subscriptionPlan', finalPlan);
-      localStorage.removeItem('pendingPlan'); // always clear after use
+      localStorage.removeItem('pendingPlan');
       
-      // Redirect to dashboard
       navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid credentials. Please try again.');
@@ -200,10 +195,7 @@ const Login = ({ onLogin }) => {
       {/* Background elements */}
       <div className="aurora-bg"></div>
       <div className="mesh-grid"></div>
-      <div className="blob blob-1"></div>
-      <div className="blob blob-2"></div>
-      <div className="blob blob-3"></div>
-      
+
       {/* Twinkling star field */}
       <div className="stars">
         {stars.map(star => (
@@ -222,438 +214,516 @@ const Login = ({ onLogin }) => {
         ))}
       </div>
 
-      {/* Main card */}
-      <div className="login-wrapper">
-        
-        {/* Left Side: Login Form */}
-        <div className="form-side">
-          <div className="brand">
-            <div className="brand-icon">
-              <svg viewBox="0 0 100 100" style={{ width: '28px', height: '28px', overflow: 'visible' }}>
-                <path d="M 24 45 V 32 A 8 8 0 0 1 32 24 H 76 L 46 54" fill="none" stroke="#0b4d8c" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M 76 55 V 68 A 8 8 0 0 1 68 76 H 24 L 54 46" fill="none" stroke="#00a2e8" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <div>
-              <div className="brand-name">Zayn Levi Technologies</div>
-              <div className="brand-tag">School Operating System</div>
-            </div>
+      {/* 1. Fixed Top Navigation */}
+      <nav className="saas-navbar">
+        <a href="#" className="nav-brand">
+          <div className="nav-logo-icon">
+            <svg viewBox="0 0 100 100" style={{ width: '20px', height: '20px', overflow: 'visible' }}>
+              <path d="M 24 45 V 32 A 8 8 0 0 1 32 24 H 76 L 46 54" fill="none" stroke="#0b4d8c" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M 76 55 V 68 A 8 8 0 0 1 68 76 H 24 L 54 46" fill="none" stroke="#00a2e8" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </div>
+          <span className="nav-brand-name">Zayn Levi Technologies</span>
+        </a>
+        <div className="nav-links">
+          <a href="#" className="nav-link">Home</a>
+          <a href="#features" className="nav-link">Features</a>
+          <a href="#pricing" className="nav-link">Pricing</a>
+          <a href="#about" className="nav-link">About</a>
+          <a href="#contact" className="nav-link">Contact</a>
+        </div>
+        <div className="nav-actions">
+          <a href="#login" className="btn-nav-login">Login</a>
+        </div>
+      </nav>
 
-          <h1 className="headline">Welcome Back</h1>
-          <p className="subline">Sign in to access your school dashboard and modules.</p>
+      <div className="saas-container">
+        
+        {/* 2. Hero Section */}
+        <section className="saas-hero">
+          <div className="hero-badges">
+            <div className="hero-badge"><i className="fa-solid fa-check"></i> AI Powered</div>
+            <div className="hero-badge"><i className="fa-solid fa-check"></i> OCR Ready</div>
+            <div className="hero-badge"><i className="fa-solid fa-check"></i> Cloud Based</div>
+          </div>
+          <h1 className="hero-title">AI-Powered School Operating System</h1>
+          <p className="hero-subtitle">
+            One intelligent platform to manage admissions, attendance, examinations, fees, payroll, transport, library, hostel, communication, and analytics.
+          </p>
+          <div className="hero-cta">
+            <a href="#login" className="btn-primary">Login</a>
+            <a href="#contact" className="btn-secondary">Book Free Demo</a>
+          </div>
+        </section>
 
+        {/* 3 & 4. Login Card & Demo Portal Section */}
+        <section id="login" className="saas-section" style={{ paddingTop: '40px' }}>
+          <div className="login-demo-wrapper">
+            
+            {/* Login Form Side */}
+            <div className="login-side">
+              <h2 className="login-heading">Welcome Back</h2>
+              <p className="login-subheading">Sign in to access your school dashboard and modules.</p>
 
-          {/* Messages */}
-          {error && (
-            <div className="alert alert-error">
-              <i className="fa-solid fa-circle-exclamation"></i> {error}
-            </div>
-          )}
+              {error && (
+                <div className="alert-error">
+                  <i className="fa-solid fa-circle-exclamation"></i> {error}
+                </div>
+              )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="userId">User ID / Email</label>
-              <div className="input-wrap">
-                <i className="fa-solid fa-user"></i>
-                <input
-                  type="text"
-                  id="userId"
-                  ref={userIdRef}
-                  value={userId}
-                  onChange={(e) => {
-                    setUserId(e.target.value);
-                    setActivePill('');
-                  }}
-                  className="form-input"
-                  placeholder="e.g. SUPERADMIN001"
-                  required
-                  autoComplete="username"
-                />
+              <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                  <label htmlFor="userId">User ID / Email</label>
+                  <div className="input-wrap">
+                    <i className="fa-solid fa-user"></i>
+                    <input
+                      type="text"
+                      id="userId"
+                      ref={userIdRef}
+                      value={userId}
+                      onChange={(e) => {
+                        setUserId(e.target.value);
+                        setActivePill('');
+                      }}
+                      className="form-input"
+                      placeholder="e.g. SUPERADMIN001"
+                      required
+                      autoComplete="username"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="password">Password</label>
+                  <div className="input-wrap">
+                    <i className="fa-solid fa-lock"></i>
+                    <input
+                      type="password"
+                      id="password"
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setActivePill('');
+                      }}
+                      className="form-input"
+                      placeholder="••••••••"
+                      required
+                      autoComplete="current-password"
+                    />
+                  </div>
+                </div>
+
+                <div className="cta-action-group">
+                  <button type="button" className="btn-book-demo-large" onClick={() => setShowDemoModal(true)}>
+                    🚀 Book Free Demo
+                  </button>
+                  <button type="submit" className="btn-login-secondary" disabled={loading}>
+                    {loading ? (
+                      <><i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }}></i>Authenticating...</>
+                    ) : (
+                      <><i className="fa-solid fa-arrow-right-to-bracket" style={{ marginRight: '8px' }}></i>Sign In to Portal</>
+                    )}
+                  </button>
+                </div>
+              </form>
+
+              <div className="login-footer-links">
+                <button type="button" className="link" onClick={() => { setShowForgotPw(true); setShowForgotId(false); setForgotMsg(''); setForgotEmail(''); }}>
+                  Forgot Password?
+                </button>
+                <span className="divider">•</span>
+                <button type="button" className="link" onClick={() => { setShowForgotId(true); setShowForgotPw(false); setForgotMsg(''); setForgotEmail(''); }}>
+                  Forgot User ID?
+                </button>
               </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="password">Password</label>
-              <div className="input-wrap">
-                <i className="fa-solid fa-lock"></i>
-                <input
-                  type="password"
-                  id="password"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    setActivePill('');
-                  }}
-                  className="form-input"
-                  placeholder="••••••••"
-                  required
-                  autoComplete="current-password"
-                />
+            {/* Demo Portal Side */}
+            <div className="demo-side">
+              <h3 className="demo-heading"><i className="fa-solid fa-wand-magic-sparkles"></i> Demo Portal Access</h3>
+              <p className="demo-subheading">Select a role below to auto-fill valid seed credentials for a live demo.</p>
+
+              <div className="role-cards-grid">
+                <div className={`role-card ${activePill === 'SUPERADMIN001' ? 'active' : ''}`} onClick={() => handleQuickLogin('SUPERADMIN001', 'Admin@123')}>
+                  <div className="role-card-title"><i className="fa-solid fa-crown"></i> School Admin</div>
+                  <div className="role-card-id">SUPERADMIN001</div>
+                </div>
+                <div className={`role-card ${activePill === 'PRINCIPAL001' ? 'active' : ''}`} onClick={() => handleQuickLogin('PRINCIPAL001', 'Principal@123')}>
+                  <div className="role-card-title"><i className="fa-solid fa-user-tie"></i> Principal</div>
+                  <div className="role-card-id">PRINCIPAL001</div>
+                </div>
+                <div className={`role-card ${activePill === 'ACCOUNTANT001' ? 'active' : ''}`} onClick={() => handleQuickLogin('ACCOUNTANT001', 'Accountant@123')}>
+                  <div className="role-card-title"><i className="fa-solid fa-file-invoice-dollar"></i> Accountant</div>
+                  <div className="role-card-id">ACCOUNTANT001</div>
+                </div>
+                <div className={`role-card ${activePill === 'TEACHER001' ? 'active' : ''}`} onClick={() => handleQuickLogin('TEACHER001', 'Teacher@123')}>
+                  <div className="role-card-title"><i className="fa-solid fa-chalkboard-user"></i> Teacher</div>
+                  <div className="role-card-id">TEACHER001</div>
+                </div>
+                <div className={`role-card ${activePill === 'EXAMINER001' ? 'active' : ''}`} onClick={() => handleQuickLogin('EXAMINER001', 'Examiner@123')}>
+                  <div className="role-card-title"><i className="fa-solid fa-clipboard-check"></i> Examiner</div>
+                  <div className="role-card-id">EXAMINER001</div>
+                </div>
+                <div className={`role-card ${activePill === 'STUDENT001' ? 'active' : ''}`} onClick={() => handleQuickLogin('STUDENT001', 'Student@123')}>
+                  <div className="role-card-title"><i className="fa-solid fa-user-graduate"></i> Student</div>
+                  <div className="role-card-id">STUDENT001</div>
+                </div>
+                <div className={`role-card ${activePill === 'PAR-G1-001' ? 'active' : ''}`} onClick={() => handleQuickLogin('PAR-G1-001', 'Parent@123')}>
+                  <div className="role-card-title"><i className="fa-solid fa-users"></i> Parent</div>
+                  <div className="role-card-id">PAR-G1-001</div>
+                </div>
               </div>
             </div>
+            
+          </div>
+        </section>
 
-            <button
-              type="submit"
-              className="btn-login"
-              ref={loginBtnRef}
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }}></i>Authenticating...
-                </>
+        {showDemoModal && (
+          <div className="demo-modal-overlay">
+            <div className="demo-modal-content">
+              {demoSubmitted ? (
+                <div className="demo-success-message">
+                  <i className="fa-solid fa-check-circle success-icon"></i>
+                  <h3>Thank you!</h3>
+                  <p>Our team will contact you shortly to schedule your free demo.</p>
+                </div>
               ) : (
                 <>
-                  <i className="fa-solid fa-arrow-right-to-bracket" style={{ marginRight: '8px' }}></i>Sign In to Portal
+                  <div className="demo-modal-header">
+                    <h2>Book Free Demo</h2>
+                    <button className="demo-close-btn" onClick={() => setShowDemoModal(false)}>&times;</button>
+                  </div>
+                  <form onSubmit={handleDemoSubmit} className="demo-form">
+                    <div className="demo-form-group">
+                      <label>School Name</label>
+                      <input type="text" value={demoFormData.schoolName} onChange={e => setDemoFormData({...demoFormData, schoolName: e.target.value})} required />
+                    </div>
+                    <div className="demo-form-row">
+                      <div className="demo-form-group">
+                        <label>Contact Person</label>
+                        <input type="text" value={demoFormData.contactPerson} onChange={e => setDemoFormData({...demoFormData, contactPerson: e.target.value})} required />
+                      </div>
+                      <div className="demo-form-group">
+                        <label>Mobile Number</label>
+                        <input type="tel" value={demoFormData.mobile} onChange={e => setDemoFormData({...demoFormData, mobile: e.target.value})} required />
+                      </div>
+                    </div>
+                    <div className="demo-form-row">
+                      <div className="demo-form-group">
+                        <label>Email Address</label>
+                        <input type="email" value={demoFormData.email} onChange={e => setDemoFormData({...demoFormData, email: e.target.value})} required />
+                      </div>
+                      <div className="demo-form-group">
+                        <label>City / State</label>
+                        <input type="text" value={demoFormData.city} onChange={e => setDemoFormData({...demoFormData, city: e.target.value})} required />
+                      </div>
+                    </div>
+                    <div className="demo-form-group">
+                      <label>Number of Students</label>
+                      <select value={demoFormData.students} onChange={e => setDemoFormData({...demoFormData, students: e.target.value})} required>
+                        <option value="">Select range...</option>
+                        <option value="1-500">1 - 500</option>
+                        <option value="501-1000">501 - 1000</option>
+                        <option value="1001-2000">1001 - 2000</option>
+                        <option value="2000+">2000+</option>
+                      </select>
+                    </div>
+                    <div className="demo-form-group">
+                      <label>Message (Optional)</label>
+                      <textarea value={demoFormData.message} onChange={e => setDemoFormData({...demoFormData, message: e.target.value})} rows="3"></textarea>
+                    </div>
+                    <div className="demo-modal-actions">
+                      <button type="button" className="btn-demo-cancel" onClick={() => setShowDemoModal(false)}>Cancel</button>
+                      <button type="submit" className="btn-demo-submit">Submit Demo Request</button>
+                    </div>
+                  </form>
                 </>
               )}
-            </button>
-          </form>
-
-          {/* Footer Links */}
-          <div className="login-footer-links">
-            <button type="button" className="link" style={{ background:'none', border:'none', cursor:'pointer', color:'inherit', font:'inherit', padding:0 }}
-              onClick={() => { setShowForgotPw(true); setShowForgotId(false); setForgotMsg(''); setForgotEmail(''); }}>
-              Forgot Password?
-            </button>
-            <span className="divider">•</span>
-            <button type="button" className="link" style={{ background:'none', border:'none', cursor:'pointer', color:'inherit', font:'inherit', padding:0 }}
-              onClick={() => { setShowForgotId(true); setShowForgotPw(false); setForgotMsg(''); setForgotEmail(''); }}>
-              Forgot User ID?
-            </button>
-            <span className="divider">•</span>
-            <a href="#contact" className="link" onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }}>
-              Contact Us
-            </a>
+            </div>
           </div>
+        )}
 
-          {/* Forgot Password / Forgot ID Modal */}
-          {(showForgotId || showForgotPw) && (
-            <div style={{
-              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 9999,
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }}>
-              <div style={{
-                background: '#fff', borderRadius: '16px', padding: '32px', maxWidth: '420px',
-                width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', position: 'relative'
-              }}>
-                <button onClick={closeForgotModal} style={{
-                  position: 'absolute', top: '14px', right: '16px', background: 'none',
-                  border: 'none', fontSize: '1.4rem', cursor: 'pointer', color: '#6b7280'
-                }}>✕</button>
+        {/* 5. Subscription Plans */}
+        <section id="pricing" className="saas-section">
+          <div className="section-header">
+            <h2 className="section-title">Subscription Plans</h2>
+            <p className="section-subtitle">Choose the perfect plan to digitize and automate your entire school operations.</p>
+          </div>
+          
+          <div className="plans-grid">
+            <div className="plan-card">
+              <h3 className="plan-name">Silver</h3>
+              <p className="plan-desc">Basic features for small schools to go digital.</p>
+              <ul className="plan-features">
+                <li><i className="fa-solid fa-check"></i> Class & Subject Schedules</li>
+                <li><i className="fa-solid fa-check"></i> Student Directory</li>
+                <li><i className="fa-solid fa-check"></i> Daily Student Attendance Tracking</li>
+                <li><i className="fa-solid fa-check"></i> Basic Exam Schedules</li>
+              </ul>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <button className="btn-primary" style={{ width: '100%' }} onClick={() => navigate('/silver-plan')}>Get Started</button>
+              </div>
+            </div>
 
-                <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-                  <span style={{ fontSize: '2.5rem' }}>{showForgotId ? '🆔' : '🔑'}</span>
-                  <h3 style={{ margin: '8px 0 4px', fontWeight: '700', color: '#1e3a5f' }}>
-                    {showForgotId ? 'Forgot User ID?' : 'Forgot Password?'}
-                  </h3>
-                  <p style={{ color: '#6b7280', fontSize: '0.88rem', margin: 0 }}>
-                    {showForgotId
-                      ? 'Enter your registered email address and we\'ll send your User ID.'
-                      : 'Enter your registered email and we\'ll send a password reset link.'}
-                  </p>
+            <div className="plan-card recommended">
+              <div className="recommended-badge">Recommended</div>
+              <h3 className="plan-name">Gold</h3>
+              <p className="plan-desc">Everything you need to manage a growing school.</p>
+              <ul className="plan-features">
+                <li><i className="fa-solid fa-check"></i> Fee Management & Receipts</li>
+                <li><i className="fa-solid fa-check"></i> Homework & Timetables</li>
+                <li><i className="fa-solid fa-check"></i> Staff Leave & Payroll</li>
+                <li><i className="fa-solid fa-check"></i> Parent Communication</li>
+              </ul>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <button className="btn-primary" style={{ width: '100%' }} onClick={() => navigate('/gold-plan')}>Buy Gold</button>
+              </div>
+            </div>
+
+            <div className="plan-card">
+              <h3 className="plan-name">Platinum</h3>
+              <p className="plan-desc">Complete automation and reporting for large schools.</p>
+              <ul className="plan-features">
+                <li><i className="fa-solid fa-check"></i> All Gold Features</li>
+                <li><i className="fa-solid fa-check"></i> Advanced security and staff permissions</li>
+                <li><i className="fa-solid fa-check"></i> Complex Report Generation</li>
+                <li><i className="fa-solid fa-check"></i> 365 days priority support</li>
+              </ul>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <button className="btn-primary" style={{ width: '100%' }} onClick={() => navigate('/platinum-plan?ocr=false')}>Buy Platinum</button>
+              </div>
+            </div>
+
+            <div className="plan-card">
+              <h3 className="plan-name">Platinum + OCR</h3>
+              <p className="plan-desc">The ultimate package with AI-powered document scanning.</p>
+              <ul className="plan-features">
+                <li><i className="fa-solid fa-check"></i> All Platinum Features</li>
+                <li><i className="fa-solid fa-check"></i> AI OCR mark scanning</li>
+                <li><i className="fa-solid fa-check"></i> Auto document processing</li>
+                <li><i className="fa-solid fa-check"></i> Intelligent Analytics & Insights</li>
+              </ul>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <button className="btn-primary" style={{ width: '100%' }} onClick={() => navigate('/platinum-plan?ocr=true')}>Buy Premium</button>
+              </div>
+            </div>
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '30px' }}>
+            <button className="btn-secondary">Compare All Plans</button>
+          </div>
+        </section>
+
+        {/* 6. About Section */}
+        <section id="about" className="saas-section">
+          <div className="about-grid">
+            <div className="about-content">
+              <h3>About Zayn Levi Technologies</h3>
+              <p>
+                Zayn Levi Technologies is a forward-thinking AI-powered education technology company dedicated to creating digital solutions that simplify complexity and unlock growth for modern educational organizations.
+              </p>
+              <p>
+                Our vision is to blend innovation, reliability, and user-focused design to deliver a complete School Operating System that empowers administrators, improves student experiences, and scales with ambition.
+              </p>
+              <div className="about-features">
+                <div className="about-feature">
+                  <div className="about-feature-icon"><i className="fa-solid fa-rocket"></i></div>
+                  End-to-end digital transformation
                 </div>
+                <div className="about-feature">
+                  <div className="about-feature-icon"><i className="fa-solid fa-shield-halved"></i></div>
+                  Reliable post-launch maintenance
+                </div>
+              </div>
+            </div>
+            <div style={{ position: 'relative', height: '400px', background: 'rgba(255,255,255,0.5)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.8)', backdropFilter: 'blur(10px)' }}>
+                <div style={{ position: 'absolute', inset: '20px', background: 'linear-gradient(135deg, rgba(124,58,237,0.1), rgba(6,182,212,0.1))', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                   <div className="nav-logo-icon" style={{ width: '100px', height: '100px', borderRadius: '24px', boxShadow: '0 10px 40px rgba(124,58,237,0.2)' }}>
+                      <svg viewBox="0 0 100 100" style={{ width: '60px', height: '60px', overflow: 'visible' }}>
+                        <path d="M 24 45 V 32 A 8 8 0 0 1 32 24 H 76 L 46 54" fill="none" stroke="#0b4d8c" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M 76 55 V 68 A 8 8 0 0 1 68 76 H 24 L 54 46" fill="none" stroke="#00a2e8" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                   </div>
+                </div>
+            </div>
+          </div>
+        </section>
 
-                <form onSubmit={showForgotId ? handleForgotId : handleForgotPw} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  <input
-                    type="email"
-                    placeholder="Your registered email address"
-                    value={forgotEmail}
-                    onChange={e => setForgotEmail(e.target.value)}
-                    required
-                    style={{
-                      padding: '12px 16px', borderRadius: '10px',
-                      border: '1.5px solid #d1d5db', fontSize: '0.95rem',
-                      outline: 'none', width: '100%', boxSizing: 'border-box'
-                    }}
-                  />
-                  {forgotMsg && (
-                    <div style={{
-                      padding: '10px 14px', borderRadius: '8px',
-                      background: forgotMsg.includes('wrong') ? '#fef2f2' : '#f0fdf4',
-                      color: forgotMsg.includes('wrong') ? '#dc2626' : '#16a34a',
-                      fontSize: '0.85rem', fontWeight: '600'
-                    }}>
-                      {forgotMsg.includes('wrong') ? '⚠️' : '✅'} {forgotMsg}
+        {/* 7. Contact Section */}
+        <section id="contact" className="saas-section">
+          <div className="contact-wrapper">
+            <div className="contact-info">
+              <h3>Book a Free Demo</h3>
+              <p>Experience the power of the Zayn Levi School OS firsthand. Our experts will walk you through a personalized demonstration tailored to your school's unique needs.</p>
+              
+              <div className="contact-detail">
+                <i className="fa-solid fa-envelope"></i> business@zaynlevi.com
+              </div>
+              <div className="contact-detail">
+                <i className="fa-solid fa-phone"></i> +91 6300854318
+              </div>
+              <div className="contact-detail">
+                <i className="fa-solid fa-location-dot"></i> Global Remote Delivery & Support
+              </div>
+            </div>
+            
+            <div className="contact-form">
+              {contactSent ? (
+                <div className="alert-success" style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center' }}>
+                  <i className="fa-solid fa-circle-check" style={{ fontSize: '48px', marginBottom: '20px' }}></i> 
+                  <h3 style={{ fontSize: '24px', color: '#15803d', marginBottom: '10px' }}>Message Sent Successfully!</h3>
+                  <p style={{ color: '#166534' }}>Thank you for reaching out. Our team will contact you shortly to schedule your personalized demo.</p>
+                </div>
+              ) : (
+                <form onSubmit={handleContactSubmit}>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>School Name</label>
+                      <input type="text" name="schoolName" placeholder="Enter school name" value={contactForm.schoolName} onChange={handleContactChange} required className="form-input" />
                     </div>
-                  )}
-                  <button type="submit" disabled={forgotLoading} style={{
-                    padding: '12px', borderRadius: '10px', border: 'none', cursor: 'pointer',
-                    background: 'linear-gradient(135deg, #1e3a5f, #2563eb)',
-                    color: '#fff', fontWeight: '700', fontSize: '0.95rem'
-                  }}>
-                    {forgotLoading ? '⏳ Sending...' : (showForgotId ? '📧 Send My User ID' : '📧 Send Reset Link')}
+                    <div className="form-group">
+                      <label>Contact Person</label>
+                      <input type="text" name="contactPerson" placeholder="Full name" value={contactForm.contactPerson} onChange={handleContactChange} required className="form-input" />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Work Email</label>
+                      <input type="email" name="email" placeholder="email@school.edu" value={contactForm.email} onChange={handleContactChange} required className="form-input" />
+                    </div>
+                    <div className="form-group">
+                      <label>Phone Number</label>
+                      <input type="tel" name="phone" placeholder="+1 (555) 000-0000" value={contactForm.phone} onChange={handleContactChange} className="form-input" required />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Number of Students</label>
+                    <select name="students" value={contactForm.students} onChange={handleContactChange} className="form-input" style={{ appearance: 'auto' }} required>
+                      <option value="" disabled>Select range</option>
+                      <option value="1-500">1 - 500</option>
+                      <option value="501-1000">501 - 1,000</option>
+                      <option value="1001-3000">1,001 - 3,000</option>
+                      <option value="3000+">3,000+</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Message / Requirements</label>
+                    <textarea name="message" placeholder="Tell us about your specific needs..." rows="3" value={contactForm.message} onChange={handleContactChange} required className="form-input" style={{ resize: 'none' }}></textarea>
+                  </div>
+                  {contactError && <div style={{ color: '#dc2626', fontSize: '14px', marginBottom: '15px' }}>{contactError}</div>}
+                  <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '10px' }} disabled={contactSending}>
+                    {contactSending ? '⏳ Sending Request...' : 'Book My Demo'}
                   </button>
                 </form>
-
-                <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.8rem', color: '#9ca3af' }}>
-                  Only you can recover your credentials using your registered email.
-                </p>
-              </div>
+              )}
             </div>
-          )}
+          </div>
+        </section>
 
-        </div>{/* end form-side */}
+      </div>
 
-        {/* Right Side: Plans & Quick Login */}
-        <div className="plans-side">
-          <div className="plans-inner">
+      {/* 8. Footer */}
+      <footer className="saas-footer" style={{ width: '100%', padding: '80px 40px 40px' }}>
+        <div className="saas-container" style={{ padding: 0 }}>
+          <div className="footer-grid">
+            <div className="footer-brand">
+              <a href="#" className="nav-brand">
+                <div className="nav-logo-icon">
+                  <svg viewBox="0 0 100 100" style={{ width: '20px', height: '20px', overflow: 'visible' }}>
+                    <path d="M 24 45 V 32 A 8 8 0 0 1 32 24 H 76 L 46 54" fill="none" stroke="#0b4d8c" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M 76 55 V 68 A 8 8 0 0 1 68 76 H 24 L 54 46" fill="none" stroke="#00a2e8" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <span className="nav-brand-name">Zayn Levi Technologies</span>
+              </a>
+              <p className="footer-desc">Empowering educational institutions worldwide with intelligent, AI-driven management solutions.</p>
+            </div>
             
-            {/* Plans List */}
-            <div>
-              <div className="plans-hdr">
-                <i className="fa-solid fa-gem"></i> Subscription Plans
-              </div>
-
-              {/* Silver Card */}
-              <div className="plan-card plan-silver">
-                <div className="plan-header">
-                  <span className="plan-name">Silver ({activeCurrency.symbol})</span>
-                  <span className="plan-badge badge-silver">Core</span>
-                </div>
-
-                <ul className="plan-features">
-                  <li><i className="fa-solid fa-circle-check"></i> Class &amp; Subject Schedules</li>
-                  <li><i className="fa-solid fa-circle-check"></i> Student Directory</li>
-                  <li><i className="fa-solid fa-circle-check"></i> Daily Student Attendance Tracking</li>
-                  <li><i className="fa-solid fa-circle-check"></i> Basic Exam Schedules</li>
-                </ul>
-                <button className="btn-login" style={{ marginTop: '14px', width: '100%', padding: '10px', fontSize: '0.9rem' }} onClick={() => navigate('/silver-plan')}>
-                  Choose Plan
-                </button>
-              </div>
-
-              {/* Gold Card */}
-              <div className="plan-card plan-gold">
-                <div className="plan-header">
-                  <span className="plan-name">Gold ({activeCurrency.symbol})</span>
-                  <span className="plan-badge badge-gold">Standard</span>
-                </div>
-
-                <ul className="plan-features">
-                  <li><i className="fa-solid fa-circle-check"></i> Fee Management &amp; Receipts</li>
-                  <li><i className="fa-solid fa-circle-check"></i> Homework &amp; Timetables</li>
-                  <li><i className="fa-solid fa-circle-check"></i> Staff Leave &amp; Payroll</li>
-                  <li><i className="fa-solid fa-circle-check"></i> Parent Communication</li>
-                </ul>
-                <button className="btn-login" style={{ marginTop: '14px', width: '100%', padding: '10px', fontSize: '0.9rem' }} onClick={() => navigate('/gold-plan')}>
-                  Choose Plan
-                </button>
-              </div>
-
-              {/* Platinum Without OCR Card */}
-              <div className="plan-card plan-platinum">
-                <div className="plan-header">
-                  <span className="plan-name">Platinum (Without OCR)</span>
-                  <span className="plan-badge badge-platinum">Elite</span>
-                </div>
-
-                <ul className="plan-features">
-                  <li><i className="fa-solid fa-circle-check"></i> Advanced security and staff permissions</li>
-                  <li><i className="fa-solid fa-circle-check"></i> 24/7 personal support helpline</li>
-                </ul>
-                <button className="btn-login" style={{ marginTop: '14px', width: '100%', padding: '10px', fontSize: '0.9rem' }} onClick={() => navigate('/platinum-plan?ocr=false')}>
-                  Choose Plan
-                </button>
-              </div>
-
-              {/* Platinum With OCR Card */}
-              <div className="plan-card plan-platinum">
-                <div className="plan-header">
-                  <span className="plan-name">Platinum (With OCR)</span>
-                  <span className="plan-badge badge-platinum">Elite</span>
-                </div>
-
-                <ul className="plan-features">
-                  <li><i className="fa-solid fa-circle-check"></i> Advanced security and staff permissions</li>
-                  <li><i className="fa-solid fa-circle-check"></i> 24/7 personal support helpline</li>
-                  <li><i className="fa-solid fa-circle-check"></i> Scan and upload documents automatically</li>
-                </ul>
-                <button className="btn-login" style={{ marginTop: '14px', width: '100%', padding: '10px', fontSize: '0.9rem' }} onClick={() => navigate('/platinum-plan?ocr=true')}>
-                  Choose Plan
-                </button>
+            <div className="footer-col">
+              <h4>Company</h4>
+              <div className="footer-links">
+                <a href="#about">About Us</a>
+                <a href="#careers">Careers</a>
+                <a href="#contact">Contact</a>
               </div>
             </div>
 
-            {/* Quick Login Pills */}
-            <div>
-              <div className="plans-hdr" style={{ marginBottom: '14px' }}>
-                <i className="fa-solid fa-wand-magic-sparkles"></i> Quick Login
-              </div>
-
-              {/* All roles — available in every plan */}
-              <div className="tier-group tier-platinum">
-                <div className="tier-header">
-                  <span className="tier-name">👑 School Super Admin</span>
-                </div>
-                <div className="role-grid">
-                  <div
-                    className={`role-pill ${activePill === 'SUPERADMIN001' ? 'role-pill-clicked' : ''}`}
-                    onClick={() => handleQuickLogin('SUPERADMIN001', 'Admin@123')}
-                    style={{ gridColumn: 'span 3' }}
-                  >
-                    Super Admin (SUPERADMIN001)
-                  </div>
-                </div>
-              </div>
-
-              <div className="tier-group tier-gold">
-                <div className="tier-header">
-                  <span className="tier-name">🏫 School Branch Staff</span>
-                </div>
-                <div className="role-grid">
-                  <div
-                    className={`role-pill ${activePill === 'PRINCIPAL001' ? 'role-pill-clicked' : ''}`}
-                    onClick={() => handleQuickLogin('PRINCIPAL001', 'Principal@123')}
-                  >
-                    Principal
-                  </div>
-                  <div
-                    className={`role-pill ${activePill === 'ACCOUNTANT001' ? 'role-pill-clicked' : ''}`}
-                    onClick={() => handleQuickLogin('ACCOUNTANT001', 'Accountant@123')}
-                  >
-                    Accountant
-                  </div>
-                  <div
-                    className={`role-pill ${activePill === 'TEACHER001' ? 'role-pill-clicked' : ''}`}
-                    onClick={() => handleQuickLogin('TEACHER001', 'Teacher@123')}
-                  >
-                    Ramesh (T001)
-                  </div>
-                  <div
-                    className={`role-pill ${activePill === 'TEACHER002' ? 'role-pill-clicked' : ''}`}
-                    onClick={() => handleQuickLogin('TEACHER002', 'Teacher@123')}
-                  >
-                    Priya (T002)
-                  </div>
-                  <div
-                    className={`role-pill ${activePill === 'TEACHER003' ? 'role-pill-clicked' : ''}`}
-                    onClick={() => handleQuickLogin('TEACHER003', 'Teacher@123')}
-                  >
-                    Rajesh (T003)
-                  </div>
-                  <div
-                    className={`role-pill ${activePill === 'TEACHER004' ? 'role-pill-clicked' : ''}`}
-                    onClick={() => handleQuickLogin('TEACHER004', 'Teacher@123')}
-                  >
-                    Sneha (T004)
-                  </div>
-                  <div
-                    className={`role-pill ${activePill === 'TEACHER005' ? 'role-pill-clicked' : ''}`}
-                    onClick={() => handleQuickLogin('TEACHER005', 'Teacher@123')}
-                  >
-                    Suresh (T005)
-                  </div>
-                </div>
-              </div>
-
-              <div className="tier-group tier-silver">
-                <div className="tier-header">
-                  <span className="tier-name">👥 Students &amp; Parents</span>
-                </div>
-                <div className="role-grid">
-                  <div
-                    className={`role-pill ${activePill === 'STUDENT001' ? 'role-pill-clicked' : ''}`}
-                    onClick={() => handleQuickLogin('STUDENT001', 'Student@123')}
-                    style={{ gridColumn: 'span 1.5' }}
-                  >
-                    Student (STUDENT001)
-                  </div>
-                  <div
-                    className={`role-pill ${activePill === 'PAR-G1-001' ? 'role-pill-clicked' : ''}`}
-                    onClick={() => handleQuickLogin('PAR-G1-001', 'Parent@123')}
-                    style={{ gridColumn: 'span 1.5' }}
-                  >
-                    Parent (PAR-G1-001)
-                  </div>
-                </div>
-              </div>
-
-              <div className="pw-hint">
-                Auto-fills valid seed credentials on click.
+            <div className="footer-col">
+              <h4>Product</h4>
+              <div className="footer-links">
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#demo">Demo Portal</a>
               </div>
             </div>
 
-          </div>
-        </div>
-
-      </div>
-
-      {/* About Us Card */}
-      <div className="login-wrapper about-section-card" id="about" style={{ marginTop: '40px', padding: '40px', flexDirection: 'column', gap: '15px' }}>
-        <div className="plans-hdr" style={{ fontSize: '1.5rem', marginBottom: '10px' }}>
-          <i className="fa-solid fa-circle-info"></i> About Zayn Levi Technologies
-        </div>
-        <p style={{ lineHeight: '1.6', opacity: 0.9 }}>
-          Zayn Levi Technologies is a forward-thinking technology company dedicated to creating digital solutions that simplify complexity and unlock growth for modern organizations.
-        </p>
-        <p style={{ lineHeight: '1.6', opacity: 0.9 }}>
-          Our vision is to blend innovation, reliability, and user-focused design to deliver software that empowers teams, improves customer experiences, and scales with ambition. From custom platforms to intelligent automation, we build technology that turns business goals into measurable progress.
-        </p>
-        <div className="why-choose-us-grid" style={{ marginTop: '15px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-          <div className="why-card" style={{ padding: '12px', background: 'rgba(99,102,241,0.06)', borderRadius: '10px', border: '1px solid rgba(99,102,241,0.1)', fontWeight: '600' }}>✓ End-to-end digital transformation support</div>
-          <div className="why-card" style={{ padding: '12px', background: 'rgba(99,102,241,0.06)', borderRadius: '10px', border: '1px solid rgba(99,102,241,0.1)', fontWeight: '600' }}>✓ Transparent collaboration & milestones</div>
-          <div className="why-card" style={{ padding: '12px', background: 'rgba(99,102,241,0.06)', borderRadius: '10px', border: '1px solid rgba(99,102,241,0.1)', fontWeight: '600' }}>✓ Reliable post-launch maintenance</div>
-          <div className="why-card" style={{ padding: '12px', background: 'rgba(99,102,241,0.06)', borderRadius: '10px', border: '1px solid rgba(99,102,241,0.1)', fontWeight: '600' }}>✓ Flexible engagement models</div>
-        </div>
-      </div>
-
-      {/* Contact Us Card */}
-      <div className="login-wrapper contact-section-card" id="contact" style={{ marginTop: '40px', padding: '40px', display: 'flex', gap: '40px' }}>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div className="plans-hdr" style={{ fontSize: '1.5rem', marginBottom: '10px' }}>
-            <i className="fa-solid fa-paper-plane"></i> Contact Us
-          </div>
-          <div>
-            <h4 style={{ fontWeight: '700', marginBottom: '6px' }}>Official Email</h4>
-            <p style={{ opacity: 0.9 }}>business@zaynlevi.com</p>
-          </div>
-          <div>
-            <h4 style={{ fontWeight: '700', marginBottom: '6px' }}>Official Phone</h4>
-            <p style={{ opacity: 0.9 }}>+91 6300854318</p>
-          </div>
-          <div>
-            <h4 style={{ fontWeight: '700', marginBottom: '6px' }}>Service Area</h4>
-            <p style={{ opacity: 0.9 }}>Remote delivery, strategic consulting, and implementation support for growing teams.</p>
-          </div>
-        </div>
-
-        <div style={{ flex: 1.2 }}>
-          <h3 style={{ fontSize: '1.3rem', fontWeight: '700', marginBottom: '20px' }}>Request a consultation</h3>
-          {contactSent ? (
-            <div className="alert alert-success" style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)', color: '#047857', padding: '15px', borderRadius: '12px' }}>
-              <i className="fa-solid fa-circle-check"></i> Thank you! Your message has been sent successfully. Our team will contact you shortly.
+            <div className="footer-col">
+              <h4>Resources</h4>
+              <div className="footer-links">
+                <a href="#blog">Blog</a>
+                <a href="#help">Help Center</a>
+                <a href="#privacy">Privacy Policy</a>
+                <a href="#terms">Terms of Service</a>
+              </div>
             </div>
-          ) : (
-            <form onSubmit={handleContactSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <input type="text" name="name" placeholder="Your Name" value={contactForm.name} onChange={handleContactChange} required className="form-input" style={{ width: '100%' }} />
-              </div>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <input type="email" name="email" placeholder="Your Email" value={contactForm.email} onChange={handleContactChange} required className="form-input" style={{ width: '100%' }} />
-              </div>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <input type="tel" name="phone" placeholder="Your Phone" value={contactForm.phone} onChange={handleContactChange} className="form-input" style={{ width: '100%' }} />
-              </div>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <input type="text" name="subject" placeholder="Subject" value={contactForm.subject} onChange={handleContactChange} required className="form-input" style={{ width: '100%' }} />
-              </div>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <textarea name="message" placeholder="Tell us about your project" rows="3" value={contactForm.message} onChange={handleContactChange} required className="form-input" style={{ width: '100%', resize: 'none' }}></textarea>
-              </div>
-              {contactError && <div style={{ color: '#dc2626', fontSize: '0.85rem' }}>{contactError}</div>}
-              <button type="submit" className="btn-login" style={{ width: '100%', marginTop: '5px' }} disabled={contactSending}>
-                {contactSending ? '⏳ Sending...' : '📨 Send Inquiry'}
-              </button>
-              <p style={{ fontSize: '0.75rem', color: '#6b7280', textAlign: 'center', margin: 0 }}>
-                Your inquiry will be sent to <strong>business@zaynlevi.com</strong>
+          </div>
+
+          <div className="footer-bottom">
+            <div>&copy; 2026 Zayn Levi Technologies. All Rights Reserved.</div>
+            <div style={{ display: 'flex', gap: '15px' }}>
+              <a href="#" style={{ color: '#94a3b8' }}><i className="fa-brands fa-linkedin"></i></a>
+              <a href="#" style={{ color: '#94a3b8' }}><i className="fa-brands fa-twitter"></i></a>
+              <a href="#" style={{ color: '#94a3b8' }}><i className="fa-brands fa-facebook"></i></a>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      {/* Forgot Password / Forgot ID Modal */}
+      {(showForgotId || showForgotPw) && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <button onClick={closeForgotModal} style={{
+              position: 'absolute', top: '20px', right: '20px', background: 'none',
+              border: 'none', fontSize: '24px', cursor: 'pointer', color: '#94a3b8'
+            }}>✕</button>
+
+            <div style={{ marginBottom: '24px', textAlign: 'center' }}>
+              <span style={{ fontSize: '40px', display: 'block', marginBottom: '10px' }}>{showForgotId ? '🆔' : '🔑'}</span>
+              <h3 style={{ margin: '0 0 8px', fontWeight: '800', color: '#0f172a', fontSize: '22px' }}>
+                {showForgotId ? 'Forgot User ID?' : 'Forgot Password?'}
+              </h3>
+              <p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>
+                {showForgotId
+                  ? 'Enter your registered email address and we\'ll send your User ID.'
+                  : 'Enter your registered email and we\'ll send a password reset link.'}
               </p>
+            </div>
+
+            <form onSubmit={showForgotId ? handleForgotId : handleForgotPw} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <input
+                type="email"
+                placeholder="Your registered email address"
+                value={forgotEmail}
+                onChange={e => setForgotEmail(e.target.value)}
+                required
+                className="form-input"
+              />
+              {forgotMsg && (
+                <div className={forgotMsg.includes('wrong') ? 'alert-error' : 'alert-success'} style={{ marginBottom: 0 }}>
+                  <i className={`fa-solid ${forgotMsg.includes('wrong') ? 'fa-circle-exclamation' : 'fa-circle-check'}`}></i> {forgotMsg}
+                </div>
+              )}
+              <button type="submit" disabled={forgotLoading} className="btn-primary" style={{ width: '100%' }}>
+                {forgotLoading ? '⏳ Sending...' : (showForgotId ? '📧 Send My User ID' : '📧 Send Reset Link')}
+              </button>
             </form>
-          )}
+
+            <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '13px', color: '#94a3b8' }}>
+              Only you can recover your credentials using your registered email.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
     </div>
   );

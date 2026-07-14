@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { attendanceService, feeService, marksService, studentService } from '../../services/api';
+import { formatCurrency } from '../../utils/currencyFormatter';
 
 const ParentDownloads = () => {
   const [students, setStudents] = useState([]);
@@ -79,9 +80,9 @@ const ParentDownloads = () => {
     const dueAmount = studentFees.filter((fee) => !fee.isPaid).reduce((sum, fee) => sum + fee.amount, 0);
     const paidAmount = studentFees.filter((fee) => fee.isPaid).reduce((sum, fee) => sum + fee.amount, 0);
 
-    const content = [`Fee Statement for ${formatStudentName(student)}`, '=========================================', `Total Invoices: ${studentFees.length}`, `Paid Amount: ₹${paidAmount}`, `Pending Amount: ₹${dueAmount}`, '', 'Details:'];
+    const content = [`Fee Statement for ${formatStudentName(student)}`, '=========================================', `Total Invoices: ${studentFees.length}`, `Paid Amount: ${formatCurrency(paidAmount)}`, `Pending Amount: ${formatCurrency(dueAmount)}`, '', 'Details:'];
     studentFees.forEach((fee) => {
-      content.push(`- ${fee.description || 'Fee item'}: ₹${fee.amount} | ${fee.isPaid ? 'Paid' : 'Pending'} | Due ${fee.dueDate ? new Date(fee.dueDate).toLocaleDateString() : 'N/A'}`);
+      content.push(`- ${fee.description || 'Fee item'}: ${formatCurrency(fee.amount)} | ${fee.isPaid ? 'Paid' : 'Pending'} | Due ${fee.dueDate ? new Date(fee.dueDate).toLocaleDateString() : 'N/A'}`);
     });
 
     createDownloadFile(`fee-statement-${student._id || student.userId || 'child'}.txt`, content.join('\n'));

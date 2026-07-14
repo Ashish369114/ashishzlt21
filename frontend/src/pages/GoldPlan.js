@@ -4,6 +4,7 @@ import { schoolService } from '../services/api';
 import { getPlanModules } from '../utils/planModules';
 import '../styles/LandingPage.css';
 import '../styles/Login.css';
+import { formatCurrency } from '../utils/currencyFormatter';
 
 const paymentProviders = [
   'PhonePe', 'Google Pay', 'Paytm', 'BharatPe', 
@@ -299,7 +300,7 @@ const GoldPlan = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <div className="panel-info" style={{ background: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.1)', padding: '15px', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <p style={{ margin: 0 }}><strong>Selected Method:</strong> {selectedProvider}</p>
-                <p style={{ margin: 0 }}><strong>Amount:</strong> ₹{calculatePrice().toLocaleString()}</p>
+                <p style={{ margin: 0 }}><strong>Amount:</strong> {formatCurrency(calculatePrice())}</p>
                 <p style={{ margin: 0 }}><strong>Plan:</strong> Gold Plan ({planDuration} Months)</p>
               </div>
               <button className="btn-login" onClick={handlePayment} disabled={isProcessing} style={{ width: '100%' }}>

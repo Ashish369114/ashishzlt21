@@ -1,5 +1,6 @@
 const ConcessionRequest = require('../models/ConcessionRequest');
 const Fee = require('../models/Fee');
+const { formatCurrency } = require('../utils/currencyFormatter');
 
 /**
  * POST /api/concessions
@@ -19,23 +20,42 @@ exports.createRequest = async (req, res) => {
       return res.status(400).json({ message: 'Concession amount must be greater than 0' });
     }
 
-    // Update the fee immediately
     const fee = await Fee.findById(feeId);
     if (!fee) {
       return res.status(404).json({ message: 'Fee record not found' });
     }
 
+    if (amount > fee.amount) {
+      return res.status(400).json({ message: `Concession amount cannot exceed the current fee amount of ${formatCurrency(fee.amount)}` });
+    }
+
+    // If parent is requesting, save a pending request and DO NOT modify the fee.
+    if (req.user.role === 'parent') {
+      const request = new ConcessionRequest({
+        student: studentId,
+        fee: feeId,
+        concessionAmount: amount,
+        reason,
+        requestedBy: req.user.userId,
+        status: 'pending',
+      });
+      await request.save();
+      return res.status(201).json({
+        message: `Your concession request of ${formatCurrency(amount)} has been submitted to the Principal for approval.`,
+        request,
+      });
+    }
+
+    // Otherwise (Principal, Super Admin, Accountant direct grant), apply immediately.
     const previousAmount = fee.amount;
     fee.amount = Math.max(fee.amount - amount, 0);
-    fee.remarks = `${fee.remarks || ''} [Concession ₹${amount} granted by Principal. Prev: ₹${previousAmount}]`.trim();
+    fee.remarks = `${fee.remarks || ''} [Concession ${formatCurrency(amount)} granted by Principal. Prev: ${formatCurrency(previousAmount)}]`.trim();
 
-    // Auto-mark paid if fully covered
     if (fee.amount === 0 || (fee.paidAmount >= fee.amount && fee.amount > 0)) {
       fee.isPaid = true;
     }
     await fee.save();
 
-    // Record in concession log — already approved
     const request = new ConcessionRequest({
       student: studentId,
       fee: feeId,
@@ -50,7 +70,7 @@ exports.createRequest = async (req, res) => {
 
     await request.save();
     res.status(201).json({
-      message: `Concession of ₹${amount} granted. Fee updated from ₹${previousAmount} → ₹${fee.amount}`,
+      message: `Concession of ${formatCurrency(amount)} granted. Fee updated from ${formatCurrency(previousAmount)} → ${formatCurrency(fee.amount)}`,
       request,
     });
   } catch (error) {
@@ -65,7 +85,7 @@ exports.createRequest = async (req, res) => {
  */
 exports.getPendingRequests = async (req, res) => {
   try {
-    const requests = await ConcessionRequest.find()
+    const requests = await ConcessionRequest.find({ status: 'pending' })
       .populate('student', 'firstName lastName userId')
       .populate('fee', 'amount description')
       .populate('requestedBy', 'firstName lastName')
@@ -101,14 +121,47 @@ exports.approveRequest = async (req, res) => {
   try {
     const request = await ConcessionRequest.findById(req.params.id);
     if (!request) return res.status(404).json({ message: 'Concession record not found' });
-    res.json({ message: 'Concession is already approved (direct grant system).', request });
+
+    if (request.status === 'approved') {
+      return res.json({ message: 'Concession is already approved.', request });
+    }
+
+    if (request.status === 'rejected') {
+      return res.status(400).json({ message: 'Concession request was already rejected.' });
+    }
+
+    // Process approval
+    const fee = await Fee.findById(request.fee);
+    if (!fee) {
+      return res.status(404).json({ message: 'Associated fee record not found' });
+    }
+
+    const previousAmount = fee.amount;
+    fee.amount = Math.max(fee.amount - request.concessionAmount, 0);
+    fee.remarks = `${fee.remarks || ''} [Concession ${formatCurrency(request.concessionAmount)} approved by Principal. Prev: ${formatCurrency(previousAmount)}]`.trim();
+
+    if (fee.amount === 0 || (fee.paidAmount >= fee.amount && fee.amount > 0)) {
+      fee.isPaid = true;
+    }
+    await fee.save();
+
+    request.status = 'approved';
+    request.approvedBy = req.user.userId;
+    request.approvalDate = new Date();
+    request.remarks = req.body.remarks || 'Approved by Principal';
+    await request.save();
+
+    res.json({
+      message: `Concession of ${formatCurrency(request.concessionAmount)} approved and applied to fee.`,
+      request,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
 /**
- * PUT /api/concessions/:id/reject  — Principal can revoke a granted concession
+ * PUT /api/concessions/:id/reject  — Principal can reject/revoke a concession request
  */
 exports.rejectRequest = async (req, res) => {
   try {
@@ -116,22 +169,27 @@ exports.rejectRequest = async (req, res) => {
     const request = await ConcessionRequest.findById(req.params.id);
     if (!request) return res.status(404).json({ message: 'Concession record not found' });
 
+    if (request.status === 'rejected') {
+      return res.json({ message: 'Concession is already rejected.', request });
+    }
+
+    // If it was already approved, restore the fee amount
     if (request.status === 'approved') {
-      // Restore the fee amount
       const fee = await Fee.findById(request.fee);
       if (fee) {
         fee.amount = fee.amount + request.concessionAmount;
         fee.isPaid = fee.paidAmount >= fee.amount;
-        fee.remarks = `${fee.remarks || ''} [Concession of ₹${request.concessionAmount} revoked]`.trim();
+        fee.remarks = `${fee.remarks || ''} [Concession of ${formatCurrency(request.concessionAmount)} revoked]`.trim();
         await fee.save();
       }
     }
 
+    // Mark as rejected
     request.status = 'rejected';
-    request.remarks = remarks || 'Revoked by Principal';
+    request.remarks = remarks || 'Rejected by Principal';
     await request.save();
 
-    res.json({ message: 'Concession revoked and fee restored.', request });
+    res.json({ message: 'Concession request rejected.', request });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -12,6 +12,7 @@ import TeacherAssignmentManagement from '../components/TeacherAssignmentManageme
 import TeacherCommunication from '../components/TeacherCommunication';
 import TeacherLeaveManagement from '../components/TeacherLeaveManagement';
 import TeacherClassTimetable from '../components/TeacherClassTimetable';
+import StudentManagement from '../components/StudentManagement';
 
 const TeacherDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -88,6 +89,7 @@ const TeacherDashboard = ({ user, onLogout }) => {
             CLASS MANAGEMENT
           </li>
           <li><Link to="/dashboard/classes">📚 My Classes</Link></li>
+          <li><Link to="/dashboard/students">👩‍🎓 Students</Link></li>
           <li><Link to="/dashboard/timetable">📅 Timetable</Link></li>
           
           <li style={{ marginTop: '20px', fontSize: '0.85em', fontWeight: 'bold', color: 'rgba(255,255,255,0.6)', paddingLeft: '15px' }}>
@@ -155,6 +157,7 @@ const TeacherDashboard = ({ user, onLogout }) => {
           <Route path="exams" element={<ExamList teacherUserId={user?._id || user?.id || user?.userId} />} />
           <Route path="remarks" element={<RemarkList teacherUserId={user?._id || user?.id || user?.userId} />} />
           <Route path="classes" element={<TeacherClasses teacherId={user?._id || user?.id || user?.userId} />} />
+          <Route path="students" element={<StudentManagement />} />
           <Route path="communication" element={<TeacherCommunication teacherId={user?._id || user?.id || user?.userId} user={user} />} />
           <Route path="leave" element={<TeacherLeaveManagement teacherId={user?._id || user?.id || user?.userId} user={user} />} />
           <Route path="timetable" element={<TeacherClassTimetable teacherId={user?._id || user?.id || user?.userId} user={user} />} />
@@ -177,7 +180,7 @@ const TeacherDashboardHome = ({ stats, user }) => {
         </div>
         <div className="stat-card">
           <h3>Today's Classes</h3>
-          <div className="value" style={{ color: '#3b82f6' }}>{stats?.todayClasses || 0}</div>
+          <div className="value" style={{ color: '#8b5cf6' }}>{stats?.todayClasses || 0}</div>
         </div>
         <div className="stat-card">
           <h3>Pending Assignments</h3>
@@ -218,7 +221,7 @@ const TeacherDashboardHome = ({ stats, user }) => {
             <div>🕘 09:00 - 10:00 • Class 10A</div>
             <div>🕙 10:00 - 11:00 • Class 10B</div>
             <div>🕐 12:00 - 13:00 • Class 9A</div>
-            <Link to="/dashboard/timetable" style={{ color: '#3b82f6', textDecoration: 'none', marginTop: '10px', display: 'inline-block' }}>
+            <Link to="/dashboard/timetable" style={{ color: '#8b5cf6', textDecoration: 'none', marginTop: '10px', display: 'inline-block' }}>
               View Full Timetable →
             </Link>
           </div>
@@ -232,7 +235,7 @@ const TeacherDashboardHome = ({ stats, user }) => {
             <div>📚 Total Homework: <strong>{stats?.totalHomework || 0}</strong></div>
             <div>📝 Total Marks Recorded: <strong>{stats?.totalMarks || 0}</strong></div>
             <div>✅ Attendance Records: <strong>{stats?.attendanceRecords || 0}</strong></div>
-            <Link to="/dashboard/performance" style={{ color: '#3b82f6', textDecoration: 'none', marginTop: '10px', display: 'inline-block' }}>
+            <Link to="/dashboard/performance" style={{ color: '#8b5cf6', textDecoration: 'none', marginTop: '10px', display: 'inline-block' }}>
               View Analytics →
             </Link>
           </div>

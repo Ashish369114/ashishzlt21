@@ -4,11 +4,14 @@ import { classService, teacherService } from '../../services/api';
 const ClassManagement = () => {
   const [classes, setClasses] = useState([]);
   const [teachers, setTeachers] = useState([]);
+  const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingClassId, setEditingClassId] = useState(null);
+  const [selectedGrade, setSelectedGrade] = useState('');
+  const [selectedSection, setSelectedSection] = useState('');
   const [formData, setFormData] = useState({
     grade: '',
     section: 'A',
@@ -19,6 +22,7 @@ const ClassManagement = () => {
   useEffect(() => {
     fetchClasses();
     fetchTeachers();
+    fetchSubjects();
   }, []);
 
   const fetchClasses = async () => {
@@ -31,6 +35,15 @@ const ClassManagement = () => {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSubjects = async () => {
+    try {
+      const response = await classService.getSubjects();
+      setSubjects(Array.isArray(response.data) ? response.data : []);
+    } catch (err) {
+      console.error('Failed to fetch subjects:', err);
     }
   };
 
@@ -58,10 +71,24 @@ const ClassManagement = () => {
     return Array.isArray(assignedClasses) ? assignedClasses.length : 0;
   };
 
+  const getClassSubjectsAndTeachers = (classId) => {
+    const classTeachers = teachers.filter((teacher) => {
+      const assignedIds = (teacher.assignedClasses || []).map((c) => String(c?._id || c));
+      return assignedIds.includes(String(classId));
+    });
+
+    return classTeachers.map((t) => {
+      const subName = t.subject?.name || t.subject || 'General';
+      const teacherName = getTeacherDisplayName(t);
+      return { subName, teacherName };
+    });
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+
 
   const handleAddClass = async (e) => {
     e.preventDefault();
@@ -98,6 +125,7 @@ const ClassManagement = () => {
       subject: cls.subject || '',
     });
     setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const resetForm = () => {
@@ -118,6 +146,12 @@ const ClassManagement = () => {
       }
     }
   };
+
+  const visibleClasses = classes.filter((cls) => {
+    if (selectedGrade && Number(cls.grade) !== Number(selectedGrade)) return false;
+    if (selectedSection && String(cls.section) !== String(selectedSection)) return false;
+    return true;
+  });
 
   if (loading) return <div className="loading-spinner"></div>;
 
@@ -160,13 +194,15 @@ const ClassManagement = () => {
             <div className="form-row">
               <div className="form-group">
                 <label>Subject</label>
-                <input
-                  type="text"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleInputChange}
-                  placeholder="e.g. Mathematics"
-                />
+                <select name="subject" value={formData.subject} onChange={handleInputChange} required>
+                  <option value="">Select a subject</option>
+                  <option value="General Curriculum">General Curriculum</option>
+                  {subjects.map((sub) => (
+                    <option key={sub._id} value={sub.name}>
+                      {sub.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="form-group">
                 <label>Class Teacher</label>
@@ -186,27 +222,76 @@ const ClassManagement = () => {
         </div>
       )}
 
-      <div style={{ overflowX: 'auto' }}>
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Grade</th>
-              <th>Section</th>
-              <th>Subject</th>
-              <th>Class Teacher</th>
-              <th>Students Count</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {classes.map((cls) => (
-              <tr key={cls._id}>
-                <td>{cls.grade}</td>
-                <td>{cls.section}</td>
-                <td>{cls.subject || 'N/A'}</td>
-                <td>{getTeacherDisplayName(cls.classTeacher) || 'No teacher assigned'}</td>
-                <td>{cls.students?.length || 0}</td>
-                <td>
+      {/* Filters block to simplify the page and hide default list */}
+      <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', flexWrap: 'wrap' }}>
+        <div style={{ flex: '1', minWidth: '180px' }}>
+          <select
+            value={selectedGrade}
+            onChange={(e) => setSelectedGrade(e.target.value)}
+            style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.95rem', width: '100%' }}
+          >
+            <option value="">Select Grade</option>
+            {Array.from({ length: 10 }, (_, i) => i + 1).map((grade) => (
+              <option key={grade} value={grade}>
+                Grade {grade}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div style={{ flex: '1', minWidth: '180px' }}>
+          <select
+            value={selectedSection}
+            onChange={(e) => setSelectedSection(e.target.value)}
+            style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.95rem', width: '100%' }}
+          >
+            <option value="">Select Section</option>
+            {['A', 'B', 'C'].map((sec) => (
+              <option key={sec} value={sec}>
+                Section {sec}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {!selectedGrade && !selectedSection ? (
+        <p style={{ textAlign: 'center', padding: '40px 20px', color: '#9ca3af', border: '1px dashed #e5e7eb', borderRadius: '8px', margin: 0 }}>
+          Please select a Grade or Section from the filters above to view the classes list.
+        </p>
+      ) : (
+        <div style={{ overflowX: 'auto' }}>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Grade</th>
+                <th>Section</th>
+                <th>Subject</th>
+                <th>Class Teacher</th>
+                <th>Students Count</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {visibleClasses.sort((a, b) => {
+                const gradeA = Number(a.grade || 0);
+                const gradeB = Number(b.grade || 0);
+                if (gradeA !== gradeB) return gradeA - gradeB;
+                return String(a.section || '').localeCompare(String(b.section || ''));
+              }).map((cls) => (
+                <tr key={cls._id}>
+                  <td>{cls.grade}</td>
+                  <td>{cls.section}</td>
+                  <td>
+                    <div style={{ fontWeight: 'bold' }}>{cls.subject || 'Core'}</div>
+                    {getClassSubjectsAndTeachers(cls._id).map(({ subName, teacherName }, idx) => (
+                      <div key={idx} style={{ fontSize: '0.8rem', color: '#4b5563', marginTop: '2px' }}>
+                        📖 {subName}: {teacherName}
+                      </div>
+                    ))}
+                  </td>
+                  <td>{getTeacherDisplayName(cls.classTeacher) || 'No teacher assigned'}</td>
+                  <td>{cls.students?.length || 0}</td>
+                  <td>
                     <button
                       className="btn btn-secondary btn-sm"
                       onClick={() => handleEditClass(cls)}
@@ -214,21 +299,33 @@ const ClassManagement = () => {
                     >
                       Edit
                     </button>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => handleDeleteClass(cls._id)}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleDeleteClass(cls._id)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <div style={{ marginTop: '16px' }}>
-        <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
+        <button className="btn btn-primary" onClick={() => {
+          if (showForm) {
+            setShowForm(false);
+            setEditingClassId(null);
+            setFormData({ grade: '', section: 'A', classTeacher: '', subject: '' });
+          } else {
+            setEditingClassId(null);
+            setFormData({ grade: '', section: 'A', classTeacher: '', subject: '' });
+            setShowForm(true);
+          }
+        }}>
+
           {showForm ? 'Cancel' : '➕ Add Class'}
         </button>
       </div>

@@ -13,8 +13,10 @@ import ParentNotices from '../components/ParentNotices';
 import ParentCommunication from '../components/ParentCommunication';
 import ParentDownloads from '../components/ParentDownloads';
 import ParentProfileSettings from '../components/ParentProfileSettings';
+import ParentPocketMoney from '../components/ParentPocketMoney';
 import DashboardHome from '../components/DashboardHome';
 import RemarkList from '../components/RemarkList';
+import ParentTeacherComplaints from '../components/ParentTeacherComplaints';
 
 const ParentDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -91,8 +93,10 @@ const ParentDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/attendance">✅ Attendance</Link></li>
           <li><Link to="/dashboard/homework">📖 Homework</Link></li>
           <li><Link to="/dashboard/fees">💰 Fees</Link></li>
+          <li><Link to="/dashboard/pocket-money">💵 Pocket Money</Link></li>
           <li><Link to="/dashboard/exams">📋 Exams</Link></li>
           <li><Link to="/dashboard/remarks">💬 Remarks</Link></li>
+          <li><Link to="/dashboard/feedback">⚠️ Teacher Feedback</Link></li>
           <li><Link to="/dashboard/timetable">🕒 Timetable</Link></li>
           <li><Link to="/dashboard/notices">📰 Notices</Link></li>
           <li><Link to="/dashboard/communication">💬 Communication</Link></li>
@@ -119,8 +123,10 @@ const ParentDashboard = ({ user, onLogout }) => {
           <Route path="attendance" element={<ParentAttendance />} />
           <Route path="homework" element={<ParentHomework />} />
           <Route path="fees" element={<ParentFees />} />
+          <Route path="pocket-money" element={<ParentPocketMoney />} />
           <Route path="exams" element={<ParentExams />} />
           <Route path="remarks" element={<RemarkList />} />
+          <Route path="feedback" element={<ParentTeacherComplaints currentUser={user} />} />
           <Route path="timetable" element={<ParentTimetable />} />
           <Route path="notices" element={<ParentNotices />} />
           <Route path="communication" element={<ParentCommunication />} />

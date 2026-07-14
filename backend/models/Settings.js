@@ -21,6 +21,14 @@ const settingsSchema = new mongoose.Schema(
       minimumAttendancePercentage: Number,
       passingMarks: Number,
       gradeSystem: String,
+      workingMonths: {
+        type: Number,
+        default: 10,
+      },
+      workingDays: {
+        type: Number,
+        default: 220,
+      },
     },
     admission: {
       admissionNumber: String,

@@ -76,7 +76,8 @@ const addMarks = async (req, res) => {
 
     const marks = new Marks(sanitizedPayload);
     await marks.save();
-    await marks.populate('student teacher subject class');
+    await marks.populate('student');
+    await marks.populate('teacher subject class');
     res.status(201).json(marks);
   } catch (error) {
     res.status(400).json({ message: error.message });

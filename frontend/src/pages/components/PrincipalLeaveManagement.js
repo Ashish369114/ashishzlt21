@@ -4,7 +4,7 @@ import { leaveService } from '../../services/api';
 // ── Role badge ────────────────────────────────────────────────────────────────
 const RoleBadge = ({ role }) => {
   const map = {
-    teacher: { label: '👨‍🏫 Teacher',  bg: '#dbeafe', color: '#1d4ed8' },
+    teacher: { label: '👨‍🏫 Teacher',  bg: '#f3e8ff', color: '#6d28d9' },
     student: { label: '👨‍🎓 Student',  bg: '#dcfce7', color: '#15803d' },
     parent:  { label: '👪 Parent',    bg: '#fef3c7', color: '#b45309' },
     staff:   { label: '🏢 Staff',     bg: '#f3e8ff', color: '#7c3aed' },
@@ -70,7 +70,10 @@ const PrincipalLeaveManagement = () => {
       setLoading(true);
       setError('');
       const res = await leaveService.getAll();
-      setLeaves(Array.isArray(res.data) ? res.data : []);
+      const allLeaves = Array.isArray(res.data) ? res.data : [];
+      // Display ONLY leave requests submitted by Teachers and Employees
+      const staffLeaves = allLeaves.filter(l => l.applicantRole === 'teacher' || l.applicantRole === 'staff');
+      setLeaves(staffLeaves);
     } catch (err) {
       setError('Failed to load leave requests. Please try again.');
       console.error(err);
@@ -106,11 +109,20 @@ const PrincipalLeaveManagement = () => {
   });
 
   // ── Counters for tab badges ────────────────────────────────────────────────
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  const isThisMonth = (d) => {
+    if (!d) return false;
+    const date = new Date(d);
+    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+  };
+
   const counts = {
     All:      leaves.length,
     Pending:  leaves.filter(l => l.status === 'pending').length,
-    Approved: leaves.filter(l => l.status === 'approved').length,
-    Rejected: leaves.filter(l => l.status === 'rejected').length,
+    Approved: leaves.filter(l => l.status === 'approved' && isThisMonth(l.updatedAt || l.createdAt)).length,
+    Rejected: leaves.filter(l => l.status === 'rejected' && isThisMonth(l.updatedAt || l.createdAt)).length,
   };
 
   // ── Action handlers ────────────────────────────────────────────────────────
@@ -171,7 +183,7 @@ const PrincipalLeaveManagement = () => {
   };
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 4px' }}>
+    <div style={{ width: '100%', padding: '0 4px', boxSizing: 'border-box' }}>
       {/* ── Header ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '22px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
@@ -193,12 +205,12 @@ const PrincipalLeaveManagement = () => {
       {success && <div style={{ background: '#dcfce7', color: '#15803d', padding: '10px 16px', borderRadius: '8px', marginBottom: '14px', fontWeight: 600 }}>{success}</div>}
 
       {/* ── Stats row ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '22px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '22px' }}>
         {[
-          { label: 'Total',    val: counts.All,      color: '#6366f1', bg: '#eef2ff', icon: '📋' },
-          { label: 'Pending',  val: counts.Pending,  color: '#f59e0b', bg: '#fffbeb', icon: '⏳' },
-          { label: 'Approved', val: counts.Approved, color: '#22c55e', bg: '#f0fdf4', icon: '✅' },
-          { label: 'Rejected', val: counts.Rejected, color: '#ef4444', bg: '#fef2f2', icon: '❌' },
+          { label: 'Total Requests',    val: counts.All,      color: '#6366f1', bg: '#eef2ff', icon: '📋' },
+          { label: 'Pending Requests',  val: counts.Pending,  color: '#f59e0b', bg: '#fffbeb', icon: '⏳' },
+          { label: 'Approved This Month', val: counts.Approved, color: '#22c55e', bg: '#f0fdf4', icon: '✅' },
+          { label: 'Rejected This Month', val: counts.Rejected, color: '#ef4444', bg: '#fef2f2', icon: '❌' },
         ].map(s => (
           <div key={s.label} style={{ ...cardStyle, padding: '16px 18px', display: 'flex', alignItems: 'center', gap: '12px', background: s.bg }}>
             <span style={{ fontSize: '1.6rem' }}>{s.icon}</span>
@@ -228,9 +240,7 @@ const PrincipalLeaveManagement = () => {
         >
           <option value="all">All Roles</option>
           <option value="teacher">Teachers</option>
-          <option value="student">Students</option>
-          <option value="parent">Parents</option>
-          <option value="staff">Staff</option>
+          <option value="staff">Employees</option>
         </select>
       </div>
 
@@ -271,7 +281,7 @@ const PrincipalLeaveManagement = () => {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.87rem' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e5e7eb' }}>
-                  {['Applicant', 'Role', 'Leave Type', 'From', 'To', 'Days', 'Reason', 'Status', 'Actions'].map(h => (
+                  {['Applicant', 'Role', 'Leave Type', 'Applied Date', 'Leave Duration', 'Reason', 'Status', 'Actions'].map(h => (
                     <th key={h} style={{ padding: '11px 12px', textAlign: 'left', fontWeight: 700, color: '#374151', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
@@ -289,29 +299,42 @@ const PrincipalLeaveManagement = () => {
                     onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? '#fff' : '#fafafa'}
                   >
                     <td style={{ padding: '11px 12px' }}>
-                      <div style={{ fontWeight: 700, color: '#1f2937' }}>{leave.applicantName || '—'}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{leave.applicantId}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{
+                          width: '32px', height: '32px', borderRadius: '50%', background: '#e2e8f0', color: '#475569',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.8rem', flexShrink: 0
+                        }}>
+                          {(leave.applicantName || 'U').charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 700, color: '#1f2937' }}>{leave.applicantName || '—'}</div>
+                          <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{leave.applicantId}</div>
+                        </div>
+                      </div>
                     </td>
                     <td style={{ padding: '11px 12px' }}><RoleBadge role={leave.applicantRole} /></td>
                     <td style={{ padding: '11px 12px', fontWeight: 600, color: '#374151' }}>{leave.leaveType}</td>
-                    <td style={{ padding: '11px 12px', color: '#4b5563' }}>{fmt(leave.fromDate)}</td>
-                    <td style={{ padding: '11px 12px', color: '#4b5563' }}>{fmt(leave.toDate)}</td>
-                    <td style={{ padding: '11px 12px', textAlign: 'center', fontWeight: 700, color: '#6366f1' }}>
-                      {leave.leaveDays ?? days(leave.fromDate, leave.toDate)}
+                    <td style={{ padding: '11px 12px', color: '#4b5563' }}>{fmt(leave.createdAt)}</td>
+                    <td style={{ padding: '11px 12px', color: '#4b5563' }}>
+                      <div>{fmt(leave.fromDate)} → {fmt(leave.toDate)}</div>
+                      <div style={{ fontSize: '0.75rem', color: '#6366f1', fontWeight: 700 }}>
+                        {leave.leaveDays ?? days(leave.fromDate, leave.toDate)} days
+                      </div>
                     </td>
-                    <td style={{ padding: '11px 12px', maxWidth: '200px', color: '#6b7280' }}>
+                    <td style={{ padding: '11px 12px', maxWidth: '150px', color: '#6b7280' }}>
                       <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={leave.reason}>
                         {leave.reason}
                       </div>
-                      {leave.remarks && (
-                        <div style={{ fontSize: '0.73rem', color: '#9ca3af', marginTop: '3px', fontStyle: 'italic' }} title={leave.remarks}>
-                          Remark: {leave.remarks}
-                        </div>
-                      )}
                     </td>
                     <td style={{ padding: '11px 12px' }}><StatusBadge status={leave.status} /></td>
                     <td style={{ padding: '11px 12px' }}>
-                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'nowrap' }}>
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                        <button
+                          onClick={() => openAction(leave, 'view')}
+                          style={{ padding: '5px 10px', background: '#e0e7ff', color: '#4338ca', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 700, fontSize: '0.78rem', whiteSpace: 'nowrap' }}
+                        >
+                          👁 View Details
+                        </button>
                         {leave.status === 'pending' && (
                           <>
                             <button
@@ -328,13 +351,6 @@ const PrincipalLeaveManagement = () => {
                             </button>
                           </>
                         )}
-                        <button
-                          onClick={() => handleDelete(leave)}
-                          style={{ padding: '5px 8px', background: '#f1f5f9', color: '#6b7280', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.78rem' }}
-                          title="Delete"
-                        >
-                          🗑️
-                        </button>
                       </div>
                     </td>
                   </tr>
@@ -353,10 +369,12 @@ const PrincipalLeaveManagement = () => {
         }}>
           <div style={{ background: '#fff', borderRadius: '16px', padding: '32px', width: '100%', maxWidth: '480px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
             <h3 style={{ margin: '0 0 6px', fontSize: '1.2rem' }}>
-              {actionType === 'approve' ? '✅ Approve Leave' : '❌ Reject Leave'}
+              {actionType === 'approve' ? '✅ Approve Leave' : actionType === 'reject' ? '❌ Reject Leave' : '👁 Leave Details'}
             </h3>
             <p style={{ margin: '0 0 20px', color: '#6b7280', fontSize: '0.88rem' }}>
-              {selected.applicantName} — <strong>{selected.leaveType}</strong> ({fmt(selected.fromDate)} → {fmt(selected.toDate)}, {days(selected.fromDate, selected.toDate)} day{days(selected.fromDate, selected.toDate) !== 1 ? 's' : ''})
+              {selected.applicantName} ({selected.applicantId}) — <strong>{selected.leaveType}</strong><br/>
+              Duration: {fmt(selected.fromDate)} → {fmt(selected.toDate)} ({days(selected.fromDate, selected.toDate)} day{days(selected.fromDate, selected.toDate) !== 1 ? 's' : ''})<br/>
+              Applied: {fmt(selected.createdAt)}
             </p>
 
             {/* Reason display */}
@@ -364,38 +382,50 @@ const PrincipalLeaveManagement = () => {
               <strong>Reason:</strong> {selected.reason}
             </div>
 
-            <label style={{ display: 'block', fontWeight: 700, marginBottom: '6px', fontSize: '0.87rem' }}>
-              {actionType === 'reject' ? '⚠️ Rejection Reason (required)' : '💬 Remarks (optional)'}
-            </label>
-            <textarea
-              rows={3}
-              value={remarks}
-              onChange={e => setRemarks(e.target.value)}
-              placeholder={
-                actionType === 'approve'
-                  ? 'e.g. Approved. Please arrange substitution.'
-                  : 'e.g. Exam season — please reschedule.'
-              }
-              style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.88rem', boxSizing: 'border-box', resize: 'vertical', outline: 'none' }}
-            />
+            {selected.remarks && actionType === 'view' && (
+              <div style={{ background: '#fef3c7', borderRadius: '8px', padding: '12px 14px', marginBottom: '16px', fontSize: '0.86rem', color: '#92400e' }}>
+                <strong>Remarks:</strong> {selected.remarks}
+              </div>
+            )}
+
+            {actionType !== 'view' && (
+              <>
+                <label style={{ display: 'block', fontWeight: 700, marginBottom: '6px', fontSize: '0.87rem' }}>
+                  {actionType === 'reject' ? '⚠️ Rejection Reason (required)' : '💬 Remarks (optional)'}
+                </label>
+                <textarea
+                  rows={3}
+                  value={remarks}
+                  onChange={e => setRemarks(e.target.value)}
+                  placeholder={
+                    actionType === 'approve'
+                      ? 'e.g. Approved. Please arrange substitution.'
+                      : 'e.g. Exam season — please reschedule.'
+                  }
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.88rem', boxSizing: 'border-box', resize: 'vertical', outline: 'none' }}
+                />
+              </>
+            )}
             {error && <div style={{ color: '#b91c1c', fontSize: '0.82rem', marginTop: '6px', fontWeight: 600 }}>{error}</div>}
 
             <div style={{ display: 'flex', gap: '10px', marginTop: '20px', justifyContent: 'flex-end' }}>
               <button onClick={closeAction} style={{ padding: '9px 20px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>
-                Cancel
+                {actionType === 'view' ? 'Close' : 'Cancel'}
               </button>
-              <button
-                onClick={submitAction}
-                disabled={submitting}
-                style={{
-                  padding: '9px 22px', border: 'none', borderRadius: '8px', cursor: submitting ? 'not-allowed' : 'pointer', fontWeight: 700, color: '#fff',
-                  background: actionType === 'approve'
-                    ? (submitting ? '#86efac' : '#22c55e')
-                    : (submitting ? '#fca5a5' : '#ef4444'),
-                }}
-              >
-                {submitting ? '…' : actionType === 'approve' ? '✅ Confirm Approval' : '❌ Confirm Rejection'}
-              </button>
+              {actionType !== 'view' && (
+                <button
+                  onClick={submitAction}
+                  disabled={submitting}
+                  style={{
+                    padding: '9px 22px', border: 'none', borderRadius: '8px', cursor: submitting ? 'not-allowed' : 'pointer', fontWeight: 700, color: '#fff',
+                    background: actionType === 'approve'
+                      ? (submitting ? '#86efac' : '#22c55e')
+                      : (submitting ? '#fca5a5' : '#ef4444'),
+                  }}
+                >
+                  {submitting ? '…' : actionType === 'approve' ? '✅ Confirm Approval' : '❌ Confirm Rejection'}
+                </button>
+              )}
             </div>
           </div>
         </div>

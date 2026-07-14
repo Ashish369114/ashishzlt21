@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { studentService, marksService, attendanceService, feeService } from '../../services/api';
+import { formatCurrency } from '../../utils/currencyFormatter';
 
 const PrincipalComprehensiveReports = () => {
   const [stats, setStats] = useState(null);
@@ -122,7 +123,7 @@ const PrincipalComprehensiveReports = () => {
             </div>
             <div className="stat-card">
               <h3>Fee Collection</h3>
-              <div className="value" style={{ color: '#3b82f6' }}>{stats?.collectionPercentage}%</div>
+              <div className="value" style={{ color: '#8b5cf6' }}>{stats?.collectionPercentage}%</div>
             </div>
           </div>
 
@@ -166,7 +167,7 @@ const PrincipalComprehensiveReports = () => {
                   <h2>📊 School Performance Overview</h2>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
-                  <div style={{ padding: '15px', backgroundColor: '#eff6ff', borderRadius: '8px' }}>
+                  <div style={{ padding: '15px', backgroundColor: '#faf5ff', borderRadius: '8px' }}>
                     <strong style={{ color: '#1e3a8a' }}>Total Students Enrolled</strong>
                     <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#1e40af', marginTop: '10px' }}>
                       {stats?.totalStudents || 0}
@@ -187,7 +188,7 @@ const PrincipalComprehensiveReports = () => {
                       {stats?.collectionPercentage}%
                     </div>
                     <div style={{ fontSize: '0.85em', color: '#4b5563', marginTop: '5px' }}>
-                      Collected: ₹{(stats?.collectedAmount / 100000).toFixed(2)}L
+                      Collected: {formatCurrency((stats?.collectedAmount / 100000).toFixed(2))}L
                     </div>
                   </div>
                   <div style={{ padding: '15px', backgroundColor: '#fce7f3', borderRadius: '8px' }}>
@@ -210,8 +211,8 @@ const PrincipalComprehensiveReports = () => {
                   <li>📚 Total marks recorded: <strong>{stats?.totalMarks}</strong></li>
                   <li>📋 Total attendance records: <strong>{stats?.totalAttendance}</strong></li>
                   <li>💳 Total fees processed: <strong>{stats?.totalFees}</strong></li>
-                  <li>💰 Total fee amount: <strong>₹{(stats?.totalFeeAmount / 100000).toFixed(2)}L</strong></li>
-                  <li>⏳ Pending amount: <strong>₹{(stats?.pendingAmount / 100000).toFixed(2)}L</strong></li>
+                  <li>💰 Total fee amount: <strong>{formatCurrency((stats?.totalFeeAmount / 100000).toFixed(2))}L</strong></li>
+                  <li>⏳ Pending amount: <strong>{formatCurrency((stats?.pendingAmount / 100000).toFixed(2))}L</strong></li>
                 </ul>
               </div>
             </div>
@@ -352,7 +353,7 @@ const PrincipalComprehensiveReports = () => {
                     {((attendanceStats?.absent / attendanceStats?.total) * 100).toFixed(1)}%
                   </div>
                 </div>
-                <div style={{ padding: '15px', backgroundColor: '#eff6ff', borderRadius: '8px' }}>
+                <div style={{ padding: '15px', backgroundColor: '#faf5ff', borderRadius: '8px' }}>
                   <div style={{ fontSize: '0.85em', color: '#1e40af', marginBottom: '5px' }}>Total Records</div>
                   <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#1e3a8a' }}>
                     {attendanceStats?.total}
@@ -392,22 +393,22 @@ const PrincipalComprehensiveReports = () => {
                 <h2>💰 Finance Summary</h2>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '25px' }}>
-                <div style={{ padding: '15px', backgroundColor: '#eff6ff', borderRadius: '8px' }}>
+                <div style={{ padding: '15px', backgroundColor: '#faf5ff', borderRadius: '8px' }}>
                   <div style={{ fontSize: '0.85em', color: '#1e40af', marginBottom: '5px' }}>Total Amount Due</div>
                   <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1e3a8a' }}>
-                    ₹{(stats?.totalFeeAmount / 100000).toFixed(2)}L
+                    {formatCurrency((stats?.totalFeeAmount / 100000).toFixed(2))}L
                   </div>
                 </div>
                 <div style={{ padding: '15px', backgroundColor: '#dcfce7', borderRadius: '8px' }}>
                   <div style={{ fontSize: '0.85em', color: '#15803d', marginBottom: '5px' }}>Amount Collected</div>
                   <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#16a34a' }}>
-                    ₹{(stats?.collectedAmount / 100000).toFixed(2)}L
+                    {formatCurrency((stats?.collectedAmount / 100000).toFixed(2))}L
                   </div>
                 </div>
                 <div style={{ padding: '15px', backgroundColor: '#fee2e2', borderRadius: '8px' }}>
                   <div style={{ fontSize: '0.85em', color: '#991b1b', marginBottom: '5px' }}>Amount Pending</div>
                   <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#dc2626' }}>
-                    ₹{(stats?.pendingAmount / 100000).toFixed(2)}L
+                    {formatCurrency((stats?.pendingAmount / 100000).toFixed(2))}L
                   </div>
                 </div>
               </div>

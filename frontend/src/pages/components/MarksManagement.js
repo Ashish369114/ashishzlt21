@@ -15,6 +15,8 @@ const MarksManagement = ({ teacherUserId }) => {
   const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
   const [selectedClassId, setSelectedClassId] = useState('');
+  const [selectedStudentId, setSelectedStudentId] = useState('');
+  const [selectedExamType, setSelectedExamType] = useState('');
   const [formData, setFormData] = useState({
     student: '',
     subject: '',
@@ -56,6 +58,7 @@ const MarksManagement = ({ teacherUserId }) => {
     if (!classes.length || !selectedGrade) {
       setSelectedSection('');
       setSelectedClassId('');
+      setSelectedStudentId('');
       return;
     }
 
@@ -64,6 +67,7 @@ const MarksManagement = ({ teacherUserId }) => {
     if (!sections.length) {
       setSelectedSection('');
       setSelectedClassId('');
+      setSelectedStudentId('');
       return;
     }
 
@@ -73,6 +77,8 @@ const MarksManagement = ({ teacherUserId }) => {
 
     const matchedClass = gradeClasses.find((cls) => String(cls.section) === String(selectedSection || ''));
     setSelectedClassId(matchedClass?._id || '');
+    setSelectedStudentId('');
+    setSelectedExamType('');
   }, [classes, selectedGrade, selectedSection]);
 
   const fetchMarks = async () => {
@@ -193,29 +199,43 @@ const MarksManagement = ({ teacherUserId }) => {
     ? classes.filter((cls) => String(cls.grade) === String(selectedGrade))
     : classes;
   const sectionsForGrade = [...new Set(visibleClasses.map((cls) => cls.section).filter(Boolean))].sort();
+  const classStudents = students.filter((student) => {
+    const studentClassId = student.class?._id || student.class;
+    return String(studentClassId) === String(selectedClassId);
+  });
   const visibleMarks = marks.filter((mark) => {
     if (!selectedClassId) return true;
     const markClassId = mark.class?._id || mark.class || mark.classId;
-    return String(markClassId) === String(selectedClassId);
+    if (String(markClassId) !== String(selectedClassId)) return false;
+
+    if (selectedStudentId) {
+      const markStudentId = mark.student?._id || mark.student || mark.studentId;
+      if (String(markStudentId) !== String(selectedStudentId)) return false;
+    }
+
+    if (selectedExamType) {
+      if (String(mark.examType) !== String(selectedExamType)) return false;
+    }
+    return true;
   });
 
   return (
     <div className="card">
       <div className="card-header">
         <h2>📝 Marks Management</h2>
-        <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-          {showForm ? 'Cancel' : '➕ Add Marks'}
-        </button>
+        {selectedClassId && (
+          <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
+            {showForm ? 'Cancel' : '➕ Add Marks'}
+          </button>
+        )}
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
 
       <div className="form-container" style={{ marginBottom: '20px' }}>
-        <h3>Filter marks by class</h3>
         <div className="form-row">
           <div className="form-group">
-            <label>Grade</label>
-            <select value={selectedGrade} onChange={(e) => setSelectedGrade(e.target.value)}>
+            <select value={selectedGrade} onChange={(e) => { setSelectedGrade(e.target.value); setSelectedSection(''); setSelectedClassId(''); setSelectedStudentId(''); }}>
               <option value="">Select grade</option>
               {gradeOptions.map((grade) => (
                 <option key={grade} value={grade}>Grade {grade}</option>
@@ -223,12 +243,30 @@ const MarksManagement = ({ teacherUserId }) => {
             </select>
           </div>
           <div className="form-group">
-            <label>Section</label>
             <select value={selectedSection} onChange={(e) => setSelectedSection(e.target.value)} disabled={!sectionsForGrade.length}>
               <option value="">Select section</option>
               {sectionsForGrade.map((section) => (
                 <option key={section} value={section}>Section {section}</option>
               ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <select value={selectedStudentId} onChange={(e) => setSelectedStudentId(e.target.value)} disabled={!selectedClassId}>
+              <option value="">All Students</option>
+              {classStudents.map((student) => (
+                <option key={student._id} value={student.userId?._id || student.userId}>
+                  {student.userId?.firstName} {student.userId?.lastName} ({student.rollNumber})
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <select value={selectedExamType} onChange={(e) => setSelectedExamType(e.target.value)} disabled={!selectedClassId}>
+              <option value="">All Exams</option>
+              <option value="Unit Test">Unit Test</option>
+              <option value="Mid-Term">Mid-Term</option>
+              <option value="Final">Final</option>
+              <option value="Practical">Practical</option>
             </select>
           </div>
         </div>
@@ -315,7 +353,11 @@ const MarksManagement = ({ teacherUserId }) => {
         </div>
       )}
 
-      {loading ? (
+      {!selectedClassId ? (
+        <p style={{ textAlign: 'center', padding: '40px 20px', color: '#9ca3af' }}>
+          Select a grade and section to view marks.
+        </p>
+      ) : loading ? (
         <div className="spinner"></div>
       ) : (
         <div className="table-container">
@@ -323,6 +365,7 @@ const MarksManagement = ({ teacherUserId }) => {
             <thead>
               <tr>
                 <th>Student</th>
+                <th>Guardian</th>
                 <th>Class</th>
                 <th>Subject</th>
                 <th>Marks</th>
@@ -338,9 +381,14 @@ const MarksManagement = ({ teacherUserId }) => {
                   ? `${mark.student.userId.firstName || ''} ${mark.student.userId.lastName || ''}`.trim()
                   : 'N/A';
 
+                const guardianName = mark.student?.parentId?.firstName
+                  ? `${mark.student.parentId.firstName} ${mark.student.parentId.lastName}`
+                  : 'N/A';
+
                 return (
                   <tr key={mark._id}>
                     <td>{studentName || 'N/A'}</td>
+                    <td>{guardianName}</td>
                     <td>{mark.class ? `Grade ${mark.class.grade} - Section ${mark.class.section}` : 'N/A'}</td>
                     <td>{mark.subject?.name || mark.subject || 'N/A'}</td>
                     <td>{mark.marks}</td>

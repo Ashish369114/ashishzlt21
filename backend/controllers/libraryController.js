@@ -222,6 +222,40 @@ const deleteBook = async (req, res) => {
   }
 };
 
+const renewBook = async (req, res) => {
+  try {
+    const book = await Library.findById(req.params.id);
+    if (!book) {
+      return res.status(404).json({ message: 'Book not found' });
+    }
+
+    const userId = req.user?.userId || req.body.userId;
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required. Please login again.' });
+    }
+
+    const borrowRecord = book.borrowHistory.find(
+      r => r.userId?.toString() === userId && r.status === 'borrowed'
+    );
+
+    if (!borrowRecord) {
+      return res.status(400).json({ message: 'No active borrow record found' });
+    }
+
+    // Extend due date by 14 days from current due date
+    borrowRecord.dueDate = new Date(new Date(borrowRecord.dueDate).getTime() + 14 * 24 * 60 * 60 * 1000);
+    
+    await book.save();
+
+    res.json({ 
+      message: 'Book renewed successfully',
+      borrowRecord,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getBooks,
   getBookById,
@@ -233,4 +267,5 @@ module.exports = {
   getAvailableBooks,
   getBorrowHistory,
   deleteBook,
+  renewBook,
 };

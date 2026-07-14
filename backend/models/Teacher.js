@@ -38,6 +38,10 @@ const teacherSchema = new mongoose.Schema(
       enum: ['Active', 'Inactive'],
       default: 'Active',
     },
+    remarks: {
+      type: String,
+      default: ''
+    }
   },
   { timestamps: true }
 );

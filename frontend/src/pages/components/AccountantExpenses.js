@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { expenseService } from '../../services/api';
+import { formatCurrency } from '../../utils/currencyFormatter';
 
 const AccountantExpenses = () => {
   const [expenses, setExpenses] = useState([]);
@@ -186,7 +187,7 @@ const AccountantExpenses = () => {
       <div className="card">
         <div className="card-header">
           <h3>Expense Report</h3>
-          <p>Total expenses recorded: ₹{totalExpense.toLocaleString()}</p>
+          <p>Total expenses recorded: {formatCurrency(totalExpense)}</p>
         </div>
 
         <div className="table-container">
@@ -212,7 +213,7 @@ const AccountantExpenses = () => {
                   <tr key={expense._id}>
                     <td>{expense.title}</td>
                     <td>{expense.category || 'General'}</td>
-                    <td>₹{expense.amount}</td>
+                    <td>{formatCurrency(expense.amount)}</td>
                     <td>{expense.date ? new Date(expense.date).toLocaleDateString() : '-'}</td>
                     <td>{expense.expenseType}</td>
                     <td>{expense.description || '-'}</td>

@@ -397,7 +397,7 @@ const FeeManagement = ({ user }) => {
 
       {/* Section and Grade Student List */}
       {selectedGrade && selectedSection && !selectedStudent && (
-        <div className="form-container" style={{ marginBottom: '20px' }}>
+        <div className="form-container" style={{ marginBottom: '20px', maxWidth: 'none' }}>
           <h3>📚 Students in Grade {selectedGrade} - Section {selectedSection}</h3>
           {sectionStudents.length > 0 ? (
             <div className="table-container">

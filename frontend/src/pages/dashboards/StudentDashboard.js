@@ -15,6 +15,8 @@ import DashboardHome from '../components/DashboardHome';
 import EventList from '../components/EventList';
 import ExamList from '../components/ExamList';
 import RemarkList from '../components/RemarkList';
+import StudentPocketMoney from '../components/StudentPocketMoney';
+import StudentTeacherComplaints from '../components/StudentTeacherComplaints';
 
 const StudentDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -75,6 +77,8 @@ const StudentDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/exams">📋 Exams</Link></li>
           <li><Link to="/dashboard/events">🎉 Events</Link></li>
           <li><Link to="/dashboard/remarks">💬 Remarks</Link></li>
+          <li><Link to="/dashboard/feedback">⚠️ Teacher Feedback</Link></li>
+          <li><Link to="/dashboard/pocket-money">💵 Pocket Money</Link></li>
           <li><Link to="/change-password">🔒 Change Password</Link></li>
           <li style={{ marginTop: '30px', borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '20px' }}>
             <button onClick={handleLogout} className="logout-btn" style={{ width: '100%' }}>🚪 Logout</button>
@@ -102,6 +106,8 @@ const StudentDashboard = ({ user, onLogout }) => {
           <Route path="exams" element={<ExamList studentId={studentId} showActions={false} />} />
           <Route path="events" element={<EventList showActions={false} />} />
           <Route path="remarks" element={<RemarkList studentId={studentId} showActions={false} />} />
+          <Route path="feedback" element={<StudentTeacherComplaints currentUser={user} />} />
+          <Route path="pocket-money" element={<StudentPocketMoney user={user} />} />
           <Route path="*" element={<DashboardHome stats={stats} />} />
         </Routes>
       </div>

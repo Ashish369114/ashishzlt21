@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { teacherService } from '../../services/api';
+import { formatCurrency } from '../../utils/currencyFormatter';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const rupee = n => `₹${Number(n || 0).toLocaleString('en-IN')}`;
+const rupee = formatCurrency;
 const expLabel = yrs => {
   if (yrs >= 15) return { label: 'Senior', color: '#7c3aed', bg: '#f3e8ff' };
-  if (yrs >= 8)  return { label: 'Mid-Senior', color: '#0891b2', bg: '#ecfeff' };
+  if (yrs >= 8)  return { label: 'Mid-Senior', color: '#7c3aed', bg: '#f5f3ff' };
   if (yrs >= 3)  return { label: 'Mid-Level', color: '#15803d', bg: '#dcfce7' };
   return { label: 'Junior', color: '#b45309', bg: '#fef3c7' };
 };
@@ -234,7 +235,7 @@ const PrincipalPayrollManagement = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '12px', marginBottom: '22px' }}>
         {[
           { label: 'Total Teachers', val: teachers.length,        icon: '👨‍🏫', color: '#6366f1', bg: '#eef2ff' },
-          { label: 'Total Payroll',  val: rupee(totalPayroll),    icon: '💰', color: '#0891b2', bg: '#ecfeff' },
+          { label: 'Total Payroll',  val: rupee(totalPayroll),    icon: '💰', color: '#7c3aed', bg: '#f5f3ff' },
           { label: 'Average Salary', val: rupee(avgSalary),       icon: '📊', color: '#15803d', bg: '#dcfce7' },
           { label: 'Highest Salary', val: rupee(highestSalary),   icon: '🏆', color: '#b45309', bg: '#fef3c7' },
         ].map(s => (
@@ -276,7 +277,7 @@ const PrincipalPayrollManagement = () => {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.87rem' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e5e7eb' }}>
-                  {['Teacher', 'Designation', 'Experience', 'Qualifications', 'Performance', 'Current Salary', 'Action'].map(h => (
+                  {['Teacher', 'Subject', 'Designation', 'Experience', 'Qualifications', 'Performance', 'Current Salary', 'Action'].map(h => (
                     <th key={h} style={{ padding: '11px 14px', textAlign: 'left', fontWeight: 700, color: '#374151', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
@@ -307,6 +308,8 @@ const PrincipalPayrollManagement = () => {
                           </div>
                         </div>
                       </td>
+                      {/* Subject */}
+                      <td style={{ padding: '12px 14px', color: '#4b5563', fontSize: '0.84rem' }}>{teacher.subject?.name || '—'}</td>
                       {/* Designation */}
                       <td style={{ padding: '12px 14px', color: '#374151', fontWeight: 600 }}>{teacher.designation || 'Teacher'}</td>
                       {/* Experience */}

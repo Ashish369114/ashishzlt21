@@ -1,0 +1,8 @@
+(node:21660) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Creating an optimized production build...
+Failed to compile.
+
+[eslint] Plugin "react" was conflicted between "package.json » eslint-config-react-app » C:\ashishzlt\frontend\node_modules\eslint-config-react-app\base.js" and "BaseConfig » C:\ashishzlt\frontend\node_modules\.pnpm\eslint-config-react-app@7.0_bccbd1892eab859947aefaf041a738ff\node_modules\eslint-config-react-app\base.js".
+
+

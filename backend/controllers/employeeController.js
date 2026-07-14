@@ -4,6 +4,7 @@ const getEmployees = async (req, res) => {
   try {
     const employees = await Employee.find()
       .populate('userId')
+      .populate('class')
       .populate('school');
     res.json(employees);
   } catch (error) {
@@ -15,6 +16,7 @@ const getEmployeeById = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id)
       .populate('userId')
+      .populate('class')
       .populate('school');
     if (!employee) {
       return res.status(404).json({ message: 'Employee not found' });
@@ -34,6 +36,7 @@ const addEmployee = async (req, res) => {
     const newEmployee = await employee.save();
     const populatedEmployee = await Employee.findById(newEmployee._id)
       .populate('userId')
+      .populate('class')
       .populate('school');
 
     // Emit socket event to notify real-time updates
@@ -61,6 +64,7 @@ const updateEmployee = async (req, res) => {
     const updatedEmployee = await employee.save();
     const populatedEmployee = await Employee.findById(updatedEmployee._id)
       .populate('userId')
+      .populate('class')
       .populate('school');
 
     // Emit socket event to notify real-time updates

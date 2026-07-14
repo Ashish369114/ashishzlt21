@@ -12,6 +12,9 @@ const AcademicManagement = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  const [selectedGrade, setSelectedGrade] = useState('');
+  const [selectedSection, setSelectedSection] = useState('');
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -101,6 +104,17 @@ const AcademicManagement = () => {
     }
   };
 
+  // Helper values for filtering classes
+  const gradeOptions = [...new Set(classes.map(c => String(c.grade)).filter(Boolean))].sort((a, b) => Number(a) - Number(b));
+  const visibleClassesForGrade = selectedGrade ? classes.filter(c => String(c.grade) === String(selectedGrade)) : classes;
+  const sectionOptions = [...new Set(visibleClassesForGrade.map(c => c.section).filter(Boolean))].sort();
+
+  const filteredClasses = classes.filter(cls => {
+    const matchGrade = !selectedGrade || String(cls.grade) === String(selectedGrade);
+    const matchSection = !selectedSection || String(cls.section) === String(selectedSection);
+    return matchGrade && matchSection;
+  });
+
   return (
     <div className="card">
       <div className="card-header">
@@ -109,50 +123,6 @@ const AcademicManagement = () => {
 
       {error && <div className="alert alert-error">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
-
-      <div className="form-container" style={{ marginBottom: '24px' }}>
-        <h3>Add New Subject</h3>
-        <form onSubmit={handleCreateSubject}>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Subject Name</label>
-              <input
-                type="text"
-                value={subjectName}
-                onChange={(e) => setSubjectName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Subject Code</label>
-              <input
-                type="text"
-                value={subjectCode}
-                onChange={(e) => setSubjectCode(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="form-row">
-            <div className="form-group" style={{ width: '100%' }}>
-              <label>Description</label>
-              <input
-                type="text"
-                value={subjectDescription}
-                onChange={(e) => setSubjectDescription(e.target.value)}
-                placeholder="Optional"
-              />
-            </div>
-          </div>
-          <button type="submit" className="btn btn-primary">
-            {editingSubjectId ? 'Update Subject' : 'Add Subject'}
-          </button>
-          {editingSubjectId && (
-            <button type="button" className="btn btn-secondary" style={{ marginLeft: '12px' }} onClick={handleCancelEdit}>
-              Cancel
-            </button>
-          )}
-        </form>
-      </div>
 
       {loading ? (
         <div className="spinner"></div>
@@ -190,7 +160,37 @@ const AcademicManagement = () => {
           </div>
 
           <div className="table-container">
-            <h3>Classes</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+              <h3 style={{ margin: 0 }}>Classes</h3>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <select
+                  value={selectedGrade}
+                  onChange={(e) => {
+                    setSelectedGrade(e.target.value);
+                    setSelectedSection('');
+                  }}
+                  style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.88rem' }}
+                >
+                  <option value="">All Grades</option>
+                  {gradeOptions.map((grade) => (
+                    <option key={grade} value={grade}>Grade {grade}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={selectedSection}
+                  onChange={(e) => setSelectedSection(e.target.value)}
+                  disabled={!selectedGrade}
+                  style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.88rem' }}
+                >
+                  <option value="">All Sections</option>
+                  {sectionOptions.map((section) => (
+                    <option key={section} value={section}>Section {section}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             <table>
               <thead>
                 <tr>
@@ -200,13 +200,19 @@ const AcademicManagement = () => {
                 </tr>
               </thead>
               <tbody>
-                {classes.map((cls) => (
-                  <tr key={cls._id}>
-                    <td>{cls.grade}</td>
-                    <td>{cls.section}</td>
-                    <td>{cls.subject || 'N/A'}</td>
+                {filteredClasses.length > 0 ? (
+                  filteredClasses.map((cls) => (
+                    <tr key={cls._id}>
+                      <td>{cls.grade}</td>
+                      <td>{cls.section}</td>
+                      <td>{cls.subject || 'N/A'}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="3" style={{ textAlign: 'center', color: '#9ca3af' }}>No classes found matching the filters.</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

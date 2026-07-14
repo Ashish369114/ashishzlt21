@@ -20,6 +20,11 @@ const examSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    examType: {
+      type: String,
+      enum: ['Unit Test', 'Half-Yearly', 'Quarterly', 'Annual', 'Mid-Term', 'Final', 'Practical'],
+      default: 'Unit Test',
+    },
     startTime: String,
     endTime: String,
     totalMarks: {
@@ -28,6 +33,18 @@ const examSchema = new mongoose.Schema(
     },
     room: String,
     description: String,
+    invigilator: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Teacher',
+    },
+    paperDispatched: {
+      type: Boolean,
+      default: false,
+    },
+    paperCollected: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

@@ -16,3 +16,4 @@ describe('plan module helpers', () => {
     expect(getPlanDisplayName('platinum')).toBe('Platinum Plan');
   });
 });
+

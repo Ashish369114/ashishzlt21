@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { feeService } from '../../services/api';
+import { formatCurrency } from '../../utils/currencyFormatter';
 
 // ─── Colour tokens ─────────────────────────────────────────────────────────
 const C = {
-  navy:    '#1e3a5f',
+  navy:    '#2d2d44',
   blue:    '#2b6cb0',
   blueLt:  '#ebf8ff',
   green:   '#276749',
@@ -17,7 +18,7 @@ const C = {
   bg:      '#f7fafc',
 };
 
-const rupee   = n => `₹${Number(n || 0).toLocaleString('en-IN')}`;
+const rupee   = n => `${formatCurrency(Number(n || 0))}`;
 const fmtDate = d => d
   ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
   : '—';
@@ -282,7 +283,7 @@ const AccountantPendingFees = () => {
           { label: 'Total Records',  val: fees.length,         bg: C.blueLt,  color: C.blue  },
           { label: 'Unpaid',         val: unpaidCnt,           bg: C.redLt,   color: C.red   },
           { label: 'Partial',        val: partialCnt,          bg: C.amberLt, color: C.amber },
-          { label: 'Total Pending',  val: rupee(totalPending), bg: C.greenLt, color: C.green },
+          { label: 'Pending Dues',   val: unpaidCnt + partialCnt, bg: C.purpleLt, color: C.purple },
         ].map(s => (
           <div key={s.label} style={{ ...cardBase, padding: '14px 16px', background: s.bg,
             borderLeft: `4px solid ${s.color}` }}>

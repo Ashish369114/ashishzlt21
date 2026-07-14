@@ -48,7 +48,7 @@ const admissionSchema = new mongoose.Schema(
     school: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'School',
-      required: true,
+      required: false,
     },
     appliedForClass: {
       type: mongoose.Schema.Types.ObjectId,

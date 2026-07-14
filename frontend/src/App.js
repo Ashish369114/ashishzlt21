@@ -14,6 +14,7 @@ import TeacherDashboard from './pages/dashboards/TeacherDashboard';
 import StudentDashboard from './pages/dashboards/StudentDashboard';
 import ParentDashboard from './pages/dashboards/ParentDashboard';
 import AccountantDashboard from './pages/dashboards/AccountantDashboard';
+import ExaminerDashboard from './pages/dashboards/ExaminerDashboard';
 import SilverPlan from './pages/SilverPlan';
 import GoldPlan from './pages/GoldPlan';
 import PlatinumPlan from './pages/PlatinumPlan';
@@ -84,6 +85,9 @@ function App() {
         {user && (user.role === 'accountant_admin' || user.role === 'accountant') && (
           <Route path="/dashboard/*" element={<AccountantDashboard user={user} onLogout={handleLogout} />} />
         )}
+        {user && user.role === 'examiner' && (
+          <Route path="/dashboard/*" element={<ExaminerDashboard user={user} onLogout={handleLogout} />} />
+        )}
 
         {/* Fallback Routes */}
         <Route path="*" element={user ? <Navigate to={getDashboardRoute(user)} replace /> : <Navigate to="/" replace />} />
@@ -99,10 +103,12 @@ function App() {
       'teacher': '/dashboard',
       'student': '/dashboard',
       'parent': '/dashboard',
-      'accountant_admin': '/dashboard'
+      'accountant_admin': '/dashboard',
+      'examiner': '/dashboard'
     };
     return dashboardRoutes[userData.role] || '/';
   }
 }
 
 export default App;
+

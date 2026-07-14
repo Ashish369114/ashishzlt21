@@ -8,7 +8,7 @@ const reportSchema = new mongoose.Schema(
     },
     reportType: {
       type: String,
-      enum: ['attendance', 'academic', 'financial', 'performance', 'enrollment', 'transport', 'custom'],
+      enum: ['attendance', 'academic', 'financial', 'performance', 'enrollment', 'transport', 'custom', 'working_days'],
       required: true,
     },
     school: {

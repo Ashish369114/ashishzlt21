@@ -143,7 +143,7 @@ const PrincipalTeacherManagement = () => {
         </div>
         <div className="stat-card">
           <h3>Attendance Rate</h3>
-          <div className="value" style={{ color: '#3b82f6' }}>{stats.percentage}%</div>
+          <div className="value" style={{ color: '#8b5cf6' }}>{stats.percentage}%</div>
         </div>
       </div>
 
@@ -307,7 +307,7 @@ const PrincipalTeacherManagement = () => {
                             <span style={{
                               padding: '4px 8px',
                               borderRadius: '3px',
-                              backgroundColor: leave.type === 'Sick Leave' ? '#dbeafe' :
+                              backgroundColor: leave.type === 'Sick Leave' ? '#f3e8ff' :
                                              leave.type === 'Casual Leave' ? '#fce7f3' : '#f0fdf4',
                               fontSize: '0.85em'
                             }}>

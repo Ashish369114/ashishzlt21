@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { studentService, teacherService, feeService } from '../../services/api';
+import { formatCurrency } from '../../utils/currencyFormatter';
 
 const PrincipalReports = () => {
   const [stats, setStats] = useState(null);
@@ -73,11 +74,11 @@ const PrincipalReports = () => {
           </div>
           <div className="stat-card">
             <h3>Pending Fees</h3>
-            <div className="value">₹{stats.pendingAmount}</div>
+            <div className="value">{formatCurrency(stats.pendingAmount)}</div>
           </div>
           <div className="stat-card">
             <h3>Collected</h3>
-            <div className="value">₹{stats.paidAmount}</div>
+            <div className="value">{formatCurrency(stats.paidAmount)}</div>
           </div>
         </div>
       )}

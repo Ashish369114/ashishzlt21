@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { feeService, studentService } from '../../services/api';
+import { formatCurrency } from '../../utils/currencyFormatter';
 
 const PrincipalFinanceReport = () => {
   const [fees, setFees] = useState([]);
@@ -79,19 +80,11 @@ const PrincipalFinanceReport = () => {
       <div className="stats-grid" style={{ marginBottom: '20px' }}>
         <div className="stat-card">
           <h3>Total Amount</h3>
-          <div className="value">₹{(stats.totalAmount / 100000).toFixed(2)}L</div>
+          <div className="value">{formatCurrency((stats.totalAmount / 100000).toFixed(2))}L</div>
         </div>
         <div className="stat-card">
           <h3>Collected</h3>
-          <div className="value" style={{ color: '#10b981' }}>₹{(stats.paidAmount / 100000).toFixed(2)}L</div>
-        </div>
-        <div className="stat-card">
-          <h3>Pending</h3>
-          <div className="value" style={{ color: '#ef4444' }}>₹{(stats.pendingAmount / 100000).toFixed(2)}L</div>
-        </div>
-        <div className="stat-card">
-          <h3>Collection Rate</h3>
-          <div className="value" style={{ color: '#3b82f6' }}>{stats.collectionPercentage}%</div>
+          <div className="value" style={{ color: '#10b981' }}>{formatCurrency((stats.paidAmount / 100000).toFixed(2))}L</div>
         </div>
       </div>
 
@@ -108,12 +101,6 @@ const PrincipalFinanceReport = () => {
         >
           📋 Pending Fees ({stats.pendingCount})
         </button>
-        <button
-          className={`btn ${activeTab === 'monthly' ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={() => setActiveTab('monthly')}
-        >
-          📊 Monthly Trends
-        </button>
       </div>
 
       {loading ? (
@@ -127,7 +114,7 @@ const PrincipalFinanceReport = () => {
               </div>
               
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '25px' }}>
-                <div style={{ padding: '15px', backgroundColor: '#eff6ff', borderRadius: '8px', borderLeft: '4px solid #3b82f6' }}>
+                <div style={{ padding: '15px', backgroundColor: '#faf5ff', borderRadius: '8px', borderLeft: '4px solid #8b5cf6' }}>
                   <div style={{ fontSize: '0.85em', color: '#1e40af', marginBottom: '5px' }}>Total Fees</div>
                   <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1e3a8a' }}>{stats.totalFees}</div>
                 </div>
@@ -194,7 +181,7 @@ const PrincipalFinanceReport = () => {
                       {pendingFeesByStudent.map((item, index) => (
                         <tr key={index}>
                           <td>{item.student}</td>
-                          <td style={{ fontWeight: 'bold' }}>₹{item.amount.toLocaleString()}</td>
+                          <td style={{ fontWeight: 'bold' }}>{formatCurrency(item.amount)}</td>
                           <td>{new Date(item.dueDate).toLocaleDateString()}</td>
                           <td>
                             <span style={{
@@ -229,61 +216,6 @@ const PrincipalFinanceReport = () => {
               ) : (
                 <p style={{ textAlign: 'center', padding: '20px', color: '#6b7280' }}>
                   All fees are collected! 🎉
-                </p>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'monthly' && (
-            <div className="card">
-              <div className="card-header">
-                <h2>📊 Monthly Fee Collection Trends</h2>
-              </div>
-              {monthlyCollection.length > 0 ? (
-                <div className="table-container">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Month</th>
-                        <th>Amount Collected</th>
-                        <th>Collection Trend</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {monthlyCollection.map((item, index) => {
-                        const maxAmount = Math.max(...monthlyCollection.map(m => m.amount));
-                        const percentage = (item.amount / maxAmount) * 100;
-                        return (
-                          <tr key={index}>
-                            <td>{item.month}</td>
-                            <td style={{ fontWeight: 'bold' }}>₹{item.amount.toLocaleString()}</td>
-                            <td>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <div style={{
-                                  width: '100px',
-                                  height: '8px',
-                                  backgroundColor: '#e5e7eb',
-                                  borderRadius: '4px',
-                                  overflow: 'hidden'
-                                }}>
-                                  <div style={{
-                                    width: `${percentage}%`,
-                                    height: '100%',
-                                    backgroundColor: '#10b981'
-                                  }}></div>
-                                </div>
-                                <span style={{ fontSize: '0.85em' }}>{percentage.toFixed(0)}%</span>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p style={{ textAlign: 'center', padding: '20px', color: '#6b7280' }}>
-                  No monthly data available yet.
                 </p>
               )}
             </div>

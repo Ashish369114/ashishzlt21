@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get('/', authMiddleware, concessionController.getAllRequests);
 router.get('/pending', authMiddleware, roleMiddleware(['super_admin', 'principal']), concessionController.getPendingRequests);
-router.post('/', authMiddleware, roleMiddleware(['accountant_admin', 'super_admin', 'principal']), concessionController.createRequest);
+router.post('/', authMiddleware, roleMiddleware(['accountant_admin', 'super_admin', 'principal', 'parent']), concessionController.createRequest);
 router.put('/:id/approve', authMiddleware, roleMiddleware(['super_admin', 'principal']), concessionController.approveRequest);
 router.put('/:id/reject', authMiddleware, roleMiddleware(['super_admin', 'principal']), concessionController.rejectRequest);
 

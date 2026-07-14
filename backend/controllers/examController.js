@@ -4,7 +4,11 @@ const getExams = async (req, res) => {
   try {
     const exams = await Exam.find()
       .populate('class')
-      .populate('subject');
+      .populate('subject')
+      .populate({
+        path: 'invigilator',
+        populate: { path: 'userId' }
+      });
     res.json(exams);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -15,7 +19,11 @@ const getExamById = async (req, res) => {
   try {
     const exam = await Exam.findById(req.params.id)
       .populate('class')
-      .populate('subject');
+      .populate('subject')
+      .populate({
+        path: 'invigilator',
+        populate: { path: 'userId' }
+      });
     if (!exam) {
       return res.status(404).json({ message: 'Exam not found' });
     }
@@ -30,7 +38,11 @@ const getExamsByClass = async (req, res) => {
     const classId = req.params.classId;
     const exams = await Exam.find({ class: classId })
       .populate('class')
-      .populate('subject');
+      .populate('subject')
+      .populate({
+        path: 'invigilator',
+        populate: { path: 'userId' }
+      });
     res.json(exams);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -45,6 +57,10 @@ const addExam = async (req, res) => {
     const populatedExam = await Exam.findById(exam._id);
     await populatedExam.populate('class');
     await populatedExam.populate('subject');
+    await populatedExam.populate({
+      path: 'invigilator',
+      populate: { path: 'userId' }
+    });
 
     res.status(201).json(populatedExam);
   } catch (error) {
@@ -56,7 +72,11 @@ const updateExam = async (req, res) => {
   try {
     const exam = await Exam.findByIdAndUpdate(req.params.id, req.body, { new: true })
       .populate('class')
-      .populate('subject');
+      .populate('subject')
+      .populate({
+        path: 'invigilator',
+        populate: { path: 'userId' }
+      });
     res.json(exam);
   } catch (error) {
     res.status(400).json({ message: error.message });

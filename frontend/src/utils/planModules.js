@@ -54,3 +54,4 @@ export const getPlanDisplayName = (planName = 'silver') => {
   if (normalizedPlan === 'platinum_without_ocr' || normalizedPlan === 'platinum') return 'Platinum Plan (Without OCR)';
   return 'Silver Plan';
 };
+

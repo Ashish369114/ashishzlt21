@@ -47,6 +47,9 @@ const AdmissionManagement = () => {
       ]);
       setSchools(schoolsRes.data);
       setClasses(classesRes.data);
+      if (schoolsRes.data?.length > 0) {
+        setNewApplication(prev => ({ ...prev, school: schoolsRes.data[0]._id }));
+      }
     } catch (error) {
       console.error('Error fetching form options:', error);
     }
@@ -60,8 +63,9 @@ const AdmissionManagement = () => {
   const handleSubmitApplication = async (e) => {
     e.preventDefault();
 
-    if (!newApplication.school || !newApplication.appliedForClass) {
-      alert('Please select a school and class before submitting.');
+    const finalSchool = newApplication.school || schools[0]?._id;
+    if (!finalSchool || !newApplication.appliedForClass) {
+      alert('Please select a class before submitting.');
       return;
     }
 
@@ -73,7 +77,7 @@ const AdmissionManagement = () => {
       parentName: newApplication.parentName,
       parentEmail: newApplication.parentEmail,
       parentPhone: newApplication.parentPhone,
-      school: newApplication.school,
+      school: finalSchool,
       appliedForClass: newApplication.appliedForClass,
       address: newApplication.address,
     };
@@ -95,7 +99,7 @@ const AdmissionManagement = () => {
         appliedForClass: '',
         address: {},
       });
-      alert('Application submitted successfully!');
+      alert('Student registered successfully!');
     } catch (error) {
       const serverMessage = error.response?.data?.message || error.response?.data || error.message;
       console.error('Error submitting application:', serverMessage, error);
@@ -126,11 +130,10 @@ const AdmissionManagement = () => {
 
   return (
     <div className="management-container">
-      <h1>Admission Management</h1>
-      <p className="status-badge">Pending Applications: <strong>{pendingCount}</strong></p>
+      <h1>Student Registration</h1>
 
       <form onSubmit={handleSubmitApplication} className="management-form">
-        <h3>New Admission Application</h3>
+        <h3>Add New Student</h3>
         <div className="form-row">
           <input
             type="text"
@@ -190,17 +193,7 @@ const AdmissionManagement = () => {
           <option value="female">Female</option>
           <option value="other">Other</option>
         </select>
-        <select
-          name="school"
-          value={newApplication.school}
-          onChange={handleInputChange}
-          required
-        >
-          <option value="">Select School</option>
-          {schools.map((school) => (
-            <option key={school._id} value={school._id}>{school.name}</option>
-          ))}
-        </select>
+
         <select
           name="appliedForClass"
           value={newApplication.appliedForClass}
@@ -212,49 +205,8 @@ const AdmissionManagement = () => {
             <option key={classItem._id} value={classItem._id}>{classItem.grade} {classItem.section}</option>
           ))}
         </select>
-        <button type="submit">Submit Application</button>
+        <button type="submit">Add Student</button>
       </form>
-
-      <div className="applications-list">
-        <h3>Applications</h3>
-        {loading ? (
-          <p>Loading...</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Student Name</th>
-                <th>Parent Email</th>
-                <th>Status</th>
-                <th>Applied Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {admissions.map((admission) => (
-                <tr key={admission._id}>
-                  <td>{admission.firstName} {admission.lastName}</td>
-                  <td>{admission.parentEmail}</td>
-                  <td><span className={`status-${admission.status}`}>{admission.status}</span></td>
-                  <td>{new Date(admission.applicationDate).toLocaleDateString()}</td>
-                  <td>
-                    {admission.status === 'pending' && (
-                      <>
-                        <button onClick={() => handleApproveAdmission(admission._id)} className="btn-approve">
-                          Approve
-                        </button>
-                        <button onClick={() => handleRejectAdmission(admission._id)} className="btn-reject">
-                          Reject
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
     </div>
   );
 };

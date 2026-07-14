@@ -56,13 +56,46 @@ const getAdmissionById = async (req, res) => {
 };
 
 const applyForAdmission = async (req, res) => {
-  const admission = new Admission({
-    ...req.body,
-    admissionNumber: `ADM-${Date.now()}`,
-    status: 'pending',
-  });
   try {
+    const admission = new Admission({
+      ...req.body,
+      admissionNumber: `ADM-${Date.now()}`,
+      status: 'approved',
+      approvalDate: new Date(),
+      approvedBy: req.user?.id,
+      school: req.body.school || req.user?.school,
+    });
+
     const newAdmission = await admission.save();
+
+    // Create user account for approved student
+    const studentUserId = await generateStudentUserId();
+    const user = new User({
+      userId: studentUserId,
+      email: admission.parentEmail,
+      password: 'defaultPassword123', // Should be generated securely
+      firstName: admission.firstName,
+      lastName: admission.lastName,
+      role: 'student',
+      school: admission.school,
+      phone: admission.phone,
+    });
+
+    await user.save();
+
+    // Create student record
+    const student = new Student({
+      userId: user._id,
+      rollNumber: `ROLL-${Date.now()}`,
+      class: admission.appliedForClass,
+      parentId: null,
+      admissionDate: new Date(),
+      bloodGroup: admission.bloodGroup,
+      emergencyContact: admission.parentPhone,
+    });
+
+    await student.save();
+
     res.status(201).json(newAdmission);
   } catch (error) {
     res.status(400).json({ message: error.message });

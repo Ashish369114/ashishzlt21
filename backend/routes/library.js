@@ -14,6 +14,6 @@ router.post('/', authMiddleware, roleMiddleware(['super_admin', 'principal', 'li
 router.put('/:id', authMiddleware, roleMiddleware(['super_admin', 'principal', 'librarian']), libraryController.updateBook);
 router.post('/:id/borrow', authMiddleware, libraryController.borrowBook);
 router.post('/:id/return', authMiddleware, libraryController.returnBook);
+router.post('/:id/renew', authMiddleware, libraryController.renewBook);
 router.delete('/:id', authMiddleware, roleMiddleware(['super_admin', 'principal', 'librarian']), libraryController.deleteBook);
-
 module.exports = router;

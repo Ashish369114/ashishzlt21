@@ -156,7 +156,7 @@ const StudentHomework = ({ userId }) => {
                       <span style={{
                         padding: '5px 10px',
                         borderRadius: '3px',
-                        backgroundColor: status === 'Overdue' ? '#fee2e2' : status === 'Completed' ? '#d1fae5' : '#dbeafe',
+                        backgroundColor: status === 'Overdue' ? '#fee2e2' : status === 'Completed' ? '#d1fae5' : '#f3e8ff',
                         color: status === 'Overdue' ? '#991b1b' : '#0c4a6e',
                       }}>
                         {status}

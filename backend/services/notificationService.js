@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const { formatCurrency } = require('../utils/currencyFormatter');
 
 // Configure email transporter (use your email service)
 const transporter = nodemailer.createTransport({
@@ -92,7 +93,7 @@ const sendFeeReminder = async (parentEmail, studentName, amount, dueDate) => {
   const html = `
     <h2>Fee Payment Reminder</h2>
     <p>Dear Parent,</p>
-    <p>This is a reminder that fees for <strong>${studentName}</strong> of amount <strong>₹${amount}</strong> are due on <strong>${dueDate}</strong></p>
+    <p>This is a reminder that fees for <strong>${studentName}</strong> of amount <strong>${formatCurrency(amount)}</strong> are due on <strong>${dueDate}</strong></p>
     <p>Please make the payment as soon as possible.</p>
   `;
   await sendEmail(parentEmail, 'Fee Payment Reminder', html);

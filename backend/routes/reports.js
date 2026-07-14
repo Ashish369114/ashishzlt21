@@ -12,7 +12,9 @@ router.post('/generate/attendance', authMiddleware, roleMiddleware(['super_admin
 router.post('/generate/academic', authMiddleware, roleMiddleware(['super_admin', 'principal', 'admin']), reportController.generateAcademicReport);
 router.post('/generate/financial', authMiddleware, roleMiddleware(['super_admin', 'principal', 'accountant_admin']), reportController.generateFinancialReport);
 router.post('/generate/performance', authMiddleware, roleMiddleware(['super_admin', 'principal', 'admin']), reportController.generatePerformanceReport);
+router.post('/generate/working_days', authMiddleware, roleMiddleware(['super_admin', 'principal', 'admin']), reportController.generateWorkingDaysReport);
 router.post('/schedule', authMiddleware, roleMiddleware(['super_admin', 'principal', 'admin']), reportController.scheduleReport);
+router.get('/download/:id', reportController.downloadReport);
 router.put('/:id', authMiddleware, roleMiddleware(['super_admin', 'principal']), reportController.updateReport);
 router.delete('/:id', authMiddleware, roleMiddleware(['super_admin', 'principal']), reportController.deleteReport);
 

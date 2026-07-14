@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import '../../styles/ManagementStyles.css';
+import { formatCurrency } from '../../utils/currencyFormatter';
 
 const HostelManagement = () => {
   const [hostels, setHostels] = useState([]);
@@ -202,7 +203,7 @@ const HostelManagement = () => {
                   <td>{hostel.wardenName}</td>
                   <td>{hostel.totalRooms}</td>
                   <td>{hostel.totalBeds}</td>
-                  <td>₹{hostel.monthlyFee}</td>
+                  <td>{formatCurrency(hostel.monthlyFee)}</td>
                   <td>
                     <button onClick={() => handleEditHostel(hostel)} style={{ marginRight: '8px' }}>
                       Edit

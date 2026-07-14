@@ -80,7 +80,7 @@ const TeacherClassTimetable = ({ teacherId, user }) => {
 
   const getClassColor = (classname) => {
     const colors = {
-      '10A': '#dbeafe',
+      '10A': '#f3e8ff',
       '10B': '#fce7f3',
       '9A': '#dcfce7',
       '9B': '#fee2e2',
@@ -111,7 +111,7 @@ const TeacherClassTimetable = ({ teacherId, user }) => {
         </div>
         <div className="stat-card">
           <h3>Classes/Week</h3>
-          <div className="value" style={{ color: '#3b82f6' }}>
+          <div className="value" style={{ color: '#8b5cf6' }}>
             {timetable.length}
           </div>
         </div>
@@ -303,9 +303,9 @@ const TeacherClassTimetable = ({ teacherId, user }) => {
                     key={time}
                     style={{
                       padding: '15px',
-                      border: todayClass ? '2px solid #3b82f6' : '1px solid #e5e7eb',
+                      border: todayClass ? '2px solid #8b5cf6' : '1px solid #e5e7eb',
                       borderRadius: '8px',
-                      backgroundColor: todayClass ? '#eff6ff' : '#f9fafb'
+                      backgroundColor: todayClass ? '#faf5ff' : '#f9fafb'
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
@@ -326,7 +326,7 @@ const TeacherClassTimetable = ({ teacherId, user }) => {
                       {todayClass && (
                         <div style={{
                           padding: '8px 12px',
-                          backgroundColor: '#dbeafe',
+                          backgroundColor: '#f3e8ff',
                           borderRadius: '4px',
                           fontSize: '0.9em',
                           fontWeight: '500',

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { concessionService } from '../../services/api';
+import { formatCurrency } from '../../utils/currencyFormatter';
 
 const fmt   = d => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
-const rupee = n => `₹${Number(n || 0).toLocaleString('en-IN')}`;
+const rupee = formatCurrency;
 
 const ConcessionManagement = () => {
   const [concessions, setConcessions] = useState([]);
@@ -63,7 +64,7 @@ const ConcessionManagement = () => {
         {[
           { label: 'Total Concessions', val: concessions.length,  icon: '🎁', color: '#6366f1', bg: '#eef2ff' },
           { label: 'Total Amount',      val: rupee(totalAmount),   icon: '💰', color: '#15803d', bg: '#dcfce7' },
-          { label: 'This Month',        val: thisMonth,            icon: '📅', color: '#0891b2', bg: '#ecfeff' },
+          { label: 'This Month',        val: thisMonth,            icon: '📅', color: '#7c3aed', bg: '#f5f3ff' },
         ].map(s => (
           <div key={s.label} style={{ ...cardStyle, padding: '16px 18px', display: 'flex', alignItems: 'center', gap: '12px', background: s.bg }}>
             <span style={{ fontSize: '1.6rem' }}>{s.icon}</span>
