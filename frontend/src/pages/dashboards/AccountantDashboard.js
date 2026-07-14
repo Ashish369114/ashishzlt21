@@ -145,7 +145,7 @@ const AccountantDashboard = ({ user, onLogout }) => {
   const isPlatinum = planName.startsWith('platinum');
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#f8fafc', overflow: 'hidden' }}>
+    <div className="dashboard-layout">
       <style>{`
         .accountant-top-nav {
           background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
@@ -289,70 +289,54 @@ const AccountantDashboard = ({ user, onLogout }) => {
           }
         }
       `}</style>
-
-      <nav className="accountant-top-nav">
-        <div className="nav-brand">
-          <span style={{ fontSize: '1.4rem' }}>💼</span> 
-          <span>{user?.role === 'super_admin' ? 'Super Admin' : user?.role === 'principal' ? 'Principal' : 'Accountant'}</span>
-        </div>
-
-        <button className="mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-          {mobileMenuOpen ? '✕' : '☰'}
-        </button>
-
-        <div className={`nav-links ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-          <Link to="/dashboard" className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}>
-            Dashboard
-          </Link>
-          <Link to="/dashboard/students" className={`nav-link ${isActive('/dashboard/students') ? 'active' : ''}`}>
-            Students
-          </Link>
-
-          <div 
-            className="nav-link-dropdown-container" 
-            ref={feesRef}
-            style={{ position: 'relative' }}
-          >
-            <div 
-              className={`nav-link ${isActive(['/dashboard/fees', '/dashboard/payments', '/dashboard/pending', '/dashboard/collections', '/dashboard/concessions']) ? 'active' : ''}`}
-              onClick={() => setFeesDropdownOpen(!feesDropdownOpen)}
-            >
-              Fees <span style={{ fontSize: '0.7em', marginLeft: '4px' }}>{feesDropdownOpen ? '▲' : '▼'}</span>
+      <div className="sidebar">
+        <div className="sidebar-header">
+          <h2>
+            <div style={{ width: '32px', height: '32px', background: '#3b82f6', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '1.2rem' }}>💼</span>
             </div>
-            
-            {feesDropdownOpen && (
-              <div className="nav-dropdown-menu">
-                <Link to="/dashboard/fees" className={`dropdown-item ${isActive('/dashboard/fees') ? 'active' : ''}`}>Collect Fee</Link>
-                <Link to="/dashboard/payments" className={`dropdown-item ${isActive('/dashboard/payments') ? 'active' : ''}`}>Payment History</Link>
-                <Link to="/dashboard/pending" className={`dropdown-item ${isActive('/dashboard/pending') ? 'active' : ''}`}>Pending Fees</Link>
-                <Link to="/dashboard/collections" className={`dropdown-item ${isActive('/dashboard/collections') ? 'active' : ''}`}>Receipts</Link>
-                {isGoldOrBetter && (
-                  <Link to="/dashboard/concessions" className={`dropdown-item ${isActive('/dashboard/concessions') ? 'active' : ''}`}>Discounts</Link>
-                )}
-              </div>
-            )}
-          </div>
-
-          <Link to="/dashboard/payroll" className={`nav-link ${isActive('/dashboard/payroll') ? 'active' : ''}`}>
-            Payroll
-          </Link>
-          <Link to="/dashboard/expenses" className={`nav-link ${isActive('/dashboard/expenses') ? 'active' : ''}`}>
-            Expenses
-          </Link>
-          <Link to="/dashboard/reports" className={`nav-link ${isActive('/dashboard/reports') ? 'active' : ''}`}>
-            Reports
-          </Link>
-          <Link to="/change-password" className={`nav-link ${isActive('/change-password') ? 'active' : ''}`}>
-            Change Password
-          </Link>
-
-          <button onClick={handleLogout} className="nav-link logout-btn-top">
-            Logout
-          </button>
+            {user?.role === 'super_admin' ? 'Super Admin' : user?.role === 'principal' ? 'Principal' : 'Accountant'}
+          </h2>
         </div>
-      </nav>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+        <ul className="nav-menu">
+          <li><Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''}>Dashboard</Link></li>
+          <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''}>Students</Link></li>
+
+          <li>
+            <div 
+              onClick={() => setFeesDropdownOpen(!feesDropdownOpen)}
+              style={{ padding: '12px 16px', color: 'white', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: feesDropdownOpen || isActive(['/dashboard/fees', '/dashboard/payments', '/dashboard/pending', '/dashboard/collections', '/dashboard/concessions']) ? 'rgba(255,255,255,0.08)' : 'transparent', borderRadius: '8px', fontSize: '14px', fontWeight: '500', transition: 'all 0.2s ease' }}
+            >
+              <span>Fees</span>
+              <span style={{ fontSize: '10px', opacity: 0.7 }}>{feesDropdownOpen ? '▲' : '▼'}</span>
+            </div>
+            {feesDropdownOpen && (
+              <ul style={{ listStyle: 'none', padding: '8px 0 0 16px', margin: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <li><Link to="/dashboard/fees" className={isActive('/dashboard/fees') ? 'active' : ''} style={{ fontSize: '13px', padding: '8px 12px' }}>Fees Overview</Link></li>
+                <li><Link to="/dashboard/payments" className={isActive('/dashboard/payments') ? 'active' : ''} style={{ fontSize: '13px', padding: '8px 12px' }}>Collect Payment</Link></li>
+                <li><Link to="/dashboard/pending" className={isActive('/dashboard/pending') ? 'active' : ''} style={{ fontSize: '13px', padding: '8px 12px' }}>Pending Dues</Link></li>
+                <li><Link to="/dashboard/collections" className={isActive('/dashboard/collections') ? 'active' : ''} style={{ fontSize: '13px', padding: '8px 12px' }}>Collections</Link></li>
+                {isGoldOrBetter && (
+                  <li><Link to="/dashboard/concessions" className={isActive('/dashboard/concessions') ? 'active' : ''} style={{ fontSize: '13px', padding: '8px 12px' }}>Concessions</Link></li>
+                )}
+              </ul>
+            )}
+          </li>
+          <li><Link to="/dashboard/payroll" className={isActive('/dashboard/payroll') ? 'active' : ''}>Payroll</Link></li>
+          <li><Link to="/dashboard/expenses" className={isActive('/dashboard/expenses') ? 'active' : ''}>Expenses</Link></li>
+          <li><Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''}>Reports</Link></li>
+          <li><Link to="/dashboard/settings" className={isActive('/dashboard/settings') ? 'active' : ''}>Settings</Link></li>
+          
+          <li style={{ marginTop: '30px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
+            <button onClick={handleLogout} className="logout-btn" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444' }}>
+              Logout
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div className="main-content">
         <div className="header" style={{ marginBottom: '24px' }}>
           <h1 style={{ fontSize: '1.75rem', color: '#0f172a', margin: 0 }}>
             {user?.role === 'super_admin' ? 'Super Admin' : user?.role === 'principal' ? 'Principal' : 'Accountant'} Dashboard

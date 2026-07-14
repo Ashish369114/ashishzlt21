@@ -111,7 +111,7 @@ const AccountantPayroll = () => {
   }
 
   // Improved Empty State
-  if (!schoolId || payroll.length === 0) {
+  if (payroll.length === 0) {
     return (
       <div style={{ padding: '60px 20px', textAlign: 'center', background: '#fff', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', margin: '20px auto', maxWidth: '600px' }}>
         <div style={{ fontSize: '56px', marginBottom: '20px' }}>📝</div>

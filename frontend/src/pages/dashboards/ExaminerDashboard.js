@@ -321,46 +321,46 @@ const ExaminerDashboard = ({ user, onLogout }) => {
       {/* Horizontal top nav / Sidebar */}
       <div className="sidebar">
         <div className="sidebar-header">
-          <h2>✍️ Examiner</h2>
-          <p>{user?.firstName} {user?.lastName}</p>
+          <h2>
+            <div style={{ width: '32px', height: '32px', background: '#f59e0b', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+              <span style={{ fontSize: '1.2rem' }}>✍️</span>
+            </div>
+            Examiner
+          </h2>
         </div>
 
         <ul className="nav-menu">
           <li>
-            <a href="#overview" onClick={(e) => { e.preventDefault(); setActiveTab('overview'); }} className={activeTab === 'overview' ? 'active' : ''}>
-              📊 Dashboard
+            <a href="#" className={activeTab === 'overview' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActiveTab('overview'); }}>
+              Dashboard
             </a>
           </li>
           <li>
-            <a href="#invigilators" onClick={(e) => { e.preventDefault(); setActiveTab('invigilators'); }} className={activeTab === 'invigilators' ? 'active' : ''}>
-              👮 Invigilators
+            <a href="#" className={activeTab === 'invigilators' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActiveTab('invigilators'); }}>
+              Invigilators
             </a>
           </li>
           <li>
-            <a href="#papers" onClick={(e) => { e.preventDefault(); setActiveTab('papers'); }} className={activeTab === 'papers' ? 'active' : ''}>
-              📄 Exam Papers
+            <a href="#" className={activeTab === 'papers' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActiveTab('papers'); }}>
+              Exam Papers
             </a>
           </li>
           <li>
-            <a href="#seating" onClick={(e) => { e.preventDefault(); setActiveTab('seating'); }} className={activeTab === 'seating' ? 'active' : ''}>
-              🪑 Seating
+            <a href="#" className={activeTab === 'seating' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActiveTab('seating'); }}>
+              Seating
             </a>
           </li>
-          <li>
-            <a href="/change-password" style={{ display: 'block', padding: '12px 18px', color: '#64748b', textDecoration: 'none', fontWeight: 600 }}>
-              🔒 Change Password
-            </a>
-          </li>
-          <li>
-            <button onClick={handleLogout} className="logout-btn">
-              🚪 Logout
+          
+          <li style={{ marginTop: '30px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
+            <button onClick={handleLogout} className="logout-btn" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444' }}>
+              Logout
             </button>
           </li>
         </ul>
       </div>
 
       {/* Main Content Area */}
-      <div className="main-content" style={{ padding: '28px' }}>
+      <div className="main-content" style={{ background: '#f8fafc', padding: '28px' }}>
         {/* Header Banner */}
         <div style={{
           background: '#ffffff',
