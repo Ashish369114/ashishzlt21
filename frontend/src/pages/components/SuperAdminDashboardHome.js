@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Users, UserCheck, Briefcase, GraduationCap, 
   CreditCard, AlertCircle, Clock, TrendingUp,
@@ -150,12 +151,12 @@ const SuperAdminDashboardHome = ({ stats }) => {
       {/* 5. Quick Actions */}
       <div className="section-title">Quick Actions</div>
       <div className="quick-actions-grid">
-        <div className="action-card"><PlusCircle className="action-icon" size={20} /> Add Student</div>
-        <div className="action-card"><Briefcase className="action-icon" size={20} /> Add Employee</div>
-        <div className="action-card"><BookOpen className="action-icon" size={20} /> Create Exam</div>
-        <div className="action-card"><Send className="action-icon" size={20} /> Send Notice</div>
-        <div className="action-card"><Bus className="action-icon" size={20} /> Add Transport Route</div>
-        <div className="action-card"><Home className="action-icon" size={20} /> Add Hostel</div>
+        <Link to="/dashboard/students" className="action-card" style={{ textDecoration: 'none', color: 'inherit' }}><PlusCircle className="action-icon" size={20} /> Add Student</Link>
+        <Link to="/dashboard/employees" className="action-card" style={{ textDecoration: 'none', color: 'inherit' }}><Briefcase className="action-icon" size={20} /> Add Employee</Link>
+        <Link to="/dashboard/exams" className="action-card" style={{ textDecoration: 'none', color: 'inherit' }}><BookOpen className="action-icon" size={20} /> Create Exam</Link>
+        <Link to="/dashboard/attendance" className="action-card" style={{ textDecoration: 'none', color: 'inherit' }}><Send className="action-icon" size={20} /> Mark Attendance</Link>
+        <Link to="/dashboard/transport" className="action-card" style={{ textDecoration: 'none', color: 'inherit' }}><Bus className="action-icon" size={20} /> Add Transport Route</Link>
+        <Link to="/dashboard/hostel" className="action-card" style={{ textDecoration: 'none', color: 'inherit' }}><Home className="action-icon" size={20} /> Add Hostel</Link>
       </div>
 
       {/* 6. Activity, Notices & Events Section */}

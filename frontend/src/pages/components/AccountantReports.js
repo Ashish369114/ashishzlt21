@@ -92,10 +92,46 @@ const AccountantReports = ({ isPremiumFeatureAllowed }) => {
     fetchStats();
   }, []);
 
+  const downloadReport = () => {
+    if (!stats) return;
+    let csv = 'Metric,Value\n';
+    csv += `Total Fees,${stats.totalFees}\n`;
+    csv += `Total Amount,${stats.totalAmount}\n`;
+    csv += `Pending Count,${stats.pendingCount}\n`;
+    csv += `Pending Amount,${stats.pendingAmount}\n`;
+    csv += `Paid Count,${stats.paidCount}\n`;
+    csv += `Paid Amount,${stats.paidAmount}\n`;
+    csv += `Total Expenses,${stats.totalExpenses}\n`;
+    csv += `Expense Count,${stats.expenseCount}\n`;
+    csv += `Net Income,${stats.netIncome}\n`;
+    csv += `Today's Collection,${stats.todaysCollection}\n`;
+    csv += `Monthly Collection,${stats.monthlyCollection}\n`;
+    csv += '\nExpense Breakdown\nTitle,Category,Amount,Date\n';
+    expenses.forEach(e => {
+      csv += `"${e.title || ''}","${e.category || 'General'}",${e.amount || 0},${e.date ? new Date(e.date).toLocaleDateString() : '-'}\n`;
+    });
+    csv += '\nRecent Collections\nStudent,Amount,Method,Date\n';
+    paidFees.forEach(f => {
+      csv += `"${f.student?.firstName || ''} ${f.student?.lastName || ''}",${f.amount || 0},${f.paymentMethod || '-'},${f.paymentDate ? new Date(f.paymentDate).toLocaleDateString() : '-'}\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `accountant_report_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="card">
-      <div className="card-header">
+      <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2>📊 Accountant Reports</h2>
+        {stats && (
+          <button onClick={downloadReport} className="btn btn-primary" style={{ width: 'auto', padding: '10px 24px', marginTop: 0 }}>
+            📥 Download Report
+          </button>
+        )}
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}

@@ -121,7 +121,37 @@ const AccountantPayroll = () => {
         </p>
         <button 
           className="btn btn-primary"
-          onClick={() => alert("Payroll generation initiated (Mock Action)")}
+          onClick={async () => {
+            try {
+              setLoading(true);
+              const empRes = await employeeService.getAll();
+              const employees = empRes.data || [];
+              if (employees.length === 0) {
+                alert('No employees found. Please add employees first.');
+                setLoading(false);
+                return;
+              }
+              const generated = employees.map(emp => ({
+                _id: emp._id,
+                employeeId: emp.employeeId || `EMP-${emp._id?.slice(-4)}`,
+                name: `${emp.firstName || ''} ${emp.lastName || ''}`.trim(),
+                department: emp.department || 'General',
+                baseSalary: emp.salary?.baseSalary || emp.baseSalary || 25000,
+                allowances: emp.salary?.allowances || emp.allowances || { HRA: 5000, DA: 3000 },
+                deductions: emp.salary?.deductions || emp.deductions || { PF: 2000, Tax: 1500 },
+                netSalary: (emp.salary?.baseSalary || emp.baseSalary || 25000) +
+                  Object.values(emp.salary?.allowances || emp.allowances || { HRA: 5000, DA: 3000 }).reduce((s,v) => s + Number(v||0), 0) -
+                  Object.values(emp.salary?.deductions || emp.deductions || { PF: 2000, Tax: 1500 }).reduce((s,v) => s + Number(v||0), 0),
+                status: 'Pending',
+              }));
+              setPayroll(generated);
+              setLoading(false);
+            } catch (err) {
+              console.error('Error generating payroll:', err);
+              alert('Failed to generate payroll. Please try again.');
+              setLoading(false);
+            }
+          }}
           style={{ padding: '12px 28px', fontSize: '15px', borderRadius: '8px', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: '600', boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)' }}
         >
           ✨ Generate Payroll
