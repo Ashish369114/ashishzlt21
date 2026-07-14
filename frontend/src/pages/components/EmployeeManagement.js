@@ -599,16 +599,9 @@ const EmployeeManagement = () => {
                               <button 
                                 className="btn btn-secondary btn-small" 
                                 onClick={() => setComplaintsModalTeacher(employee)} 
-                                style={{ position: 'relative', marginRight: '8px' }}
+                                style={{ marginRight: '8px' }}
                               >
-                                💬 Complaints
-                                {allComplaints.filter(c => c.teacherId === employee._id && ['New', 'Under Review'].includes(c.status)).length > 0 && (
-                                  <span style={{
-                                    position: 'absolute', top: '-8px', right: '-8px', background: '#ef4444', color: 'white', borderRadius: '50%', padding: '2px 6px', fontSize: '0.7rem', fontWeight: 'bold'
-                                  }}>
-                                    {allComplaints.filter(c => c.teacherId === employee._id && ['New', 'Under Review'].includes(c.status)).length}
-                                  </span>
-                                )}
+                                📝 Remarks
                               </button>
                             )}
                             <button onClick={() => handleEditEmployee(employee)} className="btn btn-secondary btn-small" style={{ marginRight: '8px' }}>
@@ -627,7 +620,7 @@ const EmployeeManagement = () => {
             </>
           )}
 
-          {/* Complaints Modal */}
+          {/* Remarks Modal */}
           {complaintsModalTeacher && (
             <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' }}>
               <div className="modal-content" style={{ background: 'white', borderRadius: '12px', width: '100%', maxWidth: '700px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
