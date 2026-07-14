@@ -11,7 +11,7 @@ const AttendanceManagement = () => {
   const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
   const [selectedClassId, setSelectedClassId] = useState('');
-  const [selectedMonth, setSelectedMonth] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState(String(new Date().getMonth() + 1).padStart(2, '0'));
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [selectedWeek, setSelectedWeek] = useState('');
   const [formData, setFormData] = useState({
@@ -433,37 +433,142 @@ const AttendanceManagement = () => {
               );
             })()}
 
-            <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Student</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th>Remarks</th>
-                </tr>
-              </thead>
-              <tbody>
-                {displayRecords.map((record) => (
-                  <tr key={record._id}>
-                    <td>{record.student?.firstName} {record.student?.lastName}</td>
-                    <td>{new Date(record.date).toLocaleDateString()}</td>
-                    <td>
-                      <span style={{
-                        padding: '5px 10px',
-                        borderRadius: '3px',
-                        backgroundColor: record.status === 'Present' ? '#d1fae5' : record.status === 'Holiday' ? '#e0f2fe' : record.status === 'Not Marked' ? '#f3f4f6' : '#fee2e2',
-                        color: record.status === 'Present' ? '#065f46' : record.status === 'Holiday' ? '#0369a1' : record.status === 'Not Marked' ? '#4b5563' : '#991b1b',
-                      }}>
-                        {record.status}
-                      </span>
-                    </td>
-                    <td>{record.remarks || '-'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+            {selectedMonth ? (() => {
+              const year = new Date().getFullYear();
+              const daysInMonth = new Date(year, parseInt(selectedMonth, 10), 0).getDate();
+              const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+              const studentsToDisplay = selectedStudentId 
+                ? sectionStudents.filter(s => String(s.userId?._id || s.userId) === String(selectedStudentId)) 
+                : sectionStudents;
+
+              return (
+                <div style={{ overflowX: 'auto', background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', minWidth: 'max-content' }}>
+                    <thead>
+                      <tr style={{ background: '#f8fafc', borderBottom: '2px solid #cbd5e1' }}>
+                        <th style={{ padding: '12px 16px', position: 'sticky', left: 0, background: '#f8fafc', zIndex: 1, borderRight: '1px solid #cbd5e1', textAlign: 'left', color: '#475569', fontSize: '0.85rem', textTransform: 'uppercase' }}>Student Name</th>
+                        {daysArray.map(d => <th key={d} style={{ padding: '12px 6px', fontSize: '0.8rem', minWidth: '28px', color: '#64748b' }}>{d}</th>)}
+                        <th style={{ padding: '12px 10px', borderLeft: '1px solid #cbd5e1', color: '#166534', fontSize: '0.85rem' }}>P</th>
+                        <th style={{ padding: '12px 10px', color: '#991b1b', fontSize: '0.85rem' }}>A</th>
+                        <th style={{ padding: '12px 10px', color: '#1d4ed8', fontSize: '0.85rem' }}>%</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {studentsToDisplay.map(student => {
+                        const sId = String(student.userId?._id || student.userId);
+                        const name = `${student.userId?.firstName || ''} ${student.userId?.lastName || ''}`;
+                        let presentCount = 0;
+                        let absentCount = 0;
+                        let totalWorking = 0;
+                        
+                        const rowDays = daysArray.map(d => {
+                          const dateStr = `${year}-${String(selectedMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                          const record = visibleAttendance.find(r => {
+                            const rSid = String(r.student?._id || r.student);
+                            const rDate = r.date ? new Date(r.date).toISOString().slice(0,10) : '';
+                            return rSid === sId && rDate === dateStr;
+                          });
+                          
+                          const tempDate = new Date(year, parseInt(selectedMonth, 10) - 1, d);
+                          const day = tempDate.getDay();
+                          const isSunday = day === 0;
+                          const isSecondSaturday = (day === 6 && d >= 8 && d <= 14);
+                          const isHoliday = school?.schoolSettings?.holidays?.some(hDate => new Date(hDate).toISOString().slice(0, 10) === dateStr);
+                          
+                          let statusChar = '-';
+                          let bgColor = 'transparent';
+                          let textColor = '#cbd5e1';
+                          
+                          if (isSunday || isSecondSaturday || isHoliday) {
+                            statusChar = 'H';
+                            bgColor = '#f8fafc';
+                            textColor = '#94a3b8';
+                          } else {
+                            totalWorking++;
+                            if (record) {
+                              if (record.status === 'Present') {
+                                statusChar = 'P';
+                                bgColor = '#dcfce7';
+                                textColor = '#166534';
+                                presentCount++;
+                              } else if (record.status === 'Absent') {
+                                statusChar = 'A';
+                                bgColor = '#fee2e2';
+                                textColor = '#991b1b';
+                                absentCount++;
+                              } else if (record.status === 'Half Day') {
+                                statusChar = 'HD';
+                                bgColor = '#fef9c3';
+                                textColor = '#854d0e';
+                                presentCount += 0.5;
+                              } else if (record.status === 'Late') {
+                                statusChar = 'L';
+                                bgColor = '#fef3c7';
+                                textColor = '#b45309';
+                                presentCount++;
+                              }
+                            }
+                          }
+                          
+                          return (
+                            <td key={d} style={{ padding: '8px 2px', background: bgColor, fontSize: '0.85rem', fontWeight: '600', color: textColor, borderBottom: '1px solid #f1f5f9', borderRight: '1px solid #f1f5f9' }}>
+                              {statusChar}
+                            </td>
+                          );
+                        });
+                        
+                        const percent = totalWorking > 0 ? ((presentCount / totalWorking) * 100).toFixed(1) : 0;
+                        
+                        return (
+                          <tr key={sId} style={{ transition: 'background 0.2s', cursor: 'default' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                            <td style={{ padding: '12px 16px', position: 'sticky', left: 0, background: '#fff', zIndex: 1, borderRight: '2px solid #cbd5e1', borderBottom: '1px solid #e2e8f0', textAlign: 'left', fontWeight: '500', color: '#0f172a', whiteSpace: 'nowrap' }}>
+                              {name}
+                            </td>
+                            {rowDays}
+                            <td style={{ padding: '12px 10px', borderLeft: '2px solid #cbd5e1', borderBottom: '1px solid #e2e8f0', fontWeight: '600', color: '#166534' }}>{presentCount}</td>
+                            <td style={{ padding: '12px 10px', borderBottom: '1px solid #e2e8f0', fontWeight: '600', color: '#991b1b' }}>{absentCount}</td>
+                            <td style={{ padding: '12px 10px', borderBottom: '1px solid #e2e8f0', fontWeight: 'bold', color: '#1d4ed8' }}>{percent}%</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })() : (
+              <div className="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Student</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                      <th>Remarks</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {displayRecords.map((record) => (
+                      <tr key={record._id}>
+                        <td>{record.student?.firstName} {record.student?.lastName}</td>
+                        <td>{new Date(record.date).toLocaleDateString()}</td>
+                        <td>
+                          <span style={{
+                            padding: '5px 10px',
+                            borderRadius: '3px',
+                            backgroundColor: record.status === 'Present' ? '#d1fae5' : record.status === 'Holiday' ? '#e0f2fe' : record.status === 'Not Marked' ? '#f3f4f6' : '#fee2e2',
+                            color: record.status === 'Present' ? '#065f46' : record.status === 'Holiday' ? '#0369a1' : record.status === 'Not Marked' ? '#4b5563' : '#991b1b',
+                          }}>
+                            {record.status}
+                          </span>
+                        </td>
+                        <td>{record.remarks || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
         </>
       )
     )}

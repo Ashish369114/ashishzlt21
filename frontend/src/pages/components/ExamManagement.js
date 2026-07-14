@@ -229,8 +229,61 @@ const ExamManagement = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '16px' }}>
           <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1e293b' }}>Filter & Search</h3>
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button className="btn btn-primary" onClick={() => alert('Printing Timetable...')} style={{ background: '#475569', borderColor: '#475569' }}>🖨️ Print Timetable</button>
-            <button className="btn btn-primary" onClick={() => alert('Exporting as PDF...')} style={{ background: '#dc2626', borderColor: '#dc2626' }}>📄 Export PDF</button>
+            <button className="btn btn-primary" onClick={() => {
+              const printWin = window.open('', '_blank');
+              const rows = visibleExams.map(exam => {
+                const status = getStatus(exam.examDate);
+                let durationStr = '120 mins';
+                if (exam.startTime && exam.endTime) {
+                  const start = new Date(`1970-01-01T${exam.startTime}`);
+                  const end = new Date(`1970-01-01T${exam.endTime}`);
+                  const diff = (end - start) / 60000;
+                  if (diff > 0) durationStr = `${diff} mins`;
+                }
+                return `<tr>
+                  <td>${getExamDate(exam.examDate)}</td>
+                  <td>${getExamDay(exam.examDate)}</td>
+                  <td>${exam.startTime ? `${exam.startTime} – ${exam.endTime}` : '09:00 – 11:00'}</td>
+                  <td>${exam.subject?.name || exam.subject || 'Unknown'}</td>
+                  <td>${exam.examType || exam.name?.split(' - ')[0] || 'Term Exam'}</td>
+                  <td>Grade ${exam.class?.grade || 'N/A'}</td>
+                  <td>${exam.class?.section || 'A'}</td>
+                  <td>${exam.room || 'Room 21'}</td>
+                  <td>${durationStr}</td>
+                  <td>${status}</td>
+                </tr>`;
+              }).join('');
+              printWin.document.write(`<html><head><title>Exam Timetable</title>
+                <style>body{font-family:Arial,sans-serif;padding:20px}h1{text-align:center;color:#1e293b}
+                table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #cbd5e1;padding:10px;text-align:left;font-size:13px}
+                th{background:#f1f5f9;color:#475569;text-transform:uppercase;font-size:11px}</style></head>
+                <body><h1>📋 Exam Timetable</h1><p style="text-align:center;color:#64748b">${new Date().toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}</p>
+                <table><thead><tr><th>Date</th><th>Day</th><th>Time</th><th>Subject</th><th>Type</th><th>Grade</th><th>Section</th><th>Room</th><th>Duration</th><th>Status</th></tr></thead>
+                <tbody>${rows}</tbody></table></body></html>`);
+              printWin.document.close();
+              printWin.print();
+            }} style={{ background: '#475569', borderColor: '#475569' }}>🖨️ Print Timetable</button>
+            <button className="btn btn-primary" onClick={() => {
+              let csv = 'Date,Day,Time,Subject,Exam Type,Grade,Section,Room,Invigilator,Duration,Status\n';
+              visibleExams.forEach(exam => {
+                const status = getStatus(exam.examDate);
+                let durationStr = '120 mins';
+                if (exam.startTime && exam.endTime) {
+                  const start = new Date(`1970-01-01T${exam.startTime}`);
+                  const end = new Date(`1970-01-01T${exam.endTime}`);
+                  const diff = (end - start) / 60000;
+                  if (diff > 0) durationStr = `${diff} mins`;
+                }
+                csv += `"${getExamDate(exam.examDate)}","${getExamDay(exam.examDate)}","${exam.startTime ? `${exam.startTime} – ${exam.endTime}` : '09:00 – 11:00'}","${exam.subject?.name || exam.subject || 'Unknown'}","${exam.examType || exam.name?.split(' - ')[0] || 'Term Exam'}","Grade ${exam.class?.grade || 'N/A'}","${exam.class?.section || 'A'}","${exam.room || 'Room 21'}","${exam.invigilator?.firstName || 'Ramesh'} ${exam.invigilator?.lastName || 'Sharma'}","${durationStr}","${status}"\n`;
+              });
+              const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `exam_timetable_${new Date().toISOString().slice(0,10)}.csv`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }} style={{ background: '#dc2626', borderColor: '#dc2626' }}>📄 Export PDF</button>
             <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
               {showForm ? 'Cancel Form' : '➕ Add Exam'}
             </button>
