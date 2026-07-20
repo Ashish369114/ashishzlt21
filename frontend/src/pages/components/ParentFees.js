@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { feeService, concessionService } from '../../services/api';
-import { formatCurrency } from '../../utils/currencyFormatter';
+import { feeService } from '../../services/api';
 
 const paymentMethods = [
   'PhonePe',
@@ -17,52 +16,6 @@ const ParentFees = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [paymentInputs, setPaymentInputs] = useState({});
-
-  const [requestModalFee, setRequestModalFee] = useState(null);
-  const [concessionAmount, setConcessionAmount] = useState('');
-  const [concessionReason, setConcessionReason] = useState('');
-  const [requestSaving, setRequestSaving] = useState(false);
-  const [requestError, setRequestError] = useState('');
-
-  const handleOpenRequestModal = (fee) => {
-    setRequestModalFee(fee);
-    setConcessionAmount('');
-    setConcessionReason('');
-    setRequestError('');
-  };
-
-  const handleCloseRequestModal = () => {
-    setRequestModalFee(null);
-  };
-
-  const handleSubmitConcessionRequest = async (e) => {
-    e.preventDefault();
-    if (!concessionAmount || !concessionReason) {
-      setRequestError('Please fill in all fields.');
-      return;
-    }
-    const amount = Number(concessionAmount);
-    if (amount <= 0 || amount > requestModalFee.amount) {
-      setRequestError(`Concession amount must be between ₹1 and ${formatCurrency(requestModalFee.amount)}.`);
-      return;
-    }
-    setRequestSaving(true);
-    setRequestError('');
-    try {
-      await concessionService.create({
-        studentId: requestModalFee.student?._id || requestModalFee.student,
-        feeId: requestModalFee._id,
-        concessionAmount: amount,
-        reason: concessionReason,
-      });
-      alert('Concession request submitted successfully!');
-      handleCloseRequestModal();
-    } catch (err) {
-      setRequestError(err.response?.data?.message || 'Failed to submit request.');
-    } finally {
-      setRequestSaving(false);
-    }
-  };
 
   useEffect(() => {
     fetchFees();
@@ -161,7 +114,7 @@ const ParentFees = () => {
   };
 
   const downloadReceipt = (fee) => {
-    const content = `Receipt\n==========\nStudent: ${fee.student?.firstName || '-'} ${fee.student?.lastName || '-'}\nAmount: ${formatCurrency(fee.amount)}\nStatus: ${fee.isPaid ? 'Paid' : 'Pending'}\nMethod: ${fee.paymentMethod || '-'}\nTransaction: ${fee.transactionId || '-'}\nDate: ${fee.paymentDate ? new Date(fee.paymentDate).toLocaleString() : '-'}\nDetails: ${JSON.stringify(fee.paymentDetails || {}, null, 2)}`;
+    const content = `Receipt\n==========\nStudent: ${fee.student?.firstName || '-'} ${fee.student?.lastName || '-'}\nAmount: ₹${fee.amount}\nStatus: ${fee.isPaid ? 'Paid' : 'Pending'}\nMethod: ${fee.paymentMethod || '-'}\nTransaction: ${fee.transactionId || '-'}\nDate: ${fee.paymentDate ? new Date(fee.paymentDate).toLocaleString() : '-'}\nDetails: ${JSON.stringify(fee.paymentDetails || {}, null, 2)}`;
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -200,15 +153,15 @@ const ParentFees = () => {
         </div>
         <div className="stat-card">
           <h3>Paid Amount</h3>
-          <div className="value">{formatCurrency(calculateTotalPaid())}</div>
+          <div className="value">₹{calculateTotalPaid()}</div>
         </div>
         <div className="stat-card">
           <h3>Pending Amount</h3>
-          <div className="value">{formatCurrency(calculateTotalPending())}</div>
+          <div className="value">₹{calculateTotalPending()}</div>
         </div>
         <div className="stat-card">
           <h3>Total Fee Amount</h3>
-          <div className="value">{formatCurrency(calculateTotalFeeAmount())}</div>
+          <div className="value">₹{calculateTotalFeeAmount()}</div>
         </div>
       </div>
 
@@ -237,10 +190,10 @@ const ParentFees = () => {
                 return (
                   <tr key={fee._id}>
                     <td><strong>{fee.student?.firstName} {fee.student?.lastName}</strong></td>
-                    <td>{formatCurrency(fee.amount)}</td>
+                    <td>₹{fee.amount}</td>
                     <td>{fee.installments || 3}</td>
-                    <td>{formatCurrency(paidAmount)}</td>
-                    <td>{formatCurrency(pendingAmount)}</td>
+                    <td>₹{paidAmount}</td>
+                    <td>₹{pendingAmount}</td>
                     <td>{new Date(fee.dueDate).toLocaleDateString()}</td>
                     <td>
                     <span style={{
@@ -266,28 +219,19 @@ const ParentFees = () => {
                             <option key={method} value={method}>{method}</option>
                           ))}
                         </select>
-                        <div style={{ display: 'flex', gap: '5px' }}>
-                          <button
-                            className="btn btn-small"
-                            onClick={() => handlePayFee(fee._id)}
-                            style={{ background: '#10b981', color: 'white', flex: 1 }}
-                          >
-                            Pay
-                          </button>
-                          <button
-                            className="btn btn-small"
-                            onClick={() => handleOpenRequestModal(fee)}
-                            style={{ background: '#eab308', color: 'white', flex: 1, border: 'none' }}
-                          >
-                            🎁 Concession
-                          </button>
-                        </div>
+                        <button
+                          className="btn btn-small"
+                          onClick={() => handlePayFee(fee._id)}
+                          style={{ background: '#10b981', color: 'white' }}
+                        >
+                          Pay
+                        </button>
                       </div>
                     ) : (
                       <button
                         className="btn btn-small"
                         onClick={() => downloadReceipt(fee)}
-                        style={{ background: '#7c3aed', color: 'white' }}
+                        style={{ background: '#2563eb', color: 'white' }}
                       >
                         Download Receipt
                       </button>
@@ -298,81 +242,6 @@ const ParentFees = () => {
               })}
             </tbody>
           </table>
-        </div>
-      )}
-
-      {requestModalFee && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div style={{ background: '#fff', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '450px', boxShadow: '0 20px 60px rgba(0,0,0,0.22)', color: '#374151', boxSizing: 'border-box' }}>
-            <h3 style={{ margin: '0 0 10px', fontSize: '1.2rem', fontWeight: 700, color: '#1f2937' }}>🎁 Request Fee Concession</h3>
-            <p style={{ color: '#6b7280', fontSize: '0.85rem', margin: '0 0 20px', lineHeight: 1.4 }}>
-              Submit a request for <strong>{requestModalFee.description || 'Tuition Fee'}</strong> (Outstanding: {formatCurrency(requestModalFee.amount)}). The Principal will review your request.
-            </p>
-
-            {requestError && (
-              <div style={{ color: '#b91c1c', background: '#fee2e2', padding: '8px 12px', borderRadius: '6px', marginBottom: '12px', fontWeight: 600, fontSize: '0.83rem', textAlign: 'left' }}>
-                {requestError}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmitConcessionRequest} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div>
-                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.83rem', marginBottom: '4px', color: '#374151', textAlign: 'left' }}>
-                  Requested Concession Amount (₹) *
-                </label>
-                <input
-                  type="number"
-                  value={concessionAmount}
-                  min={1}
-                  max={requestModalFee.amount}
-                  onChange={(e) => setConcessionAmount(e.target.value)}
-                  placeholder={`Max: ${formatCurrency(requestModalFee.amount)}`}
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.87rem', outline: 'none', boxSizing: 'border-box' }}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.83rem', marginBottom: '4px', color: '#374151', textAlign: 'left' }}>
-                  Reason for Request *
-                </label>
-                <textarea
-                  rows={3}
-                  value={concessionReason}
-                  onChange={(e) => setConcessionReason(e.target.value)}
-                  placeholder="Explain why you are requesting a concession (e.g. academic excellence, financial hardship...)"
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.87rem', outline: 'none', boxSizing: 'border-box', resize: 'vertical' }}
-                  required
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '10px' }}>
-                <button
-                  type="button"
-                  onClick={handleCloseRequestModal}
-                  style={{ padding: '9px 20px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.86rem' }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={requestSaving}
-                  style={{
-                    padding: '9px 22px',
-                    background: requestSaving ? '#cbd5e1' : '#15803d',
-                    color: requestSaving ? '#94a3b8' : '#fff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: requestSaving ? 'not-allowed' : 'pointer',
-                    fontWeight: 700,
-                    fontSize: '0.86rem'
-                  }}
-                >
-                  {requestSaving ? '⏳ Submitting...' : 'Submit Request'}
-                </button>
-              </div>
-            </form>
-          </div>
         </div>
       )}
     </div>

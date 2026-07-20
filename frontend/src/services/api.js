@@ -353,4 +353,24 @@ export const studentNotesService = {
   }
 };
 
+export const assignmentService = {
+  getAll: () => api.get('/assignments'),
+  add: (data) => api.post('/assignments', data),
+  update: (id, data) => api.put(`/assignments/${id}`, data),
+  delete: (id) => api.delete(`/assignments/${id}`),
+};
+
+export const activityService = {
+  getAll: () => api.get('/activities'),
+  add: (data) => api.post('/activities', data),
+  update: (id, data) => api.put(`/activities/${id}`, data),
+  delete: (id) => api.delete(`/activities/${id}`),
+};
+
+export const messageService = {
+  getAll: () => api.get('/messages'),
+  getByUser: (userId) => api.get(`/messages/user/${userId}`),
+  send: (data) => api.post('/messages', data),
+};
+
 export default api;

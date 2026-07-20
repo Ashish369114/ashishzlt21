@@ -142,7 +142,7 @@ const TeacherCommunication = ({ teacherId, user }) => {
         </div>
         <div className="stat-card">
           <h3>Recipients Reached</h3>
-          <div className="value" style={{ color: '#8b5cf6' }}>
+          <div className="value" style={{ color: '#3b82f6' }}>
             {notices.reduce((sum, n) => sum + (n.recipientCount || 0), 0) + messages.length}
           </div>
         </div>

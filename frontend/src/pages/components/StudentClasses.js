@@ -39,7 +39,6 @@ const StudentClasses = ({ userId }) => {
 
   const buildTimetable = () => {
     const grade = classInfo?.grade || 'N/A';
-    const section = classInfo?.section || '';
     const baseSubjects = ['Mathematics', 'English', 'Science', 'Social Studies', 'Language'];
     const optional = grade >= 9 ? ['Physics', 'Chemistry', 'Biology'] : ['Art', 'Music', 'Physical Education'];
     const subjects = [...baseSubjects, optional[0], optional[1]].slice(0, 7);
