@@ -96,6 +96,8 @@ jobs:
           NODE_ENV=${{ steps.env.outputs.NODE_ENV }}
           ENVEOF
 
+            node seeds/seedData.js
+
             pm2 delete ${{ steps.env.outputs.APP_NAME }} 2>/dev/null || true
             pm2 start server.js --name ${{ steps.env.outputs.APP_NAME }}
             pm2 save
