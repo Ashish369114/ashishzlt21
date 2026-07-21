@@ -29,8 +29,7 @@ jobs:
           SSH_KEY=$(aws secretsmanager get-secret-value --secret-id zltsos/ec2-ssh-key --query SecretString --output text)
           echo "$SSH_KEY" > /tmp/ssh_key.pem
           chmod 400 /tmp/ssh_key.pem
-          ssh -o StrictHostKeyChecking=no -i /tmp/ssh_key.pem ec2-user@$EC2_HOST "pm2 logs --lines 100 --nostream ; pm2 list" > pm2-logs.txt || true
-          echo $(echo $SECRET | jq -r '.BACKEND_URL') > backend-url.txt
+          ssh -o StrictHostKeyChecking=no -i /tmp/ssh_key.pem ec2-user@$EC2_HOST "cd /home/ec2-user/app-dev/backend && export DB_HOST=$(echo $SECRET | jq -r '.DB_HOST') && export DB_USER=$(echo $SECRET | jq -r '.DB_USER') && export DB_PASSWORD=$(echo $SECRET | jq -r '.DB_PASSWORD') && export DB_NAME=$(echo $SECRET | jq -r '.DB_NAME') && export NODE_ENV=development && node create_db.js" > pm2-logs.txt 2>&1 || true
           
       - name: Push logs
         run: |
