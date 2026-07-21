@@ -1,53 +1,16 @@
-const User = require('../models/User');
-const Subject = require('../models/Subject');
-const Class = require('../models/Class');
-const Teacher = require('../models/Teacher');
-const Student = require('../models/Student');
-const Fee = require('../models/Fee');
-const Homework = require('../models/Homework');
-const Marks = require('../models/Marks');
-const Attendance = require('../models/Attendance');
-const Exam = require('../models/Exam');
-const Event = require('../models/Event');
-const Leave = require('../models/Leave');
-const Employee = require('../models/Employee');
-const School = require('../models/School');
-const Library = require('../models/Library');
-const Transport = require('../models/Transport');
-const Hostel = require('../models/Hostel');
+const { User, Subject, Class, Teacher, Student, Fee, Homework, Marks, Attendance, Exam, Event, Leave, Employee, School, Library, Transport, Hostel } = require('../models');
 
 const seedDataFn = async () => {
-  // Clear lists first
-  await Promise.all([
-    User.deleteMany({}),
-    Subject.deleteMany({}),
-    Class.deleteMany({}),
-    Teacher.deleteMany({}),
-    Student.deleteMany({}),
-    Fee.deleteMany({}),
-    Homework.deleteMany({}),
-    Marks.deleteMany({}),
-    Attendance.deleteMany({}),
-    Exam.deleteMany({}),
-    Event.deleteMany({}),
-    Leave.deleteMany({}),
-    Employee.deleteMany({}),
-    School.deleteMany({}),
-    Library.deleteMany({}),
-    Transport.deleteMany({}),
-    Hostel.deleteMany({}),
-  ]);
+  // Sync in seedData.js already wiped tables, so we don't need deleteMany.
+  console.log('Cleared existing data (tables synced)');
 
-  console.log('Cleared existing data');
-
-  const defaultSchool = new School({
+  const defaultSchool = await School.create({
     name: 'Greenwood High School',
     code: 'GHS101',
     email: 'info@greenwood.edu',
     phone: '1234567890',
     academicYear: '2026-2027',
   });
-  await defaultSchool.save();
   console.log('Created default school Greenwood High School');
 
   const subjectsData = [
@@ -60,10 +23,10 @@ const seedDataFn = async () => {
     { name: 'Environmental Science (EVS)' },
   ];
 
-  const subjects = await Subject.insertMany(subjectsData);
+  const subjects = await Subject.bulkCreate(subjectsData);
   console.log(`Created ${subjects.length} subjects`);
 
-  const superAdmin = new User({
+  const superAdmin = await User.create({
     userId: 'SUPERADMIN001',
     password: 'Admin@123',
     role: 'super_admin',
@@ -73,9 +36,8 @@ const seedDataFn = async () => {
     phone: '9876543210',
     subscriptionPlan: 'platinum_with_ocr',
   });
-  await superAdmin.save();
 
-  const principal = new User({
+  const principal = await User.create({
     userId: 'PRINCIPAL001',
     password: 'Principal@123',
     role: 'principal',
@@ -85,9 +47,8 @@ const seedDataFn = async () => {
     phone: '9876543211',
     subscriptionPlan: 'platinum_with_ocr',
   });
-  await principal.save();
 
-  const accountant = new User({
+  const accountant = await User.create({
     userId: 'ACCOUNTANT001',
     password: 'Accountant@123',
     role: 'accountant_admin',
@@ -97,9 +58,8 @@ const seedDataFn = async () => {
     phone: '9876543299',
     subscriptionPlan: 'gold',
   });
-  await accountant.save();
 
-  const examiner = new User({
+  const examiner = await User.create({
     userId: 'EXAMINER001',
     password: 'Examiner@123',
     role: 'examiner',
@@ -109,7 +69,6 @@ const seedDataFn = async () => {
     phone: '9876543290',
     subscriptionPlan: 'gold',
   });
-  await examiner.save();
 
   console.log('Created admin and examiner accounts');
 
@@ -142,7 +101,7 @@ const seedDataFn = async () => {
   let teacherCount = 1;
 
   for (const tData of teacherData) {
-    const user = new User({
+    const user = await User.create({
       userId: `TEACHER${String(teacherCount).padStart(3, '0')}`,
       password: 'Teacher@123',
       role: 'teacher',
@@ -151,21 +110,20 @@ const seedDataFn = async () => {
       email: `${tData.firstName.toLowerCase()}${teacherCount}@school.com`,
       phone: `987654321${teacherCount}`,
     });
-    await user.save();
 
-    const teacher = new Teacher({
-      userId: user._id,
-      subject: subjects[tData.subjectIndex]._id,
-      teachingSubjects: tData.isAllSubjectTeacher ? subjects.map((subject) => subject._id) : [subjects[tData.subjectIndex]._id],
+    const teacher = await Teacher.create({
+      userId: user.id,
+      subjectId: subjects[tData.subjectIndex].id,
+      teachingSubjects: tData.isAllSubjectTeacher ? subjects.map((subject) => subject.id) : [subjects[tData.subjectIndex].id],
       isAllSubjectTeacher: tData.isAllSubjectTeacher,
       qualifications: 'B.Ed, M.A',
       experience: tData.isAllSubjectTeacher ? 8 : 5,
       joinDate: new Date('2019-01-01'),
       salary: 50000 + tData.grade * 2500,
     });
-    await teacher.save();
+    
     teachers.push(teacher);
-    teacherUsersByClass[`${tData.grade}-${tData.section}`] = user._id;
+    teacherUsersByClass[`${tData.grade}-${tData.section}`] = user.id;
     teacherCount += 1;
   }
   console.log(`Created ${teachers.length} teachers`);
@@ -174,13 +132,12 @@ const seedDataFn = async () => {
   for (let grade = 1; grade <= 10; grade += 1) {
     for (const section of ['A', 'B', 'C']) {
       const classTeacherUserId = teacherUsersByClass[`${grade}-${section}`];
-      const classData = new Class({
+      const classData = await Class.create({
         grade,
         section,
         subject: 'General Curriculum',
-        classTeacher: classTeacherUserId
+        classTeacherId: classTeacherUserId
       });
-      await classData.save();
       classes.push(classData);
     }
   }
@@ -188,11 +145,12 @@ const seedDataFn = async () => {
 
   // Assign multiple teachers to teach different subjects in each class
   for (const classItem of classes) {
-    const classTeacher = teachers.find(t => String(t.userId) === String(classItem.classTeacher));
+    const classTeacher = teachers.find(t => String(t.userId) === String(classItem.classTeacherId));
     if (classTeacher) {
-      await Teacher.findByIdAndUpdate(classTeacher._id, {
-        $addToSet: { assignedClasses: classItem._id },
-      });
+      let assigned = classTeacher.assignedClasses || [];
+      if (!assigned.includes(classItem.id)) assigned.push(classItem.id);
+      classTeacher.assignedClasses = assigned;
+      await classTeacher.save();
     }
 
     const tIndex = classes.indexOf(classItem);
@@ -200,9 +158,10 @@ const seedDataFn = async () => {
     const altTeacher2 = teachers[(tIndex + 20) % teachers.length];
     for (const t of [altTeacher1, altTeacher2]) {
       if (t) {
-        await Teacher.findByIdAndUpdate(t._id, {
-          $addToSet: { assignedClasses: classItem._id },
-        });
+        let assigned = t.assignedClasses || [];
+        if (!assigned.includes(classItem.id)) assigned.push(classItem.id);
+        t.assignedClasses = assigned;
+        await t.save();
       }
     }
   }
@@ -219,7 +178,7 @@ const seedDataFn = async () => {
   for (const classItem of classes) {
     for (let i = 0; i < studentsPerClass; i += 1) {
       const rollNumber = `G${classItem.grade}-${String(studentIndex + 1).padStart(3, '0')}`;
-      const parent = new User({
+      const parent = await User.create({
         userId: `PAR-${rollNumber}`,
         password: 'Parent@123',
         role: 'parent',
@@ -228,9 +187,8 @@ const seedDataFn = async () => {
         email: `parent-${rollNumber.toLowerCase()}@school.com`,
         phone: `8765432${String(studentIndex).padStart(3, '0')}`,
       });
-      await parent.save();
 
-      const user = new User({
+      const user = await User.create({
         userId: `STUDENT${String(studentIndex + 1).padStart(3, '0')}`,
         password: 'Student@123',
         role: 'student',
@@ -239,23 +197,22 @@ const seedDataFn = async () => {
         email: `${studentFirstNames[studentIndex % studentFirstNames.length].toLowerCase()}${studentIndex + 1}@school.com`,
         phone: `9876543${String(studentIndex).padStart(3, '0')}`,
       });
-      await user.save();
 
-      const student = new Student({
-        userId: user._id,
+      const student = await Student.create({
+        userId: user.id,
         rollNumber,
-        class: classItem._id,
-        parentId: parent._id,
+        classId: classItem.id,
+        parentId: parent.id,
         admissionDate: new Date('2024-06-01'),
         bloodGroup: 'O+',
         totalFees: 50000 + classItem.grade * 1500,
       });
-      await student.save();
       studentRecords.push({ student, classItem, user, parent });
 
-      await Class.findByIdAndUpdate(classItem._id, {
-        $push: { students: user._id },
-      });
+      let stList = classItem.students || [];
+      stList.push(user.id);
+      classItem.students = stList;
+      await classItem.save();
 
       studentIndex += 1;
     }
@@ -297,8 +254,8 @@ const seedDataFn = async () => {
       paidAmount = 0;
     }
 
-    const fee = new Fee({
-      student: student.userId,
+    feeRecords.push({
+      studentId: student.id,
       amount,
       description: classItem.grade >= 6 ? 'Annual Tuition Fees' : 'Quarterly Tuition Fees',
       dueDate,
@@ -311,9 +268,8 @@ const seedDataFn = async () => {
       } : {}),
       remarks: isPaid ? 'Paid on time' : paidAmount > 0 ? 'Partially Paid' : 'Pending review',
     });
-    await fee.save();
-    feeRecords.push(fee);
   }
+  await Fee.bulkCreate(feeRecords);
   console.log(`Created ${feeRecords.length} fee records`);
 
   const homeworkTemplates = [
@@ -326,6 +282,7 @@ const seedDataFn = async () => {
   const homeworkRecords = [];
   for (const classItem of classes) {
     const teacherUserId = teacherUsersByClass[`${classItem.grade}-${classItem.section}`];
+    const teacher = teachers.find(t => t.userId === teacherUserId);
     const subjectPool = subjects.filter((_, index) => index < 4);
     const selectedSubject = subjectPool[(classItem.grade + classItem.section.charCodeAt(0)) % subjectPool.length];
     for (let index = 0; index < 2; index += 1) {
@@ -334,19 +291,18 @@ const seedDataFn = async () => {
       assignedDate.setDate(assignedDate.getDate() - (index + 1) * 2);
       const dueDate = new Date();
       dueDate.setDate(dueDate.getDate() + (index + 1) * 3);
-      const homework = new Homework({
-        class: classItem._id,
-        subject: selectedSubject._id,
-        teacher: teacherUserId,
+      homeworkRecords.push({
+        classId: classItem.id,
+        subjectId: selectedSubject.id,
+        teacherId: teacher?.id || 1,
         title: `${template.title} · ${classItem.section}`,
         description: template.description,
         assignedDate,
         dueDate,
       });
-      await homework.save();
-      homeworkRecords.push(homework);
     }
   }
+  await Homework.bulkCreate(homeworkRecords);
   console.log(`Created ${homeworkRecords.length} homework records`);
 
   const marksRecords = [];
@@ -358,16 +314,17 @@ const seedDataFn = async () => {
 
     subjects.forEach((subject, subIdx) => {
       const teacherUserId = teacherUsersByClass[`${classItem.grade}-${classItem.section}`] || teachers[subIdx % teachers.length].userId;
+      const teacher = teachers.find(t => t.userId === teacherUserId);
 
       examTypes.forEach((examType, examIdx) => {
         const baseScore = 60 + ((idx + subIdx + classItem.grade + examIdx * 5) % 25);
         const marksValue = idx % 8 >= 6 ? baseScore - 12 : baseScore + 8;
 
         marksRecords.push({
-          student: user._id,
-          teacher: teacherUserId,
-          subject: subject._id,
-          class: classItem._id,
+          studentId: student.id,
+          teacherId: teacher?.id || 1,
+          subjectId: subject.id,
+          classId: classItem.id,
           marks: Math.min(100, Math.max(0, marksValue)),
           examType,
           examDate: new Date(examDate.getTime() + examIdx * 5 * 24 * 60 * 60 * 1000),
@@ -375,12 +332,12 @@ const seedDataFn = async () => {
       });
     });
   }
-  const insertedMarks = await Marks.insertMany(marksRecords);
+  const insertedMarks = await Marks.bulkCreate(marksRecords);
   console.log(`Created ${insertedMarks.length} mark records`);
 
   const allDates = [];
   const currentYear = new Date().getFullYear();
-  const startDate = new Date(Date.UTC(currentYear, 0, 1)); // Jan 1st of current year in UTC
+  const startDate = new Date(Date.UTC(currentYear, 0, 1));
   const endDate = new Date();
   endDate.setHours(23, 59, 59, 999);
   let tempDate = new Date(startDate);
@@ -388,8 +345,7 @@ const seedDataFn = async () => {
     const day = tempDate.getUTCDay();
     const dateNum = tempDate.getUTCDate();
     const isSecondSaturday = (day === 6 && dateNum >= 8 && dateNum <= 14);
-    if (day !== 0 && !isSecondSaturday) { // Exclude Sundays and 2nd Saturdays
-      // Use UTC noon so date stays correct for IST (+5:30) timezone
+    if (day !== 0 && !isSecondSaturday) {
       allDates.push(new Date(Date.UTC(tempDate.getUTCFullYear(), tempDate.getUTCMonth(), tempDate.getUTCDate(), 12, 0, 0, 0)));
     }
     tempDate.setUTCDate(tempDate.getUTCDate() + 1);
@@ -397,22 +353,26 @@ const seedDataFn = async () => {
 
   const attendanceDocs = [];
   studentRecords.forEach(({ student, classItem, user }, idx) => {
-    // Each student gets a distinct attendance rate (75% to 98%) so their percentages differ
     const studentRate = 0.75 + ((idx % 23) / 100);
     for (const d of allDates) {
       const isPresent = Math.random() < studentRate;
       const status = isPresent ? 'Present' : 'Absent';
       attendanceDocs.push({
-        student: user._id,
-        class: classItem._id,
+        studentId: student.id,
+        classId: classItem.id,
         date: d,
         status: status,
         remarks: status === 'Absent' ? 'Medical leave' : 'On time',
       });
     }
   });
-  const insertedAttendance = await Attendance.insertMany(attendanceDocs);
-  console.log(`Created ${insertedAttendance.length} attendance records`);
+  
+  // BulkCreate in chunks to prevent memory issues with many attendance records
+  const chunkSize = 5000;
+  for (let i = 0; i < attendanceDocs.length; i += chunkSize) {
+    await Attendance.bulkCreate(attendanceDocs.slice(i, i + chunkSize));
+  }
+  console.log(`Created ${attendanceDocs.length} attendance records`);
 
   const examRecords = [];
   const types = ['Unit Test', 'Half-Yearly', 'Quarterly', 'Annual', 'Mid-Term', 'Final', 'Practical'];
@@ -421,10 +381,10 @@ const seedDataFn = async () => {
       const type = types[i];
       for (let j = 0; j < subjects.length; j++) {
         const subject = subjects[j];
-        const exam = new Exam({
+        examRecords.push({
           name: `${type} - ${subject.name}`,
-          class: classItem._id,
-          subject: subject._id,
+          classId: classItem.id,
+          subjectId: subject.id,
           examDate: new Date(Date.now() + (i + 1) * 3 * 24 * 60 * 60 * 1000 + j * 24 * 60 * 60 * 1000),
           examType: type,
           startTime: '09:00',
@@ -433,11 +393,10 @@ const seedDataFn = async () => {
           room: `Room ${100 + (classItem.grade - 1) * 10 + (j % 8) + 1}`,
           description: `Scheduled evaluation for ${type} in Grade ${classItem.grade} Section ${classItem.section}.`,
         });
-        await exam.save();
-        examRecords.push(exam);
       }
     }
   }
+  await Exam.bulkCreate(examRecords);
   console.log(`Created ${examRecords.length} examination records`);
 
   const eventRecords = [];
@@ -456,24 +415,21 @@ const seedDataFn = async () => {
   ];
 
   for (const event of eventData) {
-    const eventDoc = new Event({
+    eventRecords.push({
       title: event.title,
       description: event.description,
       eventDate: event.eventDate,
       startTime: '10:00',
       endTime: '13:00',
       location: event.location,
-      organizer: superAdmin._id,
+      organizerId: superAdmin.id,
       eventType: event.eventType,
     });
-    await eventDoc.save();
-    eventRecords.push(eventDoc);
   }
+  await Event.bulkCreate(eventRecords);
   console.log(`Created ${eventRecords.length} events`);
 
-  // ── Seed demo leave requests ──────────────────────────────────
-  // Use the first 4 seeded teacher users
-  const teacherUsers = await User.find({ role: 'teacher' }).limit(4);
+  const teacherUsers = await User.findAll({ where: { role: 'teacher' }, limit: 4 });
   const today = new Date();
   const d = (offset) => {
     const dt = new Date(today);
@@ -483,10 +439,10 @@ const seedDataFn = async () => {
 
   const leaveSeeds = [
     {
-      applicant: teacherUsers[0]?._id,
+      applicantUserId: teacherUsers[0]?.id || 1,
       applicantRole: 'teacher',
       applicantName: `${teacherUsers[0]?.firstName} ${teacherUsers[0]?.lastName}`,
-      applicantId: teacherUsers[0]?.userId,
+      applicantId: teacherUsers[0]?.userId || 'T1',
       leaveType: 'Sick Leave',
       fromDate: d(1),
       toDate: d(3),
@@ -494,10 +450,10 @@ const seedDataFn = async () => {
       status: 'pending',
     },
     {
-      applicant: teacherUsers[1]?._id,
+      applicantUserId: teacherUsers[1]?.id || 1,
       applicantRole: 'teacher',
       applicantName: `${teacherUsers[1]?.firstName} ${teacherUsers[1]?.lastName}`,
-      applicantId: teacherUsers[1]?.userId,
+      applicantId: teacherUsers[1]?.userId || 'T2',
       leaveType: 'Casual Leave',
       fromDate: d(5),
       toDate: d(5),
@@ -505,10 +461,10 @@ const seedDataFn = async () => {
       status: 'pending',
     },
     {
-      applicant: teacherUsers[2]?._id,
+      applicantUserId: teacherUsers[2]?.id || 1,
       applicantRole: 'teacher',
       applicantName: `${teacherUsers[2]?.firstName} ${teacherUsers[2]?.lastName}`,
-      applicantId: teacherUsers[2]?.userId,
+      applicantId: teacherUsers[2]?.userId || 'T3',
       leaveType: 'Emergency Leave',
       fromDate: d(-2),
       toDate: d(-1),
@@ -517,10 +473,10 @@ const seedDataFn = async () => {
       remarks: 'Granted. Please ensure substitute arrangement.',
     },
     {
-      applicant: teacherUsers[3]?._id,
+      applicantUserId: teacherUsers[3]?.id || 1,
       applicantRole: 'teacher',
       applicantName: `${teacherUsers[3]?.firstName} ${teacherUsers[3]?.lastName}`,
-      applicantId: teacherUsers[3]?.userId,
+      applicantId: teacherUsers[3]?.userId || 'T4',
       leaveType: 'Earned Leave',
       fromDate: d(-5),
       toDate: d(-3),
@@ -530,13 +486,9 @@ const seedDataFn = async () => {
     },
   ];
 
-  const validLeaves = leaveSeeds.filter((l) => l.applicant);
-  if (validLeaves.length > 0) {
-    await Leave.insertMany(validLeaves);
-    console.log(`Created ${validLeaves.length} demo leave requests`);
-  }
+  await Leave.bulkCreate(leaveSeeds);
+  console.log(`Created ${leaveSeeds.length} demo leave requests`);
 
-  // Seed employees
   const employeeData = [
     { firstName: 'Amit', lastName: 'Kumar', employeeType: 'High School', designation: 'Mathematics PGT', dateOfJoining: new Date('2020-07-15'), baseSalary: 45000 },
     { firstName: 'Vikram', lastName: 'Rathore', employeeType: 'High School', designation: 'Physics PGT', dateOfJoining: new Date('2019-09-05'), baseSalary: 48000 },
@@ -562,13 +514,14 @@ const seedDataFn = async () => {
     employeeType: emp.employeeType,
     designation: emp.designation,
     dateOfJoining: emp.dateOfJoining,
-    salary: { baseSalary: emp.baseSalary }
+    salary: { baseSalary: emp.baseSalary },
+    userId: 1, // Linking to superadmin for simplicity
+    schoolId: defaultSchool.id,
   }));
 
-  await Employee.insertMany(employeeDocs);
+  await Employee.bulkCreate(employeeDocs);
   console.log(`Created ${employeeDocs.length} employees`);
 
-  // Seed Library Books
   const libraryBooks = [
     {
       title: "Introduction to Algorithms",
@@ -581,7 +534,7 @@ const seedDataFn = async () => {
       description: "A comprehensive guide to algorithm design and analysis.",
       totalCopies: 10,
       availableCopies: 8,
-      school: defaultSchool._id,
+      schoolId: defaultSchool.id,
       status: "available"
     },
     {
@@ -595,7 +548,7 @@ const seedDataFn = async () => {
       description: "The classic novel about racial injustice and the destruction of innocence.",
       totalCopies: 5,
       availableCopies: 3,
-      school: defaultSchool._id,
+      schoolId: defaultSchool.id,
       status: "available"
     },
     {
@@ -609,19 +562,18 @@ const seedDataFn = async () => {
       description: "A landmark volume in science writing by one of the great minds of our time.",
       totalCopies: 7,
       availableCopies: 7,
-      school: defaultSchool._id,
+      schoolId: defaultSchool.id,
       status: "available"
     }
   ];
-  await Library.insertMany(libraryBooks);
+  await Library.bulkCreate(libraryBooks);
   console.log(`Created ${libraryBooks.length} library books`);
 
-  // Seed Transport Routes
   const transportRoutes = [
     {
       routeName: "Route A - North City",
       routeNumber: "RT-101",
-      school: defaultSchool._id,
+      schoolId: defaultSchool.id,
       vehicle: {
         vehicleNumber: "TS 09 UA 1234",
         vehicleType: "Bus",
@@ -647,7 +599,7 @@ const seedDataFn = async () => {
     {
       routeName: "Route B - West suburbs",
       routeNumber: "RT-102",
-      school: defaultSchool._id,
+      schoolId: defaultSchool.id,
       vehicle: {
         vehicleNumber: "TS 09 UB 5678",
         vehicleType: "Bus",
@@ -671,15 +623,14 @@ const seedDataFn = async () => {
       status: "active"
     }
   ];
-  await Transport.insertMany(transportRoutes);
+  await Transport.bulkCreate(transportRoutes);
   console.log(`Created ${transportRoutes.length} transport routes`);
 
-  // Seed Hostels
   const hostels = [
     {
       hostelName: "Newton Boys Hostel",
       hostelType: "boys",
-      school: defaultSchool._id,
+      schoolId: defaultSchool.id,
       address: {
         street: "Hostel Block A, School Campus",
         city: "Hyderabad",
@@ -697,7 +648,7 @@ const seedDataFn = async () => {
     {
       hostelName: "Curie Girls Hostel",
       hostelType: "girls",
-      school: defaultSchool._id,
+      schoolId: defaultSchool.id,
       address: {
         street: "Hostel Block B, School Campus",
         city: "Hyderabad",
@@ -713,7 +664,7 @@ const seedDataFn = async () => {
       status: "active"
     }
   ];
-  await Hostel.insertMany(hostels);
+  await Hostel.bulkCreate(hostels);
   console.log(`Created ${hostels.length} hostels`);
 };
 

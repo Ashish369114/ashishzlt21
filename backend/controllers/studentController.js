@@ -1,14 +1,14 @@
-const mongoose = require('mongoose');
-const User = require('../models/User');
-const Student = require('../models/Student');
-const Class = require('../models/Class');
+const { User, Student, Class } = require('../models');
 
 const getStudents = async (req, res) => {
   try {
-    const students = await Student.find()
-      .populate('userId')
-      .populate('class')
-      .populate('parentId');
+    const students = await Student.findAll({
+      include: [
+        { model: User, as: 'user', attributes: { exclude: ['password'] } },
+        { model: Class, as: 'class' },
+        { model: User, as: 'parent', attributes: { exclude: ['password'] } }
+      ]
+    });
     res.json(students);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -17,10 +17,13 @@ const getStudents = async (req, res) => {
 
 const getStudentById = async (req, res) => {
   try {
-    const student = await Student.findById(req.params.id)
-      .populate('userId')
-      .populate('class')
-      .populate('parentId');
+    const student = await Student.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'user', attributes: { exclude: ['password'] } },
+        { model: Class, as: 'class' },
+        { model: User, as: 'parent', attributes: { exclude: ['password'] } }
+      ]
+    });
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
     }
@@ -34,19 +37,17 @@ const getStudentByUserId = async (req, res) => {
   try {
     const userIdParam = req.params.userId;
 
-    let student = await Student.findOne({ userId: userIdParam })
-      .populate('userId')
-      .populate('class')
-      .populate('parentId');
-
-    if (!student) {
-      const user = await User.findOne({ userId: userIdParam });
-      if (user) {
-        student = await Student.findOne({ userId: user._id })
-          .populate('userId')
-          .populate('class')
-          .populate('parentId');
-      }
+    let user = await User.findOne({ where: { userId: userIdParam } });
+    let student;
+    if (user) {
+      student = await Student.findOne({ 
+        where: { userId: user.id },
+        include: [
+          { model: User, as: 'user', attributes: { exclude: ['password'] } },
+          { model: Class, as: 'class' },
+          { model: User, as: 'parent', attributes: { exclude: ['password'] } }
+        ]
+      });
     }
 
     if (!student) {
@@ -84,8 +85,8 @@ const addStudent = async (req, res) => {
       admissionDate,
     } = req.body;
 
-    const existingUser = await User.findOne({ userId });
-    const existingStudent = await Student.findOne({ rollNumber });
+    const existingUser = await User.findOne({ where: { userId } });
+    const existingStudent = await Student.findOne({ where: { rollNumber } });
     if (existingStudent) {
       return res.status(400).json({ message: `Roll number '${rollNumber}' is already assigned to another student.` });
     }
@@ -96,7 +97,7 @@ const addStudent = async (req, res) => {
         return res.status(400).json({ message: `Student user ID '${userId}' is already in use.` });
       }
 
-      const existingStudentProfile = await Student.findOne({ userId: existingUser._id });
+      const existingStudentProfile = await Student.findOne({ where: { userId: existingUser.id } });
       if (existingStudentProfile) {
         return res.status(400).json({ message: `Student user ID '${userId}' is already in use.` });
       }
@@ -111,7 +112,7 @@ const addStudent = async (req, res) => {
       }
       await existingUser.save();
     } else {
-      user = new User({
+      user = await User.create({
         userId,
         password,
         role: 'student',
@@ -120,14 +121,12 @@ const addStudent = async (req, res) => {
         dateOfBirth,
         phone,
         gender,
+        email,
       });
-
-      await user.save();
     }
 
-    let parent = undefined;
+    let parentIdObj = null;
 
-    // Automatically generate a parent login when parent details are provided.
     if (!parentUserId && (parentFirstName || parentLastName || parentEmail || parentPhone || parentAddress || parentRelationship)) {
       parentUserId = `PAR-${rollNumber}`;
     }
@@ -135,13 +134,12 @@ const addStudent = async (req, res) => {
       parentPassword = 'Parent@123';
     }
 
-    // Prefer an existing or newly created parent user, or accept a parent ObjectId.
     if (parentUserId || parentPassword) {
       if (!parentUserId || !parentPassword) {
         return res.status(400).json({ message: 'Both Parent User ID and Parent Password are required when creating a parent account.' });
       }
 
-      const existingParentUser = await User.findOne({ userId: parentUserId });
+      const existingParentUser = await User.findOne({ where: { userId: parentUserId } });
       if (existingParentUser) {
         if (existingParentUser.role !== 'parent') {
           return res.status(400).json({ message: `Specified parent user ID '${parentUserId}' is already in use.` });
@@ -151,16 +149,14 @@ const addStudent = async (req, res) => {
         if (parentEmail) existingParentUser.email = parentEmail;
         if (parentPhone) existingParentUser.phone = parentPhone;
         if (parentGender) existingParentUser.gender = parentGender;
-        if (parentAddress) existingParentUser.address = parentAddress;
-        if (parentRelationship) existingParentUser.relationship = parentRelationship;
         await existingParentUser.save();
-        parent = existingParentUser._id;
+        parentIdObj = existingParentUser.id;
       } else {
         if (!parentFirstName || !parentLastName) {
           return res.status(400).json({ message: 'Parent first name and last name are required when creating a new parent account.' });
         }
 
-        const parentUser = new User({
+        const parentUser = await User.create({
           userId: parentUserId,
           password: parentPassword,
           role: 'parent',
@@ -169,40 +165,25 @@ const addStudent = async (req, res) => {
           email: parentEmail,
           phone: parentPhone,
           gender: parentGender,
-          address: parentAddress,
-          relationship: parentRelationship,
         });
-        await parentUser.save();
-        parent = parentUser._id;
+        parentIdObj = parentUser.id;
       }
-    } else if (parentId && typeof parentId === 'string' && parentId.trim() !== '') {
-      if (!mongoose.Types.ObjectId.isValid(parentId)) {
-        return res.status(400).json({ message: 'Invalid parentId provided' });
-      }
-      parent = parentId;
+    } else if (parentId) {
+      parentIdObj = parentId;
     }
 
-    // Create student
-    const student = new Student({
-      userId: user._id,
+    const student = await Student.create({
+      userId: user.id,
       rollNumber,
-      class: classId,
-      parentId: parent,
+      classId: classId,
+      parentId: parentIdObj,
       admissionDate,
-    });
-
-    await student.save();
-
-    // Add student to class
-    await Class.findByIdAndUpdate(classId, {
-      $push: { students: user._id },
     });
 
     res.status(201).json(student);
   } catch (error) {
-    if (error.code === 11000) {
-      const duplicateFields = Object.keys(error.keyPattern || {}).join(', ');
-      return res.status(400).json({ message: `Duplicate value for field(s): ${duplicateFields}.` });
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(400).json({ message: `Duplicate value error.` });
     }
     res.status(400).json({ message: error.message });
   }
@@ -231,29 +212,27 @@ const updateStudent = async (req, res) => {
       email,
     } = req.body;
 
-    const student = await Student.findById(req.params.id);
+    const student = await Student.findByPk(req.params.id);
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
     }
 
     if (classId !== undefined) {
-      student.class = classId;
+      student.classId = classId;
     }
 
-    let parentObjectId = student.parentId;
+    let parentIdObj = student.parentId;
 
     if (Object.prototype.hasOwnProperty.call(req.body, 'parentId')) {
-      if (!parentId || (typeof parentId === 'string' && parentId.trim() === '')) {
-        parentObjectId = undefined;
-      } else if (!mongoose.Types.ObjectId.isValid(parentId)) {
-        return res.status(400).json({ message: 'Invalid parentId provided' });
+      if (!parentId) {
+        parentIdObj = null;
       } else {
-        parentObjectId = parentId;
+        parentIdObj = parentId;
       }
     }
 
     if (parentUserId) {
-      const existingParentUser = await User.findOne({ userId: parentUserId });
+      const existingParentUser = await User.findOne({ where: { userId: parentUserId } });
       if (existingParentUser && existingParentUser.role !== 'parent') {
         return res.status(400).json({ message: `Parent User ID '${parentUserId}' is already in use by another role.` });
       }
@@ -264,17 +243,15 @@ const updateStudent = async (req, res) => {
         if (parentEmail !== undefined) existingParentUser.email = parentEmail;
         if (parentPhone !== undefined) existingParentUser.phone = parentPhone;
         if (parentGender !== undefined) existingParentUser.gender = parentGender;
-        if (parentAddress !== undefined) existingParentUser.address = parentAddress;
-        if (parentRelationship !== undefined) existingParentUser.relationship = parentRelationship;
         if (parentPassword) existingParentUser.password = parentPassword;
         await existingParentUser.save();
-        parentObjectId = existingParentUser._id;
+        parentIdObj = existingParentUser.id;
       } else {
         if (!parentFirstName || !parentLastName) {
           return res.status(400).json({ message: 'Parent first name and last name are required when creating a new parent account.' });
         }
 
-        const newParent = new User({
+        const newParent = await User.create({
           userId: parentUserId,
           password: parentPassword || 'Parent@123',
           role: 'parent',
@@ -283,18 +260,15 @@ const updateStudent = async (req, res) => {
           email: parentEmail,
           phone: parentPhone,
           gender: parentGender,
-          address: parentAddress,
-          relationship: parentRelationship,
         });
-        await newParent.save();
-        parentObjectId = newParent._id;
+        parentIdObj = newParent.id;
       }
     }
 
-    student.parentId = parentObjectId;
+    student.parentId = parentIdObj;
     await student.save();
 
-    const user = await User.findById(student.userId);
+    const user = await User.findByPk(student.userId);
     if (user) {
       if (firstName !== undefined) user.firstName = firstName;
       if (lastName !== undefined) user.lastName = lastName;
@@ -306,10 +280,13 @@ const updateStudent = async (req, res) => {
       await user.save();
     }
 
-    const updatedStudent = await Student.findById(req.params.id)
-      .populate('userId')
-      .populate('class')
-      .populate('parentId');
+    const updatedStudent = await Student.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'user', attributes: { exclude: ['password'] } },
+        { model: Class, as: 'class' },
+        { model: User, as: 'parent', attributes: { exclude: ['password'] } }
+      ]
+    });
 
     res.json(updatedStudent);
   } catch (error) {
@@ -319,10 +296,11 @@ const updateStudent = async (req, res) => {
 
 const deleteStudent = async (req, res) => {
   try {
-    const student = await Student.findByIdAndDelete(req.params.id);
+    const student = await Student.findByPk(req.params.id);
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
     }
+    await student.destroy();
     res.json({ message: 'Student deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -335,21 +313,27 @@ const getStudentByParent = async (req, res) => {
     let parentObjectId = parentIdentifier;
     let students = [];
 
-    if (mongoose.Types.ObjectId.isValid(parentIdentifier)) {
-      students = await Student.find({ parentId: parentIdentifier })
-        .populate('userId')
-        .populate('class')
-        .populate('parentId');
-    }
+    students = await Student.findAll({ 
+      where: { parentId: parentObjectId },
+      include: [
+        { model: User, as: 'user', attributes: { exclude: ['password'] } },
+        { model: Class, as: 'class' },
+        { model: User, as: 'parent', attributes: { exclude: ['password'] } }
+      ]
+    });
 
     if (!students.length) {
-      const parentUser = await User.findOne({ userId: parentIdentifier });
+      const parentUser = await User.findOne({ where: { userId: parentIdentifier } });
       if (parentUser) {
-        parentObjectId = parentUser._id;
-        students = await Student.find({ parentId: parentObjectId })
-          .populate('userId')
-          .populate('class')
-          .populate('parentId');
+        parentObjectId = parentUser.id;
+        students = await Student.findAll({ 
+          where: { parentId: parentObjectId },
+          include: [
+            { model: User, as: 'user', attributes: { exclude: ['password'] } },
+            { model: Class, as: 'class' },
+            { model: User, as: 'parent', attributes: { exclude: ['password'] } }
+          ]
+        });
       }
     }
 
@@ -362,10 +346,14 @@ const getStudentByParent = async (req, res) => {
 const getStudentsByClass = async (req, res) => {
   try {
     const classId = req.params.classId;
-    const students = await Student.find({ class: classId })
-      .populate('userId')
-      .populate('class')
-      .populate('parentId');
+    const students = await Student.findAll({ 
+      where: { classId },
+      include: [
+        { model: User, as: 'user', attributes: { exclude: ['password'] } },
+        { model: Class, as: 'class' },
+        { model: User, as: 'parent', attributes: { exclude: ['password'] } }
+      ]
+    });
     res.json(students);
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -1,9 +1,9 @@
-const Transport = require('../models/Transport');
+const { Transport, School } = require('../models');
 
 const getRoutes = async (req, res) => {
   try {
-    const routes = await Transport.find()
-      .populate('students.studentId');
+    const routes = await Transport.findAll();
+    // We would need to manually resolve students.studentId if it is needed by frontend.
     res.json(routes);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -12,8 +12,7 @@ const getRoutes = async (req, res) => {
 
 const getRouteById = async (req, res) => {
   try {
-    const route = await Transport.findById(req.params.id)
-      .populate('students.studentId');
+    const route = await Transport.findByPk(req.params.id);
     if (!route) {
       return res.status(404).json({ message: 'Route not found' });
     }
@@ -25,29 +24,25 @@ const getRouteById = async (req, res) => {
 
 const addRoute = async (req, res) => {
   try {
-    // Validate required fields
     if (!req.body.routeName || !req.body.startPoint?.name || !req.body.endPoint?.name) {
       return res.status(400).json({ message: 'Missing required fields: routeName, startPoint, endPoint' });
     }
 
-    // Get first available school if not provided
-    let school = req.body.school;
-    if (!school) {
-      const School = require('../models/School');
+    let schoolId = req.body.school;
+    if (!schoolId) {
       const availableSchool = await School.findOne();
       if (!availableSchool) {
         return res.status(400).json({ message: 'No school configured in the system' });
       }
-      school = availableSchool._id;
+      schoolId = availableSchool.id;
     }
 
-    const route = new Transport({
+    const route = await Transport.create({
       ...req.body,
-      school,
+      schoolId,
       routeNumber: `RT-${Date.now()}`,
     });
-    const newRoute = await route.save();
-    res.status(201).json(newRoute);
+    res.status(201).json(route);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -55,12 +50,11 @@ const addRoute = async (req, res) => {
 
 const updateRoute = async (req, res) => {
   try {
-    const route = await Transport.findById(req.params.id);
+    const route = await Transport.findByPk(req.params.id);
     if (!route) {
       return res.status(404).json({ message: 'Route not found' });
     }
     
-    // Validate required fields if being updated
     if (req.body.routeName === '' || 
         (req.body.startPoint && req.body.startPoint.name === '') || 
         (req.body.endPoint && req.body.endPoint.name === '')) {
@@ -68,8 +62,8 @@ const updateRoute = async (req, res) => {
     }
     
     Object.assign(route, req.body);
-    const updatedRoute = await route.save();
-    res.json(updatedRoute);
+    await route.save();
+    res.json(route);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -77,7 +71,7 @@ const updateRoute = async (req, res) => {
 
 const assignStudentToRoute = async (req, res) => {
   try {
-    const route = await Transport.findById(req.params.id);
+    const route = await Transport.findByPk(req.params.id);
     if (!route) {
       return res.status(404).json({ message: 'Route not found' });
     }
@@ -88,7 +82,10 @@ const assignStudentToRoute = async (req, res) => {
       status: 'active',
     };
 
-    route.students.push(studentAssignment);
+    const students = [...(route.students || [])];
+    students.push(studentAssignment);
+    route.students = students;
+
     await route.save();
 
     res.json({ 
@@ -102,15 +99,16 @@ const assignStudentToRoute = async (req, res) => {
 
 const removeStudentFromRoute = async (req, res) => {
   try {
-    const route = await Transport.findById(req.params.id);
+    const route = await Transport.findByPk(req.params.id);
     if (!route) {
       return res.status(404).json({ message: 'Route not found' });
     }
 
-    route.students = route.students.filter(
-      s => s.studentId.toString() !== req.body.studentId
+    const students = (route.students || []).filter(
+      s => String(s.studentId) !== String(req.body.studentId)
     );
     
+    route.students = students;
     await route.save();
     res.json({ message: 'Student removed from route', route });
   } catch (error) {
@@ -120,8 +118,7 @@ const removeStudentFromRoute = async (req, res) => {
 
 const getRoutesBySchool = async (req, res) => {
   try {
-    const routes = await Transport.find({ school: req.params.schoolId })
-      .populate('students.studentId');
+    const routes = await Transport.findAll({ where: { schoolId: req.params.schoolId } });
     res.json(routes);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -130,22 +127,21 @@ const getRoutesBySchool = async (req, res) => {
 
 const updateVehicleLocation = async (req, res) => {
   try {
-    const route = await Transport.findById(req.params.id);
+    const route = await Transport.findByPk(req.params.id);
     if (!route) {
       return res.status(404).json({ message: 'Route not found' });
     }
 
-    if (!route.gpsTracking) {
-      route.gpsTracking = {};
-    }
-
-    route.gpsTracking.lastLocation = {
+    const tracking = { ...(route.gpsTracking || {}) };
+    tracking.lastLocation = {
       latitude: req.body.latitude,
       longitude: req.body.longitude,
       timestamp: new Date(),
     };
 
+    route.gpsTracking = tracking;
     await route.save();
+
     res.json({
       message: 'Vehicle location updated',
       location: route.gpsTracking.lastLocation,
@@ -157,7 +153,7 @@ const updateVehicleLocation = async (req, res) => {
 
 const getVehicleTracking = async (req, res) => {
   try {
-    const route = await Transport.findById(req.params.id);
+    const route = await Transport.findByPk(req.params.id);
     if (!route) {
       return res.status(404).json({ message: 'Route not found' });
     }
@@ -175,10 +171,11 @@ const getVehicleTracking = async (req, res) => {
 
 const deleteRoute = async (req, res) => {
   try {
-    const route = await Transport.findByIdAndDelete(req.params.id);
+    const route = await Transport.findByPk(req.params.id);
     if (!route) {
       return res.status(404).json({ message: 'Route not found' });
     }
+    await route.destroy();
     res.json({ message: 'Route deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });

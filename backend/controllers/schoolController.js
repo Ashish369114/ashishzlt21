@@ -1,12 +1,11 @@
-const School = require('../models/School');
-const User = require('../models/User');
+const { School, User } = require('../models');
 const { sendEmail } = require('../services/notificationService');
 
 const getSchools = async (req, res) => {
   try {
-    const schools = await School.find()
-      .populate('principalId')
-      .exec();
+    const schools = await School.findAll({
+      include: [{ model: User, as: 'principal' }]
+    });
     res.json(schools);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -15,8 +14,9 @@ const getSchools = async (req, res) => {
 
 const getSchoolById = async (req, res) => {
   try {
-    const school = await School.findById(req.params.id)
-      .populate('principalId');
+    const school = await School.findByPk(req.params.id, {
+      include: [{ model: User, as: 'principal' }]
+    });
     if (!school) {
       return res.status(404).json({ message: 'School not found' });
     }
@@ -27,9 +27,8 @@ const getSchoolById = async (req, res) => {
 };
 
 const addSchool = async (req, res) => {
-  const school = new School(req.body);
   try {
-    const newSchool = await school.save();
+    const newSchool = await School.create(req.body);
     res.status(201).json(newSchool);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -38,13 +37,13 @@ const addSchool = async (req, res) => {
 
 const updateSchool = async (req, res) => {
   try {
-    const school = await School.findById(req.params.id);
+    const school = await School.findByPk(req.params.id);
     if (!school) {
       return res.status(404).json({ message: 'School not found' });
     }
     Object.assign(school, req.body);
-    const updatedSchool = await school.save();
-    res.json(updatedSchool);
+    await school.save();
+    res.json(school);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -52,10 +51,11 @@ const updateSchool = async (req, res) => {
 
 const deleteSchool = async (req, res) => {
   try {
-    const school = await School.findByIdAndDelete(req.params.id);
+    const school = await School.findByPk(req.params.id);
     if (!school) {
       return res.status(404).json({ message: 'School not found' });
     }
+    await school.destroy();
     res.json({ message: 'School deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -65,7 +65,7 @@ const deleteSchool = async (req, res) => {
 const getSchoolStatistics = async (req, res) => {
   try {
     const schoolId = req.params.id;
-    const school = await School.findById(schoolId);
+    const school = await School.findByPk(schoolId);
     
     if (!school) {
       return res.status(404).json({ message: 'School not found' });
@@ -92,87 +92,56 @@ const generatePassword = () => {
 };
 
 const createOrUpdateAdminUser = async ({ schoolEmail, principalName, phone, normalizedPlan, schoolCode }) => {
-  const mongoose = require('mongoose');
-  const isDbConnected = mongoose.connection && mongoose.connection.readyState === 1;
-
   const nameParts = String(principalName || '').trim().split(' ');
   const firstName = nameParts[0] || 'Admin';
   const lastName = nameParts.slice(1).join(' ') || 'User';
 
-  if (isDbConnected) {
-    const existingUser = await User.findOne({ email: schoolEmail });
-    if (existingUser) {
-      existingUser.role = existingUser.role || 'super_admin';
-      existingUser.firstName = firstName || existingUser.firstName;
-      existingUser.lastName = lastName || existingUser.lastName;
-      existingUser.phone = phone || existingUser.phone;
-      existingUser.subscriptionPlan = normalizedPlan;
-      await existingUser.save();
+  const existingUser = await User.findOne({ where: { email: schoolEmail } });
+  if (existingUser) {
+    existingUser.role = existingUser.role || 'super_admin';
+    existingUser.firstName = firstName || existingUser.firstName;
+    existingUser.lastName = lastName || existingUser.lastName;
+    existingUser.phone = phone || existingUser.phone;
+    existingUser.subscriptionPlan = normalizedPlan;
+    await existingUser.save();
 
-      return {
-        user: existingUser,
-        credentials: {
-          userId: existingUser.userId,
-          password: null,
-        },
-      };
-    }
+    return {
+      user: existingUser,
+      credentials: {
+        userId: existingUser.userId,
+        password: null,
+      },
+    };
   }
 
   let userId = `${schoolCode}-admin`;
-  if (isDbConnected) {
-    let suffix = 0;
-    while (await User.findOne({ userId })) {
-      suffix += 1;
-      userId = `${schoolCode}-admin${suffix}`;
-      if (suffix > 20) break;
-    }
+  let suffix = 0;
+  while (await User.findOne({ where: { userId } })) {
+    suffix += 1;
+    userId = `${schoolCode}-admin${suffix}`;
+    if (suffix > 20) break;
   }
 
   const password = generatePassword();
 
-  if (isDbConnected) {
-    const user = new User({
+  const user = await User.create({
+    userId,
+    password,
+    role: 'super_admin',
+    firstName,
+    lastName,
+    email: schoolEmail,
+    phone,
+    subscriptionPlan: normalizedPlan,
+  });
+
+  return {
+    user,
+    credentials: {
       userId,
       password,
-      role: 'super_admin',
-      firstName,
-      lastName,
-      email: schoolEmail,
-      phone,
-      subscriptionPlan: normalizedPlan,
-    });
-
-    await user.save();
-
-    return {
-      user,
-      credentials: {
-        userId,
-        password,
-      },
-    };
-  } else {
-    const mockUser = {
-      _id: `mock_u_${Date.now()}`,
-      userId,
-      password,
-      role: 'super_admin',
-      firstName,
-      lastName,
-      email: schoolEmail,
-      phone,
-      subscriptionPlan: normalizedPlan,
-      isActive: true,
-    };
-    return {
-      user: mockUser,
-      credentials: {
-        userId,
-        password,
-      },
-    };
-  }
+    },
+  };
 };
 
 const upgradePlan = async (req, res) => {
@@ -205,67 +174,56 @@ const upgradePlan = async (req, res) => {
     const endDate = new Date(startDate);
     endDate.setMonth(endDate.getMonth() + durationMonths);
 
-    const mongoose = require('mongoose');
-    const isDbConnected = mongoose.connection && mongoose.connection.readyState === 1;
-    let school;
+    const { Op } = require('sequelize');
+    let school = await School.findOne({ 
+      where: {
+        [Op.or]: [
+          { email: schoolEmail },
+          { name: schoolName }
+        ]
+      } 
+    });
 
-    if (isDbConnected) {
-      school = await School.findOne({ $or: [{ email: schoolEmail }, { name: schoolName }] });
-
-      if (!school) {
-        school = new School({
-          name: schoolName,
-          code: schoolCode,
-          email: schoolEmail,
-          phone,
-          address: {
-            street: address || '',
-            city: '',
-            state: '',
-            zipCode: '',
-            country: 'India',
-          },
-          principalName,
-          academicYear: new Date().getFullYear().toString(),
-          subscriptionPlan: normalizedPlan,
-          subscriptionDurationMonths: durationMonths,
-          subscriptionStatus: 'active',
-          subscriptionStartDate: startDate,
-          subscriptionEndDate: endDate,
-          paymentReference: paymentReference || `PAY-${Date.now()}`,
-          status: 'active',
-        });
-      } else {
-        school.subscriptionPlan = normalizedPlan;
-        school.subscriptionDurationMonths = durationMonths;
-        school.subscriptionStatus = 'active';
-        school.subscriptionStartDate = startDate;
-        school.subscriptionEndDate = endDate;
-        school.paymentReference = paymentReference || school.paymentReference || `PAY-${Date.now()}`;
-        school.phone = phone || school.phone;
-        school.email = schoolEmail || school.email;
-        school.address = school.address || {};
-        school.address.street = address || school.address.street || '';
-        school.address.city = school.address.city || '';
-        school.address.state = school.address.state || '';
-        school.address.country = school.address.country || 'India';
-        school.principalName = principalName || school.principalName;
-      }
-
-      await school.save();
-    } else {
-      school = {
-        _id: `mock_sch_${Date.now()}`,
+    if (!school) {
+      school = await School.create({
         name: schoolName,
         code: schoolCode,
         email: schoolEmail,
         phone,
+        address: {
+          street: address || '',
+          city: '',
+          state: '',
+          zipCode: '',
+          country: 'India',
+        },
         principalName,
+        academicYear: new Date().getFullYear().toString(),
         subscriptionPlan: normalizedPlan,
         subscriptionDurationMonths: durationMonths,
         subscriptionStatus: 'active',
+        subscriptionStartDate: startDate,
+        subscriptionEndDate: endDate,
         paymentReference: paymentReference || `PAY-${Date.now()}`,
-      };
+        status: 'active',
+      });
+    } else {
+      school.subscriptionPlan = normalizedPlan;
+      school.subscriptionDurationMonths = durationMonths;
+      school.subscriptionStatus = 'active';
+      school.subscriptionStartDate = startDate;
+      school.subscriptionEndDate = endDate;
+      school.paymentReference = paymentReference || school.paymentReference || `PAY-${Date.now()}`;
+      school.phone = phone || school.phone;
+      school.email = schoolEmail || school.email;
+      
+      const newAddress = { ...school.address };
+      newAddress.street = address || newAddress.street || '';
+      newAddress.country = newAddress.country || 'India';
+      school.address = newAddress;
+      
+      school.principalName = principalName || school.principalName;
+      await school.save();
     }
 
     const { user, credentials } = await createOrUpdateAdminUser({
@@ -275,28 +233,6 @@ const upgradePlan = async (req, res) => {
       normalizedPlan,
       schoolCode,
     });
-
-    // Dynamically register the newly created admin user in the local memory authController.mockUsers list
-    if (!isDbConnected) {
-      const authController = require('./authController');
-      if (authController.mockUsers) {
-        const userToRegister = {
-          _id: user._id,
-          userId: credentials.userId,
-          password: credentials.password,
-          role: 'super_admin',
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          subscriptionPlan: user.subscriptionPlan,
-          isActive: true,
-        };
-        const existingInMock = authController.mockUsers.find(u => u.userId === credentials.userId);
-        if (!existingInMock) {
-          authController.mockUsers.push(userToRegister);
-        }
-      }
-    }
 
     const loginUrl = process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/login` : 'http://localhost:3000/login';
     let emailSent = false;
@@ -324,7 +260,7 @@ const upgradePlan = async (req, res) => {
     res.json({
       message: `${school.name} has been upgraded to the ${normalizedPlan.toUpperCase()} plan successfully.`,
       school: {
-        id: school._id,
+        id: school.id,
         name: school.name,
         email: school.email,
         subscriptionPlan: school.subscriptionPlan,

@@ -1,8 +1,8 @@
-const Subject = require('../models/Subject');
+const { Subject } = require('../models');
 
 const getSubjects = async (req, res) => {
   try {
-    const subjects = await Subject.find();
+    const subjects = await Subject.findAll();
     res.json(subjects);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -17,13 +17,12 @@ const addSubject = async (req, res) => {
       return res.status(400).json({ message: 'Subject name is required.' });
     }
 
-    const existing = await Subject.findOne({ name });
+    const existing = await Subject.findOne({ where: { name } });
     if (existing) {
       return res.status(400).json({ message: 'Subject already exists.' });
     }
 
-    const subject = new Subject({ name, code, description });
-    await subject.save();
+    const subject = await Subject.create({ name, code, description });
     res.status(201).json(subject);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -32,7 +31,7 @@ const addSubject = async (req, res) => {
 
 const updateSubject = async (req, res) => {
   try {
-    const subject = await Subject.findById(req.params.id);
+    const subject = await Subject.findByPk(req.params.id);
     if (!subject) {
       return res.status(404).json({ message: 'Subject not found' });
     }
@@ -51,10 +50,11 @@ const updateSubject = async (req, res) => {
 
 const deleteSubject = async (req, res) => {
   try {
-    const subject = await Subject.findByIdAndDelete(req.params.id);
+    const subject = await Subject.findByPk(req.params.id);
     if (!subject) {
       return res.status(404).json({ message: 'Subject not found' });
     }
+    await subject.destroy();
     res.json({ message: 'Subject deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });

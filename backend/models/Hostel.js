@@ -1,89 +1,77 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const hostelSchema = new mongoose.Schema(
-  {
-    hostelName: {
-      type: String,
-      required: true,
-    },
-    hostelType: {
-      type: String,
-      enum: ['boys', 'girls', 'mixed'],
-      required: true,
-    },
-    school: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'School',
-    },
-    address: {
-      street: String,
-      city: String,
-      state: String,
-      zipCode: String,
-    },
-    wardenName: String,
-    wardenPhone: String,
-    totalRooms: Number,
-    totalBeds: Number,
-    availableBeds: Number,
-    rooms: [
-      {
-        roomNumber: String,
-        floor: Number,
-        capacity: Number,
-        occupiedBeds: Number,
-        students: [
-          {
-            studentId: {
-              type: mongoose.Schema.Types.ObjectId,
-              ref: 'Student',
-            },
-            bedNumber: String,
-            admissionDate: Date,
-          },
-        ],
-        facilities: [String],
-      },
-    ],
-    monthlyFee: Number,
-    rules: [String],
-    visitingHours: {
-      startTime: String,
-      endTime: String,
-      days: [String],
-    },
-    mealsSchedule: [
-      {
-        mealType: String,
-        time: String,
-        menu: String,
-      },
-    ],
-    status: {
-      type: String,
-      enum: ['active', 'inactive'],
-      default: 'active',
-    },
-    facilities: [String],
-    securityFeatures: [String],
-    complaints: [
-      {
-        studentId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Student',
-        },
-        complaintType: String,
-        description: String,
-        status: {
-          type: String,
-          enum: ['pending', 'resolved', 'in_progress'],
-        },
-        submittedDate: Date,
-        resolvedDate: Date,
-      },
-    ],
+const Hostel = sequelize.define('Hostel', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  { timestamps: true }
-);
+  hostelName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  hostelType: {
+    type: DataTypes.ENUM('boys', 'girls', 'mixed'),
+    allowNull: false,
+  },
+  schoolId: {
+    type: DataTypes.INTEGER,
+  },
+  address: {
+    type: DataTypes.JSONB,
+  },
+  wardenName: {
+    type: DataTypes.STRING,
+  },
+  wardenPhone: {
+    type: DataTypes.STRING,
+  },
+  totalRooms: {
+    type: DataTypes.INTEGER,
+  },
+  totalBeds: {
+    type: DataTypes.INTEGER,
+  },
+  availableBeds: {
+    type: DataTypes.INTEGER,
+  },
+  rooms: {
+    type: DataTypes.JSONB,
+    defaultValue: [],
+  },
+  monthlyFee: {
+    type: DataTypes.FLOAT,
+  },
+  rules: {
+    type: DataTypes.JSONB,
+    defaultValue: [],
+  },
+  visitingHours: {
+    type: DataTypes.JSONB,
+  },
+  mealsSchedule: {
+    type: DataTypes.JSONB,
+    defaultValue: [],
+  },
+  status: {
+    type: DataTypes.ENUM('active', 'inactive'),
+    defaultValue: 'active',
+  },
+  facilities: {
+    type: DataTypes.JSONB,
+    defaultValue: [],
+  },
+  securityFeatures: {
+    type: DataTypes.JSONB,
+    defaultValue: [],
+  },
+  complaints: {
+    type: DataTypes.JSONB,
+    defaultValue: [],
+  },
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model('Hostel', hostelSchema);
+module.exports = Hostel;

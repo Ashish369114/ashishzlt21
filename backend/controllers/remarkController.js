@@ -1,12 +1,37 @@
-const Remark = require('../models/Remark');
+const { Remark, Student, Teacher, Subject, Class, User } = require('../models');
+
+const sanitizeRemarkPayload = (payload) => {
+  const sanitized = { ...payload };
+  const fieldMapping = {
+    'student': 'studentId',
+    'teacher': 'teacherId',
+    'subject': 'subjectId',
+    'class': 'classId'
+  };
+
+  Object.keys(fieldMapping).forEach((field) => {
+    const value = sanitized[field];
+    if (value !== undefined) {
+      if (typeof value !== 'string' || value.trim() !== '') {
+        sanitized[fieldMapping[field]] = value;
+      }
+      delete sanitized[field];
+    }
+  });
+
+  return sanitized;
+};
 
 const getRemarks = async (req, res) => {
   try {
-    const remarks = await Remark.find()
-      .populate('student')
-      .populate('teacher')
-      .populate('subject')
-      .populate('class');
+    const remarks = await Remark.findAll({
+      include: [
+        { model: Student, as: 'student', include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] },
+        { model: Teacher, as: 'teacher', include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] },
+        { model: Subject, as: 'subject' },
+        { model: Class, as: 'class' }
+      ]
+    });
     res.json(remarks);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -16,11 +41,15 @@ const getRemarks = async (req, res) => {
 const getRemarksByStudent = async (req, res) => {
   try {
     const studentId = req.params.studentId;
-    const remarks = await Remark.find({ student: studentId })
-      .populate('student')
-      .populate('teacher')
-      .populate('subject')
-      .populate('class');
+    const remarks = await Remark.findAll({ 
+      where: { studentId },
+      include: [
+        { model: Student, as: 'student', include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] },
+        { model: Teacher, as: 'teacher', include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] },
+        { model: Subject, as: 'subject' },
+        { model: Class, as: 'class' }
+      ]
+    });
     res.json(remarks);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -30,11 +59,15 @@ const getRemarksByStudent = async (req, res) => {
 const getRemarksByClass = async (req, res) => {
   try {
     const classId = req.params.classId;
-    const remarks = await Remark.find({ class: classId })
-      .populate('student')
-      .populate('teacher')
-      .populate('subject')
-      .populate('class');
+    const remarks = await Remark.findAll({ 
+      where: { classId },
+      include: [
+        { model: Student, as: 'student', include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] },
+        { model: Teacher, as: 'teacher', include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] },
+        { model: Subject, as: 'subject' },
+        { model: Class, as: 'class' }
+      ]
+    });
     res.json(remarks);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -43,14 +76,17 @@ const getRemarksByClass = async (req, res) => {
 
 const addRemark = async (req, res) => {
   try {
-    const remark = new Remark(req.body);
-    await remark.save();
+    const payload = sanitizeRemarkPayload(req.body);
+    const remark = await Remark.create(payload);
 
-    const populated = await Remark.findById(remark._id)
-      .populate('student')
-      .populate('teacher')
-      .populate('subject')
-      .populate('class');
+    const populated = await Remark.findByPk(remark.id, {
+      include: [
+        { model: Student, as: 'student', include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] },
+        { model: Teacher, as: 'teacher', include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] },
+        { model: Subject, as: 'subject' },
+        { model: Class, as: 'class' }
+      ]
+    });
 
     res.status(201).json(populated);
   } catch (error) {
@@ -60,12 +96,26 @@ const addRemark = async (req, res) => {
 
 const updateRemark = async (req, res) => {
   try {
-    const remark = await Remark.findByIdAndUpdate(req.params.id, req.body, { new: true })
-      .populate('student')
-      .populate('teacher')
-      .populate('subject')
-      .populate('class');
-    res.json(remark);
+    const payload = sanitizeRemarkPayload(req.body);
+    const remark = await Remark.findByPk(req.params.id);
+    
+    if (!remark) {
+      return res.status(404).json({ message: 'Remark not found' });
+    }
+
+    Object.assign(remark, payload);
+    await remark.save();
+
+    const populated = await Remark.findByPk(remark.id, {
+      include: [
+        { model: Student, as: 'student', include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] },
+        { model: Teacher, as: 'teacher', include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] },
+        { model: Subject, as: 'subject' },
+        { model: Class, as: 'class' }
+      ]
+    });
+
+    res.json(populated);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -73,10 +123,11 @@ const updateRemark = async (req, res) => {
 
 const deleteRemark = async (req, res) => {
   try {
-    const remark = await Remark.findByIdAndDelete(req.params.id);
+    const remark = await Remark.findByPk(req.params.id);
     if (!remark) {
       return res.status(404).json({ message: 'Remark not found' });
     }
+    await remark.destroy();
     res.json({ message: 'Remark deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });

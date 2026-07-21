@@ -1,52 +1,61 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const examSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-    },
-    class: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Class',
-      required: true,
-    },
-    subject: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Subject',
-      required: true,
-    },
-    examDate: {
-      type: Date,
-      required: true,
-    },
-    examType: {
-      type: String,
-      enum: ['Unit Test', 'Half-Yearly', 'Quarterly', 'Annual', 'Mid-Term', 'Final', 'Practical'],
-      default: 'Unit Test',
-    },
-    startTime: String,
-    endTime: String,
-    totalMarks: {
-      type: Number,
-      default: 100,
-    },
-    room: String,
-    description: String,
-    invigilator: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Teacher',
-    },
-    paperDispatched: {
-      type: Boolean,
-      default: false,
-    },
-    paperCollected: {
-      type: Boolean,
-      default: false,
-    },
+const Exam = sequelize.define('Exam', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  { timestamps: true }
-);
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  classId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  subjectId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  examDate: {
+    type: DataTypes.DATEONLY,
+    allowNull: false,
+  },
+  examType: {
+    type: DataTypes.ENUM('Unit Test', 'Half-Yearly', 'Quarterly', 'Annual', 'Mid-Term', 'Final', 'Practical'),
+    defaultValue: 'Unit Test',
+  },
+  startTime: {
+    type: DataTypes.STRING,
+  },
+  endTime: {
+    type: DataTypes.STRING,
+  },
+  totalMarks: {
+    type: DataTypes.FLOAT,
+    defaultValue: 100,
+  },
+  room: {
+    type: DataTypes.STRING,
+  },
+  description: {
+    type: DataTypes.TEXT,
+  },
+  invigilatorId: {
+    type: DataTypes.INTEGER,
+  },
+  paperDispatched: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  paperCollected: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model('Exam', examSchema);
+module.exports = Exam;

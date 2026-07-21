@@ -1,71 +1,69 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const reportSchema = new mongoose.Schema(
-  {
-    title: {
-      type: String,
-      required: true,
-    },
-    reportType: {
-      type: String,
-      enum: ['attendance', 'academic', 'financial', 'performance', 'enrollment', 'transport', 'custom', 'working_days'],
-      required: true,
-    },
-    school: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'School',
-    },
-    generatedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
-    startDate: Date,
-    endDate: Date,
-    filters: {
-      class: mongoose.Schema.Types.ObjectId,
-      section: String,
-      teacher: mongoose.Schema.Types.ObjectId,
-      student: mongoose.Schema.Types.ObjectId,
-    },
-    data: mongoose.Schema.Types.Mixed,
-    summary: {
-      totalRecords: Number,
-      totalPages: Number,
-      metrics: mongoose.Schema.Types.Mixed,
-    },
-    format: {
-      type: String,
-      enum: ['pdf', 'excel', 'json', 'csv'],
-      default: 'pdf',
-    },
-    fileUrl: String,
-    status: {
-      type: String,
-      enum: ['pending', 'completed', 'failed'],
-      default: 'pending',
-    },
-    visibility: {
-      type: String,
-      enum: ['private', 'shared', 'public'],
-      default: 'private',
-    },
-    sharedWith: [
-      {
-        userId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'User',
-        },
-        accessLevel: String,
-      },
-    ],
-    tags: [String],
-    scheduledGeneration: {
-      isScheduled: Boolean,
-      frequency: String,
-      nextGenerationDate: Date,
-    },
+const Report = sequelize.define('Report', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  { timestamps: true }
-);
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  reportType: {
+    type: DataTypes.ENUM('attendance', 'academic', 'financial', 'performance', 'enrollment', 'transport', 'custom', 'working_days'),
+    allowNull: false,
+  },
+  schoolId: {
+    type: DataTypes.INTEGER,
+  },
+  generatedById: {
+    type: DataTypes.INTEGER,
+  },
+  startDate: {
+    type: DataTypes.DATE,
+  },
+  endDate: {
+    type: DataTypes.DATE,
+  },
+  filters: {
+    type: DataTypes.JSONB,
+  },
+  data: {
+    type: DataTypes.JSONB,
+  },
+  summary: {
+    type: DataTypes.JSONB,
+  },
+  format: {
+    type: DataTypes.ENUM('pdf', 'excel', 'json', 'csv'),
+    defaultValue: 'pdf',
+  },
+  fileUrl: {
+    type: DataTypes.STRING,
+  },
+  status: {
+    type: DataTypes.ENUM('pending', 'completed', 'failed'),
+    defaultValue: 'pending',
+  },
+  visibility: {
+    type: DataTypes.ENUM('private', 'shared', 'public'),
+    defaultValue: 'private',
+  },
+  sharedWith: {
+    type: DataTypes.JSONB,
+    defaultValue: [],
+  },
+  tags: {
+    type: DataTypes.JSONB,
+    defaultValue: [],
+  },
+  scheduledGeneration: {
+    type: DataTypes.JSONB,
+  },
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model('Report', reportSchema);
+module.exports = Report;

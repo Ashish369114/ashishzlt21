@@ -1,39 +1,47 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const studentSchema = new mongoose.Schema(
-  {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    rollNumber: {
-      type: String,
-      unique: true,
-      required: true,
-    },
-    class: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Class',
-      required: true,
-    },
-    parentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
-    admissionDate: Date,
-    bloodGroup: String,
-    emergencyContact: String,
-    feesPaid: {
-      type: Number,
-      default: 0,
-    },
-    totalFees: {
-      type: Number,
-      default: 50000,
-    },
+const Student = sequelize.define('Student', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  { timestamps: true }
-);
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  rollNumber: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: false,
+  },
+  classId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  parentId: {
+    type: DataTypes.INTEGER,
+  },
+  admissionDate: {
+    type: DataTypes.DATEONLY,
+  },
+  bloodGroup: {
+    type: DataTypes.STRING,
+  },
+  emergencyContact: {
+    type: DataTypes.STRING,
+  },
+  feesPaid: {
+    type: DataTypes.FLOAT,
+    defaultValue: 0,
+  },
+  totalFees: {
+    type: DataTypes.FLOAT,
+    defaultValue: 50000,
+  },
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model('Student', studentSchema);
+module.exports = Student;

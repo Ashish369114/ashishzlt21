@@ -1,79 +1,98 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
+const { sequelize } = require('../config/db');
 
-const userSchema = new mongoose.Schema(
-  {
-    userId: {
-      type: String,
-      unique: true,
-      required: true,
-    },
-    password: {
-      type: String,
-      required: true,
-      minlength: 6,
-    },
-    role: {
-      type: String,
-      enum: ['super_admin', 'principal', 'teacher', 'student', 'parent', 'accountant_admin', 'examiner'],
-      required: true,
-    },
-    subscriptionPlan: {
-      type: String,
-      enum: ['silver', 'gold', 'platinum', 'platinum_with_ocr', 'platinum_without_ocr'],
-      default: 'silver',
-    },
-    firstName: {
-      type: String,
-      required: true,
-    },
-    lastName: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      unique: true,
-      sparse: true,
-    },
-    phone: String,
-    gender: {
-      type: String,
-      enum: ['Male', 'Female', 'Other'],
-    },
-    dateOfBirth: Date,
-    address: String,
-    relationship: String,
-    profileImage: String,
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    lastLogin: Date,
-    resetPasswordToken: String,
-    resetPasswordExpires: Date,
+const User = sequelize.define('User', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  { timestamps: true }
-);
-
-// Hash password before saving
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    return next();
+  userId: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: false,
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      len: [6, 100],
+    }
+  },
+  role: {
+    type: DataTypes.ENUM('super_admin', 'principal', 'teacher', 'student', 'parent', 'accountant_admin', 'examiner'),
+    allowNull: false,
+  },
+  subscriptionPlan: {
+    type: DataTypes.ENUM('silver', 'gold', 'platinum', 'platinum_with_ocr', 'platinum_without_ocr'),
+    defaultValue: 'silver',
+  },
+  firstName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  lastName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  email: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: true,
+  },
+  phone: {
+    type: DataTypes.STRING,
+  },
+  gender: {
+    type: DataTypes.ENUM('Male', 'Female', 'Other'),
+  },
+  dateOfBirth: {
+    type: DataTypes.DATEONLY,
+  },
+  address: {
+    type: DataTypes.STRING,
+  },
+  relationship: {
+    type: DataTypes.STRING,
+  },
+  profileImage: {
+    type: DataTypes.STRING,
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+  },
+  lastLogin: {
+    type: DataTypes.DATE,
+  },
+  resetPasswordToken: {
+    type: DataTypes.STRING,
+  },
+  resetPasswordExpires: {
+    type: DataTypes.DATE,
   }
-
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
+}, {
+  timestamps: true,
+  hooks: {
+    beforeCreate: async (user) => {
+      if (user.password) {
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(user.password, salt);
+      }
+    },
+    beforeUpdate: async (user) => {
+      if (user.changed('password')) {
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(user.password, salt);
+      }
+    }
   }
 });
 
 // Method to compare passwords
-userSchema.methods.comparePassword = async function (enteredPassword) {
+User.prototype.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = User;

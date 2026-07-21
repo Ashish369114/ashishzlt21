@@ -1,9 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const connectDB = require('./config/db');
+const { connectDB, sequelize } = require('./config/db');
 const initializeSocket = require('./config/socket');
 const { ensureAdminRoles } = require('./utils/roleFixer');
+require('./models'); // Loads models and associations
 
 // Routes
 const authRoutes = require('./routes/auth');
@@ -37,14 +38,7 @@ const app = express();
 const startServer = async () => {
   try {
     await connectDB();
-    const mongoose = require('mongoose');
-    const isDbConnected = mongoose.connection && mongoose.connection.readyState === 1;
-
-    if (isDbConnected) {
-      // Sync Class model indexes to remove any stale collection index definitions.
-      const Class = require('./models/Class');
-      await Class.syncIndexes();
-    }
+    await sequelize.sync({ alter: true }); // Automatically sync DB
 
     // Middleware
     app.use(cors());
@@ -86,11 +80,7 @@ const startServer = async () => {
       res.json({ message: 'Server is running' });
     });
 
-    if (isDbConnected) {
-      await ensureAdminRoles();
-    } else {
-      console.log('Skipping syncIndexes and role check: MongoDB is offline.');
-    }
+    await ensureAdminRoles();
 
     const PORT = process.env.PORT || 5000;
     server.listen(PORT, () => {

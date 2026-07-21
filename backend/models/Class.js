@@ -1,36 +1,39 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const classSchema = new mongoose.Schema(
-  {
-    grade: {
-      type: Number,
-      required: true,
+const Class = sequelize.define('Class', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  grade: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    validate: {
       min: 1,
       max: 10,
     },
-    section: {
-      type: String,
-      required: true,
-      enum: ['A', 'B', 'C'],
-    },
-    classTeacher: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
-    subject: {
-      type: String,
-      trim: true,
-      default: 'N/A',
-    },
-    students: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    }],
   },
-  { timestamps: true }
-);
+  section: {
+    type: DataTypes.ENUM('A', 'B', 'C'),
+    allowNull: false,
+  },
+  classTeacherId: {
+    type: DataTypes.INTEGER,
+  },
+  subject: {
+    type: DataTypes.STRING,
+    defaultValue: 'N/A',
+  },
+}, {
+  timestamps: true,
+  indexes: [
+    {
+      unique: true,
+      fields: ['grade', 'section', 'subject'],
+    },
+  ],
+});
 
-// Allow multiple class records for the same grade/section when they represent different subjects.
-classSchema.index({ grade: 1, section: 1, subject: 1 }, { unique: true });
-
-module.exports = mongoose.model('Class', classSchema);
+module.exports = Class;

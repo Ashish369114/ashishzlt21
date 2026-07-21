@@ -1,8 +1,12 @@
-const Expense = require('../models/Expense');
+const { Op } = require('sequelize');
+const { sequelize } = require('../config/db');
+const { Expense } = require('../models');
 
 const getExpenses = async (req, res) => {
   try {
-    const expenses = await Expense.find().sort({ date: -1 });
+    const expenses = await Expense.findAll({
+      order: [['date', 'DESC']]
+    });
     res.json(expenses);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -11,7 +15,7 @@ const getExpenses = async (req, res) => {
 
 const getExpenseById = async (req, res) => {
   try {
-    const expense = await Expense.findById(req.params.id);
+    const expense = await Expense.findByPk(req.params.id);
     if (!expense) {
       return res.status(404).json({ message: 'Expense not found' });
     }
@@ -23,12 +27,12 @@ const getExpenseById = async (req, res) => {
 
 const addExpense = async (req, res) => {
   try {
-    const expense = new Expense({
+    const expenseData = {
       ...req.body,
       date: req.body.date ? new Date(req.body.date) : new Date(),
-      createdBy: req.user?.userId,
-    });
-    const savedExpense = await expense.save();
+      createdById: req.user?.id,
+    };
+    const savedExpense = await Expense.create(expenseData);
     res.status(201).json(savedExpense);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -37,17 +41,17 @@ const addExpense = async (req, res) => {
 
 const updateExpense = async (req, res) => {
   try {
-    const expense = await Expense.findByIdAndUpdate(
-      req.params.id,
-      {
-        ...req.body,
-        date: req.body.date ? new Date(req.body.date) : undefined,
-      },
-      { new: true }
-    );
+    const expense = await Expense.findByPk(req.params.id);
     if (!expense) {
       return res.status(404).json({ message: 'Expense not found' });
     }
+    
+    Object.assign(expense, {
+      ...req.body,
+      date: req.body.date ? new Date(req.body.date) : undefined,
+    });
+    await expense.save();
+
     res.json(expense);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -56,10 +60,11 @@ const updateExpense = async (req, res) => {
 
 const deleteExpense = async (req, res) => {
   try {
-    const expense = await Expense.findByIdAndDelete(req.params.id);
+    const expense = await Expense.findByPk(req.params.id);
     if (!expense) {
       return res.status(404).json({ message: 'Expense not found' });
     }
+    await expense.destroy();
     res.json({ message: 'Expense deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -69,34 +74,30 @@ const deleteExpense = async (req, res) => {
 const getMonthlyExpenses = async (req, res) => {
   try {
     const year = Number(req.query.year) || new Date().getFullYear();
-    const monthly = await Expense.aggregate([
-      {
-        $match: {
-          date: {
-            $gte: new Date(`${year}-01-01T00:00:00.000Z`),
-            $lte: new Date(`${year}-12-31T23:59:59.999Z`),
-          },
-        },
+    
+    const monthly = await Expense.findAll({
+      attributes: [
+        [sequelize.fn('EXTRACT', sequelize.literal('MONTH FROM "date"')), 'month'],
+        [sequelize.fn('SUM', sequelize.col('amount')), 'totalAmount'],
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+      ],
+      where: {
+        date: {
+          [Op.gte]: new Date(`${year}-01-01T00:00:00.000Z`),
+          [Op.lte]: new Date(`${year}-12-31T23:59:59.999Z`),
+        }
       },
-      {
-        $group: {
-          _id: { $month: '$date' },
-          totalAmount: { $sum: '$amount' },
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $project: {
-          month: '$_id',
-          totalAmount: 1,
-          count: 1,
-          _id: 0,
-        },
-      },
-      { $sort: { month: 1 } },
-    ]);
+      group: [sequelize.fn('EXTRACT', sequelize.literal('MONTH FROM "date"'))],
+      order: [[sequelize.fn('EXTRACT', sequelize.literal('MONTH FROM "date"')), 'ASC']]
+    });
 
-    res.json(monthly);
+    const formattedMonthly = monthly.map(m => ({
+      month: Number(m.get('month')),
+      totalAmount: Number(m.get('totalAmount')),
+      count: Number(m.get('count'))
+    }));
+
+    res.json(formattedMonthly);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

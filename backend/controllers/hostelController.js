@@ -1,9 +1,32 @@
-const Hostel = require('../models/Hostel');
+const { Hostel, School, Student, User } = require('../models');
+
+const populateHostelRooms = async (hostels) => {
+  const isArray = Array.isArray(hostels);
+  const hstls = isArray ? hostels : [hostels];
+
+  for (const h of hstls) {
+    if (h.rooms && Array.isArray(h.rooms)) {
+      for (const room of h.rooms) {
+        if (room.students && Array.isArray(room.students)) {
+          for (const s of room.students) {
+            if (s.studentId) {
+              const student = await Student.findByPk(s.studentId, { include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] }) ||
+                              await Student.findOne({ where: { userId: s.studentId }, include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] });
+              s.studentId = student || s.studentId;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return isArray ? hstls : hstls[0];
+};
 
 const getHostels = async (req, res) => {
   try {
-    const hostels = await Hostel.find()
-      .populate('rooms.students.studentId');
+    const hostels = await Hostel.findAll();
+    await populateHostelRooms(hostels);
     res.json(hostels);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -12,11 +35,11 @@ const getHostels = async (req, res) => {
 
 const getHostelById = async (req, res) => {
   try {
-    const hostel = await Hostel.findById(req.params.id)
-      .populate('rooms.students.studentId');
+    const hostel = await Hostel.findByPk(req.params.id);
     if (!hostel) {
       return res.status(404).json({ message: 'Hostel not found' });
     }
+    await populateHostelRooms(hostel);
     res.json(hostel);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -25,28 +48,26 @@ const getHostelById = async (req, res) => {
 
 const addHostel = async (req, res) => {
   try {
-    // Validate required fields
     if (!req.body.hostelName || !req.body.hostelType) {
       return res.status(400).json({ message: 'Missing required fields: hostelName, hostelType' });
     }
 
-    // Get first available school if not provided
-    let school = req.body.school;
-    if (!school) {
-      const School = require('../models/School');
+    let schoolId = req.body.school;
+    if (!schoolId) {
       const availableSchool = await School.findOne();
       if (!availableSchool) {
         return res.status(400).json({ message: 'No school configured in the system' });
       }
-      school = availableSchool._id;
+      schoolId = availableSchool.id;
     }
 
-    const hostel = new Hostel({
+    const payload = {
       ...req.body,
-      school,
+      schoolId,
       availableBeds: req.body.totalBeds || 0,
-    });
-    const newHostel = await hostel.save();
+    };
+
+    const newHostel = await Hostel.create(payload);
     res.status(201).json(newHostel);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -55,19 +76,18 @@ const addHostel = async (req, res) => {
 
 const updateHostel = async (req, res) => {
   try {
-    const hostel = await Hostel.findById(req.params.id);
+    const hostel = await Hostel.findByPk(req.params.id);
     if (!hostel) {
       return res.status(404).json({ message: 'Hostel not found' });
     }
     
-    // Validate required fields if being updated
     if (req.body.hostelName === '' || req.body.hostelType === '') {
       return res.status(400).json({ message: 'Invalid field values: hostelName and hostelType cannot be empty' });
     }
     
     Object.assign(hostel, req.body);
-    const updatedHostel = await hostel.save();
-    res.json(updatedHostel);
+    await hostel.save();
+    res.json(hostel);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -75,15 +95,18 @@ const updateHostel = async (req, res) => {
 
 const allocateStudentToRoom = async (req, res) => {
   try {
-    const hostel = await Hostel.findById(req.params.hostelId);
+    const hostel = await Hostel.findByPk(req.params.hostelId);
     if (!hostel) {
       return res.status(404).json({ message: 'Hostel not found' });
     }
 
-    const room = hostel.rooms.find(r => r.roomNumber === req.body.roomNumber);
-    if (!room) {
+    const rooms = [...(hostel.rooms || [])];
+    const roomIndex = rooms.findIndex(r => String(r.roomNumber) === String(req.body.roomNumber));
+    if (roomIndex === -1) {
       return res.status(404).json({ message: 'Room not found' });
     }
+
+    let room = { ...rooms[roomIndex] };
 
     if (room.occupiedBeds >= room.capacity) {
       return res.status(400).json({ message: 'Room is full' });
@@ -91,15 +114,20 @@ const allocateStudentToRoom = async (req, res) => {
 
     const studentAssignment = {
       studentId: req.body.studentId,
-      bedNumber: `BED-${room.roomNumber}-${room.occupiedBeds + 1}`,
+      bedNumber: `BED-${room.roomNumber}-${(room.occupiedBeds || 0) + 1}`,
       admissionDate: new Date(),
     };
 
+    room.students = room.students || [];
     room.students.push(studentAssignment);
-    room.occupiedBeds += 1;
-    hostel.availableBeds -= 1;
+    room.occupiedBeds = (room.occupiedBeds || 0) + 1;
+    
+    hostel.availableBeds = (hostel.availableBeds || 0) - 1;
 
+    rooms[roomIndex] = room;
+    hostel.rooms = rooms;
     await hostel.save();
+
     res.json({
       message: 'Student allocated to room',
       studentAssignment,
@@ -111,24 +139,34 @@ const allocateStudentToRoom = async (req, res) => {
 
 const removeStudentFromRoom = async (req, res) => {
   try {
-    const hostel = await Hostel.findById(req.params.hostelId);
+    const hostel = await Hostel.findByPk(req.params.hostelId);
     if (!hostel) {
       return res.status(404).json({ message: 'Hostel not found' });
     }
 
-    const room = hostel.rooms.find(r => r.roomNumber === req.body.roomNumber);
-    if (!room) {
+    const rooms = [...(hostel.rooms || [])];
+    const roomIndex = rooms.findIndex(r => String(r.roomNumber) === String(req.body.roomNumber));
+    if (roomIndex === -1) {
       return res.status(404).json({ message: 'Room not found' });
     }
 
-    room.students = room.students.filter(
-      s => s.studentId.toString() !== req.body.studentId
+    let room = { ...rooms[roomIndex] };
+    const initialCount = room.students ? room.students.length : 0;
+    room.students = (room.students || []).filter(
+      s => String(s.studentId) !== String(req.body.studentId) && String(s.studentId?.id) !== String(req.body.studentId)
     );
     
-    room.occupiedBeds -= 1;
-    hostel.availableBeds += 1;
+    const finalCount = room.students.length;
+    
+    if (initialCount > finalCount) {
+      room.occupiedBeds = Math.max(0, (room.occupiedBeds || 0) - 1);
+      hostel.availableBeds = (hostel.availableBeds || 0) + 1;
+    }
 
+    rooms[roomIndex] = room;
+    hostel.rooms = rooms;
     await hostel.save();
+
     res.json({
       message: 'Student removed from room',
       room,
@@ -140,17 +178,17 @@ const removeStudentFromRoom = async (req, res) => {
 
 const getAvailableRooms = async (req, res) => {
   try {
-    const hostels = await Hostel.find({ school: req.params.schoolId });
+    const hostels = await Hostel.findAll({ where: { schoolId: req.params.schoolId } });
     const availableRooms = [];
 
     hostels.forEach(hostel => {
-      hostel.rooms.forEach(room => {
-        if (room.occupiedBeds < room.capacity) {
+      (hostel.rooms || []).forEach(room => {
+        if ((room.occupiedBeds || 0) < (room.capacity || 0)) {
           availableRooms.push({
-            hostelId: hostel._id,
+            hostelId: hostel.id,
             hostelName: hostel.hostelName,
             roomNumber: room.roomNumber,
-            availableBeds: room.capacity - room.occupiedBeds,
+            availableBeds: room.capacity - (room.occupiedBeds || 0),
             facilities: room.facilities,
           });
         }
@@ -165,12 +203,13 @@ const getAvailableRooms = async (req, res) => {
 
 const registerComplaint = async (req, res) => {
   try {
-    const hostel = await Hostel.findById(req.params.hostelId);
+    const hostel = await Hostel.findByPk(req.params.hostelId);
     if (!hostel) {
       return res.status(404).json({ message: 'Hostel not found' });
     }
 
     const complaint = {
+      id: `COMP-${Date.now()}`,
       studentId: req.body.studentId,
       complaintType: req.body.complaintType,
       description: req.body.description,
@@ -178,7 +217,8 @@ const registerComplaint = async (req, res) => {
       submittedDate: new Date(),
     };
 
-    hostel.complaints.push(complaint);
+    const complaints = [...(hostel.complaints || []), complaint];
+    hostel.complaints = complaints;
     await hostel.save();
 
     res.status(201).json({
@@ -192,20 +232,26 @@ const registerComplaint = async (req, res) => {
 
 const resolveComplaint = async (req, res) => {
   try {
-    const hostel = await Hostel.findById(req.params.hostelId);
+    const hostel = await Hostel.findByPk(req.params.hostelId);
     if (!hostel) {
       return res.status(404).json({ message: 'Hostel not found' });
     }
 
-    const complaint = hostel.complaints.id(req.params.complaintId);
-    if (!complaint) {
+    const complaints = [...(hostel.complaints || [])];
+    const complaintIndex = complaints.findIndex(c => String(c.id) === String(req.params.complaintId) || String(c._id) === String(req.params.complaintId));
+    
+    if (complaintIndex === -1) {
       return res.status(404).json({ message: 'Complaint not found' });
     }
 
+    let complaint = { ...complaints[complaintIndex] };
     complaint.status = 'resolved';
     complaint.resolvedDate = new Date();
 
+    complaints[complaintIndex] = complaint;
+    hostel.complaints = complaints;
     await hostel.save();
+
     res.json({
       message: 'Complaint resolved',
       complaint,
@@ -217,8 +263,8 @@ const resolveComplaint = async (req, res) => {
 
 const getHostelBySchool = async (req, res) => {
   try {
-    const hostels = await Hostel.find({ school: req.params.schoolId })
-      .populate('rooms.students.studentId');
+    const hostels = await Hostel.findAll({ where: { schoolId: req.params.schoolId } });
+    await populateHostelRooms(hostels);
     res.json(hostels);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -227,10 +273,11 @@ const getHostelBySchool = async (req, res) => {
 
 const deleteHostel = async (req, res) => {
   try {
-    const hostel = await Hostel.findByIdAndDelete(req.params.id);
+    const hostel = await Hostel.findByPk(req.params.id);
     if (!hostel) {
       return res.status(404).json({ message: 'Hostel not found' });
     }
+    await hostel.destroy();
     res.json({ message: 'Hostel deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -1,11 +1,14 @@
-const Employee = require('../models/Employee');
+const { Employee, User, Class, School } = require('../models');
 
 const getEmployees = async (req, res) => {
   try {
-    const employees = await Employee.find()
-      .populate('userId')
-      .populate('class')
-      .populate('school');
+    const employees = await Employee.findAll({
+      include: [
+        { model: User, as: 'user', attributes: { exclude: ['password'] } },
+        { model: Class, as: 'class' },
+        { model: School, as: 'school' }
+      ]
+    });
     res.json(employees);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -14,10 +17,13 @@ const getEmployees = async (req, res) => {
 
 const getEmployeeById = async (req, res) => {
   try {
-    const employee = await Employee.findById(req.params.id)
-      .populate('userId')
-      .populate('class')
-      .populate('school');
+    const employee = await Employee.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'user', attributes: { exclude: ['password'] } },
+        { model: Class, as: 'class' },
+        { model: School, as: 'school' }
+      ]
+    });
     if (!employee) {
       return res.status(404).json({ message: 'Employee not found' });
     }
@@ -28,24 +34,28 @@ const getEmployeeById = async (req, res) => {
 };
 
 const addEmployee = async (req, res) => {
-  const employee = new Employee({
-    ...req.body,
-    employeeId: `EMP-${Date.now()}`,
-  });
   try {
-    const newEmployee = await employee.save();
-    const populatedEmployee = await Employee.findById(newEmployee._id)
-      .populate('userId')
-      .populate('class')
-      .populate('school');
+    const employeeData = {
+      ...req.body,
+      employeeId: `EMP-${Date.now()}`,
+    };
+    const newEmployee = await Employee.create(employeeData);
+    
+    const populatedEmployee = await Employee.findByPk(newEmployee.id, {
+      include: [
+        { model: User, as: 'user', attributes: { exclude: ['password'] } },
+        { model: Class, as: 'class' },
+        { model: School, as: 'school' }
+      ]
+    });
 
-    // Emit socket event to notify real-time updates
     const io = req.app.locals.io;
     if (io) {
-      io.to(`school:${newEmployee.school}`).emit('employee:added', populatedEmployee.toObject());
-      io.to(`role:super_admin`).emit('employee:added', populatedEmployee.toObject());
-      io.to(`role:principal`).emit('employee:added', populatedEmployee.toObject());
-      io.to(`role:admin`).emit('employee:added', populatedEmployee.toObject());
+      const schoolId = populatedEmployee.schoolId;
+      io.to(`school:${schoolId}`).emit('employee:added', populatedEmployee.toJSON());
+      io.to(`role:super_admin`).emit('employee:added', populatedEmployee.toJSON());
+      io.to(`role:principal`).emit('employee:added', populatedEmployee.toJSON());
+      io.to(`role:admin`).emit('employee:added', populatedEmployee.toJSON());
     }
 
     res.status(201).json(populatedEmployee);
@@ -56,24 +66,28 @@ const addEmployee = async (req, res) => {
 
 const updateEmployee = async (req, res) => {
   try {
-    const employee = await Employee.findById(req.params.id);
+    const employee = await Employee.findByPk(req.params.id);
     if (!employee) {
       return res.status(404).json({ message: 'Employee not found' });
     }
     Object.assign(employee, req.body);
-    const updatedEmployee = await employee.save();
-    const populatedEmployee = await Employee.findById(updatedEmployee._id)
-      .populate('userId')
-      .populate('class')
-      .populate('school');
+    await employee.save();
+    
+    const populatedEmployee = await Employee.findByPk(employee.id, {
+      include: [
+        { model: User, as: 'user', attributes: { exclude: ['password'] } },
+        { model: Class, as: 'class' },
+        { model: School, as: 'school' }
+      ]
+    });
 
-    // Emit socket event to notify real-time updates
     const io = req.app.locals.io;
     if (io) {
-      io.to(`school:${updatedEmployee.school}`).emit('employee:updated', populatedEmployee.toObject());
-      io.to(`role:super_admin`).emit('employee:updated', populatedEmployee.toObject());
-      io.to(`role:principal`).emit('employee:updated', populatedEmployee.toObject());
-      io.to(`role:admin`).emit('employee:updated', populatedEmployee.toObject());
+      const schoolId = populatedEmployee.schoolId;
+      io.to(`school:${schoolId}`).emit('employee:updated', populatedEmployee.toJSON());
+      io.to(`role:super_admin`).emit('employee:updated', populatedEmployee.toJSON());
+      io.to(`role:principal`).emit('employee:updated', populatedEmployee.toJSON());
+      io.to(`role:admin`).emit('employee:updated', populatedEmployee.toJSON());
     }
 
     res.json(populatedEmployee);
@@ -84,18 +98,20 @@ const updateEmployee = async (req, res) => {
 
 const deleteEmployee = async (req, res) => {
   try {
-    const employee = await Employee.findByIdAndDelete(req.params.id);
+    const employee = await Employee.findByPk(req.params.id);
     if (!employee) {
       return res.status(404).json({ message: 'Employee not found' });
     }
     
-    // Emit socket event to notify real-time updates
+    const schoolId = employee.schoolId;
+    await employee.destroy();
+    
     const io = req.app.locals.io;
     if (io) {
-      io.to(`school:${employee.school}`).emit('employee:deleted', { id: employee._id, schoolId: employee.school });
-      io.to(`role:super_admin`).emit('employee:deleted', { id: employee._id, schoolId: employee.school });
-      io.to(`role:principal`).emit('employee:deleted', { id: employee._id, schoolId: employee.school });
-      io.to(`role:admin`).emit('employee:deleted', { id: employee._id, schoolId: employee.school });
+      io.to(`school:${schoolId}`).emit('employee:deleted', { id: employee.id, schoolId });
+      io.to(`role:super_admin`).emit('employee:deleted', { id: employee.id, schoolId });
+      io.to(`role:principal`).emit('employee:deleted', { id: employee.id, schoolId });
+      io.to(`role:admin`).emit('employee:deleted', { id: employee.id, schoolId });
     }
     
     res.json({ message: 'Employee deleted successfully' });
@@ -106,10 +122,13 @@ const deleteEmployee = async (req, res) => {
 
 const getEmployeesByDepartment = async (req, res) => {
   try {
-    const employees = await Employee.find({ 
-      school: req.params.schoolId,
-      department: req.params.department 
-    }).populate('userId');
+    const employees = await Employee.findAll({ 
+      where: {
+        schoolId: req.params.schoolId,
+        department: req.params.department 
+      },
+      include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }]
+    });
     res.json(employees);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -118,10 +137,13 @@ const getEmployeesByDepartment = async (req, res) => {
 
 const getEmployeesByType = async (req, res) => {
   try {
-    const employees = await Employee.find({ 
-      school: req.params.schoolId,
-      employeeType: req.params.type 
-    }).populate('userId');
+    const employees = await Employee.findAll({ 
+      where: {
+        schoolId: req.params.schoolId,
+        employeeType: req.params.type 
+      },
+      include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }]
+    });
     res.json(employees);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -130,13 +152,13 @@ const getEmployeesByType = async (req, res) => {
 
 const updateEmployeeSalary = async (req, res) => {
   try {
-    const employee = await Employee.findById(req.params.id);
+    const employee = await Employee.findByPk(req.params.id);
     if (!employee) {
       return res.status(404).json({ message: 'Employee not found' });
     }
     employee.salary = req.body;
-    const updatedEmployee = await employee.save();
-    res.json(updatedEmployee);
+    await employee.save();
+    res.json(employee);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -144,18 +166,25 @@ const updateEmployeeSalary = async (req, res) => {
 
 const getEmployeePayroll = async (req, res) => {
   try {
-    const employees = await Employee.find({ school: req.params.schoolId }).populate('userId');
-    const payroll = employees.map(emp => ({
-      _id: emp._id,
-      employeeId: emp.employeeId,
-      name: emp.userId ? `${emp.userId.firstName} ${emp.userId.lastName}` : emp.designation,
-      baseSalary: emp.salary?.baseSalary || 0,
-      allowances: emp.salary?.allowances || {},
-      deductions: emp.salary?.deductions || {},
-      netSalary: (emp.salary?.baseSalary || 0) + 
-                 Object.values(emp.salary?.allowances || {}).reduce((a, b) => a + b, 0) -
-                 Object.values(emp.salary?.deductions || {}).reduce((a, b) => a + b, 0),
-    }));
+    const employees = await Employee.findAll({ 
+      where: { schoolId: req.params.schoolId },
+      include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }]
+    });
+    const payroll = employees.map(emp => {
+      const e = emp.toJSON();
+      return {
+        _id: e.id,
+        id: e.id,
+        employeeId: e.employeeId,
+        name: e.user ? `${e.user.firstName} ${e.user.lastName}` : e.designation,
+        baseSalary: e.salary?.baseSalary || 0,
+        allowances: e.salary?.allowances || {},
+        deductions: e.salary?.deductions || {},
+        netSalary: (e.salary?.baseSalary || 0) + 
+                   Object.values(e.salary?.allowances || {}).reduce((a, b) => a + Number(b), 0) -
+                   Object.values(e.salary?.deductions || {}).reduce((a, b) => a + Number(b), 0),
+      };
+    });
     res.json(payroll);
   } catch (error) {
     res.status(500).json({ message: error.message });

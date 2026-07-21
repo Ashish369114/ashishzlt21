@@ -1,69 +1,70 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const librarySchema = new mongoose.Schema(
-  {
-    title: {
-      type: String,
-      required: true,
-    },
-    isbn: {
-      type: String,
-      unique: true,
-      required: true,
-    },
-    author: {
-      type: String,
-      required: true,
-    },
-    publisher: String,
-    publicationYear: Number,
-    category: {
-      type: String,
-      enum: ['fiction', 'non-fiction', 'reference', 'textbook', 'biography', 'other'],
-    },
-    subject: String,
-    description: String,
-    totalCopies: {
-      type: Number,
-      required: true,
-    },
-    availableCopies: {
-      type: Number,
-      required: true,
-    },
-    location: {
-      shelfNumber: String,
-      section: String,
-    },
-    price: Number,
-    procurementDate: Date,
-    school: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'School',
-    },
-    borrowHistory: [
-      {
-        userId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'User',
-        },
-        borrowDate: Date,
-        dueDate: Date,
-        returnDate: Date,
-        fine: Number,
-        status: {
-          type: String,
-          enum: ['borrowed', 'returned', 'overdue'],
-        },
-      },
-    ],
-    status: {
-      type: String,
-      enum: ['available', 'damaged', 'lost', 'maintenance'],
-      default: 'available',
-    },
+const Library = sequelize.define('Library', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  { timestamps: true }
-);
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  isbn: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: false,
+  },
+  author: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  publisher: {
+    type: DataTypes.STRING,
+  },
+  publicationYear: {
+    type: DataTypes.INTEGER,
+  },
+  category: {
+    type: DataTypes.ENUM('fiction', 'non-fiction', 'reference', 'textbook', 'biography', 'other'),
+  },
+  subject: {
+    type: DataTypes.STRING,
+  },
+  description: {
+    type: DataTypes.TEXT,
+  },
+  totalCopies: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  availableCopies: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  location: {
+    type: DataTypes.JSONB,
+  },
+  price: {
+    type: DataTypes.FLOAT,
+  },
+  procurementDate: {
+    type: DataTypes.DATE,
+  },
+  schoolId: {
+    type: DataTypes.INTEGER,
+  },
+  borrowHistory: {
+    type: DataTypes.JSONB,
+    defaultValue: [],
+  },
+  status: {
+    type: DataTypes.ENUM('available', 'damaged', 'lost', 'maintenance'),
+    defaultValue: 'available',
+  },
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model('Library', librarySchema);
+module.exports = Library;

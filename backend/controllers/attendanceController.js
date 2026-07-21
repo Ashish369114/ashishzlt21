@@ -1,10 +1,13 @@
-const Attendance = require('../models/Attendance');
+const { Attendance, Student, Class } = require('../models');
 
 const getAttendance = async (req, res) => {
   try {
-    const attendance = await Attendance.find()
-      .populate('student')
-      .populate('class');
+    const attendance = await Attendance.findAll({
+      include: [
+        { model: Student, as: 'student' },
+        { model: Class, as: 'class' }
+      ]
+    });
     res.json(attendance);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -14,9 +17,13 @@ const getAttendance = async (req, res) => {
 const getAttendanceByStudent = async (req, res) => {
   try {
     const studentId = req.params.studentId;
-    const attendance = await Attendance.find({ student: studentId })
-      .populate('student')
-      .populate('class');
+    const attendance = await Attendance.findAll({ 
+      where: { studentId },
+      include: [
+        { model: Student, as: 'student' },
+        { model: Class, as: 'class' }
+      ]
+    });
     res.json(attendance);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -26,9 +33,13 @@ const getAttendanceByStudent = async (req, res) => {
 const getAttendanceByClass = async (req, res) => {
   try {
     const classId = req.params.classId;
-    const attendance = await Attendance.find({ class: classId })
-      .populate('student')
-      .populate('class');
+    const attendance = await Attendance.findAll({ 
+      where: { classId },
+      include: [
+        { model: Student, as: 'student' },
+        { model: Class, as: 'class' }
+      ]
+    });
     res.json(attendance);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -43,13 +54,25 @@ const markAttendance = async (req, res) => {
     const queryDate = new Date(date);
     queryDate.setHours(0, 0, 0, 0);
 
-    const attendance = await Attendance.findOneAndUpdate(
-      { student, class: classId, date: queryDate },
-      { $set: { status, remarks } },
-      { new: true, upsert: true }
-    ).populate('student class');
+    const [attendance] = await Attendance.upsert(
+      { 
+        studentId: student, 
+        classId: classId, 
+        date: queryDate,
+        status, 
+        remarks 
+      },
+      { returning: true }
+    );
     
-    res.status(201).json(attendance);
+    const populatedAttendance = await Attendance.findByPk(attendance.id, {
+      include: [
+        { model: Student, as: 'student' },
+        { model: Class, as: 'class' }
+      ]
+    });
+
+    res.status(201).json(populatedAttendance);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -57,10 +80,22 @@ const markAttendance = async (req, res) => {
 
 const updateAttendance = async (req, res) => {
   try {
-    const attendance = await Attendance.findByIdAndUpdate(req.params.id, req.body, { new: true })
-      .populate('student')
-      .populate('class');
-    res.json(attendance);
+    const attendance = await Attendance.findByPk(req.params.id);
+    if (!attendance) {
+      return res.status(404).json({ message: 'Attendance record not found' });
+    }
+    
+    Object.assign(attendance, req.body);
+    await attendance.save();
+
+    const populatedAttendance = await Attendance.findByPk(attendance.id, {
+      include: [
+        { model: Student, as: 'student' },
+        { model: Class, as: 'class' }
+      ]
+    });
+
+    res.json(populatedAttendance);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -68,10 +103,11 @@ const updateAttendance = async (req, res) => {
 
 const deleteAttendance = async (req, res) => {
   try {
-    const attendance = await Attendance.findByIdAndDelete(req.params.id);
+    const attendance = await Attendance.findByPk(req.params.id);
     if (!attendance) {
       return res.status(404).json({ message: 'Attendance record not found' });
     }
+    await attendance.destroy();
     res.json({ message: 'Attendance deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });

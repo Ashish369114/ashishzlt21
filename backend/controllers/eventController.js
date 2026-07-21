@@ -1,11 +1,34 @@
-const mongoose = require('mongoose');
-const Event = require('../models/Event');
+const { Event, User } = require('../models');
+
+const populateEventArrays = async (events) => {
+  const isArray = Array.isArray(events);
+  const eventList = isArray ? events : [events];
+
+  for (const e of eventList) {
+    if (e.attendees && e.attendees.length > 0) {
+      e.dataValues.attendeesList = await User.findAll({ 
+        where: { id: e.attendees },
+        attributes: { exclude: ['password'] }
+      });
+    } else {
+      e.dataValues.attendeesList = [];
+    }
+    
+    e.dataValues.attendees = e.dataValues.attendeesList;
+  }
+
+  return isArray ? eventList : eventList[0];
+};
 
 const getEvents = async (req, res) => {
   try {
-    const events = await Event.find()
-      .populate('organizer')
-      .populate('attendees');
+    const events = await Event.findAll({
+      include: [
+        { model: User, as: 'organizer', attributes: { exclude: ['password'] } }
+      ]
+    });
+    
+    await populateEventArrays(events);
     res.json(events);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -14,12 +37,16 @@ const getEvents = async (req, res) => {
 
 const getEventById = async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id)
-      .populate('organizer')
-      .populate('attendees');
+    const event = await Event.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'organizer', attributes: { exclude: ['password'] } }
+      ]
+    });
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
     }
+    
+    await populateEventArrays(event);
     res.json(event);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -28,11 +55,16 @@ const getEventById = async (req, res) => {
 
 const sanitizeEventBody = (body) => {
   const payload = { ...body };
-  delete payload.organizer;
+  
+  if (payload.organizer) {
+    payload.organizerId = payload.organizer;
+    delete payload.organizer;
+  }
 
   if (payload.attendees && Array.isArray(payload.attendees)) {
-    payload.attendees = payload.attendees.filter((attendee) => attendee && attendee.toString().trim() !== '');
-    payload.attendees = payload.attendees.filter((attendee) => mongoose.Types.ObjectId.isValid(attendee));
+    payload.attendees = payload.attendees
+      .map(id => Number(id))
+      .filter(id => !isNaN(id) && id > 0);
   }
 
   return payload;
@@ -41,12 +73,14 @@ const sanitizeEventBody = (body) => {
 const addEvent = async (req, res) => {
   try {
     const payload = sanitizeEventBody(req.body);
-    const event = new Event(payload);
-    await event.save();
+    const event = await Event.create(payload);
 
-    const populatedEvent = await Event.findById(event._id);
-    await populatedEvent.populate('organizer');
-    await populatedEvent.populate('attendees');
+    const populatedEvent = await Event.findByPk(event.id, {
+      include: [
+        { model: User, as: 'organizer', attributes: { exclude: ['password'] } }
+      ]
+    });
+    await populateEventArrays(populatedEvent);
 
     res.status(201).json(populatedEvent);
   } catch (error) {
@@ -57,10 +91,23 @@ const addEvent = async (req, res) => {
 const updateEvent = async (req, res) => {
   try {
     const payload = sanitizeEventBody(req.body);
-    const event = await Event.findByIdAndUpdate(req.params.id, payload, { new: true })
-      .populate('organizer')
-      .populate('attendees');
-    res.json(event);
+    const event = await Event.findByPk(req.params.id);
+    
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    
+    Object.assign(event, payload);
+    await event.save();
+    
+    const populatedEvent = await Event.findByPk(event.id, {
+      include: [
+        { model: User, as: 'organizer', attributes: { exclude: ['password'] } }
+      ]
+    });
+    await populateEventArrays(populatedEvent);
+
+    res.json(populatedEvent);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -68,10 +115,11 @@ const updateEvent = async (req, res) => {
 
 const deleteEvent = async (req, res) => {
   try {
-    const event = await Event.findByIdAndDelete(req.params.id);
+    const event = await Event.findByPk(req.params.id);
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
     }
+    await event.destroy();
     res.json({ message: 'Event deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });

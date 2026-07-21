@@ -1,9 +1,10 @@
-const Library = require('../models/Library');
+const { Library, School } = require('../models');
 
 const getBooks = async (req, res) => {
   try {
-    const books = await Library.find()
-      .populate('school');
+    const books = await Library.findAll({
+      include: [{ model: School, as: 'school' }]
+    });
     res.json(books);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -12,8 +13,9 @@ const getBooks = async (req, res) => {
 
 const getBookById = async (req, res) => {
   try {
-    const book = await Library.findById(req.params.id)
-      .populate('school');
+    const book = await Library.findByPk(req.params.id, {
+      include: [{ model: School, as: 'school' }]
+    });
     if (!book) {
       return res.status(404).json({ message: 'Book not found' });
     }
@@ -25,29 +27,25 @@ const getBookById = async (req, res) => {
 
 const addBook = async (req, res) => {
   try {
-    // Validate required fields
     if (!req.body.title || !req.body.isbn || !req.body.author || req.body.totalCopies === undefined || req.body.totalCopies === null) {
       return res.status(400).json({ message: 'Missing required fields: title, isbn, author, totalCopies' });
     }
 
-    // Get first available school if not provided
-    let school = req.body.school;
-    if (!school) {
-      const School = require('../models/School');
+    let schoolId = req.body.school;
+    if (!schoolId) {
       const availableSchool = await School.findOne();
       if (!availableSchool) {
         return res.status(400).json({ message: 'No school configured in the system' });
       }
-      school = availableSchool._id;
+      schoolId = availableSchool.id;
     }
 
-    const book = new Library({
+    const book = await Library.create({
       ...req.body,
-      school,
+      schoolId,
       availableCopies: req.body.totalCopies,
     });
-    const newBook = await book.save();
-    res.status(201).json(newBook);
+    res.status(201).json(book);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -55,19 +53,18 @@ const addBook = async (req, res) => {
 
 const updateBook = async (req, res) => {
   try {
-    const book = await Library.findById(req.params.id);
+    const book = await Library.findByPk(req.params.id);
     if (!book) {
       return res.status(404).json({ message: 'Book not found' });
     }
     
-    // Validate required fields if being updated
     if (req.body.title === '' || req.body.isbn === '' || req.body.author === '' || (req.body.totalCopies !== undefined && req.body.totalCopies < 0)) {
       return res.status(400).json({ message: 'Invalid field values: title, isbn, author cannot be empty, totalCopies must be non-negative' });
     }
     
     Object.assign(book, req.body);
-    const updatedBook = await book.save();
-    res.json(updatedBook);
+    await book.save();
+    res.json(book);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -75,7 +72,7 @@ const updateBook = async (req, res) => {
 
 const borrowBook = async (req, res) => {
   try {
-    const book = await Library.findById(req.params.id);
+    const book = await Library.findByPk(req.params.id);
     if (!book) {
       return res.status(404).json({ message: 'Book not found' });
     }
@@ -84,16 +81,16 @@ const borrowBook = async (req, res) => {
       return res.status(400).json({ message: 'No copies available' });
     }
 
-    // Use authenticated user's ID from token, not from request body
     const userId = req.user?.userId || req.body.userId;
     if (!userId) {
       return res.status(400).json({ message: 'User ID is required. Please login again.' });
     }
 
-    // Check if user already has this book borrowed
-    const existingBorrow = book.borrowHistory.find(
-      r => r.userId?.toString() === userId && r.status === 'borrowed'
+    const borrowHistory = [...(book.borrowHistory || [])];
+    const existingBorrow = borrowHistory.find(
+      r => String(r.userId) === String(userId) && r.status === 'borrowed'
     );
+    
     if (existingBorrow) {
       return res.status(400).json({ message: 'You have already borrowed this book. Please return it first.' });
     }
@@ -105,7 +102,8 @@ const borrowBook = async (req, res) => {
       status: 'borrowed',
     };
 
-    book.borrowHistory.push(borrowRecord);
+    borrowHistory.push(borrowRecord);
+    book.borrowHistory = borrowHistory;
     book.availableCopies -= 1;
 
     await book.save();
@@ -121,35 +119,38 @@ const borrowBook = async (req, res) => {
 
 const returnBook = async (req, res) => {
   try {
-    const book = await Library.findById(req.params.id);
+    const book = await Library.findByPk(req.params.id);
     if (!book) {
       return res.status(404).json({ message: 'Book not found' });
     }
 
-    // Use authenticated user's ID from token, not from request body
     const userId = req.user?.userId || req.body.userId;
     if (!userId) {
       return res.status(400).json({ message: 'User ID is required. Please login again.' });
     }
 
-    const borrowRecord = book.borrowHistory.find(
-      r => r.userId?.toString() === userId && r.status === 'borrowed'
+    const borrowHistory = [...(book.borrowHistory || [])];
+    const borrowIndex = borrowHistory.findIndex(
+      r => String(r.userId) === String(userId) && r.status === 'borrowed'
     );
 
-    if (!borrowRecord) {
+    if (borrowIndex === -1) {
       return res.status(400).json({ message: 'No active borrow record found' });
     }
 
+    let borrowRecord = { ...borrowHistory[borrowIndex] };
     borrowRecord.returnDate = new Date();
     borrowRecord.status = 'returned';
 
-    // Calculate fine if overdue
-    if (borrowRecord.returnDate > borrowRecord.dueDate) {
-      const daysOverdue = Math.ceil((borrowRecord.returnDate - borrowRecord.dueDate) / (24 * 60 * 60 * 1000));
-      borrowRecord.fine = daysOverdue * 10; // 10 per day
+    if (borrowRecord.returnDate > new Date(borrowRecord.dueDate)) {
+      const daysOverdue = Math.ceil((borrowRecord.returnDate - new Date(borrowRecord.dueDate)) / (24 * 60 * 60 * 1000));
+      borrowRecord.fine = daysOverdue * 10;
     }
 
+    borrowHistory[borrowIndex] = borrowRecord;
+    book.borrowHistory = borrowHistory;
     book.availableCopies += 1;
+    
     await book.save();
 
     res.json({ 
@@ -164,9 +165,11 @@ const returnBook = async (req, res) => {
 
 const getBooksByCategory = async (req, res) => {
   try {
-    const books = await Library.find({ 
-      school: req.params.schoolId,
-      category: req.params.category 
+    const books = await Library.findAll({ 
+      where: {
+        schoolId: req.params.schoolId,
+        category: req.params.category 
+      }
     });
     res.json(books);
   } catch (error) {
@@ -176,10 +179,13 @@ const getBooksByCategory = async (req, res) => {
 
 const getAvailableBooks = async (req, res) => {
   try {
-    const books = await Library.find({
-      school: req.params.schoolId,
-      availableCopies: { $gt: 0 },
-      status: 'available'
+    const { Op } = require('sequelize');
+    const books = await Library.findAll({
+      where: {
+        schoolId: req.params.schoolId,
+        availableCopies: { [Op.gt]: 0 },
+        status: 'available'
+      }
     });
     res.json(books);
   } catch (error) {
@@ -189,17 +195,17 @@ const getAvailableBooks = async (req, res) => {
 
 const getBorrowHistory = async (req, res) => {
   try {
-    const books = await Library.find({ school: req.params.schoolId });
+    const books = await Library.findAll({ where: { schoolId: req.params.schoolId } });
     const userBorrowHistory = [];
     
     books.forEach(book => {
-      const userRecords = book.borrowHistory.filter(
-        record => record.userId.toString() === req.params.userId
+      const userRecords = (book.borrowHistory || []).filter(
+        record => String(record.userId) === String(req.params.userId)
       );
       userRecords.forEach(record => {
         userBorrowHistory.push({
           bookTitle: book.title,
-          ...record.toObject ? record.toObject() : record,
+          ...record,
         });
       });
     });
@@ -212,10 +218,11 @@ const getBorrowHistory = async (req, res) => {
 
 const deleteBook = async (req, res) => {
   try {
-    const book = await Library.findByIdAndDelete(req.params.id);
+    const book = await Library.findByPk(req.params.id);
     if (!book) {
       return res.status(404).json({ message: 'Book not found' });
     }
+    await book.destroy();
     res.json({ message: 'Book deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -224,7 +231,7 @@ const deleteBook = async (req, res) => {
 
 const renewBook = async (req, res) => {
   try {
-    const book = await Library.findById(req.params.id);
+    const book = await Library.findByPk(req.params.id);
     if (!book) {
       return res.status(404).json({ message: 'Book not found' });
     }
@@ -234,16 +241,20 @@ const renewBook = async (req, res) => {
       return res.status(400).json({ message: 'User ID is required. Please login again.' });
     }
 
-    const borrowRecord = book.borrowHistory.find(
-      r => r.userId?.toString() === userId && r.status === 'borrowed'
+    const borrowHistory = [...(book.borrowHistory || [])];
+    const borrowIndex = borrowHistory.findIndex(
+      r => String(r.userId) === String(userId) && r.status === 'borrowed'
     );
 
-    if (!borrowRecord) {
+    if (borrowIndex === -1) {
       return res.status(400).json({ message: 'No active borrow record found' });
     }
 
-    // Extend due date by 14 days from current due date
+    let borrowRecord = { ...borrowHistory[borrowIndex] };
     borrowRecord.dueDate = new Date(new Date(borrowRecord.dueDate).getTime() + 14 * 24 * 60 * 60 * 1000);
+    
+    borrowHistory[borrowIndex] = borrowRecord;
+    book.borrowHistory = borrowHistory;
     
     await book.save();
 

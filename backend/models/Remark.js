@@ -1,37 +1,37 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const remarkSchema = new mongoose.Schema(
-  {
-    student: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    teacher: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    subject: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Subject',
-    },
-    class: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Class',
-      required: true,
-    },
-    remark: {
-      type: String,
-      required: true,
-    },
-    type: {
-      type: String,
-      enum: ['Positive', 'Negative', 'Neutral'],
-      default: 'Neutral',
-    },
+const Remark = sequelize.define('Remark', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  { timestamps: true }
-);
+  studentId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  teacherId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  subjectId: {
+    type: DataTypes.INTEGER,
+  },
+  classId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  remark: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  type: {
+    type: DataTypes.ENUM('Positive', 'Negative', 'Neutral'),
+    defaultValue: 'Neutral',
+  },
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model('Remark', remarkSchema);
+module.exports = Remark;

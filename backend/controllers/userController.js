@@ -1,8 +1,8 @@
-const User = require('../models/User');
+const { User } = require('../models');
 
 const getUsers = async (req, res) => {
   try {
-    const users = await User.find().select('-password');
+    const users = await User.findAll({ attributes: { exclude: ['password'] } });
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -11,7 +11,7 @@ const getUsers = async (req, res) => {
 
 const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select('-password');
+    const user = await User.findByPk(req.params.id, { attributes: { exclude: ['password'] } });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -29,17 +29,16 @@ const addUser = async (req, res) => {
       return res.status(400).json({ message: 'User ID, password, role, first name, and last name are required.' });
     }
 
-    if (await User.findOne({ userId })) {
+    if (await User.findOne({ where: { userId } })) {
       return res.status(400).json({ message: 'User ID already exists.' });
     }
 
-    if (email && await User.findOne({ email })) {
+    if (email && await User.findOne({ where: { email } })) {
       return res.status(400).json({ message: 'Email already exists.' });
     }
 
-    const user = new User({ userId, password, role, firstName, lastName, email, phone, gender });
-    await user.save();
-    const responseUser = user.toObject();
+    const user = await User.create({ userId, password, role, firstName, lastName, email, phone, gender });
+    const responseUser = user.toJSON();
     delete responseUser.password;
     res.status(201).json(responseUser);
   } catch (error) {
@@ -50,21 +49,21 @@ const addUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { userId, password, role, firstName, lastName, email, phone, gender, isActive } = req.body;
-    const user = await User.findById(req.params.id);
+    const user = await User.findByPk(req.params.id);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
     if (userId && userId !== user.userId) {
-      if (await User.findOne({ userId })) {
+      if (await User.findOne({ where: { userId } })) {
         return res.status(400).json({ message: 'User ID already exists.' });
       }
       user.userId = userId;
     }
 
     if (email && email !== user.email) {
-      if (await User.findOne({ email })) {
+      if (await User.findOne({ where: { email } })) {
         return res.status(400).json({ message: 'Email already exists.' });
       }
       user.email = email;
@@ -79,7 +78,7 @@ const updateUser = async (req, res) => {
     if (isActive !== undefined) user.isActive = isActive;
 
     await user.save();
-    const responseUser = user.toObject();
+    const responseUser = user.toJSON();
     delete responseUser.password;
     res.json(responseUser);
   } catch (error) {
@@ -89,10 +88,11 @@ const updateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    const user = await User.findByPk(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+    await user.destroy();
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });

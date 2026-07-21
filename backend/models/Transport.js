@@ -1,93 +1,68 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const transportSchema = new mongoose.Schema(
-  {
-    routeName: {
-      type: String,
-      required: true,
-    },
-    routeNumber: {
-      type: String,
-      unique: true,
-      required: true,
-    },
-    school: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'School',
-    },
-    vehicle: {
-      vehicleNumber: String,
-      vehicleType: String,
-      manufacturer: String,
-      capacity: Number,
-      registrationNumber: String,
-      insuranceExpiry: Date,
-    },
-    driver: {
-      driverId: String,
-      driverName: String,
-      licenseNumber: String,
-      licenseExpiry: Date,
-      phone: String,
-      address: String,
-    },
-    conductor: {
-      conductorName: String,
-      phone: String,
-      address: String,
-    },
-    startPoint: {
-      name: String,
-      latitude: Number,
-      longitude: Number,
-    },
-    endPoint: {
-      name: String,
-      latitude: Number,
-      longitude: Number,
-    },
-    stops: [
-      {
-        stopName: String,
-        sequence: Number,
-        latitude: Number,
-        longitude: Number,
-        arrivalTime: String,
-      },
-    ],
-    pickupTime: String,
-    dropTime: String,
-    distance: Number,
-    fare: Number,
-    students: [
-      {
-        studentId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Student',
-        },
-        boarding: String,
-        status: {
-          type: String,
-          enum: ['active', 'inactive'],
-        },
-      },
-    ],
-    status: {
-      type: String,
-      enum: ['active', 'inactive', 'maintenance'],
-      default: 'active',
-    },
-    gpsTracking: {
-      enabled: Boolean,
-      trackingUrl: String,
-      lastLocation: {
-        latitude: Number,
-        longitude: Number,
-        timestamp: Date,
-      },
-    },
+const Transport = sequelize.define('Transport', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  { timestamps: true }
-);
+  routeName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  routeNumber: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: false,
+  },
+  schoolId: {
+    type: DataTypes.INTEGER,
+  },
+  vehicle: {
+    type: DataTypes.JSONB,
+  },
+  driver: {
+    type: DataTypes.JSONB,
+  },
+  conductor: {
+    type: DataTypes.JSONB,
+  },
+  startPoint: {
+    type: DataTypes.JSONB,
+  },
+  endPoint: {
+    type: DataTypes.JSONB,
+  },
+  stops: {
+    type: DataTypes.JSONB,
+    defaultValue: [],
+  },
+  pickupTime: {
+    type: DataTypes.STRING,
+  },
+  dropTime: {
+    type: DataTypes.STRING,
+  },
+  distance: {
+    type: DataTypes.FLOAT,
+  },
+  fare: {
+    type: DataTypes.FLOAT,
+  },
+  students: {
+    type: DataTypes.JSONB,
+    defaultValue: [],
+  },
+  status: {
+    type: DataTypes.ENUM('active', 'inactive', 'maintenance'),
+    defaultValue: 'active',
+  },
+  gpsTracking: {
+    type: DataTypes.JSONB,
+  },
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model('Transport', transportSchema);
+module.exports = Transport;

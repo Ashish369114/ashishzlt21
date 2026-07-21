@@ -1,43 +1,47 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const concessionRequestSchema = new mongoose.Schema(
-  {
-    student: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    fee: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Fee',
-      required: true,
-    },
-    concessionAmount: {
-      type: Number,
-      required: true,
-    },
-    reason: {
-      type: String,
-      required: true,
-    },
-    status: {
-      type: String,
-      enum: ['pending', 'approved', 'rejected'],
-      default: 'pending',
-    },
-    requestedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    approvedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
-    approvalDate: Date,
-    remarks: String,
+const ConcessionRequest = sequelize.define('ConcessionRequest', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  { timestamps: true }
-);
+  studentId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  feeId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  concessionAmount: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+  },
+  reason: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  status: {
+    type: DataTypes.ENUM('pending', 'approved', 'rejected'),
+    defaultValue: 'pending',
+  },
+  requestedById: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  approvedById: {
+    type: DataTypes.INTEGER,
+  },
+  approvalDate: {
+    type: DataTypes.DATE,
+  },
+  remarks: {
+    type: DataTypes.TEXT,
+  },
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model('ConcessionRequest', concessionRequestSchema);
+module.exports = ConcessionRequest;

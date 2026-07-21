@@ -1,11 +1,9 @@
-const Subject = require('../models/Subject');
-const Class = require('../models/Class');
-const User = require('../models/User');
-const Teacher = require('../models/Teacher');
+const { Op } = require('sequelize');
+const { Subject, Class, User, Teacher, Student } = require('../models');
 
 const getSubjects = async (req, res) => {
   try {
-    const subjects = await Subject.find();
+    const subjects = await Subject.findAll();
     res.json(subjects);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -17,35 +15,57 @@ const resolveClassTeacher = async (teacherInput) => {
     return { teacherUserId: null, teacherProfile: null };
   }
 
-  let teacherProfile = await Teacher.findById(teacherInput);
+  // teacherInput could be Teacher PK or User.userId string
+  const isNumeric = !isNaN(teacherInput);
+  let teacherProfile;
+
+  if (isNumeric) {
+    teacherProfile = await Teacher.findByPk(teacherInput);
+  }
+  
   if (!teacherProfile) {
-    teacherProfile = await Teacher.findOne({ userId: teacherInput });
+    const user = await User.findOne({ where: { userId: teacherInput } });
+    if (user) {
+      teacherProfile = await Teacher.findOne({ where: { userId: user.id } });
+    }
   }
 
   return {
-    teacherUserId: teacherProfile?.userId || teacherInput,
+    teacherUserId: teacherProfile?.userId || null,
     teacherProfile,
   };
 };
 
 const syncTeacherClassAssignment = async (teacherProfile, classId, action = 'add') => {
-  if (!teacherProfile?._id) {
+  if (!teacherProfile?.id) {
     return;
   }
 
-  const update = action === 'add'
-    ? { $addToSet: { assignedClasses: classId } }
-    : { $pull: { assignedClasses: classId } };
+  const assignedClasses = teacherProfile.assignedClasses || [];
+  let newAssignedClasses = [...assignedClasses];
 
-  await Teacher.findByIdAndUpdate(teacherProfile._id, update);
+  if (action === 'add' && !assignedClasses.includes(classId)) {
+    newAssignedClasses.push(classId);
+  } else if (action === 'remove' && assignedClasses.includes(classId)) {
+    newAssignedClasses = newAssignedClasses.filter(id => id !== classId);
+  }
+
+  teacherProfile.assignedClasses = newAssignedClasses;
+  await teacherProfile.save();
 };
 
 const getClasses = async (req, res) => {
   try {
-    const classes = await Class.find()
-      .populate('classTeacher')
-      .populate('students')
-      .sort({ grade: 1, section: 1 });
+    const classes = await Class.findAll({
+      include: [
+        { model: User, as: 'classTeacher', attributes: { exclude: ['password'] } },
+        { model: Student, as: 'students' }
+      ],
+      order: [
+        ['grade', 'ASC'],
+        ['section', 'ASC']
+      ]
+    });
     res.json(classes);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -54,9 +74,12 @@ const getClasses = async (req, res) => {
 
 const getClassById = async (req, res) => {
   try {
-    const classData = await Class.findById(req.params.id)
-      .populate('classTeacher')
-      .populate('students');
+    const classData = await Class.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'classTeacher', attributes: { exclude: ['password'] } },
+        { model: Student, as: 'students' }
+      ]
+    });
     if (!classData) {
       return res.status(404).json({ message: 'Class not found' });
     }
@@ -83,9 +106,11 @@ const createClass = async (req, res) => {
     const normalizedSubject = String(subject || '').trim();
     const subjectValue = normalizedSubject || 'N/A';
     const existing = await Class.findOne({
-      grade: normalizedGrade,
-      section: { $regex: new RegExp(`^${normalizedSection.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
-      subject: { $regex: new RegExp(`^${subjectValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+      where: {
+        grade: normalizedGrade,
+        section: { [Op.iLike]: normalizedSection }, // Use Op.iLike for postgres case-insensitive match
+        subject: { [Op.iLike]: subjectValue },
+      }
     });
     if (existing) {
       return res.status(200).json({ message: 'Class already exists', class: existing });
@@ -93,21 +118,20 @@ const createClass = async (req, res) => {
 
     const { teacherUserId, teacherProfile } = await resolveClassTeacher(classTeacher);
 
-    const newClass = new Class({
+    const newClass = await Class.create({
       grade: normalizedGrade,
       section: normalizedSection,
-      ...(teacherUserId ? { classTeacher: teacherUserId } : {}),
+      classTeacherId: teacherUserId || null,
       subject: subjectValue,
     });
-    await newClass.save();
 
-    if (teacherProfile?._id) {
-      await syncTeacherClassAssignment(teacherProfile, newClass._id, 'add');
+    if (teacherProfile?.id) {
+      await syncTeacherClassAssignment(teacherProfile, newClass.id, 'add');
     }
 
     res.status(201).json(newClass);
   } catch (error) {
-    if (error.code === 11000) {
+    if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(409).json({
         message: 'Duplicate class entry found. A class already exists for this grade, section, and subject combination.',
       });
@@ -118,7 +142,7 @@ const createClass = async (req, res) => {
 
 const updateClass = async (req, res) => {
   try {
-    const existingClass = await Class.findById(req.params.id);
+    const existingClass = await Class.findByPk(req.params.id);
     if (!existingClass) {
       return res.status(404).json({ message: 'Class not found' });
     }
@@ -127,24 +151,33 @@ const updateClass = async (req, res) => {
     if (Object.prototype.hasOwnProperty.call(req.body, 'classTeacher')) {
       const shouldClearTeacher = req.body.classTeacher === '' || req.body.classTeacher === null;
       const { teacherUserId, teacherProfile } = await resolveClassTeacher(shouldClearTeacher ? null : req.body.classTeacher);
-      const previousTeacher = existingClass.classTeacher
-        ? await Teacher.findOne({ userId: existingClass.classTeacher })
+      const previousTeacher = existingClass.classTeacherId
+        ? await Teacher.findOne({ where: { userId: existingClass.classTeacherId } })
         : null;
 
-      if (previousTeacher?._id && previousTeacher._id.toString() !== teacherProfile?._id?.toString()) {
-        await syncTeacherClassAssignment(previousTeacher, existingClass._id, 'remove');
+      if (previousTeacher?.id && previousTeacher.id !== teacherProfile?.id) {
+        await syncTeacherClassAssignment(previousTeacher, existingClass.id, 'remove');
       }
 
-      updates.classTeacher = teacherUserId;
+      existingClass.classTeacherId = teacherUserId || null;
 
-      if (teacherProfile?._id && !shouldClearTeacher) {
-        await syncTeacherClassAssignment(teacherProfile, existingClass._id, 'add');
+      if (teacherProfile?.id && !shouldClearTeacher) {
+        await syncTeacherClassAssignment(teacherProfile, existingClass.id, 'add');
       }
     }
+    
+    if (updates.grade !== undefined) existingClass.grade = updates.grade;
+    if (updates.section !== undefined) existingClass.section = updates.section;
+    if (updates.subject !== undefined) existingClass.subject = updates.subject;
 
-    const classData = await Class.findByIdAndUpdate(req.params.id, updates, { new: true })
-      .populate('classTeacher')
-      .populate('students');
+    await existingClass.save();
+
+    const classData = await Class.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'classTeacher', attributes: { exclude: ['password'] } },
+        { model: Student, as: 'students' }
+      ]
+    });
     res.json(classData);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -153,19 +186,19 @@ const updateClass = async (req, res) => {
 
 const deleteClass = async (req, res) => {
   try {
-    const classData = await Class.findById(req.params.id);
+    const classData = await Class.findByPk(req.params.id);
     if (!classData) {
       return res.status(404).json({ message: 'Class not found' });
     }
 
-    const teacherProfile = classData.classTeacher
-      ? await Teacher.findOne({ userId: classData.classTeacher })
+    const teacherProfile = classData.classTeacherId
+      ? await Teacher.findOne({ where: { userId: classData.classTeacherId } })
       : null;
 
-    await Class.findByIdAndDelete(req.params.id);
+    await classData.destroy();
 
-    if (teacherProfile?._id) {
-      await syncTeacherClassAssignment(teacherProfile, classData._id, 'remove');
+    if (teacherProfile?.id) {
+      await syncTeacherClassAssignment(teacherProfile, classData.id, 'remove');
     }
 
     return res.status(200).json({ message: 'Class deleted successfully' });
@@ -177,26 +210,32 @@ const deleteClass = async (req, res) => {
 const assignClassTeacher = async (req, res) => {
   try {
     const { classId, teacherId } = req.body;
-    const currentClass = await Class.findById(classId);
+    const currentClass = await Class.findByPk(classId);
     if (!currentClass) {
       return res.status(404).json({ message: 'Class not found' });
     }
 
-    const previousTeacher = currentClass.classTeacher
-      ? await Teacher.findOne({ userId: currentClass.classTeacher })
+    const previousTeacher = currentClass.classTeacherId
+      ? await Teacher.findOne({ where: { userId: currentClass.classTeacherId } })
       : null;
     const { teacherUserId, teacherProfile } = await resolveClassTeacher(teacherId);
 
-    const classData = await Class.findByIdAndUpdate(classId, { classTeacher: teacherUserId }, { new: true })
-      .populate('classTeacher')
-      .populate('students');
+    currentClass.classTeacherId = teacherUserId || null;
+    await currentClass.save();
 
-    if (previousTeacher?._id && previousTeacher._id.toString() !== teacherProfile?._id?.toString()) {
-      await syncTeacherClassAssignment(previousTeacher, currentClass._id, 'remove');
+    const classData = await Class.findByPk(classId, {
+      include: [
+        { model: User, as: 'classTeacher', attributes: { exclude: ['password'] } },
+        { model: Student, as: 'students' }
+      ]
+    });
+
+    if (previousTeacher?.id && previousTeacher.id !== teacherProfile?.id) {
+      await syncTeacherClassAssignment(previousTeacher, currentClass.id, 'remove');
     }
 
-    if (teacherProfile?._id) {
-      await syncTeacherClassAssignment(teacherProfile, currentClass._id, 'add');
+    if (teacherProfile?.id) {
+      await syncTeacherClassAssignment(teacherProfile, currentClass.id, 'add');
     }
 
     res.json(classData);
@@ -207,14 +246,17 @@ const assignClassTeacher = async (req, res) => {
 
 const getDashboardStats = async (req, res) => {
   try {
-    const totalStudents = await User.countDocuments({ role: 'student' });
-    const totalTeachers = await User.countDocuments({ role: 'teacher' });
-    const totalParents = await User.countDocuments({ role: 'parent' });
-    const totalClasses = await Class.countDocuments();
+    const totalStudents = await User.count({ where: { role: 'student' } });
+    const totalTeachers = await User.count({ where: { role: 'teacher' } });
+    const totalParents = await User.count({ where: { role: 'parent' } });
+    const totalClasses = await Class.count();
 
-    const classes = await Class.find()
-      .populate('classTeacher')
-      .populate('students');
+    const classes = await Class.findAll({
+      include: [
+        { model: User, as: 'classTeacher', attributes: { exclude: ['password'] } },
+        { model: Student, as: 'students' }
+      ]
+    });
 
     const sectionSummary = classes
       .sort((a, b) => a.grade - b.grade || a.section.localeCompare(b.section))
@@ -226,25 +268,37 @@ const getDashboardStats = async (req, res) => {
         subject: cls.subject || 'N/A',
       }));
 
-    const assignedTeachers = await Teacher.find()
-      .populate('userId')
-      .populate({
-        path: 'assignedClasses',
-        select: 'grade section',
-      });
+    const assignedTeachers = await Teacher.findAll({
+      include: [
+        { model: User, as: 'user' }
+      ]
+    });
 
-    const teacherSummary = assignedTeachers.map((teacher) => {
-      const uniqueGrades = [...new Set((teacher.assignedClasses || []).map((cls) => cls.grade))].sort((a, b) => a - b);
-      const uniqueSections = [...new Set((teacher.assignedClasses || []).map((cls) => cls.section))].sort();
-      return {
-        name: teacher.userId ? `${teacher.userId.firstName || ''} ${teacher.userId.lastName || ''}`.trim() : 'Unknown',
+    const teacherSummary = [];
+    for (const teacher of assignedTeachers) {
+      let teacherClasses = [];
+      if (teacher.assignedClasses && teacher.assignedClasses.length > 0) {
+        teacherClasses = await Class.findAll({ where: { id: teacher.assignedClasses } });
+      }
+
+      const uniqueGrades = [...new Set(teacherClasses.map((cls) => cls.grade))].sort((a, b) => a - b);
+      const uniqueSections = [...new Set(teacherClasses.map((cls) => cls.section))].sort();
+      
+      let subjectNames = teacher.subject?.name || 'N/A';
+      if (teacher.isAllSubjectTeacher) {
+        subjectNames = 'All subjects';
+      } else if (teacher.teachingSubjects?.length) {
+        const subjects = await Subject.findAll({ where: { id: teacher.teachingSubjects } });
+        subjectNames = subjects.map(s => s.name).join(', ');
+      }
+
+      teacherSummary.push({
+        name: teacher.user ? `${teacher.user.firstName || ''} ${teacher.user.lastName || ''}`.trim() : 'Unknown',
         grades: uniqueGrades,
         sections: uniqueSections,
-        subjects: teacher.isAllSubjectTeacher
-          ? 'All subjects'
-          : (teacher.teachingSubjects?.length ? teacher.teachingSubjects.map((subject) => subject.name || subject).join(', ') : teacher.subject?.name || 'N/A'),
-      };
-    });
+        subjects: subjectNames,
+      });
+    }
 
     res.json({
       totalStudents,

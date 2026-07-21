@@ -1,20 +1,19 @@
-const Leave = require('../models/Leave');
+const { Leave, User } = require('../models');
 
-/**
- * GET /api/leaves
- * - Principal / Super Admin → sees ALL leave requests
- * - Teacher / Student / Parent → sees only their own
- */
 exports.getAll = async (req, res) => {
   try {
-    const { role, userId } = req.user;
+    const { role, id } = req.user;
     const isPrincipalOrAdmin = ['principal', 'super_admin'].includes(role);
-    const query = isPrincipalOrAdmin ? {} : { applicant: userId };
+    const query = isPrincipalOrAdmin ? {} : { applicantUserId: id };
 
-    const leaves = await Leave.find(query)
-      .populate('applicant', 'firstName lastName userId role email')
-      .populate('reviewedBy', 'firstName lastName role')
-      .sort({ createdAt: -1 });
+    const leaves = await Leave.findAll({
+      where: query,
+      include: [
+        { model: User, as: 'applicant', attributes: ['firstName', 'lastName', 'userId', 'role', 'email'] },
+        { model: User, as: 'reviewedBy', attributes: ['firstName', 'lastName', 'role'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
 
     res.json(leaves);
   } catch (err) {
@@ -23,15 +22,15 @@ exports.getAll = async (req, res) => {
   }
 };
 
-/**
- * GET /api/leaves/pending
- * Principal / Super Admin only — returns all pending requests
- */
 exports.getPending = async (req, res) => {
   try {
-    const leaves = await Leave.find({ status: 'pending' })
-      .populate('applicant', 'firstName lastName userId role email')
-      .sort({ createdAt: 1 }); // oldest first for priority
+    const leaves = await Leave.findAll({
+      where: { status: 'pending' },
+      include: [
+        { model: User, as: 'applicant', attributes: ['firstName', 'lastName', 'userId', 'role', 'email'] }
+      ],
+      order: [['createdAt', 'ASC']]
+    });
     res.json(leaves);
   } catch (err) {
     console.error('leaveController.getPending error:', err);
@@ -39,19 +38,18 @@ exports.getPending = async (req, res) => {
   }
 };
 
-/**
- * GET /api/leaves/:id
- * Any authenticated user (controller guards own vs others)
- */
 exports.getById = async (req, res) => {
   try {
-    const leave = await Leave.findById(req.params.id)
-      .populate('applicant', 'firstName lastName userId role email')
-      .populate('reviewedBy', 'firstName lastName');
+    const leave = await Leave.findByPk(req.params.id, {
+      include: [
+        { model: User, as: 'applicant', attributes: ['firstName', 'lastName', 'userId', 'role', 'email'] },
+        { model: User, as: 'reviewedBy', attributes: ['firstName', 'lastName'] }
+      ]
+    });
     if (!leave) return res.status(404).json({ message: 'Leave request not found' });
 
     const isPrincipalOrAdmin = ['principal', 'super_admin'].includes(req.user.role);
-    const isOwner = String(leave.applicant?._id) === String(req.user.userId);
+    const isOwner = String(leave.applicantUserId) === String(req.user.id);
     if (!isPrincipalOrAdmin && !isOwner) {
       return res.status(403).json({ message: 'Access denied' });
     }
@@ -61,11 +59,6 @@ exports.getById = async (req, res) => {
   }
 };
 
-/**
- * POST /api/leaves
- * Any authenticated user submits a leave for themselves.
- * Applicant details auto-filled from JWT; manual overrides allowed for admins.
- */
 exports.create = async (req, res) => {
   try {
     const { leaveType, fromDate, toDate, reason } = req.body;
@@ -82,7 +75,6 @@ exports.create = async (req, res) => {
       return res.status(400).json({ message: 'toDate must be on or after fromDate' });
     }
 
-    // Map role to applicantRole enum value
     const roleToApplicantRole = {
       teacher: 'teacher',
       student: 'student',
@@ -92,8 +84,8 @@ exports.create = async (req, res) => {
       super_admin: 'staff',
     };
 
-    const leave = new Leave({
-      applicant: req.user.userId,
+    const leave = await Leave.create({
+      applicantUserId: req.user.id,
       applicantRole: roleToApplicantRole[req.user.role] || 'staff',
       applicantName: req.user.firstName
         ? `${req.user.firstName} ${req.user.lastName || ''}`.trim()
@@ -105,45 +97,41 @@ exports.create = async (req, res) => {
       reason: reason.trim(),
     });
 
-    await leave.save();
-    await leave.populate('applicant', 'firstName lastName userId role');
-    res.status(201).json({ message: 'Leave request submitted successfully', leave });
+    const populatedLeave = await Leave.findByPk(leave.id, {
+      include: [{ model: User, as: 'applicant', attributes: ['firstName', 'lastName', 'userId', 'role'] }]
+    });
+
+    res.status(201).json({ message: 'Leave request submitted successfully', leave: populatedLeave });
   } catch (err) {
     console.error('leaveController.create error:', err);
     res.status(500).json({ message: 'Failed to submit leave request', error: err.message });
   }
 };
 
-/**
- * PUT /api/leaves/:id/approve
- * Principal / Super Admin only
- */
 exports.approve = async (req, res) => {
   try {
     const { remarks } = req.body;
-    const leave = await Leave.findByIdAndUpdate(
-      req.params.id,
-      {
-        status: 'approved',
-        remarks: (remarks || '').trim() || 'Approved',
-        reviewedBy: req.user.userId,
-        reviewedAt: new Date(),
-      },
-      { new: true }
-    ).populate('applicant', 'firstName lastName userId role');
-
+    const leave = await Leave.findByPk(req.params.id);
+    
     if (!leave) return res.status(404).json({ message: 'Leave request not found' });
-    res.json({ message: 'Leave approved successfully', leave });
+    
+    leave.status = 'approved';
+    leave.remarks = (remarks || '').trim() || 'Approved';
+    leave.reviewedById = req.user.id;
+    leave.reviewedAt = new Date();
+    await leave.save();
+
+    const populatedLeave = await Leave.findByPk(leave.id, {
+      include: [{ model: User, as: 'applicant', attributes: ['firstName', 'lastName', 'userId', 'role'] }]
+    });
+
+    res.json({ message: 'Leave approved successfully', leave: populatedLeave });
   } catch (err) {
     console.error('leaveController.approve error:', err);
     res.status(500).json({ message: 'Failed to approve leave', error: err.message });
   }
 };
 
-/**
- * PUT /api/leaves/:id/reject
- * Principal / Super Admin only
- */
 exports.reject = async (req, res) => {
   try {
     const { remarks } = req.body;
@@ -151,36 +139,33 @@ exports.reject = async (req, res) => {
       return res.status(400).json({ message: 'A rejection reason (remarks) is required' });
     }
 
-    const leave = await Leave.findByIdAndUpdate(
-      req.params.id,
-      {
-        status: 'rejected',
-        remarks: remarks.trim(),
-        reviewedBy: req.user.userId,
-        reviewedAt: new Date(),
-      },
-      { new: true }
-    ).populate('applicant', 'firstName lastName userId role');
-
+    const leave = await Leave.findByPk(req.params.id);
     if (!leave) return res.status(404).json({ message: 'Leave request not found' });
-    res.json({ message: 'Leave rejected', leave });
+
+    leave.status = 'rejected';
+    leave.remarks = remarks.trim();
+    leave.reviewedById = req.user.id;
+    leave.reviewedAt = new Date();
+    await leave.save();
+
+    const populatedLeave = await Leave.findByPk(leave.id, {
+      include: [{ model: User, as: 'applicant', attributes: ['firstName', 'lastName', 'userId', 'role'] }]
+    });
+
+    res.json({ message: 'Leave rejected', leave: populatedLeave });
   } catch (err) {
     console.error('leaveController.reject error:', err);
     res.status(500).json({ message: 'Failed to reject leave', error: err.message });
   }
 };
 
-/**
- * DELETE /api/leaves/:id
- * Principal / Super Admin — can delete any; others can only delete their own pending requests
- */
 exports.remove = async (req, res) => {
   try {
-    const leave = await Leave.findById(req.params.id);
+    const leave = await Leave.findByPk(req.params.id);
     if (!leave) return res.status(404).json({ message: 'Leave request not found' });
 
     const isPrincipalOrAdmin = ['principal', 'super_admin'].includes(req.user.role);
-    const isOwner = String(leave.applicant) === String(req.user.userId);
+    const isOwner = String(leave.applicantUserId) === String(req.user.id);
     const isOwnPending = isOwner && leave.status === 'pending';
 
     if (!isPrincipalOrAdmin && !isOwnPending) {
@@ -189,7 +174,7 @@ exports.remove = async (req, res) => {
       });
     }
 
-    await Leave.findByIdAndDelete(req.params.id);
+    await leave.destroy();
     res.json({ message: 'Leave request deleted' });
   } catch (err) {
     console.error('leaveController.remove error:', err);

@@ -1,34 +1,47 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const eventSchema = new mongoose.Schema(
-  {
-    title: {
-      type: String,
-      required: true,
-    },
-    description: String,
-    eventDate: {
-      type: Date,
-      required: true,
-    },
-    startTime: String,
-    endTime: String,
-    location: String,
-    organizer: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
-    attendees: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    }],
-    eventType: {
-      type: String,
-      enum: ['Sports', 'Cultural', 'Academic', 'Celebration', 'Other', 'Exam', 'CCA', 'PTM', 'Teachers Meeting'],
-    },
-    image: String,
+const Event = sequelize.define('Event', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  { timestamps: true }
-);
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  description: {
+    type: DataTypes.TEXT,
+  },
+  eventDate: {
+    type: DataTypes.DATEONLY,
+    allowNull: false,
+  },
+  startTime: {
+    type: DataTypes.STRING,
+  },
+  endTime: {
+    type: DataTypes.STRING,
+  },
+  location: {
+    type: DataTypes.STRING,
+  },
+  organizerId: {
+    type: DataTypes.INTEGER,
+  },
+  attendees: {
+    type: DataTypes.JSONB,
+    defaultValue: [],
+  },
+  eventType: {
+    type: DataTypes.ENUM('Sports', 'Cultural', 'Academic', 'Celebration', 'Other', 'Exam', 'CCA', 'PTM', 'Teachers Meeting'),
+  },
+  image: {
+    type: DataTypes.STRING,
+  },
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model('Event', eventSchema);
+module.exports = Event;

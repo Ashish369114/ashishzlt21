@@ -1,70 +1,74 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const schoolSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    code: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    email: {
-      type: String,
-      required: true,
-    },
-    phone: {
-      type: String,
-      required: true,
-    },
-    address: {
-      street: String,
-      city: String,
-      state: String,
-      zipCode: String,
-      country: String,
-    },
-    principalId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
-    academicYear: {
-      type: String,
-      required: true,
-    },
-    sessionStartDate: Date,
-    sessionEndDate: Date,
-    logo: String,
-    website: String,
-    status: {
-      type: String,
-      enum: ['active', 'inactive'],
-      default: 'active',
-    },
-    totalStudents: {
-      type: Number,
-      default: 0,
-    },
-    totalTeachers: {
-      type: Number,
-      default: 0,
-    },
-    totalClasses: {
-      type: Number,
-      default: 0,
-    },
-    schoolSettings: {
-      admissionOpenDate: Date,
-      admissionCloseDate: Date,
-      feeStructure: mongoose.Schema.Types.Mixed,
-      workingDays: [String],
-      holidays: [Date],
-    },
+const School = sequelize.define('School', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  { timestamps: true }
-);
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+  code: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  phone: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  address: {
+    type: DataTypes.JSONB, // { street, city, state, zipCode, country }
+  },
+  principalId: {
+    type: DataTypes.INTEGER,
+    // Will be properly associated with User model later
+  },
+  academicYear: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  sessionStartDate: {
+    type: DataTypes.DATEONLY,
+  },
+  sessionEndDate: {
+    type: DataTypes.DATEONLY,
+  },
+  logo: {
+    type: DataTypes.STRING,
+  },
+  website: {
+    type: DataTypes.STRING,
+  },
+  status: {
+    type: DataTypes.ENUM('active', 'inactive'),
+    defaultValue: 'active',
+  },
+  totalStudents: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
+  totalTeachers: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
+  totalClasses: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
+  schoolSettings: {
+    type: DataTypes.JSONB, // { admissionOpenDate, admissionCloseDate, feeStructure, workingDays, holidays }
+  },
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model('School', schoolSchema);
+module.exports = School;

@@ -1,12 +1,6 @@
-const ConcessionRequest = require('../models/ConcessionRequest');
-const Fee = require('../models/Fee');
+const { ConcessionRequest, Fee, Student, User } = require('../models');
 const { formatCurrency } = require('../utils/currencyFormatter');
 
-/**
- * POST /api/concessions
- * Principal grants a concession DIRECTLY — status is instantly 'approved',
- * fee is updated immediately. No pending/approval step.
- */
 exports.createRequest = async (req, res) => {
   try {
     const { studentId, feeId, concessionAmount, reason } = req.body;
@@ -20,7 +14,7 @@ exports.createRequest = async (req, res) => {
       return res.status(400).json({ message: 'Concession amount must be greater than 0' });
     }
 
-    const fee = await Fee.findById(feeId);
+    const fee = await Fee.findByPk(feeId);
     if (!fee) {
       return res.status(404).json({ message: 'Fee record not found' });
     }
@@ -29,24 +23,21 @@ exports.createRequest = async (req, res) => {
       return res.status(400).json({ message: `Concession amount cannot exceed the current fee amount of ${formatCurrency(fee.amount)}` });
     }
 
-    // If parent is requesting, save a pending request and DO NOT modify the fee.
     if (req.user.role === 'parent') {
-      const request = new ConcessionRequest({
-        student: studentId,
-        fee: feeId,
+      const request = await ConcessionRequest.create({
+        studentId,
+        feeId,
         concessionAmount: amount,
         reason,
-        requestedBy: req.user.userId,
+        requestedById: req.user.id,
         status: 'pending',
       });
-      await request.save();
       return res.status(201).json({
         message: `Your concession request of ${formatCurrency(amount)} has been submitted to the Principal for approval.`,
         request,
       });
     }
 
-    // Otherwise (Principal, Super Admin, Accountant direct grant), apply immediately.
     const previousAmount = fee.amount;
     fee.amount = Math.max(fee.amount - amount, 0);
     fee.remarks = `${fee.remarks || ''} [Concession ${formatCurrency(amount)} granted by Principal. Prev: ${formatCurrency(previousAmount)}]`.trim();
@@ -56,19 +47,18 @@ exports.createRequest = async (req, res) => {
     }
     await fee.save();
 
-    const request = new ConcessionRequest({
-      student: studentId,
-      fee: feeId,
+    const request = await ConcessionRequest.create({
+      studentId,
+      feeId,
       concessionAmount: amount,
       reason,
-      requestedBy: req.user.userId,
+      requestedById: req.user.id,
       status: 'approved',
-      approvedBy: req.user.userId,
+      approvedById: req.user.id,
       approvalDate: new Date(),
       remarks: `Directly granted by ${req.user.firstName || 'Principal'}`,
     });
 
-    await request.save();
     res.status(201).json({
       message: `Concession of ${formatCurrency(amount)} granted. Fee updated from ${formatCurrency(previousAmount)} → ${formatCurrency(fee.amount)}`,
       request,
@@ -79,47 +69,43 @@ exports.createRequest = async (req, res) => {
   }
 };
 
-/**
- * GET /api/concessions/pending
- * Returns all concessions (all are now auto-approved; kept for compatibility)
- */
 exports.getPendingRequests = async (req, res) => {
   try {
-    const requests = await ConcessionRequest.find({ status: 'pending' })
-      .populate('student', 'firstName lastName userId')
-      .populate('fee', 'amount description')
-      .populate('requestedBy', 'firstName lastName')
-      .sort({ createdAt: -1 });
+    const requests = await ConcessionRequest.findAll({ 
+      where: { status: 'pending' },
+      include: [
+        { model: Student, as: 'student', include: [{ model: User, as: 'user', attributes: ['firstName', 'lastName', 'userId'] }] },
+        { model: Fee, as: 'fee', attributes: ['amount', 'description'] },
+        { model: User, as: 'requestedBy', attributes: ['firstName', 'lastName'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
     res.json(requests);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-/**
- * GET /api/concessions
- * All concessions — used by both Principal (grant page) and Accountant (log view)
- */
 exports.getAllRequests = async (req, res) => {
   try {
-    const requests = await ConcessionRequest.find()
-      .populate('student', 'firstName lastName userId')
-      .populate('fee', 'amount description dueDate')
-      .populate('requestedBy', 'firstName lastName role')
-      .populate('approvedBy', 'firstName lastName role')
-      .sort({ createdAt: -1 });
+    const requests = await ConcessionRequest.findAll({
+      include: [
+        { model: Student, as: 'student', include: [{ model: User, as: 'user', attributes: ['firstName', 'lastName', 'userId'] }] },
+        { model: Fee, as: 'fee', attributes: ['amount', 'description', 'dueDate'] },
+        { model: User, as: 'requestedBy', attributes: ['firstName', 'lastName', 'role'] },
+        { model: User, as: 'approvedBy', attributes: ['firstName', 'lastName', 'role'] }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
     res.json(requests);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-/**
- * PUT /api/concessions/:id/approve  — kept for backward compatibility (no-op if already approved)
- */
 exports.approveRequest = async (req, res) => {
   try {
-    const request = await ConcessionRequest.findById(req.params.id);
+    const request = await ConcessionRequest.findByPk(req.params.id);
     if (!request) return res.status(404).json({ message: 'Concession record not found' });
 
     if (request.status === 'approved') {
@@ -130,8 +116,7 @@ exports.approveRequest = async (req, res) => {
       return res.status(400).json({ message: 'Concession request was already rejected.' });
     }
 
-    // Process approval
-    const fee = await Fee.findById(request.fee);
+    const fee = await Fee.findByPk(request.feeId);
     if (!fee) {
       return res.status(404).json({ message: 'Associated fee record not found' });
     }
@@ -146,7 +131,7 @@ exports.approveRequest = async (req, res) => {
     await fee.save();
 
     request.status = 'approved';
-    request.approvedBy = req.user.userId;
+    request.approvedById = req.user.id;
     request.approvalDate = new Date();
     request.remarks = req.body.remarks || 'Approved by Principal';
     await request.save();
@@ -160,22 +145,18 @@ exports.approveRequest = async (req, res) => {
   }
 };
 
-/**
- * PUT /api/concessions/:id/reject  — Principal can reject/revoke a concession request
- */
 exports.rejectRequest = async (req, res) => {
   try {
     const { remarks } = req.body;
-    const request = await ConcessionRequest.findById(req.params.id);
+    const request = await ConcessionRequest.findByPk(req.params.id);
     if (!request) return res.status(404).json({ message: 'Concession record not found' });
 
     if (request.status === 'rejected') {
       return res.json({ message: 'Concession is already rejected.', request });
     }
 
-    // If it was already approved, restore the fee amount
     if (request.status === 'approved') {
-      const fee = await Fee.findById(request.fee);
+      const fee = await Fee.findByPk(request.feeId);
       if (fee) {
         fee.amount = fee.amount + request.concessionAmount;
         fee.isPaid = fee.paidAmount >= fee.amount;
@@ -184,7 +165,6 @@ exports.rejectRequest = async (req, res) => {
       }
     }
 
-    // Mark as rejected
     request.status = 'rejected';
     request.remarks = remarks || 'Rejected by Principal';
     await request.save();

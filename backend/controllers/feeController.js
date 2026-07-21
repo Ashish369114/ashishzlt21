@@ -1,11 +1,10 @@
-const mongoose = require('mongoose');
-const Fee = require('../models/Fee');
-const Student = require('../models/Student');
-const User = require('../models/User');
+const { Fee, Student, User } = require('../models');
 
 const getFees = async (req, res) => {
   try {
-    const fees = await Fee.find().populate('student');
+    const fees = await Fee.findAll({
+      include: [{ model: Student, as: 'student', include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] }]
+    });
     res.json(fees);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -15,7 +14,10 @@ const getFees = async (req, res) => {
 const getFeesByStudent = async (req, res) => {
   try {
     const studentId = req.params.studentId;
-    const fees = await Fee.find({ student: studentId }).populate('student');
+    const fees = await Fee.findAll({ 
+      where: { studentId },
+      include: [{ model: Student, as: 'student', include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] }]
+    });
     res.json(fees);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -24,7 +26,10 @@ const getFeesByStudent = async (req, res) => {
 
 const getPendingFees = async (req, res) => {
   try {
-    const fees = await Fee.find({ isPaid: false }).populate('student');
+    const fees = await Fee.findAll({ 
+      where: { isPaid: false },
+      include: [{ model: Student, as: 'student', include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] }]
+    });
     res.json(fees);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -37,22 +42,26 @@ const getFeesByParent = async (req, res) => {
     let studentIds = [];
 
     const loadStudentsForParent = async (parentRef) => {
-      const students = await Student.find({ parentId: parentRef });
-      return students.map((student) => student.userId);
+      const students = await Student.findAll({ where: { parentId: parentRef } });
+      return students.map((student) => student.id);
     };
 
-    if (mongoose.Types.ObjectId.isValid(parentIdentifier)) {
+    const isNumeric = !isNaN(parentIdentifier);
+    if (isNumeric) {
       studentIds = await loadStudentsForParent(parentIdentifier);
     }
 
     if (!studentIds.length) {
-      const parentUser = await User.findOne({ userId: parentIdentifier });
+      const parentUser = await User.findOne({ where: { userId: parentIdentifier } });
       if (parentUser) {
-        studentIds = await loadStudentsForParent(parentUser._id);
+        studentIds = await loadStudentsForParent(parentUser.id);
       }
     }
 
-    const fees = await Fee.find({ student: { $in: studentIds } }).populate('student');
+    const fees = await Fee.findAll({ 
+      where: { studentId: studentIds },
+      include: [{ model: Student, as: 'student', include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] }]
+    });
     res.json(fees);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -61,15 +70,18 @@ const getFeesByParent = async (req, res) => {
 
 const addFee = async (req, res) => {
   try {
-    const fee = new Fee({
+    const payload = {
       ...req.body,
+      studentId: req.body.student, // Mapping standard req body from frontend
       installments: req.body.installments || 3,
       paidAmount: 0,
       paymentHistory: [],
       isPaid: false,
+    };
+    const fee = await Fee.create(payload);
+    const populated = await Fee.findByPk(fee.id, {
+      include: [{ model: Student, as: 'student', include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] }]
     });
-    await fee.save();
-    const populated = await fee.populate('student');
     res.status(201).json(populated);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -81,7 +93,7 @@ const payFee = async (req, res) => {
     const { feeId, paymentMethod, transactionId, paymentDetails, amount } = req.body;
     const resolvedTransactionId = transactionId || `TXN-TEST-${Date.now()}`;
 
-    const fee = await Fee.findById(feeId);
+    const fee = await Fee.findByPk(feeId);
     if (!fee) {
       return res.status(404).json({ message: 'Fee not found' });
     }
@@ -112,16 +124,18 @@ const payFee = async (req, res) => {
     fee.paymentDetails = paymentDetails || fee.paymentDetails || {};
 
     await fee.save();
-    await fee.populate('student');
+    
+    const populated = await Fee.findByPk(fee.id, {
+      include: [{ model: Student, as: 'student', include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] }]
+    });
 
-    // Update student's fees paid amount
-    const student = await Student.findById(fee.student._id);
+    const student = await Student.findByPk(fee.studentId);
     if (student) {
       student.feesPaid = (student.feesPaid || 0) + paymentAmount;
       await student.save();
     }
 
-    res.json(fee);
+    res.json(populated);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -129,7 +143,7 @@ const payFee = async (req, res) => {
 
 const updateFee = async (req, res) => {
   try {
-    const fee = await Fee.findById(req.params.id);
+    const fee = await Fee.findByPk(req.params.id);
     if (!fee) {
       return res.status(404).json({ message: 'Fee not found' });
     }
@@ -148,7 +162,9 @@ const updateFee = async (req, res) => {
     Object.assign(fee, updateData);
     await fee.save();
 
-    const populatedFee = await fee.populate('student');
+    const populatedFee = await Fee.findByPk(fee.id, {
+      include: [{ model: Student, as: 'student', include: [{ model: User, as: 'user', attributes: { exclude: ['password'] } }] }]
+    });
     res.json(populatedFee);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -157,10 +173,11 @@ const updateFee = async (req, res) => {
 
 const deleteFee = async (req, res) => {
   try {
-    const fee = await Fee.findByIdAndDelete(req.params.id);
+    const fee = await Fee.findByPk(req.params.id);
     if (!fee) {
       return res.status(404).json({ message: 'Fee not found' });
     }
+    await fee.destroy();
     res.json({ message: 'Fee deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -170,8 +187,8 @@ const deleteFee = async (req, res) => {
 const deleteFeesByStudent = async (req, res) => {
   try {
     const { studentId } = req.params;
-    const result = await Fee.deleteMany({ student: studentId });
-    res.json({ message: 'Fees deleted', deletedCount: result.deletedCount || 0 });
+    const result = await Fee.destroy({ where: { studentId } });
+    res.json({ message: 'Fees deleted', deletedCount: result || 0 });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -185,32 +202,33 @@ const getStudentsBySection = async (req, res) => {
       return res.status(400).json({ message: 'Class ID is required' });
     }
 
-    // Get all students in this class
-    const students = await Student.find({ class: classId }).populate('userId');
+    const students = await Student.findAll({ 
+      where: { classId },
+      include: [{ model: User, as: 'user' }]
+    });
     
     if (!students || students.length === 0) {
       return res.json([]);
     }
 
-    // Get all fees for students in this class
-    const studentIds = students.map((student) => student.userId?._id || student.userId || student._id);
-    const fees = await Fee.find({ student: { $in: studentIds } });
+    const studentIds = students.map((student) => student.id);
+    const fees = await Fee.findAll({ where: { studentId: studentIds } });
 
-    // Build response with student data and fee summary
     const studentsWithFees = students.map((student) => {
-      const studentId = student.userId?._id || student.userId || student._id;
-      const studentFees = fees.filter((fee) => String(fee.student) === String(studentId));
+      const studentId = student.id;
+      const studentFees = fees.filter((fee) => fee.studentId === studentId);
       
       const totalFee = studentFees.reduce((sum, fee) => sum + (fee.amount || 0), 0);
       const totalPaid = studentFees.reduce((sum, fee) => sum + (fee.paidAmount || 0), 0);
       const totalPending = totalFee - totalPaid;
 
       return {
-        _id: student._id,
+        _id: student.id,
+        id: student.id,
         studentId: studentId,
         rollNumber: student.rollNumber,
-        firstName: student.userId?.firstName || student.firstName || '',
-        lastName: student.userId?.lastName || student.lastName || '',
+        firstName: student.user?.firstName || student.firstName || '',
+        lastName: student.user?.lastName || student.lastName || '',
         totalFee,
         totalPaid,
         totalPending,

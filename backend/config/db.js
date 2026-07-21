@@ -1,57 +1,36 @@
-const mongoose = require('mongoose');
+const { Sequelize } = require('sequelize');
 
-let mongod = null;
+const sequelize = new Sequelize(
+  process.env.DB_NAME || 'school_erp',
+  process.env.DB_USER || 'postgres',
+  process.env.DB_PASSWORD || 'postgres',
+  {
+    host: process.env.DB_HOST || '127.0.0.1',
+    port: process.env.DB_PORT || 5432,
+    dialect: 'postgres',
+    logging: false, // Set to true to see SQL queries in console
+    pool: {
+      max: 10,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    }
+  }
+);
 
 const connectDB = async () => {
   try {
-    const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/school_management_system';
+    await sequelize.authenticate();
+    console.log(`PostgreSQL Connected (External): ${sequelize.config.host}`);
     
-    // Attempt standard connection first
-    let conn;
-    try {
-      conn = await mongoose.connect(uri, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        serverSelectionTimeoutMS: 2000,
-      });
-      console.log(`MongoDB Connected (External): ${conn.connection.host}`);
-      return conn;
-    } catch (e) {
-      console.warn('External MongoDB not reachable, starting in-memory database server...');
-    }
-
-    // Lazy load and start memory server if external connection fails
-    const { MongoMemoryServer } = require('mongodb-memory-server');
-    mongod = await MongoMemoryServer.create({
-      instance: {
-        port: 27017, // Bind to standard MongoDB port so any client can connect
-        dbName: 'school_management_system',
-      }
-    });
+    // In development, you might want to sync models here:
+    // await sequelize.sync({ alter: true });
     
-    const memoryUri = mongod.getUri();
-    console.log(`Memory MongoDB started at: ${memoryUri}`);
-    
-    conn = await mongoose.connect(memoryUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log(`MongoDB Connected (In-Memory): ${conn.connection.host}`);
-
-    // Seed the database automatically on startup for the demo!
-    try {
-      console.log('Seeding in-memory database...');
-      const seedDataFn = require('../seeds/seedFn');
-      await seedDataFn();
-      console.log('✓ Seeding in-memory database successful!');
-    } catch (seedErr) {
-      console.error('Error seeding database:', seedErr);
-    }
-
-    return conn;
+    return sequelize;
   } catch (error) {
-    console.error(`Fatal error in MongoDB setup: ${error.message}`);
+    console.error(`Fatal error in PostgreSQL setup: ${error.message}`);
+    process.exit(1);
   }
 };
 
-module.exports = connectDB;
+module.exports = { sequelize, connectDB };

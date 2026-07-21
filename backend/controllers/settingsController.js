@@ -1,8 +1,8 @@
-const Settings = require('../models/Settings');
+const { Settings } = require('../models');
 
 const getSettings = async (req, res) => {
   try {
-    const settings = await Settings.findOne({ school: req.params.schoolId });
+    const settings = await Settings.findOne({ where: { schoolId: req.params.schoolId } });
     if (!settings) {
       return res.status(404).json({ message: 'Settings not found' });
     }
@@ -13,13 +13,12 @@ const getSettings = async (req, res) => {
 };
 
 const createSettings = async (req, res) => {
-  const settings = new Settings({
-    ...req.body,
-    school: req.body.schoolId,
-  });
   try {
-    const newSettings = await settings.save();
-    res.status(201).json(newSettings);
+    const settings = await Settings.create({
+      ...req.body,
+      schoolId: req.body.schoolId || req.body.school,
+    });
+    res.status(201).json(settings);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -27,13 +26,13 @@ const createSettings = async (req, res) => {
 
 const updateSettings = async (req, res) => {
   try {
-    const settings = await Settings.findOne({ school: req.params.schoolId });
+    const settings = await Settings.findOne({ where: { schoolId: req.params.schoolId } });
     if (!settings) {
       return res.status(404).json({ message: 'Settings not found' });
     }
     Object.assign(settings, req.body);
-    const updatedSettings = await settings.save();
-    res.json(updatedSettings);
+    await settings.save();
+    res.json(settings);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -41,13 +40,13 @@ const updateSettings = async (req, res) => {
 
 const updateGeneralSettings = async (req, res) => {
   try {
-    const settings = await Settings.findOne({ school: req.params.schoolId });
+    const settings = await Settings.findOne({ where: { schoolId: req.params.schoolId } });
     if (!settings) {
       return res.status(404).json({ message: 'Settings not found' });
     }
-    settings.general = { ...settings.general, ...req.body };
-    const updatedSettings = await settings.save();
-    res.json(updatedSettings);
+    settings.general = { ...(settings.general || {}), ...req.body };
+    await settings.save();
+    res.json(settings);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -55,13 +54,13 @@ const updateGeneralSettings = async (req, res) => {
 
 const updateAcademicSettings = async (req, res) => {
   try {
-    const settings = await Settings.findOne({ school: req.params.schoolId });
+    const settings = await Settings.findOne({ where: { schoolId: req.params.schoolId } });
     if (!settings) {
       return res.status(404).json({ message: 'Settings not found' });
     }
-    settings.academic = { ...settings.academic, ...req.body };
-    const updatedSettings = await settings.save();
-    res.json(updatedSettings);
+    settings.academic = { ...(settings.academic || {}), ...req.body };
+    await settings.save();
+    res.json(settings);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -69,13 +68,13 @@ const updateAcademicSettings = async (req, res) => {
 
 const updateAdmissionSettings = async (req, res) => {
   try {
-    const settings = await Settings.findOne({ school: req.params.schoolId });
+    const settings = await Settings.findOne({ where: { schoolId: req.params.schoolId } });
     if (!settings) {
       return res.status(404).json({ message: 'Settings not found' });
     }
-    settings.admission = { ...settings.admission, ...req.body };
-    const updatedSettings = await settings.save();
-    res.json(updatedSettings);
+    settings.admission = { ...(settings.admission || {}), ...req.body };
+    await settings.save();
+    res.json(settings);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -83,13 +82,13 @@ const updateAdmissionSettings = async (req, res) => {
 
 const updateFeeSettings = async (req, res) => {
   try {
-    const settings = await Settings.findOne({ school: req.params.schoolId });
+    const settings = await Settings.findOne({ where: { schoolId: req.params.schoolId } });
     if (!settings) {
       return res.status(404).json({ message: 'Settings not found' });
     }
-    settings.fees = { ...settings.fees, ...req.body };
-    const updatedSettings = await settings.save();
-    res.json(updatedSettings);
+    settings.fees = { ...(settings.fees || {}), ...req.body };
+    await settings.save();
+    res.json(settings);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -97,13 +96,13 @@ const updateFeeSettings = async (req, res) => {
 
 const updateNotificationSettings = async (req, res) => {
   try {
-    const settings = await Settings.findOne({ school: req.params.schoolId });
+    const settings = await Settings.findOne({ where: { schoolId: req.params.schoolId } });
     if (!settings) {
       return res.status(404).json({ message: 'Settings not found' });
     }
-    settings.notification = { ...settings.notification, ...req.body };
-    const updatedSettings = await settings.save();
-    res.json(updatedSettings);
+    settings.notification = { ...(settings.notification || {}), ...req.body };
+    await settings.save();
+    res.json(settings);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -111,13 +110,13 @@ const updateNotificationSettings = async (req, res) => {
 
 const updateSecuritySettings = async (req, res) => {
   try {
-    const settings = await Settings.findOne({ school: req.params.schoolId });
+    const settings = await Settings.findOne({ where: { schoolId: req.params.schoolId } });
     if (!settings) {
       return res.status(404).json({ message: 'Settings not found' });
     }
-    settings.security = { ...settings.security, ...req.body };
-    const updatedSettings = await settings.save();
-    res.json(updatedSettings);
+    settings.security = { ...(settings.security || {}), ...req.body };
+    await settings.save();
+    res.json(settings);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -125,13 +124,13 @@ const updateSecuritySettings = async (req, res) => {
 
 const updateBackupSettings = async (req, res) => {
   try {
-    const settings = await Settings.findOne({ school: req.params.schoolId });
+    const settings = await Settings.findOne({ where: { schoolId: req.params.schoolId } });
     if (!settings) {
       return res.status(404).json({ message: 'Settings not found' });
     }
-    settings.backup = { ...settings.backup, ...req.body };
-    const updatedSettings = await settings.save();
-    res.json(updatedSettings);
+    settings.backup = { ...(settings.backup || {}), ...req.body };
+    await settings.save();
+    res.json(settings);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -139,13 +138,13 @@ const updateBackupSettings = async (req, res) => {
 
 const updateCustomization = async (req, res) => {
   try {
-    const settings = await Settings.findOne({ school: req.params.schoolId });
+    const settings = await Settings.findOne({ where: { schoolId: req.params.schoolId } });
     if (!settings) {
       return res.status(404).json({ message: 'Settings not found' });
     }
-    settings.customization = { ...settings.customization, ...req.body };
-    const updatedSettings = await settings.save();
-    res.json(updatedSettings);
+    settings.customization = { ...(settings.customization || {}), ...req.body };
+    await settings.save();
+    res.json(settings);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -153,13 +152,13 @@ const updateCustomization = async (req, res) => {
 
 const updateIntegrations = async (req, res) => {
   try {
-    const settings = await Settings.findOne({ school: req.params.schoolId });
+    const settings = await Settings.findOne({ where: { schoolId: req.params.schoolId } });
     if (!settings) {
       return res.status(404).json({ message: 'Settings not found' });
     }
-    settings.integrations = { ...settings.integrations, ...req.body };
-    const updatedSettings = await settings.save();
-    res.json(updatedSettings);
+    settings.integrations = { ...(settings.integrations || {}), ...req.body };
+    await settings.save();
+    res.json(settings);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

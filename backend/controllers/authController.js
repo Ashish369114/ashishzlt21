@@ -1,21 +1,21 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
-const User = require('../models/User');
+const { Op } = require('sequelize');
+const { User } = require('../models');
 const { sendEmail } = require('../services/notificationService');
 
 const mockUsers = [
-  { _id: 'mock_sa_id_123',  userId: 'SUPERADMIN001', password: 'Admin@123',      role: 'super_admin',     firstName: 'Super',  lastName: 'Admin',  email: 'superadmin@school.com',  subscriptionPlan: 'platinum_with_ocr', isActive: true },
-  { _id: 'mock_p_id_123',   userId: 'PRINCIPAL001',  password: 'Principal@123',  role: 'principal',       firstName: 'Dr.',    lastName: 'Kumar',  email: 'principal@school.com',   subscriptionPlan: 'gold',              isActive: true },
-  { _id: 'mock_a_id_123',   userId: 'ACCOUNTANT001', password: 'Accountant@123', role: 'accountant_admin',firstName: 'Ravi',   lastName: 'Verma',  email: 'accountant@school.com',  subscriptionPlan: 'gold',              isActive: true },
-  { _id: 'mock_t1_id_123',  userId: 'TEACHER001',    password: 'Teacher@123',    role: 'teacher',         firstName: 'Ramesh', lastName: 'Sharma', email: 'ramesh1@school.com',     subscriptionPlan: 'silver',            isActive: true },
-  { _id: 'mock_t2_id_123',  userId: 'TEACHER002',    password: 'Teacher@123',    role: 'teacher',         firstName: 'Priya',  lastName: 'Patel',  email: 'priya2@school.com',      subscriptionPlan: 'silver',            isActive: true },
-  { _id: 'mock_t3_id_123',  userId: 'TEACHER003',    password: 'Teacher@123',    role: 'teacher',         firstName: 'Rajesh', lastName: 'Singh',  email: 'rajesh3@school.com',     subscriptionPlan: 'silver',            isActive: true },
-  { _id: 'mock_t4_id_123',  userId: 'TEACHER004',    password: 'Teacher@123',    role: 'teacher',         firstName: 'Sneha',  lastName: 'Gupta',  email: 'sneha4@school.com',      subscriptionPlan: 'silver',            isActive: true },
-  { _id: 'mock_t5_id_123',  userId: 'TEACHER005',    password: 'Teacher@123',    role: 'teacher',         firstName: 'Suresh', lastName: 'Rao',    email: 'suresh5@school.com',     subscriptionPlan: 'silver',            isActive: true },
-  { _id: 'mock_s_id_123',   userId: 'STUDENT001',    password: 'Student@123',    role: 'student',         firstName: 'Aarav',  lastName: 'Singh',  email: 'aarav1@school.com',      subscriptionPlan: 'silver',            isActive: true },
-  { _id: 'mock_pa_id_123',  userId: 'PAR-G1-001',    password: 'Parent@123',     role: 'parent',          firstName: 'Rajesh', lastName: 'Sharma', email: 'parent-g1-001@school.com',subscriptionPlan: 'silver',            isActive: true },
-  { _id: 'mock_ex_id_123',  userId: 'EXAMINER001',   password: 'Examiner@123',   role: 'examiner',        firstName: 'Amit',   lastName: 'Jha',    email: 'examiner@school.com',    subscriptionPlan: 'gold',              isActive: true },
+  { id: 'mock_sa_id_123',  userId: 'SUPERADMIN001', password: 'Admin@123',      role: 'super_admin',     firstName: 'Super',  lastName: 'Admin',  email: 'superadmin@school.com',  subscriptionPlan: 'platinum_with_ocr', isActive: true },
+  { id: 'mock_p_id_123',   userId: 'PRINCIPAL001',  password: 'Principal@123',  role: 'principal',       firstName: 'Dr.',    lastName: 'Kumar',  email: 'principal@school.com',   subscriptionPlan: 'gold',              isActive: true },
+  { id: 'mock_a_id_123',   userId: 'ACCOUNTANT001', password: 'Accountant@123', role: 'accountant_admin',firstName: 'Ravi',   lastName: 'Verma',  email: 'accountant@school.com',  subscriptionPlan: 'gold',              isActive: true },
+  { id: 'mock_t1_id_123',  userId: 'TEACHER001',    password: 'Teacher@123',    role: 'teacher',         firstName: 'Ramesh', lastName: 'Sharma', email: 'ramesh1@school.com',     subscriptionPlan: 'silver',            isActive: true },
+  { id: 'mock_t2_id_123',  userId: 'TEACHER002',    password: 'Teacher@123',    role: 'teacher',         firstName: 'Priya',  lastName: 'Patel',  email: 'priya2@school.com',      subscriptionPlan: 'silver',            isActive: true },
+  { id: 'mock_t3_id_123',  userId: 'TEACHER003',    password: 'Teacher@123',    role: 'teacher',         firstName: 'Rajesh', lastName: 'Singh',  email: 'rajesh3@school.com',     subscriptionPlan: 'silver',            isActive: true },
+  { id: 'mock_t4_id_123',  userId: 'TEACHER004',    password: 'Teacher@123',    role: 'teacher',         firstName: 'Sneha',  lastName: 'Gupta',  email: 'sneha4@school.com',      subscriptionPlan: 'silver',            isActive: true },
+  { id: 'mock_t5_id_123',  userId: 'TEACHER005',    password: 'Teacher@123',    role: 'teacher',         firstName: 'Suresh', lastName: 'Rao',    email: 'suresh5@school.com',     subscriptionPlan: 'silver',            isActive: true },
+  { id: 'mock_s_id_123',   userId: 'STUDENT001',    password: 'Student@123',    role: 'student',         firstName: 'Aarav',  lastName: 'Singh',  email: 'aarav1@school.com',      subscriptionPlan: 'silver',            isActive: true },
+  { id: 'mock_pa_id_123',  userId: 'PAR-G1-001',    password: 'Parent@123',     role: 'parent',          firstName: 'Rajesh', lastName: 'Sharma', email: 'parent-g1-001@school.com',subscriptionPlan: 'silver',            isActive: true },
+  { id: 'mock_ex_id_123',  userId: 'EXAMINER001',   password: 'Examiner@123',   role: 'examiner',        firstName: 'Amit',   lastName: 'Jha',    email: 'examiner@school.com',    subscriptionPlan: 'gold',              isActive: true },
 ];
 
 const login = async (req, res) => {
@@ -27,15 +27,15 @@ const login = async (req, res) => {
     }
 
     let user;
-    const isDbConnected = mongoose.connection.readyState === 1;
-
-    if (isDbConnected) {
-      user = await User.findOne({ userId });
+    let isDbConnected = true;
+    try {
+      user = await User.findOne({ where: { userId } });
       if (!user) {
-        user = await User.findOne({ email: userId });
+        user = await User.findOne({ where: { email: userId } });
       }
-    } else {
-      console.log('MongoDB is offline. Checking fallback mock accounts.');
+    } catch (dbErr) {
+      isDbConnected = false;
+      console.log('Database is offline. Checking fallback mock accounts.');
       user = mockUsers.find(u => u.userId === userId || u.email === userId);
     }
 
@@ -43,7 +43,7 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const isMatch = isDbConnected && user.comparePassword 
+    const isMatch = isDbConnected && typeof user.comparePassword === 'function'
       ? await user.comparePassword(password)
       : (user.password === password);
 
@@ -51,7 +51,7 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    if (!user.isActive) {
+    if (user.isActive === false || user.status === 'inactive') {
       return res.status(401).json({ message: 'User account is inactive' });
     }
 
@@ -65,7 +65,7 @@ const login = async (req, res) => {
     if (['principal', 'teacher', 'accountant_admin', 'student', 'parent', 'examiner'].includes(user.role)) {
       try {
         const adminEmails = isDbConnected
-          ? (await User.find({ role: 'super_admin', isActive: true }).select('email firstName'))
+          ? (await User.findAll({ where: { role: 'super_admin', status: 'active' }, attributes: ['email', 'firstName'] }))
           : mockUsers.filter(u => u.role === 'super_admin');
 
         for (const admin of adminEmails) {
@@ -102,7 +102,7 @@ const login = async (req, res) => {
 
     const token = jwt.sign(
       {
-        userId: user._id,
+        userId: user.id || user._id,
         role: user.role,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -114,7 +114,7 @@ const login = async (req, res) => {
     res.json({
       token,
       user: {
-        id: user._id,
+        id: user.id || user._id,
         userId: user.userId,
         role: user.role,
         firstName: user.firstName,
@@ -134,7 +134,7 @@ const logout = (req, res) => {
 
 const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId);
+    const user = await User.findByPk(req.user.userId);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -153,14 +153,15 @@ const forgotPassword = async (req, res) => {
       return res.status(400).json({ message: 'Email or User ID is required.' });
     }
 
-    const user = await User.findOne(email ? { email } : { userId });
+    const whereClause = email ? { email } : { userId };
+    const user = await User.findOne({ where: whereClause });
     if (!user || !user.email) {
       return res.status(404).json({ message: 'User not found or does not have an email address.' });
     }
 
     const token = crypto.randomBytes(32).toString('hex');
     user.resetPasswordToken = token;
-    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
     await user.save();
 
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -191,8 +192,10 @@ const resetPassword = async (req, res) => {
     }
 
     const user = await User.findOne({
-      resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() },
+      where: {
+        resetPasswordToken: token,
+        resetPasswordExpires: { [Op.gt]: new Date() },
+      }
     });
 
     if (!user) {
@@ -200,8 +203,8 @@ const resetPassword = async (req, res) => {
     }
 
     user.password = password;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpires = undefined;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
     await user.save();
 
     res.json({ message: 'Password reset successfully. You can now log in with your new password.' });
@@ -217,7 +220,7 @@ const changePassword = async (req, res) => {
       return res.status(400).json({ message: 'Current and new passwords are required.' });
     }
 
-    const user = await User.findById(req.user.userId);
+    const user = await User.findByPk(req.user.userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
@@ -239,15 +242,15 @@ const changePassword = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const { firstName, lastName, email, phone, address, relationship } = req.body;
-    const user = await User.findById(req.user.userId);
+    const user = await User.findByPk(req.user.userId);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
     if (email && email !== user.email) {
-      const existingUser = await User.findOne({ email });
-      if (existingUser && existingUser._id.toString() !== user._id.toString()) {
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser && existingUser.id !== user.id) {
         return res.status(400).json({ message: 'Email is already in use.' });
       }
       user.email = email;
@@ -264,7 +267,7 @@ const updateProfile = async (req, res) => {
     res.json({
       message: 'Profile updated successfully.',
       user: {
-        id: user._id,
+        id: user.id,
         userId: user.userId,
         role: user.role,
         firstName: user.firstName,
@@ -280,7 +283,6 @@ const updateProfile = async (req, res) => {
   }
 };
 
-// Forgot User ID — sends userId to registered email
 const forgotUserId = async (req, res) => {
   try {
     const { email } = req.body;
@@ -288,16 +290,14 @@ const forgotUserId = async (req, res) => {
       return res.status(400).json({ message: 'Email address is required.' });
     }
 
-    const isDbConnected = mongoose.connection.readyState === 1;
     let user;
-    if (isDbConnected) {
-      user = await User.findOne({ email });
-    } else {
+    try {
+      user = await User.findOne({ where: { email } });
+    } catch (dbErr) {
       user = mockUsers.find(u => u.email === email);
     }
 
     if (!user || !user.userId) {
-      // Don't reveal if email exists — always respond success for security
       return res.json({ message: 'If an account with that email exists, your User ID has been sent.' });
     }
 

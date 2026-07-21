@@ -1,65 +1,82 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const leaveSchema = new mongoose.Schema(
-  {
-    applicant: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    // 'staff' covers principal, accountant, etc.
-    applicantRole: {
-      type: String,
-      enum: ['teacher', 'student', 'parent', 'staff'],
-      required: true,
-    },
-    applicantName: { type: String, required: true },
-    // Human-readable userId string like TEACHER001, STUDENT001 etc.
-    applicantId:   { type: String, required: true },
-
-    leaveType: {
-      type: String,
-      enum: [
-        'Sick Leave',
-        'Casual Leave',
-        'Earned Leave',
-        'Maternity Leave',
-        'Emergency Leave',
-        'Other',
-      ],
-      required: true,
-    },
-
-    fromDate: { type: Date, required: true },
-    toDate:   { type: Date, required: true },
-    reason:   { type: String, required: true },
-
-    status: {
-      type: String,
-      enum: ['pending', 'approved', 'rejected'],
-      default: 'pending',
-      index: true,   // Fast queries for pending tab
-    },
-
-    remarks: { type: String, default: '' },
-
-    reviewedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      default: null,
-    },
-    reviewedAt: { type: Date, default: null },
+const Leave = sequelize.define('Leave', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  { timestamps: true }
-);
-
-// Virtual: number of leave days
-leaveSchema.virtual('leaveDays').get(function () {
-  if (!this.fromDate || !this.toDate) return 0;
-  const diff = this.toDate.getTime() - this.fromDate.getTime();
-  return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)) + 1);
+  applicantUserId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  applicantRole: {
+    type: DataTypes.ENUM('teacher', 'student', 'parent', 'staff'),
+    allowNull: false,
+  },
+  applicantName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  applicantId: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  leaveType: {
+    type: DataTypes.ENUM(
+      'Sick Leave',
+      'Casual Leave',
+      'Earned Leave',
+      'Maternity Leave',
+      'Emergency Leave',
+      'Other'
+    ),
+    allowNull: false,
+  },
+  fromDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  toDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  reason: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  status: {
+    type: DataTypes.ENUM('pending', 'approved', 'rejected'),
+    defaultValue: 'pending',
+  },
+  remarks: {
+    type: DataTypes.TEXT,
+    defaultValue: '',
+  },
+  reviewedById: {
+    type: DataTypes.INTEGER,
+  },
+  reviewedAt: {
+    type: DataTypes.DATE,
+  },
+  leaveDays: {
+    type: DataTypes.VIRTUAL,
+    get() {
+      const from = this.getDataValue('fromDate');
+      const to = this.getDataValue('toDate');
+      if (!from || !to) return 0;
+      const diff = new Date(to).getTime() - new Date(from).getTime();
+      return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)) + 1);
+    },
+  },
+}, {
+  timestamps: true,
+  indexes: [
+    {
+      fields: ['status'],
+    },
+  ],
 });
 
-leaveSchema.set('toJSON', { virtuals: true });
-
-module.exports = mongoose.model('Leave', leaveSchema);
+module.exports = Leave;

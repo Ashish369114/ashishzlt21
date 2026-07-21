@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const { User } = require('../models');
 
 const adminRoleFixes = [
   { userId: 'SUPERADMIN001', expectedRole: 'super_admin' },
@@ -8,7 +8,7 @@ const adminRoleFixes = [
 
 const ensureAdminRoles = async () => {
   for (const fix of adminRoleFixes) {
-    const user = await User.findOne({ userId: fix.userId });
+    const user = await User.findOne({ where: { userId: fix.userId } });
     if (!user) {
       console.log(`RoleFixer: no user found for ${fix.userId}`);
       continue;

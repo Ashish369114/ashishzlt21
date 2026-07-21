@@ -1,97 +1,106 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const admissionSchema = new mongoose.Schema(
-  {
-    admissionNumber: {
-      type: String,
-      unique: true,
-      required: true,
-    },
-    firstName: {
-      type: String,
-      required: true,
-    },
-    lastName: {
-      type: String,
-      required: true,
-    },
-    dateOfBirth: {
-      type: Date,
-      required: true,
-    },
-    gender: {
-      type: String,
-      enum: ['male', 'female', 'other'],
-      required: true,
-    },
-    email: String,
-    phone: String,
-    parentName: {
-      type: String,
-      required: true,
-    },
-    parentEmail: {
-      type: String,
-      required: true,
-    },
-    parentPhone: {
-      type: String,
-      required: true,
-    },
-    parentOccupation: String,
-    address: {
-      street: String,
-      city: String,
-      state: String,
-      zipCode: String,
-    },
-    school: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'School',
-      required: false,
-    },
-    appliedForClass: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Class',
-      required: true,
-    },
-    previousSchool: String,
-    previousClass: String,
-    admissionType: {
-      type: String,
-      enum: ['new', 'transfer'],
-      default: 'new',
-    },
-    status: {
-      type: String,
-      enum: ['pending', 'approved', 'rejected', 'completed'],
-      default: 'pending',
-    },
-    documents: [
-      {
-        name: String,
-        url: String,
-        uploadedAt: Date,
-      },
-    ],
-    applicationDate: {
-      type: Date,
-      default: Date.now,
-    },
-    approvalDate: Date,
-    approvedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
-    notes: String,
-    bloodGroup: String,
-    category: {
-      type: String,
-      enum: ['general', 'sc', 'st', 'obc'],
-    },
-    medicalHistory: String,
+const Admission = sequelize.define('Admission', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  { timestamps: true }
-);
+  admissionNumber: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: false,
+  },
+  firstName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  lastName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  dateOfBirth: {
+    type: DataTypes.DATEONLY,
+    allowNull: false,
+  },
+  gender: {
+    type: DataTypes.ENUM('male', 'female', 'other'),
+    allowNull: false,
+  },
+  email: {
+    type: DataTypes.STRING,
+  },
+  phone: {
+    type: DataTypes.STRING,
+  },
+  parentName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  parentEmail: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  parentPhone: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  parentOccupation: {
+    type: DataTypes.STRING,
+  },
+  address: {
+    type: DataTypes.JSONB,
+  },
+  schoolId: {
+    type: DataTypes.INTEGER,
+  },
+  appliedForClassId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  previousSchool: {
+    type: DataTypes.STRING,
+  },
+  previousClass: {
+    type: DataTypes.STRING,
+  },
+  admissionType: {
+    type: DataTypes.ENUM('new', 'transfer'),
+    defaultValue: 'new',
+  },
+  status: {
+    type: DataTypes.ENUM('pending', 'approved', 'rejected', 'completed'),
+    defaultValue: 'pending',
+  },
+  documents: {
+    type: DataTypes.JSONB,
+    defaultValue: [],
+  },
+  applicationDate: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+  },
+  approvalDate: {
+    type: DataTypes.DATE,
+  },
+  approvedById: {
+    type: DataTypes.INTEGER,
+  },
+  notes: {
+    type: DataTypes.TEXT,
+  },
+  bloodGroup: {
+    type: DataTypes.STRING,
+  },
+  category: {
+    type: DataTypes.ENUM('general', 'sc', 'st', 'obc'),
+  },
+  medicalHistory: {
+    type: DataTypes.TEXT,
+  },
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model('Admission', admissionSchema);
+module.exports = Admission;

@@ -1,92 +1,49 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const settingsSchema = new mongoose.Schema(
-  {
-    school: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'School',
-      required: true,
-      unique: true,
-    },
-    general: {
-      systemName: String,
-      timezone: String,
-      language: String,
-      dateFormat: String,
-      currency: String,
-    },
-    academic: {
-      sessionFormat: String,
-      attendanceMarkedBy: String,
-      minimumAttendancePercentage: Number,
-      passingMarks: Number,
-      gradeSystem: String,
-      workingMonths: {
-        type: Number,
-        default: 10,
-      },
-      workingDays: {
-        type: Number,
-        default: 220,
-      },
-    },
-    admission: {
-      admissionNumber: String,
-      studentIdFormat: String,
-      rollNumberFormat: String,
-      autoGenerateId: Boolean,
-    },
-    fees: {
-      feeCollectionMode: String,
-      lateFeePercentage: Number,
-      discountPercentage: Number,
-      paymentMethods: [String],
-    },
-    notification: {
-      emailNotifications: Boolean,
-      smsNotifications: Boolean,
-      whatsappNotifications: Boolean,
-      pushNotifications: Boolean,
-      notificationTemplates: mongoose.Schema.Types.Mixed,
-    },
-    security: {
-      passwordPolicy: {
-        minLength: Number,
-        requireSpecialChar: Boolean,
-        requireNumbers: Boolean,
-        expiryDays: Number,
-      },
-      twoFactorAuth: Boolean,
-      sessionTimeout: Number,
-      ipWhitelist: [String],
-      dataEncryption: Boolean,
-    },
-    backup: {
-      autoBackupEnabled: Boolean,
-      backupFrequency: String,
-      lastBackupDate: Date,
-      backupLocation: String,
-    },
-    api: {
-      apiKey: String,
-      rateLimitPerHour: Number,
-      corsOrigins: [String],
-    },
-    customization: {
-      logo: String,
-      themeColor: String,
-      footerText: String,
-      headerText: String,
-      customCSS: String,
-    },
-    integrations: {
-      googleClassroom: Boolean,
-      googleDrive: Boolean,
-      microsoftTeams: Boolean,
-      thirdPartyApis: [String],
-    },
+const Settings = sequelize.define('Settings', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  { timestamps: true }
-);
+  schoolId: {
+    type: DataTypes.INTEGER,
+    unique: true,
+    allowNull: false,
+  },
+  general: {
+    type: DataTypes.JSONB,
+  },
+  academic: {
+    type: DataTypes.JSONB,
+  },
+  admission: {
+    type: DataTypes.JSONB,
+  },
+  fees: {
+    type: DataTypes.JSONB,
+  },
+  notification: {
+    type: DataTypes.JSONB,
+  },
+  security: {
+    type: DataTypes.JSONB,
+  },
+  backup: {
+    type: DataTypes.JSONB,
+  },
+  api: {
+    type: DataTypes.JSONB,
+  },
+  customization: {
+    type: DataTypes.JSONB,
+  },
+  integrations: {
+    type: DataTypes.JSONB,
+  },
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model('Settings', settingsSchema);
+module.exports = Settings;

@@ -1,64 +1,60 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const feeSchema = new mongoose.Schema(
-  {
-    student: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    amount: {
-      type: Number,
-      required: true,
-    },
-    description: String,
-    dueDate: {
-      type: Date,
-      required: true,
-    },
-    installments: {
-      type: Number,
-      default: 3,
-    },
-    isPaid: {
-      type: Boolean,
-      default: false,
-    },
-    paymentDate: Date,
-    paymentMethod: {
-      type: String,
-      enum: ['PhonePe', 'Credit Card', 'Debit Card', 'Cash', 'Cheque', 'Net Banking', 'UPI', 'Wallet'],
-    },
-    transactionId: String,
-    paidAmount: {
-      type: Number,
-      default: 0,
-    },
-    paymentHistory: [
-      {
-        amount: Number,
-        paymentMethod: String,
-        transactionId: String,
-        paymentDate: Date,
-        remark: String,
-      },
-    ],
-    paymentDetails: {
-      phonePeId: String,
-      cardHolderName: String,
-      cardLast4: String,
-      cardNetwork: String,
-      chequeNumber: String,
-      chequeBank: String,
-      chequeDate: Date,
-      chequeStatus: String,
-      cashReceiptId: String,
-      cashCounter: String,
-      additionalInfo: String,
-    },
-    remarks: String,
+const Fee = sequelize.define('Fee', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  { timestamps: true }
-);
+  studentId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  amount: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+  },
+  description: {
+    type: DataTypes.TEXT,
+  },
+  dueDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  installments: {
+    type: DataTypes.INTEGER,
+    defaultValue: 3,
+  },
+  isPaid: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  paymentDate: {
+    type: DataTypes.DATE,
+  },
+  paymentMethod: {
+    type: DataTypes.ENUM('PhonePe', 'Credit Card', 'Debit Card', 'Cash', 'Cheque', 'Net Banking', 'UPI', 'Wallet'),
+  },
+  transactionId: {
+    type: DataTypes.STRING,
+  },
+  paidAmount: {
+    type: DataTypes.FLOAT,
+    defaultValue: 0,
+  },
+  paymentHistory: {
+    type: DataTypes.JSONB,
+    defaultValue: [],
+  },
+  paymentDetails: {
+    type: DataTypes.JSONB,
+  },
+  remarks: {
+    type: DataTypes.TEXT,
+  },
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model('Fee', feeSchema);
+module.exports = Fee;

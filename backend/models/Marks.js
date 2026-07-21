@@ -1,53 +1,45 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const sanitizeObjectId = (value) => {
-  if (typeof value === 'string') {
-    const trimmed = value.trim();
-    return trimmed ? value : undefined;
-  }
-  return value;
-};
-
-const marksSchema = new mongoose.Schema(
-  {
-    student: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-      set: sanitizeObjectId,
-    },
-    teacher: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-      set: sanitizeObjectId,
-    },
-    subject: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Subject',
-      required: true,
-      set: sanitizeObjectId,
-    },
-    class: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Class',
-      required: true,
-      set: sanitizeObjectId,
-    },
-    marks: {
-      type: Number,
-      required: true,
+const Marks = sequelize.define('Marks', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  studentId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  teacherId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  subjectId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  classId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  marks: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+    validate: {
       max: 100,
       min: 0,
     },
-    examType: {
-      type: String,
-      enum: ['Unit Test', 'Mid-Term', 'Final', 'Practical'],
-      required: true,
-    },
-    examDate: Date,
   },
-  { timestamps: true }
-);
+  examType: {
+    type: DataTypes.ENUM('Unit Test', 'Mid-Term', 'Final', 'Practical'),
+    allowNull: false,
+  },
+  examDate: {
+    type: DataTypes.DATEONLY,
+  },
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model('Marks', marksSchema);
+module.exports = Marks;
