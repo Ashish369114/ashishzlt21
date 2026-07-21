@@ -30,11 +30,12 @@ jobs:
           echo "$SSH_KEY" > /tmp/ssh_key.pem
           chmod 400 /tmp/ssh_key.pem
           ssh -o StrictHostKeyChecking=no -i /tmp/ssh_key.pem ec2-user@$EC2_HOST "pm2 logs --lines 100 --nostream ; pm2 list" > pm2-logs.txt || true
+          echo $(echo $SECRET | jq -r '.BACKEND_URL') > backend-url.txt
           
       - name: Push logs
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git add pm2-logs.txt
-          git commit -m "chore: save pm2 logs" || true
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add pm2-logs.txt backend-url.txt || true
+          git commit -m "Automated PM2 logs update" || true
           git push
