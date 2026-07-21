@@ -1,0 +1,40 @@
+name: Get PM2 Logs
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'get-logs.txt'
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  logs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::648592435113:role/ZLT_SOS_Git_Admin
+          aws-region: ap-south-1
+
+      - name: SSH and get logs
+        run: |
+          SECRET=$(aws secretsmanager get-secret-value --secret-id zltsos/dev --query SecretString --output text)
+          EC2_HOST=$(echo $SECRET | jq -r '.EC2_HOST')
+          SSH_KEY=$(aws secretsmanager get-secret-value --secret-id zltsos/ec2-ssh-key --query SecretString --output text)
+          echo "$SSH_KEY" > /tmp/ssh_key.pem
+          chmod 400 /tmp/ssh_key.pem
+          ssh -o StrictHostKeyChecking=no -i /tmp/ssh_key.pem ec2-user@$EC2_HOST "pm2 logs --lines 100 --nostream ; pm2 list" > pm2-logs.txt || true
+          
+      - name: Push logs
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add pm2-logs.txt
+          git commit -m "chore: save pm2 logs" || true
+          git push
