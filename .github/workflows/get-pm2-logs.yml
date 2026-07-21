@@ -27,6 +27,14 @@ jobs:
           SECRET=$(aws secretsmanager get-secret-value --secret-id zltsos/dev --query SecretString --output text)
           EC2_HOST=$(echo $SECRET | jq -r '.EC2_HOST')
           echo $(echo $SECRET | jq -r '.BACKEND_URL') > backend-url.txt
+          SSH_KEY=$(aws secretsmanager get-secret-value --secret-id zltsos/ec2-ssh-key --query SecretString --output text)
+          echo "$SSH_KEY" > /tmp/ssh_key.pem
+          chmod 400 /tmp/ssh_key.pem
+          DB_HOST=$(echo $SECRET | jq -r '.DB_HOST')
+          DB_USER=$(echo $SECRET | jq -r '.DB_USER')
+          DB_PASSWORD=$(echo $SECRET | jq -r '.DB_PASSWORD')
+          DB_NAME=$(echo $SECRET | jq -r '.DB_NAME')
+          ssh -o StrictHostKeyChecking=no -i /tmp/ssh_key.pem ec2-user@$EC2_HOST "cd /home/ec2-user/app-dev/backend && DB_HOST=\"$DB_HOST\" DB_USER=\"$DB_USER\" DB_PASSWORD=\"$DB_PASSWORD\" DB_NAME=\"$DB_NAME\" node create_db.js" > pm2-logs.txt 2>&1 || true
           
       - name: Push logs
         run: |
