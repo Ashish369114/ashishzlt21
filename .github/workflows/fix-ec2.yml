@@ -1,0 +1,49 @@
+name: Fix EC2 Backend
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'fix-ec2.txt'
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::648592435113:role/ZLT_SOS_Git_Admin
+          aws-region: ap-south-1
+
+      - name: Kill all node processes and restart PM2
+        run: |
+          SECRET=$(aws secretsmanager get-secret-value --secret-id zltsos/dev --query SecretString --output text)
+          EC2_HOST=$(echo $SECRET | jq -r '.EC2_HOST')
+          SSH_KEY=$(aws secretsmanager get-secret-value --secret-id zltsos/ec2-ssh-key --query SecretString --output text)
+          echo "$SSH_KEY" > /tmp/ssh_key.pem
+          chmod 400 /tmp/ssh_key.pem
+          
+          ssh -o StrictHostKeyChecking=no -i /tmp/ssh_key.pem ec2-user@$EC2_HOST << 'EOF'
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            
+            echo "Killing all node processes..."
+            killall -9 node || true
+            pm2 kill || true
+            
+            echo "Restarting backend..."
+            cd /home/ec2-user/app-dev/backend
+            pm2 start server.js --name zltsos-backend-dev
+            pm2 save
+            
+            echo "Sleeping to let it start..."
+            sleep 5
+            pm2 logs zltsos-backend-dev --lines 50 --nostream
+          EOF
