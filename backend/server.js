@@ -61,7 +61,7 @@ const startServer = async () => {
 
     // CORS Configuration
     app.use(cors({
-      origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+      origin: process.env.FRONTEND_URL || process.env.CORS_ORIGIN || 'http://localhost:3000',
       credentials: true
     }));
     app.use(express.json({ limit: '10kb' })); // Limit body payload size
