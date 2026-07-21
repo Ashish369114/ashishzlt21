@@ -100,6 +100,12 @@ const login = async (req, res) => {
       }
     }
 
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret && process.env.NODE_ENV === 'production') {
+      console.error('CRITICAL ERROR: JWT_SECRET is missing in production!');
+      return res.status(500).json({ message: 'Internal server configuration error.' });
+    }
+
     const token = jwt.sign(
       {
         userId: user.id || user._id,
@@ -107,7 +113,7 @@ const login = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
       },
-      process.env.JWT_SECRET || 'super-secret-jwt-key',
+      jwtSecret || 'super-secret-jwt-key',
       { expiresIn: '24h' }
     );
 

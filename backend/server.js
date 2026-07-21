@@ -1,6 +1,9 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const xss = require('xss-clean');
 const { connectDB, sequelize } = require('./config/db');
 const initializeSocket = require('./config/socket');
 const { ensureAdminRoles } = require('./utils/roleFixer');
@@ -38,11 +41,30 @@ const app = express();
 const startServer = async () => {
   try {
     await connectDB();
-    await sequelize.sync({ alter: true }); // Automatically sync DB
+    if (process.env.NODE_ENV !== 'production') {
+      await sequelize.sync({ alter: true }); // Automatically sync DB only in non-production
+    }
 
-    // Middleware
-    app.use(cors());
-    app.use(express.json());
+    // Security Middleware
+    app.use(helmet());
+    
+    // Rate Limiting
+    const limiter = rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 200, // limit each IP to 200 requests per windowMs
+      message: 'Too many requests from this IP, please try again later.'
+    });
+    app.use('/api', limiter);
+
+    // Data Sanitization against XSS
+    app.use(xss());
+
+    // CORS Configuration
+    app.use(cors({
+      origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+      credentials: true
+    }));
+    app.use(express.json({ limit: '10kb' })); // Limit body payload size
 
     // Initialize WebSocket first
     const { server, io } = initializeSocket(app);
