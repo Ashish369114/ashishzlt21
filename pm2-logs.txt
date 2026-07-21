@@ -1,16 +1,10 @@
-Warning: Permanently added '43.205.242.243' (ED25519) to the list of known hosts.
-/home/ec2-user/app-dev/backend/create_db.js:42
-/
- 
-
-SyntaxError: Invalid or unexpected token
-    at internalCompileFunction (node:internal/vm:76:18)
-    at wrapSafe (node:internal/modules/cjs/loader:1283:20)
-    at Module._compile (node:internal/modules/cjs/loader:1328:27)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
-    at Module.load (node:internal/modules/cjs/loader:1203:32)
-    at Module._load (node:internal/modules/cjs/loader:1019:12)
-    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12)
-    at node:internal/main/run_main_module:28:49
-
-Node.js v18.20.8
+PORT=5000
+DB_HOST=zltsos-db.cps4sg00qgaw.ap-south-1.rds.amazonaws.com
+DB_PORT=5432
+DB_NAME=school_erp_dev
+DB_USER=zltsosadmin
+DB_PASSWORD=ZltsosERP2024Secure
+JWT_SECRET=zltsos-dev-jwt-secret-2024
+JWT_REFRESH_SECRET=zltsos-dev-refresh-secret-2024
+FRONTEND_URL=http://zltsos-frontend-dev-648592435113.s3-website.ap-south-1.amazonaws.com
+NODE_ENV=development
