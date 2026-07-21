@@ -4,6 +4,9 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const xss = require('xss-clean');
+const hpp = require('hpp');
+const authMiddleware = require('./middleware/auth');
+const roleMiddleware = require('./middleware/roleMiddleware');
 const { connectDB, sequelize } = require('./config/db');
 const initializeSocket = require('./config/socket');
 const { ensureAdminRoles } = require('./utils/roleFixer');
@@ -79,6 +82,7 @@ const startServer = async () => {
       credentials: true
     }));
     app.use(express.json({ limit: '10kb' })); // Limit body payload size
+    app.use(hpp()); // Protect against HTTP Parameter Pollution attacks
 
     // Initialize WebSocket first
     const { server, io } = initializeSocket(app);
@@ -116,7 +120,11 @@ const startServer = async () => {
       res.json({ message: 'Server is running' });
     });
 
-    app.get('/api/force-seed', async (req, res) => {
+    // Sensitive Endpoints
+    app.get('/api/force-seed', authMiddleware, roleMiddleware(['super_admin']), async (req, res) => {
+      if (process.env.NODE_ENV === 'production') {
+        return res.status(403).json({ error: 'This endpoint is disabled in production.' });
+      }
       try {
         const seedDataFn = require('./seeds/seedFn');
         await sequelize.sync({ force: true });
@@ -127,7 +135,10 @@ const startServer = async () => {
       }
     });
 
-    app.get('/api/debug-users', async (req, res) => {
+    app.get('/api/debug-users', authMiddleware, roleMiddleware(['super_admin']), async (req, res) => {
+      if (process.env.NODE_ENV === 'production') {
+        return res.status(403).json({ error: 'This endpoint is disabled in production.' });
+      }
       try {
         const count = await require('./models').User.count();
         const users = await require('./models').User.findAll({ attributes: ['userId', 'email', 'role'] });
