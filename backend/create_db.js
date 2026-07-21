@@ -11,6 +11,7 @@ async function createDatabase() {
     password: process.env.DB_PASSWORD || 'postgres',
     database: 'postgres', // Connect to default DB
     ssl: isAWS && dbHost !== '127.0.0.1' && dbHost !== 'localhost' ? {
+      require: true,
       rejectUnauthorized: false
     } : false
   });
@@ -31,6 +32,7 @@ async function createDatabase() {
     }
   } catch (err) {
     console.error('Error creating database:', err);
+    process.exit(1);
   } finally {
     await client.end();
   }
