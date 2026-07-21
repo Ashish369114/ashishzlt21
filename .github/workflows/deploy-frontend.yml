@@ -61,6 +61,7 @@ jobs:
         working-directory: frontend
         env:
           REACT_APP_API_URL: ${{ steps.secrets.outputs.BACKEND_URL }}
+          CI: false
         run: npm run build
 
       - name: Deploy to S3
