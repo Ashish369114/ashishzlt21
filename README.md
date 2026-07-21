@@ -1,6 +1,6 @@
 # School Operating System - Full Stack
 
-A comprehensive, production-level School Operating System built with React, Node.js, Express, and MongoDB. This system provides separate dashboards for Super Admin, Principal, Teachers, Students, Parents, and Accountant & Admin with real-time data synchronization.
+A comprehensive, production-level School Operating System built with React, Node.js, Express, and PostgreSQL. This system provides separate dashboards for Super Admin, Principal, Teachers, Students, Parents, and Accountant & Admin with real-time data synchronization.
 
 ## 🎯 Features
 
@@ -11,7 +11,7 @@ A comprehensive, production-level School Operating System built with React, Node
 - **Fee Management** - Multiple payment methods including PhonePe, Card, Cash, Cheque
 - **Academic Tracking** - Marks, attendance, homework, remarks, and exams
 - **Professional UI/UX** - Modern, responsive, and beautiful design
-- **Database** - MongoDB for robust data management
+- **Database** - PostgreSQL for robust data management
 
 ## 🏫 Dashboard Overview
 
@@ -159,7 +159,7 @@ school-management-system/
 
 ### Prerequisites
 - Node.js (v14 or higher)
-- MongoDB (running locally on port 27017)
+- PostgreSQL (running locally on port 27017)
 - npm or yarn
 
 ### Backend Setup
@@ -176,7 +176,11 @@ npm install
 
 3. Create `.env` file with the following variables:
 ```env
-MONGODB_URI=mongodb://localhost:27017/school-management-system
+DB_HOST=zltsos-db.cps4sg00qgaw.ap-south-1.rds.amazonaws.com
+DB_PORT=5432
+DB_NAME=school_erp_dev
+DB_USER=zltsosadmin
+DB_PASSWORD=your_secure_password
 PORT=5000
 JWT_SECRET=your_super_secret_jwt_key_change_in_production
 NODE_ENV=development
@@ -218,8 +222,8 @@ The frontend application will run on `http://localhost:3000`
 ### Backend
 - **Node.js** - Runtime environment
 - **Express.js** - Web framework
-- **MongoDB** - NoSQL database
-- **Mongoose** - MongoDB ODM
+- **PostgreSQL** - Relational Database
+- **Sequelize** - PostgreSQL ODM
 - **bcryptjs** - Password hashing
 - **jsonwebtoken** - JWT authentication
 - **CORS** - Cross-origin resource sharing
@@ -363,15 +367,15 @@ The system ensures real-time data synchronization:
 
 ## 🐛 Troubleshooting
 
-### MongoDB Connection Error
-- Ensure MongoDB is running locally on port 27017
-- Check `MONGODB_URI` in `.env` file
+### PostgreSQL Connection Error
+- Ensure AWS RDS database is accessible
+- Check `DB_HOST`, `DB_USER`, `DB_PASSWORD` in `.env` file
 
 ### Port Already in Use
 - Change the PORT in `.env` (backend) or use different port for React
 
 ### CORS Error
-- Ensure backend CORS is properly configured
+- Ensure backend CORS (`server.js`) allows your frontend URL
 - Check if backend server is running
 
 ### Module Not Found
@@ -381,7 +385,7 @@ The system ensures real-time data synchronization:
 
 For issues or questions, please check:
 1. Ensure all dependencies are installed
-2. Check MongoDB is running
+2. Check PostgreSQL is running
 3. Verify environment variables in `.env`
 4. Check browser console for error messages
 5. Check backend server logs
@@ -397,3 +401,11 @@ Created as a comprehensive School Operating System with all necessary features f
 ---
 
 **Happy Learning! 🎓**
+
+
+## ☁️ Deployment & Architecture
+- **Frontend:** AWS S3 (Static Website Hosting)
+- **Backend:** Node.js on AWS EC2 (managed by PM2)
+- **Database:** PostgreSQL on AWS RDS
+- **CI/CD:** GitHub Actions (`.github/workflows/`) for automated S3 and EC2 deployments
+- **Secrets:** AWS Secrets Manager for secure environment variables
