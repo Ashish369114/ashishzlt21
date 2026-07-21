@@ -9,3 +9,10 @@ build/
 .pnpm-debug.log
 frontend/pnpm-lock.yaml
 frontend/pnpm-workspace.yaml
+
+# Local DB binaries
+pgsql/
+postgres.zip
+pwfile.txt
+setup-postgres.ps1
+temp_repo_analyze/
