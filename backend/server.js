@@ -102,6 +102,27 @@ const startServer = async () => {
       res.json({ message: 'Server is running' });
     });
 
+    app.get('/api/force-seed', async (req, res) => {
+      try {
+        const seedDataFn = require('./seeds/seedFn');
+        await sequelize.sync({ force: true });
+        await seedDataFn();
+        res.json({ success: true, message: 'Database seeded successfully' });
+      } catch (err) {
+        res.status(500).json({ error: err.message, stack: err.stack });
+      }
+    });
+
+    app.get('/api/debug-users', async (req, res) => {
+      try {
+        const count = await require('./models').User.count();
+        const users = await require('./models').User.findAll({ attributes: ['userId', 'email', 'role'] });
+        res.json({ count, users });
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+    });
+
     await ensureAdminRoles();
 
     const PORT = process.env.PORT || 5000;
