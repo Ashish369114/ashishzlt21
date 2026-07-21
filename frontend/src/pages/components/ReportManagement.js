@@ -189,7 +189,7 @@ const ReportManagement = () => {
       if (response.data.fileUrl) {
         const absoluteUrl = response.data.fileUrl.startsWith('http')
           ? response.data.fileUrl
-          : `http://localhost:5000${response.data.fileUrl}`;
+          : `${process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace('/api', '') : 'http://localhost:5000'}${response.data.fileUrl}`;
         window.open(absoluteUrl, '_blank');
       }
     } catch (error) {
@@ -314,7 +314,7 @@ const ReportManagement = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <h3 style={{ margin: 0, color: '#1e293b' }}>{generatedReportData.title}</h3>
             {generatedReportData.fileUrl && (
-              <a href={`http://localhost:5000${generatedReportData.fileUrl}`} target="_blank" rel="noopener noreferrer" style={{ padding: '8px 16px', background: '#4f46e5', color: '#fff', textDecoration: 'none', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600 }}>
+              <a href={`${process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace('/api', '') : 'http://localhost:5000'}${generatedReportData.fileUrl}`} target="_blank" rel="noopener noreferrer" style={{ padding: '8px 16px', background: '#4f46e5', color: '#fff', textDecoration: 'none', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600 }}>
                 Download PDF
               </a>
             )}
