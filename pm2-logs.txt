@@ -1,105 +1,105 @@
 [TAILING] Tailing last 100 lines for [all] processes (change the value with --lines option)
 /home/ec2-user/.pm2/pm2.log last 100 lines:
-PM2        | 2026-07-21T10:26:28: PM2 log: App [zltsos-backend-dev:3] starting in -fork mode-
-PM2        | 2026-07-21T10:26:28: PM2 log: App [zltsos-backend-dev:3] online
-PM2        | 2026-07-21T10:26:29: PM2 log: App [zltsos-backend-dev:3] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:26:29: PM2 log: App [zltsos-backend-dev:3] starting in -fork mode-
-PM2        | 2026-07-21T10:26:29: PM2 log: App [zltsos-backend-dev:3] online
-PM2        | 2026-07-21T10:26:30: PM2 log: App [zltsos-backend-dev:3] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:26:30: PM2 log: App [zltsos-backend-dev:3] starting in -fork mode-
-PM2        | 2026-07-21T10:26:30: PM2 log: App [zltsos-backend-dev:3] online
-PM2        | 2026-07-21T10:26:31: PM2 log: App [zltsos-backend-dev:3] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:26:31: PM2 log: App [zltsos-backend-dev:3] starting in -fork mode-
-PM2        | 2026-07-21T10:26:31: PM2 log: App [zltsos-backend-dev:3] online
-PM2        | 2026-07-21T10:26:31: PM2 log: App [zltsos-backend-dev:3] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:26:31: PM2 log: App [zltsos-backend-dev:3] starting in -fork mode-
-PM2        | 2026-07-21T10:26:31: PM2 log: App [zltsos-backend-dev:3] online
-PM2        | 2026-07-21T10:26:32: PM2 log: App [zltsos-backend-dev:3] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:26:32: PM2 log: App [zltsos-backend-dev:3] starting in -fork mode-
-PM2        | 2026-07-21T10:26:32: PM2 log: App [zltsos-backend-dev:3] online
-PM2        | 2026-07-21T10:26:33: PM2 log: App [zltsos-backend-dev:3] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:26:33: PM2 log: App [zltsos-backend-dev:3] starting in -fork mode-
-PM2        | 2026-07-21T10:26:33: PM2 log: App [zltsos-backend-dev:3] online
-PM2        | 2026-07-21T10:26:34: PM2 log: App [zltsos-backend-dev:3] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:26:34: PM2 log: App [zltsos-backend-dev:3] starting in -fork mode-
-PM2        | 2026-07-21T10:26:34: PM2 log: App [zltsos-backend-dev:3] online
-PM2        | 2026-07-21T10:26:34: PM2 log: App [zltsos-backend-dev:3] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:26:34: PM2 log: App [zltsos-backend-dev:3] starting in -fork mode-
-PM2        | 2026-07-21T10:26:34: PM2 log: App [zltsos-backend-dev:3] online
-PM2        | 2026-07-21T10:26:35: PM2 log: App [zltsos-backend-dev:3] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:26:35: PM2 log: App [zltsos-backend-dev:3] starting in -fork mode-
-PM2        | 2026-07-21T10:26:35: PM2 log: App [zltsos-backend-dev:3] online
-PM2        | 2026-07-21T10:26:36: PM2 log: App [zltsos-backend-dev:3] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:26:36: PM2 log: App [zltsos-backend-dev:3] starting in -fork mode-
-PM2        | 2026-07-21T10:26:36: PM2 log: App [zltsos-backend-dev:3] online
-PM2        | 2026-07-21T10:26:36: PM2 log: App [zltsos-backend-dev:3] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:26:36: PM2 log: App [zltsos-backend-dev:3] starting in -fork mode-
-PM2        | 2026-07-21T10:26:36: PM2 log: App [zltsos-backend-dev:3] online
-PM2        | 2026-07-21T10:26:37: PM2 log: App [zltsos-backend-dev:3] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:26:37: PM2 log: App [zltsos-backend-dev:3] starting in -fork mode-
-PM2        | 2026-07-21T10:26:37: PM2 log: App [zltsos-backend-dev:3] online
-PM2        | 2026-07-21T10:26:38: PM2 log: App [zltsos-backend-dev:3] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:26:38: PM2 log: App [zltsos-backend-dev:3] starting in -fork mode-
-PM2        | 2026-07-21T10:26:38: PM2 log: App [zltsos-backend-dev:3] online
-PM2        | 2026-07-21T10:26:38: PM2 log: App [zltsos-backend-dev:3] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:26:38: PM2 log: App [zltsos-backend-dev:3] starting in -fork mode-
-PM2        | 2026-07-21T10:26:38: PM2 log: App [zltsos-backend-dev:3] online
-PM2        | 2026-07-21T10:26:39: PM2 log: App [zltsos-backend-dev:3] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:26:39: PM2 log: Script /home/ec2-user/app-dev/backend/server.js had too many unstable restarts (16). Stopped. "errored"
-PM2        | 2026-07-21T10:26:58: PM2 log: Stopping app:zltsos-backend id:0
-PM2        | 2026-07-21T10:26:58: PM2 log: Stopping app:zltsos-backend-dev id:3
-PM2        | 2026-07-21T10:26:58: PM2 error: app=zltsos-backend-dev id=3 does not have a pid
-PM2        | 2026-07-21T10:26:58: PM2 log: App [zltsos-backend:0] exited with code [0] via signal [SIGINT]
-PM2        | 2026-07-21T10:26:58: PM2 log: pid=28284 msg=process tree killed (1 pids)
-PM2        | 2026-07-21T10:27:04: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
-PM2        | 2026-07-21T10:27:04: PM2 log: App [zltsos-backend-dev:0] online
-PM2        | 2026-07-21T10:27:05: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:27:05: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
-PM2        | 2026-07-21T10:27:05: PM2 log: App [zltsos-backend-dev:0] online
-PM2        | 2026-07-21T10:27:06: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:27:06: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
-PM2        | 2026-07-21T10:27:06: PM2 log: App [zltsos-backend-dev:0] online
-PM2        | 2026-07-21T10:27:06: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:27:06: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
-PM2        | 2026-07-21T10:27:06: PM2 log: App [zltsos-backend-dev:0] online
-PM2        | 2026-07-21T10:27:07: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:27:07: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
-PM2        | 2026-07-21T10:27:07: PM2 log: App [zltsos-backend-dev:0] online
-PM2        | 2026-07-21T10:27:08: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:27:08: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
-PM2        | 2026-07-21T10:27:08: PM2 log: App [zltsos-backend-dev:0] online
-PM2        | 2026-07-21T10:27:09: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:27:09: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
-PM2        | 2026-07-21T10:27:09: PM2 log: App [zltsos-backend-dev:0] online
-PM2        | 2026-07-21T10:27:09: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:27:09: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
-PM2        | 2026-07-21T10:27:09: PM2 log: App [zltsos-backend-dev:0] online
-PM2        | 2026-07-21T10:27:10: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:27:10: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
-PM2        | 2026-07-21T10:27:10: PM2 log: App [zltsos-backend-dev:0] online
-PM2        | 2026-07-21T10:27:11: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:27:11: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
-PM2        | 2026-07-21T10:27:11: PM2 log: App [zltsos-backend-dev:0] online
-PM2        | 2026-07-21T10:27:11: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:27:11: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
-PM2        | 2026-07-21T10:27:11: PM2 log: App [zltsos-backend-dev:0] online
-PM2        | 2026-07-21T10:27:12: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:27:12: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
-PM2        | 2026-07-21T10:27:12: PM2 log: App [zltsos-backend-dev:0] online
-PM2        | 2026-07-21T10:27:13: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:27:13: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
-PM2        | 2026-07-21T10:27:13: PM2 log: App [zltsos-backend-dev:0] online
-PM2        | 2026-07-21T10:27:14: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:27:14: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
-PM2        | 2026-07-21T10:27:14: PM2 log: App [zltsos-backend-dev:0] online
-PM2        | 2026-07-21T10:27:14: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:27:14: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
-PM2        | 2026-07-21T10:27:14: PM2 log: App [zltsos-backend-dev:0] online
-PM2        | 2026-07-21T10:27:15: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:27:15: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
-PM2        | 2026-07-21T10:27:15: PM2 log: App [zltsos-backend-dev:0] online
-PM2        | 2026-07-21T10:27:16: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
-PM2        | 2026-07-21T10:27:16: PM2 log: Script /home/ec2-user/app-dev/backend/server.js had too many unstable restarts (16). Stopped. "errored"
+PM2        | 2026-07-21T10:30:43: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:30:43: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:30:44: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:30:44: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:30:44: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:30:45: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:30:45: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:30:45: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:30:45: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:30:45: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:30:45: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:30:46: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:30:46: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:30:46: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:30:47: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:30:47: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:30:47: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:30:47: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:30:47: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:30:47: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:30:48: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:30:48: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:30:48: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:30:49: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:30:49: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:30:49: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:30:50: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:30:50: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:30:50: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:30:50: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:30:50: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:30:50: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:30:51: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:30:51: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:30:51: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:30:52: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:30:52: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:30:52: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:30:52: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:30:52: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:30:53: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:30:53: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:30:53: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:30:53: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:30:54: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:30:54: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:30:54: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:30:55: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:30:55: PM2 log: Script /home/ec2-user/app-dev/backend/server.js had too many unstable restarts (16). Stopped. "errored"
+PM2        | 2026-07-21T10:31:41: PM2 log: Stopping app:zltsos-backend-dev id:0
+PM2        | 2026-07-21T10:31:41: PM2 error: app=zltsos-backend-dev id=0 does not have a pid
+PM2        | 2026-07-21T10:31:41: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:31:41: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:31:42: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:31:42: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:31:42: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:31:43: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:31:43: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:31:43: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:31:44: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:31:44: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:31:44: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:31:44: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:31:44: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:31:44: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:31:45: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:31:45: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:31:45: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:31:46: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:31:46: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:31:46: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:31:47: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:31:47: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:31:47: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:31:47: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:31:47: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:31:47: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:31:48: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:31:48: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:31:48: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:31:49: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:31:49: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:31:49: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:31:50: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:31:50: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:31:50: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:31:50: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:31:50: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:31:50: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:31:51: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:31:51: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:31:51: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:31:52: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:31:52: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:31:52: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:31:52: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:31:52: PM2 log: App [zltsos-backend-dev:0] starting in -fork mode-
+PM2        | 2026-07-21T10:31:52: PM2 log: App [zltsos-backend-dev:0] online
+PM2        | 2026-07-21T10:31:53: PM2 log: App [zltsos-backend-dev:0] exited with code [1] via signal [SIGINT]
+PM2        | 2026-07-21T10:31:53: PM2 log: Script /home/ec2-user/app-dev/backend/server.js had too many unstable restarts (16). Stopped. "errored"
 
 /home/ec2-user/.pm2/logs/zltsos-backend-dev-out.log last 100 lines:
 /home/ec2-user/.pm2/logs/zltsos-backend-dev-error.log last 100 lines:
@@ -170,10 +170,42 @@ PM2        | 2026-07-21T10:27:16: PM2 log: Script /home/ec2-user/app-dev/backend
 0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
 0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
 0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
+0|zltsos-b | Fatal error in PostgreSQL setup: database "school_erp_dev" does not exist
 
 ┌────┬───────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
 │ id │ name                  │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
 ├────┼───────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
 │ 0  │ zltsos-backend-dev    │ default     │ 1.0.0   │ fork    │ 0        │ 0      │ 15   │ errored   │ 0%       │ 0b       │ ec2-user │ disabled │
 └────┴───────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
-host metrics | cpu: 0% | ram usage: 47.3% | disk: ⇓ 0.001mb/s ⇑ 0.002mb/s |
+host metrics | cpu: 0.1% | ram usage: 45.9% | disk: ⇓ 0mb/s ⇑ 0.023mb/s |
