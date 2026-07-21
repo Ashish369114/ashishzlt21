@@ -1,0 +1,68 @@
+name: Deploy Frontend to S3
+
+on:
+  push:
+    branches: [dev, test, main]
+    paths:
+      - 'frontend/**'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set environment
+        id: env
+        run: |
+          if [[ "${{ github.ref_name }}" == "dev" ]]; then
+            echo "ENV=dev" >> $GITHUB_OUTPUT
+            echo "SECRET_NAME=zltsos/dev" >> $GITHUB_OUTPUT
+            echo "S3_BUCKET=dev.zltsos.com" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref_name }}" == "test" ]]; then
+            echo "ENV=test" >> $GITHUB_OUTPUT
+            echo "SECRET_NAME=zltsos/test" >> $GITHUB_OUTPUT
+            echo "S3_BUCKET=test.zltsos.com" >> $GITHUB_OUTPUT
+          else
+            echo "ENV=prod" >> $GITHUB_OUTPUT
+            echo "SECRET_NAME=zltsos/prod" >> $GITHUB_OUTPUT
+            echo "S3_BUCKET=zltsos-frontend-648592435113" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::648592435113:role/ZLT_SOS_Git_Admin
+          aws-region: ap-south-1
+
+      - name: Get secrets from AWS Secrets Manager
+        id: secrets
+        run: |
+          SECRET=$(aws secretsmanager get-secret-value --secret-id ${{ steps.env.outputs.SECRET_NAME }} --query SecretString --output text)
+          echo "BACKEND_URL=$(echo $SECRET | jq -r '.BACKEND_URL')" >> $GITHUB_OUTPUT
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Build
+        working-directory: frontend
+        env:
+          REACT_APP_API_URL: ${{ steps.secrets.outputs.BACKEND_URL }}
+        run: npm run build
+
+      - name: Deploy to S3
+        working-directory: frontend
+        run: aws s3 sync build/ s3://${{ steps.env.outputs.S3_BUCKET }} --delete

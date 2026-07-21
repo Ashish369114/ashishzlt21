@@ -1,0 +1,106 @@
+name: Deploy Backend to EC2
+
+on:
+  push:
+    branches: [dev, test, main]
+    paths:
+      - 'backend/**'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set environment
+        id: env
+        run: |
+          if [[ "${{ github.ref_name }}" == "dev" ]]; then
+            echo "ENV=dev" >> $GITHUB_OUTPUT
+            echo "SECRET_NAME=zltsos/dev" >> $GITHUB_OUTPUT
+            echo "APP_NAME=zltsos-backend-dev" >> $GITHUB_OUTPUT
+            echo "APP_DIR=/home/ec2-user/app-dev" >> $GITHUB_OUTPUT
+            echo "NODE_ENV=development" >> $GITHUB_OUTPUT
+            echo "PORT=5000" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref_name }}" == "test" ]]; then
+            echo "ENV=test" >> $GITHUB_OUTPUT
+            echo "SECRET_NAME=zltsos/test" >> $GITHUB_OUTPUT
+            echo "APP_NAME=zltsos-backend-test" >> $GITHUB_OUTPUT
+            echo "APP_DIR=/home/ec2-user/app-test" >> $GITHUB_OUTPUT
+            echo "NODE_ENV=test" >> $GITHUB_OUTPUT
+            echo "PORT=5001" >> $GITHUB_OUTPUT
+          else
+            echo "ENV=prod" >> $GITHUB_OUTPUT
+            echo "SECRET_NAME=zltsos/prod" >> $GITHUB_OUTPUT
+            echo "APP_NAME=zltsos-backend-prod" >> $GITHUB_OUTPUT
+            echo "APP_DIR=/home/ec2-user/app" >> $GITHUB_OUTPUT
+            echo "NODE_ENV=production" >> $GITHUB_OUTPUT
+            echo "PORT=5000" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::648592435113:role/ZLT_SOS_Git_Admin
+          aws-region: ap-south-1
+
+      - name: Get secrets from AWS Secrets Manager
+        id: secrets
+        run: |
+          SECRET=$(aws secretsmanager get-secret-value --secret-id ${{ steps.env.outputs.SECRET_NAME }} --query SecretString --output text)
+          echo "DB_HOST=$(echo $SECRET | jq -r '.DB_HOST')" >> $GITHUB_OUTPUT
+          echo "DB_PORT=$(echo $SECRET | jq -r '.DB_PORT')" >> $GITHUB_OUTPUT
+          echo "DB_NAME=$(echo $SECRET | jq -r '.DB_NAME')" >> $GITHUB_OUTPUT
+          echo "DB_USER=$(echo $SECRET | jq -r '.DB_USER')" >> $GITHUB_OUTPUT
+          echo "DB_PASSWORD=$(echo $SECRET | jq -r '.DB_PASSWORD')" >> $GITHUB_OUTPUT
+          echo "JWT_SECRET=$(echo $SECRET | jq -r '.JWT_SECRET')" >> $GITHUB_OUTPUT
+          echo "JWT_REFRESH_SECRET=$(echo $SECRET | jq -r '.JWT_REFRESH_SECRET')" >> $GITHUB_OUTPUT
+          echo "FRONTEND_URL=$(echo $SECRET | jq -r '.FRONTEND_URL')" >> $GITHUB_OUTPUT
+          echo "EC2_HOST=$(echo $SECRET | jq -r '.EC2_HOST')" >> $GITHUB_OUTPUT
+          SSH_KEY=$(aws secretsmanager get-secret-value --secret-id zltsos/ec2-ssh-key --query SecretString --output text)
+          echo "$SSH_KEY" > /tmp/ssh_key.pem
+          chmod 400 /tmp/ssh_key.pem
+
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i /tmp/ssh_key.pem ec2-user@${{ steps.secrets.outputs.EC2_HOST }} << 'DEPLOY_SCRIPT'
+            set -e
+            APP_DIR="${{ steps.env.outputs.APP_DIR }}"
+            mkdir -p $APP_DIR
+            cd $APP_DIR
+
+            if [ -d ".git" ]; then
+              git pull origin ${{ github.ref_name }}
+            else
+              git clone -b ${{ github.ref_name }} https://github.com/ZLTSOS/zltsos.github.io.git .
+            fi
+
+            cd backend
+            npm ci --production
+
+            cat > .env << ENVEOF
+          PORT=${{ steps.env.outputs.PORT }}
+          DB_HOST=${{ steps.secrets.outputs.DB_HOST }}
+          DB_PORT=${{ steps.secrets.outputs.DB_PORT }}
+          DB_NAME=${{ steps.secrets.outputs.DB_NAME }}
+          DB_USER=${{ steps.secrets.outputs.DB_USER }}
+          DB_PASSWORD=${{ steps.secrets.outputs.DB_PASSWORD }}
+          JWT_SECRET=${{ steps.secrets.outputs.JWT_SECRET }}
+          JWT_REFRESH_SECRET=${{ steps.secrets.outputs.JWT_REFRESH_SECRET }}
+          FRONTEND_URL=${{ steps.secrets.outputs.FRONTEND_URL }}
+          NODE_ENV=${{ steps.env.outputs.NODE_ENV }}
+          ENVEOF
+
+            pm2 delete ${{ steps.env.outputs.APP_NAME }} 2>/dev/null || true
+            pm2 start server.js --name ${{ steps.env.outputs.APP_NAME }}
+            pm2 save
+          DEPLOY_SCRIPT
+
+      - name: Cleanup
+        if: always()
+        run: rm -f /tmp/ssh_key.pem
