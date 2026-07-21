@@ -60,8 +60,22 @@ const startServer = async () => {
     app.use(xss());
 
     // CORS Configuration
+    const allowedOrigins = [
+      process.env.FRONTEND_URL,
+      process.env.CORS_ORIGIN,
+      'http://localhost:3000',
+      'http://dev.zltsos.com',
+      'https://dev.zltsos.com'
+    ].filter(Boolean);
+
     app.use(cors({
-      origin: process.env.FRONTEND_URL || process.env.CORS_ORIGIN || 'http://localhost:3000',
+      origin: function(origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS: ' + origin));
+        }
+      },
       credentials: true
     }));
     app.use(express.json({ limit: '10kb' })); // Limit body payload size
