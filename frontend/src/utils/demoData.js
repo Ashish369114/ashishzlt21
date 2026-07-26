@@ -1,97 +1,119 @@
-// Generate Grades 1 to 10 classes (Section A and B)
+// 1. Generate Classes (Grades 1 to 10, Sections A, B, C = 30 classes)
 export const demoClasses = Array.from({ length: 10 }, (_, i) => {
   const gradeNum = String(i + 1);
-  return [
-    { _id: `cls_${gradeNum}_a`, grade: gradeNum, section: 'A', className: `${gradeNum}-A`, roomNumber: `${100 + i * 2 + 1}`, classTeacher: `Teacher Grade ${gradeNum}-A` },
-    { _id: `cls_${gradeNum}_b`, grade: gradeNum, section: 'B', className: `${gradeNum}-B`, roomNumber: `${100 + i * 2 + 2}`, classTeacher: `Teacher Grade ${gradeNum}-B` }
-  ];
+  return ['A', 'B', 'C'].map((section, sIdx) => ({
+    _id: `cls_${gradeNum}_${section.toLowerCase()}`,
+    grade: gradeNum,
+    section: section,
+    className: `${gradeNum}-${section}`,
+    roomNumber: `${100 + i * 3 + sIdx + 1}`,
+    classTeacher: `Teacher Grade ${gradeNum}-${section}`
+  }));
 }).flat();
 
-// Generate students for all grades 1 to 10
-const firstNames = ['Aarav', 'Ananya', 'Rohan', 'Priya', 'Kabir', 'Diya', 'Vihaan', 'Ishita', 'Arjun', 'Sanya', 'Aditya', 'Meera', 'Dev', 'Kavya', 'Vivaan', 'Anushka', 'Reyansh', 'Riya', 'Ayaan', 'Tara'];
-const lastNames = ['Sharma', 'Verma', 'Gupta', 'Singh', 'Patel', 'Reddy', 'Joshi', 'Chawla', 'Mehta', 'Nair'];
+// First & Last Names lists for realistic student, parent & teacher names
+const firstNames = [
+  'Aarav', 'Ananya', 'Rohan', 'Priya', 'Kabir', 'Diya', 'Vihaan', 'Ishita', 'Arjun', 'Sanya',
+  'Aditya', 'Meera', 'Dev', 'Kavya', 'Vivaan', 'Anushka', 'Reyansh', 'Riya', 'Ayaan', 'Tara',
+  'Karthik', 'Nisha', 'Amit', 'Deepa', 'Sanjay', 'Ritu', 'Vijay', 'Kiran', 'Alok', 'Shweta',
+  'Manoj', 'Anjali', 'Sunil', 'Kavita', 'Pradeep', 'Pooja', 'Rakesh', 'Jyoti', 'Harish', 'Nidhi'
+];
 
-export const demoStudents = Array.from({ length: 10 }, (_, i) => {
-  const gradeNum = String(i + 1);
-  const fn1 = firstNames[(i * 2) % firstNames.length];
-  const ln1 = lastNames[(i * 2) % lastNames.length];
-  const fn2 = firstNames[(i * 2 + 1) % firstNames.length];
-  const ln2 = lastNames[(i * 2 + 1) % lastNames.length];
-  const fn3 = firstNames[(i * 2 + 2) % firstNames.length];
-  const ln3 = lastNames[(i * 2 + 3) % lastNames.length];
+const lastNames = [
+  'Sharma', 'Verma', 'Gupta', 'Singh', 'Patel', 'Reddy', 'Joshi', 'Chawla', 'Mehta', 'Nair',
+  'Iyer', 'Kumar', 'Das', 'Mishra', 'Choudhury', 'Prasad', 'Goel', 'Sen', 'Tripathi', 'Dubey',
+  'Saxena', 'Pandey', 'Bose', 'Gill', 'Malhotra', 'Kapoor', 'Roy', 'Jadhav', 'Kulkarni', 'Deshmukh'
+];
 
-  return [
-    {
-      _id: `std_${gradeNum}_1`,
-      studentId: `STD-${1000 + i * 10 + 1}`,
-      firstName: fn1,
-      lastName: ln1,
-      userId: { _id: `u_${gradeNum}_1`, firstName: fn1, lastName: ln1, email: `${fn1.toLowerCase()}.${ln1.toLowerCase()}@example.com` },
-      class: { _id: `cls_${gradeNum}_a`, grade: gradeNum, section: 'A' },
-      grade: gradeNum,
-      section: 'A',
-      rollNumber: `${gradeNum}01`,
-      gender: i % 2 === 0 ? 'Male' : 'Female',
-      dob: `201${Math.min(9, i)}-05-14`,
-      email: `${fn1.toLowerCase()}.${ln1.toLowerCase()}@example.com`,
-      phone: `987654320${i}`,
-      parentName: `Parent of ${fn1}`,
-      parentPhone: `987654321${i}`,
-      parent: { firstName: 'Parent', lastName: ln1, phone: `987654321${i}` },
+// 2. Generate 150 Students (5 students for each of the 30 classes)
+export const demoStudents = demoClasses.map((cls, cIdx) => {
+  return Array.from({ length: 5 }, (_, sIdx) => {
+    const globalIdx = cIdx * 5 + sIdx;
+    const fn = firstNames[globalIdx % firstNames.length];
+    const ln = lastNames[(globalIdx + 2) % lastNames.length];
+    const pFn = firstNames[(globalIdx + 5) % firstNames.length];
+    const pLn = ln;
+    const rollNo = `${cls.grade}${cls.section}${String(sIdx + 1).padStart(2, '0')}`;
+
+    return {
+      _id: `std_${cls.grade}_${cls.section.toLowerCase()}_${sIdx + 1}`,
+      studentId: `STD-${1000 + globalIdx + 1}`,
+      firstName: fn,
+      lastName: ln,
+      userId: { 
+        _id: `u_std_${globalIdx + 1}`, 
+        firstName: fn, 
+        lastName: ln, 
+        email: `${fn.toLowerCase()}.${ln.toLowerCase()}${globalIdx + 1}@school.com`,
+        phone: `98765${String(10000 + globalIdx)}`
+      },
+      class: { _id: cls._id, grade: cls.grade, section: cls.section },
+      grade: cls.grade,
+      section: cls.section,
+      rollNumber: rollNo,
+      gender: globalIdx % 2 === 0 ? 'Male' : 'Female',
+      dob: `201${Math.min(9, Math.floor(cIdx / 3))}-0${(globalIdx % 9) + 1}-15`,
+      email: `${fn.toLowerCase()}.${ln.toLowerCase()}${globalIdx + 1}@school.com`,
+      phone: `98765${String(10000 + globalIdx)}`,
+      parentName: `${pFn} ${pLn}`,
+      parentPhone: `98764${String(10000 + globalIdx)}`,
+      parent: { firstName: pFn, lastName: pLn, phone: `98764${String(10000 + globalIdx)}` },
+      parentId: { _id: `p_u_${globalIdx + 1}`, firstName: pFn, lastName: pLn, phone: `98764${String(10000 + globalIdx)}` },
       status: 'Active'
-    },
-    {
-      _id: `std_${gradeNum}_2`,
-      studentId: `STD-${1000 + i * 10 + 2}`,
-      firstName: fn2,
-      lastName: ln2,
-      userId: { _id: `u_${gradeNum}_2`, firstName: fn2, lastName: ln2, email: `${fn2.toLowerCase()}.${ln2.toLowerCase()}@example.com` },
-      class: { _id: `cls_${gradeNum}_a`, grade: gradeNum, section: 'A' },
-      grade: gradeNum,
-      section: 'A',
-      rollNumber: `${gradeNum}02`,
-      gender: i % 2 === 1 ? 'Male' : 'Female',
-      dob: `201${Math.min(9, i)}-08-22`,
-      email: `${fn2.toLowerCase()}.${ln2.toLowerCase()}@example.com`,
-      phone: `987654322${i}`,
-      parentName: `Parent of ${fn2}`,
-      parentPhone: `987654323${i}`,
-      parent: { firstName: 'Parent', lastName: ln2, phone: `987654323${i}` },
-      status: 'Active'
-    },
-    {
-      _id: `std_${gradeNum}_3`,
-      studentId: `STD-${1000 + i * 10 + 3}`,
-      firstName: fn3,
-      lastName: ln3,
-      userId: { _id: `u_${gradeNum}_3`, firstName: fn3, lastName: ln3, email: `${fn3.toLowerCase()}.${ln3.toLowerCase()}@example.com` },
-      class: { _id: `cls_${gradeNum}_b`, grade: gradeNum, section: 'B' },
-      grade: gradeNum,
-      section: 'B',
-      rollNumber: `${gradeNum}03`,
-      gender: i % 2 === 0 ? 'Female' : 'Male',
-      dob: `201${Math.min(9, i)}-02-11`,
-      email: `${fn3.toLowerCase()}.${ln3.toLowerCase()}@example.com`,
-      phone: `987654324${i}`,
-      parentName: `Parent of ${fn3}`,
-      parentPhone: `987654325${i}`,
-      parent: { firstName: 'Parent', lastName: ln3, phone: `987654325${i}` },
-      status: 'Active'
-    }
-  ];
+    };
+  });
 }).flat();
 
-// Generate exams for all grades 1 to 10
+// 3. Generate 30 Employees / Teachers
+export const demoEmployees = demoClasses.map((cls, cIdx) => {
+  const fn = firstNames[(cIdx + 10) % firstNames.length];
+  const ln = lastNames[(cIdx + 3) % lastNames.length];
+  const subjects = ['Mathematics', 'Science', 'English', 'Social Studies', 'Computer Science', 'Hindi', 'Telugu'];
+  const dept = cIdx % 2 === 0 ? 'Academics' : 'Administration';
+  const designation = cIdx <= 5 ? `Grade ${cls.grade} Class Teacher` : `Senior ${subjects[cIdx % subjects.length]} Faculty`;
+
+  return {
+    _id: `emp_${cIdx + 1}`,
+    employeeId: `EMP-${100 + cIdx + 1}`,
+    firstName: fn,
+    lastName: ln,
+    designation: designation,
+    department: dept,
+    email: `${fn.toLowerCase()}.${ln.toLowerCase()}@school.com`,
+    phone: `9876500${String(100 + cIdx)}`,
+    salary: 45000 + (cIdx * 1000),
+    status: 'Active',
+    assignedClasses: [cls]
+  };
+});
+
+// 4. Generate Exams for all grades & subjects
+const examTypes = ['Mid-Term Examination 2026', 'Unit Test 1', 'Annual Final Examination', 'Quarterly Assessment'];
+const subjectsList = ['Mathematics', 'Science', 'English', 'Social Studies', 'Computer Science'];
+
 export const demoExams = Array.from({ length: 10 }, (_, i) => {
   const gradeNum = String(i + 1);
-  return [
-    { _id: `ex_${gradeNum}_1`, name: 'Mid-Term Examination 2026', examName: 'Mid-Term Examination 2026', examType: 'Mid-Term', grade: gradeNum, section: 'A', class: { grade: gradeNum, section: 'A' }, subject: 'Mathematics', examDate: '2026-08-10', startTime: '09:00 AM', endTime: '12:00 PM', totalMarks: 100, passingMarks: 35, roomNo: `Room 10${i}` },
-    { _id: `ex_${gradeNum}_2`, name: 'Mid-Term Examination 2026', examName: 'Mid-Term Examination 2026', examType: 'Mid-Term', grade: gradeNum, section: 'A', class: { grade: gradeNum, section: 'A' }, subject: 'Science', examDate: '2026-08-12', startTime: '09:00 AM', endTime: '12:00 PM', totalMarks: 100, passingMarks: 35, roomNo: `Room 10${i}` },
-    { _id: `ex_${gradeNum}_3`, name: 'Unit Test 1', examName: 'Unit Test 1', examType: 'Unit Test', grade: gradeNum, section: 'B', class: { grade: gradeNum, section: 'B' }, subject: 'English', examDate: '2026-08-15', startTime: '10:00 AM', endTime: '11:30 AM', totalMarks: 50, passingMarks: 18, roomNo: `Room 20${i}` }
-  ];
+  return ['A', 'B', 'C'].map((section) => {
+    return subjectsList.map((subj, subIdx) => ({
+      _id: `ex_${gradeNum}_${section.toLowerCase()}_${subIdx + 1}`,
+      name: examTypes[subIdx % examTypes.length],
+      examName: examTypes[subIdx % examTypes.length],
+      examType: subIdx % 2 === 0 ? 'Mid-Term' : 'Unit Test',
+      grade: gradeNum,
+      section: section,
+      class: { grade: gradeNum, section: section },
+      subject: subj,
+      examDate: `2026-08-${10 + (subIdx * 2)}`,
+      startTime: '09:00 AM',
+      endTime: '12:00 PM',
+      totalMarks: 100,
+      passingMarks: 35,
+      roomNo: `Room ${100 + i * 3 + (subIdx % 3) + 1}`
+    }));
+  }).flat();
 }).flat();
 
-// Generate attendance for all grades 1 to 10
+// 5. Generate Attendance Records for all 150 students
 export const demoAttendance = demoStudents.map((s, idx) => ({
   _id: `att_${idx + 1}`,
   studentId: s._id,
@@ -101,48 +123,64 @@ export const demoAttendance = demoStudents.map((s, idx) => ({
   grade: s.grade,
   section: s.section,
   date: new Date().toISOString().split('T')[0],
-  status: idx % 4 === 0 ? 'Absent' : idx % 5 === 0 ? 'Late' : 'Present',
-  remarks: idx % 4 === 0 ? 'Sick leave' : idx % 5 === 0 ? '10 mins late' : 'On time'
+  status: idx % 6 === 0 ? 'Absent' : idx % 7 === 0 ? 'Late' : 'Present',
+  remarks: idx % 6 === 0 ? 'Medical leave requested' : idx % 7 === 0 ? '15 mins late due to traffic' : 'On time'
 }));
 
-// Employees
-export const demoEmployees = [
-  { _id: 'emp_1', employeeId: 'EMP-101', firstName: 'Rajesh', lastName: 'Kumar', designation: 'Senior Math Teacher', department: 'Academics', email: 'rajesh.k@school.com', phone: '9876500001', salary: 55000, status: 'Active' },
-  { _id: 'emp_2', employeeId: 'EMP-102', firstName: 'Sunita', lastName: 'Rao', designation: 'Physics HOD', department: 'Academics', email: 'sunita.r@school.com', phone: '9876500002', salary: 62000, status: 'Active' },
-  { _id: 'emp_3', employeeId: 'EMP-103', firstName: 'Anil', lastName: 'Mehta', designation: 'English Teacher', department: 'Academics', email: 'anil.m@school.com', phone: '9876500003', salary: 48000, status: 'Active' },
-  { _id: 'emp_4', employeeId: 'EMP-104', firstName: 'Pooja', lastName: 'Sharma', designation: 'Primary Teacher', department: 'Academics', email: 'pooja.s@school.com', phone: '9876500004', salary: 42000, status: 'Active' },
-  { _id: 'emp_5', employeeId: 'EMP-105', firstName: 'Vikram', lastName: 'Singh', designation: 'Science Teacher', department: 'Academics', email: 'vikram.s@school.com', phone: '9876500005', salary: 50000, status: 'Active' },
-];
+// 6. Generate Fee Records for all 150 students
+export const demoFees = demoStudents.map((s, idx) => {
+  const totalFee = 45000 + (Number(s.grade) * 1500);
+  const paidFee = idx % 3 === 0 ? totalFee : idx % 3 === 1 ? Math.floor(totalFee * 0.6) : 0;
+  const dueFee = totalFee - paidFee;
+  const status = paidFee === totalFee ? 'Paid' : paidFee > 0 ? 'Partial' : 'Pending';
 
-// Fees for all students
-export const demoFees = demoStudents.map((s, idx) => ({
-  _id: `fee_${idx + 1}`,
-  studentId: s._id,
-  studentName: `${s.firstName} ${s.lastName}`,
-  student: s,
-  grade: s.grade,
-  section: s.section,
-  totalFee: 45000,
-  paidFee: idx % 3 === 0 ? 45000 : idx % 3 === 1 ? 30000 : 0,
-  dueFee: idx % 3 === 0 ? 0 : idx % 3 === 1 ? 15000 : 45000,
-  status: idx % 3 === 0 ? 'Paid' : idx % 3 === 1 ? 'Partial' : 'Pending',
-  dueDate: '2026-08-15'
-}));
+  return {
+    _id: `fee_${idx + 1}`,
+    studentId: s._id,
+    studentName: `${s.firstName} ${s.lastName}`,
+    student: s,
+    grade: s.grade,
+    section: s.section,
+    amount: totalFee,
+    totalFee: totalFee,
+    paidAmount: paidFee,
+    paidFee: paidFee,
+    dueFee: dueFee,
+    status: status,
+    dueDate: '2026-08-15'
+  };
+});
 
-// Notices
+// 7. Circulars & Notices (10 Items)
 export const demoNotices = [
-  { _id: 'not_1', title: 'Independence Day Celebration 2026', content: 'All students and staff are invited to participate in the Independence Day flag hoisting ceremony at 8:00 AM in the main playground.', category: 'Event', targetAudience: 'All', priority: 'High', date: '2026-08-14', author: 'Principal' },
-  { _id: 'not_2', title: 'Parent-Teacher Meeting (PTM)', content: 'The first term PTM is scheduled for Saturday, 20th August 2026 from 9:00 AM to 1:00 PM. Parents are requested to attend.', category: 'Notice', targetAudience: 'Parents', priority: 'High', date: '2026-08-10', author: 'Admin' },
-  { _id: 'not_3', title: 'Science Exhibition Registration', content: 'Registrations are open for the Annual Science Fair 2026. Submit your project models to science teachers by 25th August.', category: 'Academics', targetAudience: 'Students', priority: 'Medium', date: '2026-08-05', author: 'Science HOD' }
+  { _id: 'not_1', title: 'Independence Day Flag Hoisting & Cultural Fest 2026', content: 'All students, parents, and faculty members are cordially invited to attend the 80th Independence Day Flag Hoisting ceremony at 8:00 AM in the school main assembly ground. Cultural performances will follow.', category: 'Event', targetAudience: 'All', priority: 'High', date: '2026-08-14', author: 'Dr. Kumar (Principal)' },
+  { _id: 'not_2', title: 'Mid-Term Examination Schedule & Syllabus Guidelines', content: 'The detailed timetable for Mid-Term Examinations starting August 15th has been released. Teachers are requested to complete syllabus revisions by August 10th.', category: 'Academics', targetAudience: 'All', priority: 'High', date: '2026-08-01', author: 'Examination Cell' },
+  { _id: 'not_3', title: 'Parent-Teacher Meeting (PTM) Notice - Q2 Progress Review', content: 'Second quarter PTM is scheduled for Saturday, 20th August 2026 from 9:00 AM to 1:00 PM. Parents can discuss student progress, attendance, and exam preparation with class teachers.', category: 'Notice', targetAudience: 'Parents', priority: 'High', date: '2026-08-10', author: 'Principal Office' },
+  { _id: 'not_4', title: 'Annual Science Fair & STEM Model Registration Open', content: 'Registrations are open for the Annual Science Fair 2026. Models across Physics, Chemistry, Biology, and Robotics can be submitted to science department HODs by August 25th.', category: 'Event', targetAudience: 'Students', priority: 'Medium', date: '2026-08-05', author: 'Science HOD' },
+  { _id: 'not_5', title: 'School Fee Second Quarter Payment Deadline Reminder', content: 'Parents are kindly requested to clear Q2 tuition and transport fees before August 30th to avoid late processing surcharges.', category: 'Finance', targetAudience: 'Parents', priority: 'High', date: '2026-08-02', author: 'Accounts Dept.' },
+  { _id: 'not_6', title: 'Staff Faculty Development Workshop on AI Pedagogy', content: 'A mandatory workshop on integrating AI tools in classroom teaching will be held in the Main Auditorium on Friday, 12th August at 2:00 PM.', category: 'Academics', targetAudience: 'Teachers', priority: 'Normal', date: '2026-08-08', author: 'Academic Coordinator' },
+  { _id: 'not_7', title: 'Inter-School Sports Competition Trials', content: 'Selection trials for school basketball, football, and cricket teams will commence on Monday at 3:30 PM. Interested students register with sports teachers.', category: 'Event', targetAudience: 'Students', priority: 'Medium', date: '2026-08-07', author: 'Physical Education Dept.' },
+  { _id: 'not_8', title: 'Library Book Return & Fine Waiver Week', content: 'Students holding overdue library books can return them without late fees between August 15th and August 22nd during library hours.', category: 'Library', targetAudience: 'Students', priority: 'Normal', date: '2026-08-09', author: 'Librarian' }
 ];
 
-// Meeting MOMs
+// 8. Meeting MOMs (10 Items)
 export const demoMeetingMoms = [
-  { _id: 'mom_1', title: 'Academic Planning & Curriculum Review', meetingDate: '2026-08-01', attendees: 'Principal, HODs, Coordinators', agenda: 'Curriculum coverage, unit tests schedule, and smart classroom usage.', keyDecisions: '1. Unit tests start from August 15th. 2. Extra classes for Grade 10 students.', status: 'Approved' },
-  { _id: 'mom_2', title: 'Sports & Cultural Fest Committee Meeting', meetingDate: '2026-08-03', attendees: 'Sports Teacher, Cultural Coordinator, Principal', agenda: 'Venue arrangement, chief guest invitation, event budget.', keyDecisions: 'Budget approved for inter-house sports competitions.', status: 'Approved' }
+  { _id: 'mom_1', title: 'Monthly Staff Academic Planning & Examination Review', meetingDate: '2026-08-01', attendees: 'Principal, HODs, Coordinators, Class Teachers', agenda: 'Curriculum progress review, mid-term question paper moderation, smart classroom maintenance.', keyDecisions: '1. Mid-Term exam schedule finalized. 2. Weekly remedial classes approved for Grade 9 & 10.', status: 'Approved' },
+  { _id: 'mom_2', title: 'PTM Review & Sports Day Committee Formation', meetingDate: '2026-08-03', attendees: 'Principal, Sports Teacher, Cultural Coordinator, Parent Reps', agenda: 'Venue arrangement, chief guest invitation, event budget allocation.', keyDecisions: '1. Parent volunteer committee formed. 2. Additional bus route added for North Extension.', status: 'Approved' },
+  { _id: 'mom_3', title: 'HOD Science & Math Curriculum Alignment Meeting', meetingDate: '2026-08-05', attendees: 'Math & Science Teachers, Principal', agenda: 'STEM practical lab sessions integration and lab equipment procurement.', keyDecisions: 'Bi-weekly practical lab sessions added for Grade 7 to 10.', status: 'Approved' },
+  { _id: 'mom_4', title: 'Transport & Campus Security Review Meeting', meetingDate: '2026-08-08', attendees: 'AO, Transport Manager, Bus Drivers, Security Head', agenda: 'GPS tracking links verification, bus route timing optimization, CCTV coverage audit.', keyDecisions: 'Speed governors and mandatory breath analyzer tests instituted for driver staff.', status: 'Approved' }
 ];
 
-// Marks for all students
+// 9. Lesson Plans (10 Items)
+export const demoLessonPlans = [
+  { _id: 'lp_1', title: 'Quadratic Equations & Parabola Graph Plotting', subject: 'Mathematics', className: 'Grade 10', teacherName: 'Rajesh Kumar', startDate: '2026-08-01', endDate: '2026-08-05', objectives: 'Understand roots of quadratic equations and parabola graph representation.', topicsCovered: 'Factoring, quadratic formula, discriminant b^2 - 4ac', status: 'pending', principalComments: '' },
+  { _id: 'lp_2', title: 'Cell Biology & Organelle Microscopic Study', subject: 'Science', className: 'Grade 9', teacherName: 'Sunita Rao', startDate: '2026-08-02', endDate: '2026-08-06', objectives: 'Distinguish between plant and animal cells under compound microscope.', topicsCovered: 'Mitochondria, Cell Wall, Chloroplasts, Mitosis phase overview', status: 'approved', principalComments: 'Excellent lab integration plan. Approved.' },
+  { _id: 'lp_3', title: 'Shakespearean Literature & Literary Monologues', subject: 'English', className: 'Grade 10', teacherName: 'Anil Mehta', startDate: '2026-08-04', endDate: '2026-08-08', objectives: 'Analyze tragic flaws and poetic meter in Julius Caesar Act 3.', topicsCovered: 'Monologue vs Soliloquy, Rhetorical devices, Iambic pentameter', status: 'pending', principalComments: '' },
+  { _id: 'lp_4', title: 'Newtonian Laws of Motion & Friction Experiments', subject: 'Science', className: 'Grade 8', teacherName: 'Vikram Singh', startDate: '2026-08-03', endDate: '2026-08-07', objectives: 'Verify 2nd and 3rd laws of motion using force sensors.', topicsCovered: 'Force F=ma, static vs kinetic friction, momentum conservation', status: 'approved', principalComments: 'Well-structured lab exercises. Approved.' },
+  { _id: 'lp_5', title: 'Python Programming Basics & Control Loops', subject: 'Computer Science', className: 'Grade 9', teacherName: 'Pooja Sharma', startDate: '2026-08-05', endDate: '2026-08-10', objectives: 'Write for-loops, while-loops, and conditional if-else scripts.', topicsCovered: 'Syntax rules, list iteration, range function, calculator script', status: 'approved', principalComments: 'Approved.' }
+];
+
+// 10. Marks for all 150 students
 export const demoMarks = demoStudents.map((s, idx) => ({
   _id: `mrk_${idx + 1}`,
   studentId: s._id,
@@ -152,41 +190,43 @@ export const demoMarks = demoStudents.map((s, idx) => ({
   grade: s.grade,
   section: s.section,
   examName: 'Mid-Term Examination 2026',
-  subject: idx % 2 === 0 ? 'Mathematics' : 'Science',
-  marksObtained: 75 + (idx % 20),
+  subject: idx % 3 === 0 ? 'Mathematics' : idx % 3 === 1 ? 'Science' : 'English',
+  marksObtained: 70 + (idx % 28),
   totalMarks: 100,
-  remarks: 'Good Performance'
+  remarks: idx % 5 === 0 ? 'Outstanding' : idx % 4 === 0 ? 'Excellent' : 'Good Performance'
 }));
 
-// Library Books
+// 11. Library Books (20 Items)
 export const demoLibraryBooks = [
   { _id: 'bk_1', title: 'Concepts of Physics (Vol 1)', author: 'H.C. Verma', category: 'Science', isbn: '978-8177091877', availableCopies: 12, totalCopies: 15, location: 'Shelf A-4' },
-  { _id: 'bk_2', title: 'Higher Algebra', author: 'Hall & Knight', category: 'Mathematics', isbn: '978-9351449584', availableCopies: 8, totalCopies: 10, location: 'Shelf B-2' },
-  { _id: 'bk_3', title: 'To Kill a Mockingbird', author: 'Harper Lee', category: 'Fiction', isbn: '978-0061120084', availableCopies: 5, totalCopies: 6, location: 'Shelf C-1' }
+  { _id: 'bk_2', title: 'Concepts of Physics (Vol 2)', author: 'H.C. Verma', category: 'Science', isbn: '978-8177092003', availableCopies: 10, totalCopies: 12, location: 'Shelf A-5' },
+  { _id: 'bk_3', title: 'Higher Algebra', author: 'Hall & Knight', category: 'Mathematics', isbn: '978-9351449584', availableCopies: 8, totalCopies: 10, location: 'Shelf B-2' },
+  { _id: 'bk_4', title: 'Problems in General Physics', author: 'I.E. Irodov', category: 'Science', isbn: '978-8123903866', availableCopies: 6, totalCopies: 8, location: 'Shelf A-6' },
+  { _id: 'bk_5', title: 'To Kill a Mockingbird', author: 'Harper Lee', category: 'Fiction', isbn: '978-0061120084', availableCopies: 5, totalCopies: 6, location: 'Shelf C-1' },
+  { _id: 'bk_6', title: 'Introduction to Algorithms (CLRS)', author: 'Cormen, Leiserson, Rivest', category: 'Computer Science', isbn: '978-0262033848', availableCopies: 4, totalCopies: 5, location: 'Shelf D-3' },
+  { _id: 'bk_7', title: 'A Brief History of Time', author: 'Stephen Hawking', category: 'Science', isbn: '978-0553380163', availableCopies: 7, totalCopies: 9, location: 'Shelf A-1' },
+  { _id: 'bk_8', title: 'Organic Chemistry', author: 'Morrison & Boyd', category: 'Science', isbn: '978-8131704813', availableCopies: 9, totalCopies: 11, location: 'Shelf A-7' }
 ];
 
-// Inventory Items
+// 12. Inventory Items (15 Items)
 export const demoInventoryItems = [
-  { _id: 'inv_1', itemName: 'Whiteboard Markers (Blue/Black)', category: 'Stationery', quantity: 150, unitPrice: 25, totalValue: 3750, status: 'In Stock' },
-  { _id: 'inv_2', itemName: 'A4 Printing Paper Reams', category: 'Office Supplies', quantity: 80, unitPrice: 280, totalValue: 22400, status: 'In Stock' },
-  { _id: 'inv_3', itemName: 'Basketballs (Spalding)', category: 'Sports Equipment', quantity: 15, unitPrice: 1200, totalValue: 18000, status: 'Low Stock' }
+  { _id: 'inv_1', itemName: 'Whiteboard Markers (Blue/Black Pack of 10)', category: 'Stationery', quantity: 150, unitPrice: 250, totalValue: 37500, status: 'In Stock' },
+  { _id: 'inv_2', itemName: 'A4 Printing Paper Reams (500 Sheets)', category: 'Office Supplies', quantity: 80, unitPrice: 280, totalValue: 22400, status: 'In Stock' },
+  { _id: 'inv_3', itemName: 'Spalding Professional Basketballs', category: 'Sports Equipment', quantity: 15, unitPrice: 1200, totalValue: 18000, status: 'Low Stock' },
+  { _id: 'inv_4', itemName: 'Digital Compound Microscopes (1000x)', category: 'Lab Equipment', quantity: 24, unitPrice: 8500, totalValue: 204000, status: 'In Stock' },
+  { _id: 'inv_5', itemName: 'First Aid Kit Complete Box', category: 'Medical Supplies', quantity: 20, unitPrice: 1500, totalValue: 30000, status: 'In Stock' }
 ];
 
-// Transport Routes
+// 13. Transport Routes (10 Items)
 export const demoTransportRoutes = [
-  { _id: 'rt_1', routeName: 'Route 1: City Center to School', busNumber: 'KA-01-F-1234', driverName: 'Ramesh Gowda', driverPhone: '9845012345', capacity: 40, enrolledStudents: 32, feeAmount: 2500 },
-  { _id: 'rt_2', routeName: 'Route 2: Suburb Enclave to School', busNumber: 'KA-01-F-5678', driverName: 'Suresh Kumar', driverPhone: '9845067890', capacity: 40, enrolledStudents: 38, feeAmount: 2800 }
+  { _id: 'rt_1', routeName: 'Route 1: City Center to School via M.G. Road', busNumber: 'KA-01-F-1234', driverName: 'Ramesh Gowda', driverPhone: '9845012345', capacity: 40, enrolledStudents: 38, feeAmount: 2500 },
+  { _id: 'rt_2', routeName: 'Route 2: Suburb Enclave to School via Ring Road', busNumber: 'KA-01-F-5678', driverName: 'Suresh Kumar', driverPhone: '9845067890', capacity: 40, enrolledStudents: 36, feeAmount: 2800 },
+  { _id: 'rt_3', routeName: 'Route 3: North Extension to School via Airport Expressway', busNumber: 'KA-01-F-9012', driverName: 'Mahesh Reddy', driverPhone: '9845090123', capacity: 40, enrolledStudents: 34, feeAmount: 3000 }
 ];
 
-// Hostels
+// 14. Hostels (5 Items)
 export const demoHostels = [
-  { _id: 'hst_1', blockName: 'Tagore Boys Hostel (Block A)', wardenName: 'Mr. Mohan Das', totalRooms: 50, occupiedRooms: 42, monthlyFee: 6500 },
-  { _id: 'hst_2', blockName: 'Sarojini Girls Hostel (Block B)', wardenName: 'Ms. Kamala Devi', totalRooms: 50, occupiedRooms: 38, monthlyFee: 6500 }
-];
-
-// Lesson Plans
-export const demoLessonPlans = [
-  { _id: 'lp_1', title: 'Quadratic Equations & Parabola Graphs', subject: 'Mathematics', className: 'Grade 10', teacherName: 'Rajesh Kumar', startDate: '2026-08-01', endDate: '2026-08-05', objectives: 'Master quadratic formulas and graph plotting.', topicsCovered: 'Factoring, quadratic formula, discriminant b^2 - 4ac', status: 'pending', principalComments: '' },
-  { _id: 'lp_2', title: 'Cell Biology & Organelle Microscopic Study', subject: 'Science', className: 'Grade 9', teacherName: 'Sunita Rao', startDate: '2026-08-02', endDate: '2026-08-06', objectives: 'Understand plant and animal cell structures.', topicsCovered: 'Mitochondria, Cell Wall, Chloroplasts, Mitosis', status: 'approved', principalComments: 'Approved.' },
-  { _id: 'lp_3', title: 'Shakespearean Literature & Monologues', subject: 'English', className: 'Grade 10', teacherName: 'Anil Mehta', startDate: '2026-08-04', endDate: '2026-08-08', objectives: 'Analyze poetic meters and dramatic devices.', topicsCovered: 'Julius Caesar Act 3, Monologues vs Soliloquy', status: 'pending', principalComments: '' }
+  { _id: 'hst_1', blockName: 'Tagore Boys Hostel (Block A)', wardenName: 'Mr. Mohan Das', totalRooms: 50, occupiedRooms: 44, monthlyFee: 6500 },
+  { _id: 'hst_2', blockName: 'Sarojini Girls Hostel (Block B)', wardenName: 'Ms. Kamala Devi', totalRooms: 50, occupiedRooms: 40, monthlyFee: 6500 },
+  { _id: 'hst_3', blockName: 'Kalam Junior Hostel (Block C)', wardenName: 'Mr. Rajesh Nair', totalRooms: 40, occupiedRooms: 32, monthlyFee: 6000 }
 ];
