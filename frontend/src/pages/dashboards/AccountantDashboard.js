@@ -73,20 +73,7 @@ const AccountantDashboard = ({ user, onLogout }) => {
     });
   };
 
-  const isPremiumFeatureAllowed = (featureKey) => {
-    const p = String(plan).toLowerCase();
-    const isGoldOrAbove = ['gold', 'platinum', 'platinum_with_ocr', 'platinum_without_ocr'].includes(p);
-    const isPlatinum = p.startsWith('platinum');
-    const isOcrPlatinum = p === 'platinum_with_ocr';
-
-    switch (featureKey) {
-      case 'concessions':      return isGoldOrAbove;
-      case 'payroll':          return isGoldOrAbove;
-      case 'advanced_reports': return isPlatinum;
-      case 'ocr':              return isOcrPlatinum;
-      default:                 return true;
-    }
-  };
+  const isPremiumFeatureAllowed = () => true;
 
   useEffect(() => {
     fetchData();
@@ -335,44 +322,30 @@ const AccountantDashboard = ({ user, onLogout }) => {
       </div>
 
       <div className="main-content">
-        <div className="header" style={{ marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '1.75rem', color: '#322029', margin: 0 }}>
-            {user?.role === 'super_admin' ? 'Super Admin' : user?.role === 'principal' ? 'Principal' : 'Accountant'} Dashboard
-          </h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
-            <span style={{
-              padding: '6px 14px',
-              borderRadius: '20px',
-              fontSize: '0.8rem',
-              fontWeight: '700',
-              letterSpacing: '0.04em',
-              background: plan.startsWith('platinum') ? 'linear-gradient(135deg, #a78bfa, #7c3aed)' :
-                          plan === 'gold' ? 'linear-gradient(135deg, #f59e0b, #d97706)' :
-                          'linear-gradient(135deg, #64748b, #475569)',
-              color: '#fff',
-              textTransform: 'uppercase',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-            }}>
-              {plan === 'platinum_with_ocr' ? '⭐ Platinum + OCR' :
-               plan === 'platinum_without_ocr' || plan === 'platinum' ? '⭐ Platinum' :
-               plan === 'gold' ? '🏆 Gold' : '🥈 Silver'} Plan
-            </span>
-            <span style={{ color: '#64748b', fontWeight: '500', fontSize: '0.9rem' }}>{new Date().toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span>
+        {/* Modern Accountant Header */}
+        <div className="accountant-top-nav">
+          <div>
+            <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', color: '#0f172a' }}>
+              {user?.role === 'super_admin' ? 'Super Admin' : user?.role === 'principal' ? 'Principal' : 'Accountant'} Dashboard
+            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
+              <span style={{ color: '#64748b', fontWeight: '500', fontSize: '0.9rem' }}>{new Date().toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span>
+            </div>
           </div>
         </div>
 
         <Routes>
           <Route index element={<DashboardHome stats={stats} user={user} />} />
           <Route path="students" element={<StudentManagement />} />
-          <Route path="teachers" element={isGoldOrBetter ? <AccountantTeachers /> : <PlanUpgradeRequired featureName="Teachers List" requiredPlan="Gold" />} />
-          <Route path="payroll" element={isGoldOrBetter ? <AccountantPayroll /> : <PlanUpgradeRequired featureName="Payroll" requiredPlan="Gold" />} />
-          <Route path="collections" element={isGoldOrBetter ? <AccountantCollections /> : <PlanUpgradeRequired featureName="Collections Overview" requiredPlan="Gold" />} />
+          <Route path="teachers" element={<AccountantTeachers />} />
+          <Route path="payroll" element={<AccountantPayroll />} />
+          <Route path="collections" element={<AccountantCollections />} />
           <Route path="fees" element={<FeeManagement user={user} />} />
-          <Route path="pending" element={isGoldOrBetter ? <AccountantPendingFees /> : <PlanUpgradeRequired featureName="Pending Fees Tracking" requiredPlan="Gold" />} />
-          <Route path="payments" element={isGoldOrBetter ? <AccountantPayments /> : <PlanUpgradeRequired featureName="Payments Overview" requiredPlan="Gold" />} />
-          <Route path="concessions" element={isGoldOrBetter ? <ConcessionManagement /> : <PlanUpgradeRequired featureName="Discounts" requiredPlan="Gold" />} />
-          <Route path="reports" element={isPlatinum ? <AccountantReports isPremiumFeatureAllowed={isPremiumFeatureAllowed} /> : <PlanUpgradeRequired featureName="Advanced Reports" requiredPlan="Platinum" />} />
-          <Route path="expenses" element={isGoldOrBetter ? <AccountantExpenses /> : <PlanUpgradeRequired featureName="Expenses Tracking" requiredPlan="Gold" />} />
+          <Route path="pending" element={<AccountantPendingFees />} />
+          <Route path="payments" element={<AccountantPayments />} />
+          <Route path="concessions" element={<ConcessionManagement />} />
+          <Route path="reports" element={<AccountantReports isPremiumFeatureAllowed={isPremiumFeatureAllowed} />} />
+          <Route path="expenses" element={<AccountantExpenses />} />
           <Route path="*" element={<DashboardHome stats={stats} user={user} />} />
         </Routes>
       </div>
