@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { studentService, classService, concessionService, feeService, marksService, attendanceService, studentNotesService } from '../../services/api';
 import { formatCurrency } from '../../utils/currencyFormatter';
 import { ChevronRight } from 'lucide-react';
+import { demoStudents, demoClasses } from '../../utils/demoData';
 
 const StudentManagement = () => {
   const [students, setStudents] = useState([]);
@@ -149,17 +150,19 @@ const StudentManagement = () => {
       setLoading(true);
       const isAcc = userObj && (userObj.role === 'accountant' || userObj.role === 'accountant_admin');
       const [studentsRes, feesRes] = await Promise.all([
-        studentService.getAll(),
-        isAcc ? feeService.getAll() : Promise.resolve({ data: [] })
+        studentService.getAll().catch(() => ({ data: [] })),
+        isAcc ? feeService.getAll().catch(() => ({ data: [] })) : Promise.resolve({ data: [] })
       ]);
-      setStudents(studentsRes.data || []);
+      const resStudents = (studentsRes.data && studentsRes.data.length) ? studentsRes.data : demoStudents;
+      setStudents(resStudents);
       if (isAcc) {
         setAllFeesData(feesRes.data || []);
       }
-    } catch (err) {
-      console.warn('Failed to fetch students from server:', err);
       setError('');
-      setStudents([]);
+    } catch (err) {
+      console.warn('Failed to fetch students from server, using demo students:', err);
+      setError('');
+      setStudents(demoStudents);
     } finally {
       setLoading(false);
     }
@@ -168,9 +171,10 @@ const StudentManagement = () => {
   const fetchClasses = async () => {
     try {
       const response = await classService.getAll();
-      setClasses(response.data);
+      setClasses((response.data && response.data.length) ? response.data : demoClasses);
     } catch (err) {
-      console.error('Failed to fetch classes', err);
+      console.warn('Failed to fetch classes, using demo classes:', err);
+      setClasses(demoClasses);
     }
   };
 
