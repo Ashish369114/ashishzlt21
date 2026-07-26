@@ -212,10 +212,8 @@ const NoticeManagement = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
         {loading ? (
           <div style={{ padding: '40px', textAlign: 'center', background: '#fff', borderRadius: '12px', color: '#6B5B54' }}>Loading notices...</div>
-        ) : notices.length === 0 ? (
-          <div style={{ padding: '40px', textAlign: 'center', background: '#fff', borderRadius: '12px', color: '#6B5B54' }}>No notices published matching criteria.</div>
-        ) : notices.map((notice) => (
-          <div key={notice.id} style={{ background: '#ffffff', border: '1px solid #D9D8D9', borderRadius: '14px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        ) : (notices.length === 0 ? demoNotices : notices).map((notice) => (
+          <div key={notice.id || notice._id} style={{ background: '#ffffff', border: '1px solid #D9D8D9', borderRadius: '14px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{
@@ -233,7 +231,7 @@ const NoticeManagement = () => {
                 <button onClick={() => handleOpenEditModal(notice)} style={{ border: 'none', background: '#EFE9E1', padding: '6px', borderRadius: '6px', cursor: 'pointer', color: '#AC968D' }} title="Edit">
                   <Edit size={14} />
                 </button>
-                <button onClick={() => handleDelete(notice.id)} style={{ border: 'none', background: '#FEF2F2', padding: '6px', borderRadius: '6px', cursor: 'pointer', color: '#EF4444' }} title="Delete">
+                <button onClick={() => handleDelete(notice.id || notice._id)} style={{ border: 'none', background: '#FEF2F2', padding: '6px', borderRadius: '6px', cursor: 'pointer', color: '#EF4444' }} title="Delete">
                   <Trash2 size={14} />
                 </button>
               </div>
@@ -243,8 +241,8 @@ const NoticeManagement = () => {
             <p style={{ fontSize: '13px', color: '#6B5B54', margin: 0, lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{notice.content}</p>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #EFE9E1', paddingTop: '10px', fontSize: '12px', color: '#8C7F79' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Calendar size={13} /> Published on: {notice.publishDate}</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><User size={13} /> Published by: <strong>{notice.publishedBy || 'Principal'}</strong></span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Calendar size={13} /> Published on: {notice.publishDate || notice.date}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><User size={13} /> Published by: <strong>{notice.publishedBy || notice.author || 'Principal'}</strong></span>
             </div>
           </div>
         ))}

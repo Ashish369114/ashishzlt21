@@ -186,10 +186,8 @@ const PrincipalLessonPlanManagement = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '16px', marginBottom: '20px' }}>
         {loading ? (
           <div style={{ padding: '40px', gridColumn: '1 / -1', textAlign: 'center', color: '#64748b' }}>Loading lesson plans...</div>
-        ) : lessonPlans.length === 0 ? (
-          <div style={{ padding: '40px', gridColumn: '1 / -1', textAlign: 'center', background: '#fff', borderRadius: '14px', color: '#64748b' }}>No {statusFilter} lesson plans found.</div>
-        ) : lessonPlans.map((plan) => (
-          <div key={plan.id} style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+        ) : (lessonPlans.length === 0 ? demoLessonPlans : lessonPlans).map((plan) => (
+          <div key={plan.id || plan._id} style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
                 <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: '700', background: '#f1f5f9', color: '#334155' }}>
