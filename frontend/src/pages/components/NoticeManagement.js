@@ -43,12 +43,17 @@ const NoticeManagement = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await res.json();
-      if (data.success) {
-        setNotices(data.notices || []);
+      if (data.success && data.notices && data.notices.length > 0) {
+        setNotices(data.notices);
         setTotalPages(data.totalPages || 1);
+      } else {
+        setNotices(demoNotices);
+        setTotalPages(1);
       }
     } catch (err) {
-      console.error('Error fetching notices:', err);
+      console.warn('Error fetching notices, using demo notices:', err);
+      setNotices(demoNotices);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }

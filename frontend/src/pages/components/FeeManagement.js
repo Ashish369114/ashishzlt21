@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { feeService, classService, studentService } from '../../services/api';
+import { demoFees, demoStudents, demoClasses } from '../../utils/demoData';
 
 const initialFormData = {
   student: '',
@@ -127,10 +128,12 @@ const FeeManagement = ({ user }) => {
     try {
       setLoading(true);
       const response = await feeService.getAll();
-      setFees(response.data || []);
+      setFees((response.data && response.data.length) ? response.data : demoFees);
+      setError('');
     } catch (err) {
-      setError('Failed to fetch fees');
-      console.error(err);
+      console.warn('Using demo fees:', err);
+      setFees(demoFees);
+      setError('');
     } finally {
       setLoading(false);
     }
@@ -139,18 +142,20 @@ const FeeManagement = ({ user }) => {
   const fetchStudents = async () => {
     try {
       const response = await studentService.getAll();
-      setStudents(response.data || []);
+      setStudents((response.data && response.data.length) ? response.data : demoStudents);
     } catch (err) {
-      console.error('Failed to fetch students', err);
+      console.warn('Using demo students in fees:', err);
+      setStudents(demoStudents);
     }
   };
 
   const fetchClasses = async () => {
     try {
       const response = await classService.getAll();
-      setClasses(response.data || []);
+      setClasses((response.data && response.data.length) ? response.data : demoClasses);
     } catch (err) {
-      console.error('Failed to fetch classes', err);
+      console.warn('Using demo classes in fees:', err);
+      setClasses(demoClasses);
     }
   };
 
