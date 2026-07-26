@@ -5,8 +5,9 @@ import MetricCard from '../../components/dashboard/MetricCard';
 import SectionCard from '../../components/dashboard/SectionCard';
 import WelcomeCard from '../../components/dashboard/WelcomeCard';
 
-const ParentHomePage = ({ user, students = [], stats = {} }) => {
+const ParentHomePage = ({ user, students = [], stats }) => {
   const navigate = useNavigate();
+  const safeStats = stats || {};
   const parentName = `${user?.firstName || 'Parent'} ${user?.lastName || ''}`.trim();
 
   const cards = [
@@ -19,21 +20,21 @@ const ParentHomePage = ({ user, students = [], stats = {} }) => {
     },
     {
       title: 'Pending Fees',
-      value: `₹${stats.totalPendingAmount ?? 0}`,
+      value: `₹${safeStats.totalPendingAmount ?? 0}`,
       subtitle: 'Outstanding payments',
       icon: DollarSign,
       accent: 'bg-gradient-to-br from-rose-500 to-orange-500',
     },
     {
       title: 'Average Score',
-      value: stats.averageMarks ?? '—',
+      value: safeStats.averageMarks ?? '—',
       subtitle: 'Across your children',
       icon: BookOpen,
       accent: 'bg-gradient-to-br from-sky-500 to-cyan-500',
     },
     {
       title: 'Attendance',
-      value: stats.averageAttendance ? `${stats.averageAttendance}%` : '—',
+      value: safeStats.averageAttendance ? `${safeStats.averageAttendance}%` : '—',
       subtitle: 'Average attendance',
       icon: ShieldCheck,
       accent: 'bg-gradient-to-br from-emerald-500 to-lime-500',

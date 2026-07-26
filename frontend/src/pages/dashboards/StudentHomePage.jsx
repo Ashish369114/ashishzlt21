@@ -5,8 +5,9 @@ import MetricCard from '../../components/dashboard/MetricCard';
 import SectionCard from '../../components/dashboard/SectionCard';
 import WelcomeCard from '../../components/dashboard/WelcomeCard';
 
-const StudentHomePage = ({ user, student, stats = {} }) => {
+const StudentHomePage = ({ user, student, stats }) => {
   const navigate = useNavigate();
+  const safeStats = stats || {};
   const studentName = `${user?.firstName || 'Student'} ${user?.lastName || ''}`.trim();
   const className = student?.class?.grade ? `Grade ${student.class.grade}` : 'Grade not assigned';
   const sectionName = student?.class?.section ? `Section ${student.class.section}` : 'Section not assigned';
@@ -14,28 +15,28 @@ const StudentHomePage = ({ user, student, stats = {} }) => {
   const cards = [
     {
       title: 'Average Score',
-      value: stats.averageMarks ?? '—',
+      value: safeStats.averageMarks ?? '—',
       subtitle: 'Across all exams',
       icon: CheckCircle2,
       accent: 'bg-gradient-to-br from-sky-500 to-cyan-500',
     },
     {
       title: 'Attendance',
-      value: stats.attendancePercent ? `${stats.attendancePercent}%` : '—',
+      value: safeStats.attendancePercent ? `${safeStats.attendancePercent}%` : '—',
       subtitle: 'Attendance this term',
       icon: BookOpen,
       accent: 'bg-gradient-to-br from-emerald-500 to-lime-500',
     },
     {
       title: 'Homework',
-      value: stats.homeworkAssignments ?? 0,
+      value: safeStats.homeworkAssignments ?? 0,
       subtitle: 'Assigned tasks',
       icon: ClipboardCheck,
       accent: 'bg-gradient-to-br from-violet-500 to-indigo-500',
     },
     {
       title: 'Exams Taken',
-      value: stats.totalMarks ?? 0,
+      value: safeStats.totalMarks ?? 0,
       subtitle: 'Recorded tests',
       icon: CalendarDays,
       accent: 'bg-gradient-to-br from-amber-500 to-orange-500',
@@ -83,7 +84,7 @@ const StudentHomePage = ({ user, student, stats = {} }) => {
             </div>
             <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
               <p className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-400">Focus</p>
-              <p className="mt-4 text-2xl font-semibold text-slate-900">{stats.pendingHomework ?? 0}</p>
+              <p className="mt-4 text-2xl font-semibold text-slate-900">{safeStats.pendingHomework ?? 0}</p>
               <p className="mt-2 text-sm text-slate-500">pending homework submissions</p>
             </div>
           </div>

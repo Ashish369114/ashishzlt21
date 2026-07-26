@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { teacherService, classService, studentService } from '../../services/api';
+import { teacherService, classService, studentService, complaintService } from '../../services/api';
 
 const TeacherManagement = () => {
   const [teachers, setTeachers] = useState([]);
@@ -10,6 +10,12 @@ const TeacherManagement = () => {
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  
+  const [allComplaints, setAllComplaints] = useState([]);
+  const [complaintsModalTeacher, setComplaintsModalTeacher] = useState(null);
+  const [internalRemark, setInternalRemark] = useState('');
+  const [complaintReply, setComplaintReply] = useState('');
+  const [expandedComplaintId, setExpandedComplaintId] = useState(null);
   const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
   const [selectedClassId, setSelectedClassId] = useState('');
@@ -34,7 +40,17 @@ const TeacherManagement = () => {
     fetchSubjects();
     fetchClasses();
     fetchStudents();
+    fetchAllComplaints();
   }, []);
+
+  const fetchAllComplaints = async () => {
+    try {
+      const res = await complaintService.getAll();
+      setAllComplaints(res.data || []);
+    } catch (err) {
+      console.error('Failed to fetch complaints', err);
+    }
+  };
 
   useEffect(() => {
     if (!classes.length) {
@@ -367,10 +383,19 @@ const TeacherManagement = () => {
                       <td>{teacherClasses.length ? teacherClasses.map((cls) => `G${cls.grade}S${cls.section}`).join(', ') : 'No classes'}</td>
                       <td>{teacherStudents.length}</td>
                       <td>
-                        <div className="action-buttons">
+                        <div className="action-buttons" style={{ display: 'flex', gap: '8px' }}>
+                          <button className="btn btn-secondary btn-small" onClick={() => alert(`Assigned Classes:\n${teacherClasses.length ? teacherClasses.map((cls) => `Grade ${cls.grade} - Section ${cls.section}`).join('\n') : 'No classes assigned'}`)}>
+                            Classes
+                          </button>
+                          
+                          <button className="btn btn-secondary btn-small" onClick={() => setComplaintsModalTeacher(teacher)}>
+                            📝 Remarks
+                          </button>
+                          
                           <button className="btn btn-secondary btn-small" onClick={() => handleEditTeacher(teacher)}>
                             Edit
                           </button>
+                          
                           <button className="btn btn-danger btn-small" onClick={() => handleDeleteTeacher(teacher._id)}>
                             Delete
                           </button>
@@ -384,6 +409,56 @@ const TeacherManagement = () => {
           </div>
         </div>
       )}
+      
+      {complaintsModalTeacher && (
+        <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' }}>
+          <div className="modal-content" style={{ background: 'white', borderRadius: '12px', width: '100%', maxWidth: '700px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '20px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#111827' }}>📝 Remarks for {complaintsModalTeacher.userId?.firstName} {complaintsModalTeacher.userId?.lastName}</h2>
+              <button onClick={() => setComplaintsModalTeacher(null)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#6b7280' }}>&times;</button>
+            </div>
+            
+            <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>
+              <div style={{ marginBottom: '15px' }}>
+                <h4 style={{ margin: '0 0 8px 0', color: '#334155' }}>Add Remark:</h4>
+                <textarea 
+                  value={internalRemark} 
+                  onChange={(e) => setInternalRemark(e.target.value)} 
+                  placeholder="Type a new remark here..." 
+                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', minHeight: '100px', marginBottom: '12px', fontSize: '0.95rem', fontFamily: 'inherit' }}
+                />
+                <button 
+                  onClick={async () => { 
+                    if(!internalRemark) return; 
+                    const existing = complaintsModalTeacher.remarks ? complaintsModalTeacher.remarks + '\n\n' : '';
+                    const newRemarks = existing + `[${new Date().toLocaleDateString()}] ` + internalRemark;
+                    await teacherService.update(complaintsModalTeacher._id, { remarks: newRemarks });
+                    setInternalRemark('');
+                    // Update local state for immediate feedback
+                    setComplaintsModalTeacher({ ...complaintsModalTeacher, remarks: newRemarks });
+                    fetchTeachers();
+                  }} 
+                  className="btn btn-primary" style={{ width: '100%' }}
+                >
+                  Save Remark
+                </button>
+              </div>
+              
+              {complaintsModalTeacher.remarks ? (
+                <div style={{ padding: '15px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '0.9rem', color: '#334155', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                  <h4 style={{ margin: '0 0 10px 0', color: '#0f172a' }}>History of Remarks:</h4>
+                  {complaintsModalTeacher.remarks}
+                </div>
+              ) : (
+                <div style={{ padding: '30px', textAlign: 'center', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1', color: '#64748b' }}>
+                  No remarks have been added yet.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
