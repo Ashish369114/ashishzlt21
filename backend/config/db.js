@@ -16,6 +16,8 @@ try {
 const dbHost = process.env.DB_HOST || '127.0.0.1';
 const useSqlite = process.env.DB_DIALECT === 'sqlite' || (!isPostgresAvailable && !dbHost.includes('rds.amazonaws.com'));
 
+const isAWS = dbHost.includes('rds.amazonaws.com');
+
 const sequelize = useSqlite
   ? new Sequelize({
       dialect: 'sqlite',
@@ -31,6 +33,12 @@ const sequelize = useSqlite
         port: process.env.DB_PORT || 5432,
         dialect: 'postgres',
         logging: false,
+        dialectOptions: isAWS ? {
+          ssl: {
+            require: true,
+            rejectUnauthorized: false
+          }
+        } : {},
         pool: { max: 10, min: 0, acquire: 30000, idle: 10000 }
       }
     );
