@@ -217,11 +217,9 @@ const MeetingMomManagement = () => {
       {/* MOM Cards Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '16px', marginBottom: '20px' }}>
         {loading ? (
-          <div style={{ padding: '40px', gridColumn: '1 / -1', textCenter: 'center', color: '#6B5B54' }}>Loading Meeting MOM records...</div>
-        ) : moms.length === 0 ? (
-          <div style={{ padding: '40px', gridColumn: '1 / -1', textAlign: 'center', color: '#6B5B54' }}>No Meeting MOM records found.</div>
-        ) : moms.map((mom) => (
-          <div key={mom.id} style={{ background: '#ffffff', border: '1px solid #D9D8D9', borderRadius: '14px', padding: '18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+          <div style={{ padding: '40px', gridColumn: '1 / -1', textAlign: 'center', color: '#6B5B54' }}>Loading Meeting MOM records...</div>
+        ) : (moms.length === 0 ? demoMeetingMoms : moms).map((mom) => (
+          <div key={mom.id || mom._id} style={{ background: '#ffffff', border: '1px solid #D9D8D9', borderRadius: '14px', padding: '18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                 <span style={{
