@@ -469,20 +469,24 @@ const StudentManagement = () => {
     : [];
 
   const filteredStudentsForSelect = students.filter((student) => {
-    if (selectedGrade && (!student.class || String(student.class.grade) !== String(selectedGrade))) {
+    const stGrade = student.class?.grade || student.grade;
+    const stSec = student.class?.section || student.section;
+    if (selectedGrade && String(stGrade) !== String(selectedGrade)) {
       return false;
     }
-    if (selectedSection && (!student.class || String(student.class.section) !== String(selectedSection))) {
+    if (selectedSection && String(stSec) !== String(selectedSection)) {
       return false;
     }
     return true;
   });
 
   const visibleStudents = students.filter((student) => {
-    if (selectedGrade && (!student.class || String(student.class.grade) !== String(selectedGrade))) {
+    const stGrade = student.class?.grade || student.grade;
+    const stSec = student.class?.section || student.section;
+    if (selectedGrade && String(stGrade) !== String(selectedGrade)) {
       return false;
     }
-    if (selectedSection && (!student.class || String(student.class.section) !== String(selectedSection))) {
+    if (selectedSection && String(stSec) !== String(selectedSection)) {
       return false;
     }
     if (selectedStudentId && String(student._id) !== String(selectedStudentId)) {
@@ -889,7 +893,7 @@ const StudentManagement = () => {
               <option value="">Select student</option>
               {filteredStudentsForSelect.map((st) => (
                 <option key={st._id} value={st._id}>
-                  {st.userId?.firstName} {st.userId?.lastName} ({st.rollNumber || 'N/A'})
+                  {st.userId?.firstName || st.firstName} {st.userId?.lastName || st.lastName} ({st.rollNumber || 'N/A'})
                 </option>
               ))}
             </select>
@@ -940,17 +944,17 @@ const StudentManagement = () => {
                 return (
                 <tr key={student._id}>
                   <td>
-                    {student.userId?.firstName} {student.userId?.lastName}
+                    {student.userId?.firstName || student.firstName} {student.userId?.lastName || student.lastName}
                     {allNotes.filter(n => n.studentId === student._id && n.category === 'Needs Remedial Classes').length > 0 && (
                       <span style={{ marginLeft: '8px', padding: '2px 6px', fontSize: '0.75rem', background: '#fee2e2', color: '#ef4444', borderRadius: '4px', border: '1px solid #fca5a5' }}>
                         🚨 Remedial Required
                       </span>
                     )}
                   </td>
-                  <td>{student.class ? `Grade ${student.class.grade} - Section ${student.class.section}` : 'N/A'}</td>
-                  <td>{student.rollNumber}</td>
-                  <td>{student.userId?.phone}</td>
-                  <td>{student.parentId?.firstName ? `${student.parentId.firstName} ${student.parentId.lastName}` : 'N/A'}</td>
+                  <td>{student.class ? `Grade ${student.class.grade} - Section ${student.class.section}` : `Grade ${student.grade || 'N/A'} - Section ${student.section || 'N/A'}`}</td>
+                  <td>{student.rollNumber || 'N/A'}</td>
+                  <td>{student.userId?.phone || student.phone || 'N/A'}</td>
+                  <td>{student.parentId?.firstName ? `${student.parentId.firstName} ${student.parentId.lastName}` : (student.parentName || (student.parent?.firstName ? `${student.parent.firstName} ${student.parent.lastName}` : 'N/A'))}</td>
                   {isAccountant && (
                     <td style={{ fontWeight: 'bold', color: pendingAmt > 0 ? '#ef4444' : '#10b981' }}>
                       {formatCurrency(pendingAmt)}
