@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { exportToCSV, printPDF } from '../../utils/exportUtils';
 import { Search, Plus, Edit, Trash2, Bell, Calendar, User, Download, Printer, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
+import { demoNotices } from '../../utils/demoData';
 
 const NoticeManagement = () => {
   const [notices, setNotices] = useState([]);
