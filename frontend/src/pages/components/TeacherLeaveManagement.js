@@ -167,7 +167,7 @@ const TeacherLeaveManagement = ({ teacherId, user }) => {
         </div>
         <div className="stat-card">
           <h3>Pending Requests</h3>
-          <div className="value" style={{ color: '#8b5cf6' }}>
+          <div className="value" style={{ color: '#3b82f6' }}>
             {leaves.filter(l => l.status === 'Pending').length}
           </div>
         </div>
@@ -183,7 +183,7 @@ const TeacherLeaveManagement = ({ teacherId, user }) => {
         gap: '15px',
         marginBottom: '20px'
       }}>
-        <div style={{ padding: '12px', backgroundColor: '#f3e8ff', borderRadius: '6px', textAlign: 'center' }}>
+        <div style={{ padding: '12px', backgroundColor: '#dbeafe', borderRadius: '6px', textAlign: 'center' }}>
           <div style={{ fontSize: '0.8em', color: '#0c4a6e' }}>Sick Leave</div>
           <div style={{ fontSize: '1.5em', fontWeight: 'bold', color: '#0369a1' }}>{balance.sick}</div>
           <div style={{ fontSize: '0.75em', color: '#0c4a6e', marginTop: '3px' }}>Allocated</div>
@@ -337,7 +337,7 @@ const TeacherLeaveManagement = ({ teacherId, user }) => {
                     <span style={{
                       padding: '4px 8px',
                       borderRadius: '3px',
-                      backgroundColor: leave.leaveType === 'Sick Leave' ? '#f3e8ff' :
+                      backgroundColor: leave.leaveType === 'Sick Leave' ? '#dbeafe' :
                                       leave.leaveType === 'Casual Leave' ? '#fce7f3' : '#dcfce7',
                       fontSize: '0.85em',
                       fontWeight: '500'

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { BookOpen, LayoutGrid, MessageSquare, Settings, Sparkles, LogOut } from 'lucide-react';
+import { BookOpen, LayoutGrid, MessageSquare, Settings, Sparkles } from 'lucide-react';
 
 const navigation = [
   { label: 'Dashboard', to: '/dashboard', icon: LayoutGrid, end: true },
@@ -9,7 +9,7 @@ const navigation = [
   { label: 'Settings', to: '/dashboard/settings', icon: Settings },
 ];
 
-const Sidebar = ({ onLogout }) => {
+const Sidebar = () => {
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col justify-between overflow-hidden border-r border-slate-800/80 bg-[#07111f] px-5 py-6 text-slate-100 shadow-2xl shadow-slate-950/20 lg:flex">
       <div>
@@ -42,25 +42,14 @@ const Sidebar = ({ onLogout }) => {
         </nav>
       </div>
 
-      <div className="space-y-4">
-        <div className="rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-white/10 to-white/5 p-4 shadow-inner">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Daily Insight</p>
-          <p className="mt-3 text-sm leading-6 text-slate-200">
-            “Great teachers are the ones who make learning feel like curiosity instead of duty.”
-          </p>
-        </div>
-        
-        <button 
-          onClick={onLogout}
-          className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-red-400 transition-all hover:bg-red-500/10 hover:text-red-300"
-        >
-          <LogOut className="h-4 w-4" />
-          <span>Logout</span>
-        </button>
+      <div className="rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-white/10 to-white/5 p-4 shadow-inner">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Daily Insight</p>
+        <p className="mt-3 text-sm leading-6 text-slate-200">
+          “Great teachers are the ones who make learning feel like curiosity instead of duty.”
+        </p>
       </div>
     </aside>
   );
 };
-
 
 export default Sidebar;

@@ -1,44 +1,48 @@
 const { Sequelize } = require('sequelize');
+const path = require('path');
+const { execSync } = require('child_process');
+
+let isPostgresAvailable = false;
+
+// Quick check if local PostgreSQL port 5432 is responding before initializing Sequelize models
+try {
+  const checkPortScript = "const net = require('net'); const socket = new net.Socket(); socket.setTimeout(600); socket.on('connect', () => { socket.destroy(); process.exit(0); }); socket.on('timeout', () => { socket.destroy(); process.exit(1); }); socket.on('error', () => { socket.destroy(); process.exit(1); }); socket.connect(5432, '127.0.0.1');";
+  execSync(`node -e "${checkPortScript}"`, { stdio: 'ignore' });
+  isPostgresAvailable = true;
+} catch (e) {
+  isPostgresAvailable = false;
+}
 
 const dbHost = process.env.DB_HOST || '127.0.0.1';
-const isAWS = dbHost.includes('rds.amazonaws.com') || process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'development';
+const useSqlite = process.env.DB_DIALECT === 'sqlite' || (!isPostgresAvailable && !dbHost.includes('rds.amazonaws.com'));
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME || 'school_erp',
-  process.env.DB_USER || 'postgres',
-  process.env.DB_PASSWORD || 'postgres',
-  {
-    host: dbHost,
-    port: process.env.DB_PORT || 5432,
-    dialect: 'postgres',
-    logging: false, // Set to true to see SQL queries in console
-    dialectOptions: isAWS && dbHost !== '127.0.0.1' && dbHost !== 'localhost' ? {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false
+const sequelize = useSqlite
+  ? new Sequelize({
+      dialect: 'sqlite',
+      storage: path.join(__dirname, '..', 'database.sqlite'),
+      logging: false,
+    })
+  : new Sequelize(
+      process.env.DB_NAME || 'school_erp',
+      process.env.DB_USER || 'postgres',
+      process.env.DB_PASSWORD || 'postgres',
+      {
+        host: dbHost,
+        port: process.env.DB_PORT || 5432,
+        dialect: 'postgres',
+        logging: false,
+        pool: { max: 10, min: 0, acquire: 30000, idle: 10000 }
       }
-    } : {},
-    pool: {
-      max: 10,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    }
-  }
-);
+    );
 
 const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    console.log(`PostgreSQL Connected (External): ${sequelize.config.host}`);
-    
-    // In development, you might want to sync models here:
-    // await sequelize.sync({ alter: true });
-    
+    console.log(`Database connected (${useSqlite ? 'SQLite' : 'PostgreSQL'}): ${useSqlite ? 'database.sqlite' : dbHost}`);
     return sequelize;
   } catch (error) {
-    console.error(`Fatal error in PostgreSQL setup: ${error.message}`);
-    process.exit(1);
+    console.error(`Database connection error: ${error.message}`);
+    throw error;
   }
 };
 

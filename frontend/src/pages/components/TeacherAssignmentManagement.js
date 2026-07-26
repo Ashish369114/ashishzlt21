@@ -108,7 +108,7 @@ const TeacherAssignmentManagement = ({ teacherId }) => {
         </div>
         <div className="stat-card">
           <h3>Active</h3>
-          <div className="value" style={{ color: '#8b5cf6' }}>
+          <div className="value" style={{ color: '#3b82f6' }}>
             {assignments.filter(a => a.status !== 'Closed').length}
           </div>
         </div>
@@ -313,7 +313,7 @@ const TeacherAssignmentManagement = ({ teacherId }) => {
                     <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                       <button
                         className="btn btn-small"
-                        style={{ flex: 1, backgroundColor: '#8b5cf6', color: 'white' }}
+                        style={{ flex: 1, backgroundColor: '#3b82f6', color: 'white' }}
                       >
                         Review
                       </button>

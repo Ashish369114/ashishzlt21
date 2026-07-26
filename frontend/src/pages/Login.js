@@ -3,10 +3,94 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/api';
 import '../styles/Login.css';
 
+const DEMO_ROLES = [
+  {
+    id: 'SUPERADMIN001',
+    pass: 'Admin@123',
+    label: 'School Admin',
+    badge: 'Super Admin',
+    color: '#6366f1',
+    bg: 'rgba(99, 102, 241, 0.12)',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+  },
+  {
+    id: 'PRINCIPAL001',
+    pass: 'Principal@123',
+    label: 'Principal',
+    badge: 'Management',
+    color: '#8b5cf6',
+    bg: 'rgba(139, 92, 246, 0.12)',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  },
+  {
+    id: 'ACCOUNTANT001',
+    pass: 'Accountant@123',
+    label: 'Accountant',
+    badge: 'Finance',
+    color: '#0284c7',
+    bg: 'rgba(2, 132, 199, 0.12)',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+  },
+  {
+    id: 'TEACHER001',
+    pass: 'Teacher@123',
+    label: 'Teacher',
+    badge: 'Academic',
+    color: '#10b981',
+    bg: 'rgba(16, 185, 129, 0.12)',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/></svg>
+  },
+  {
+    id: 'LIBRARIAN001',
+    pass: 'Librarian@123',
+    label: 'Librarian',
+    badge: 'Library',
+    color: '#ec4899',
+    bg: 'rgba(236, 72, 153, 0.12)',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+  },
+  {
+    id: 'EXAMINER001',
+    pass: 'Examiner@123',
+    label: 'Examiner',
+    badge: 'Exams',
+    color: '#a855f7',
+    bg: 'rgba(168, 85, 247, 0.12)',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg>
+  },
+  {
+    id: 'STUDENT001',
+    pass: 'Student@123',
+    label: 'Student',
+    badge: 'Learner',
+    color: '#06b6d4',
+    bg: 'rgba(6, 182, 212, 0.12)',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+  },
+  {
+    id: 'PAR-G1-001',
+    pass: 'Parent@123',
+    label: 'Parent',
+    badge: 'Guardian',
+    color: '#f59e0b',
+    bg: 'rgba(245, 158, 11, 0.12)',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  },
+  {
+    id: 'ADMIN_OFFICER001',
+    pass: 'Ao@123',
+    label: 'Admin Officer',
+    badge: 'Staff',
+    color: '#64748b',
+    bg: 'rgba(100, 116, 139, 0.12)',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/></svg>
+  }
+];
+
 const Login = ({ onLogin }) => {
-  
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -218,10 +302,7 @@ const Login = ({ onLogin }) => {
       <nav className="saas-navbar">
         <a href="#" className="nav-brand">
           <div className="nav-logo-icon">
-            <svg viewBox="0 0 100 100" style={{ width: '20px', height: '20px', overflow: 'visible' }}>
-              <path d="M 24 45 V 32 A 8 8 0 0 1 32 24 H 76 L 46 54" fill="none" stroke="#0b4d8c" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M 76 55 V 68 A 8 8 0 0 1 68 76 H 24 L 54 46" fill="none" stroke="#00a2e8" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <span style={{ fontWeight: '900', color: '#6366f1', fontSize: '18px', fontFamily: 'sans-serif' }}>Z</span>
           </div>
           <span className="nav-brand-name">Zayn Levi Technologies</span>
         </a>
@@ -237,142 +318,251 @@ const Login = ({ onLogin }) => {
         </div>
       </nav>
 
-      <div className="saas-container">
+      <div className="saas-container hero-layout-container">
         
-        {/* 2. Hero Section */}
-        <section className="saas-hero">
-          <div className="hero-badges">
-            <div className="hero-badge"><i className="fa-solid fa-check"></i> AI Powered</div>
-            <div className="hero-badge"><i className="fa-solid fa-check"></i> OCR Ready</div>
-            <div className="hero-badge"><i className="fa-solid fa-check"></i> Cloud Based</div>
+        {/* 2. Hero Section & Login Card side-by-side */}
+        <section className="saas-hero-grid">
+          
+          {/* Left Column: Hero Text */}
+          <div className="hero-left-col">
+            <div className="hero-badges">
+              <div className="hero-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                AI Powered
+              </div>
+              <div className="hero-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                OCR Ready
+              </div>
+              <div className="hero-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19x-9 0a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+                Cloud Based
+              </div>
+            </div>
+
+            <h1 className="hero-title">
+              AI-Powered <br />
+              <span className="hero-title-highlight">School Operating System</span>
+            </h1>
+
+            <p className="hero-subtitle">
+              One intelligent platform to manage admissions, attendance, examinations, fees, payroll, transport, library, hostel, communication, and analytics.
+            </p>
+
+            <div className="hero-cta">
+              <button className="btn-primary" onClick={() => setShowDemoModal(true)}>
+                Book a Free Demo
+              </button>
+              <button className="btn-watch-demo" onClick={() => setShowDemoModal(true)}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#4f46e5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Watch Demo
+              </button>
+            </div>
           </div>
-          <h1 className="hero-title">AI-Powered School Operating System</h1>
-          <p className="hero-subtitle">
-            One intelligent platform to manage admissions, attendance, examinations, fees, payroll, transport, library, hostel, communication, and analytics.
-          </p>
-          <div className="hero-cta">
-            <a href="#contact" className="btn-primary" style={{ width: 'fit-content' }}>Book a Free Demo</a>
-          </div>
-        </section>
 
-        {/* 3 & 4. Login Card & Demo Portal Section */}
-        <section id="login" className="saas-section" style={{ paddingTop: '40px' }}>
-          <div className="login-demo-wrapper">
-            
-            {/* Login Form Side */}
-            <div className="login-side">
-              <h2 className="login-heading">Welcome Back</h2>
-              <p className="login-subheading">Sign in to access your school dashboard and modules.</p>
-
-              {error && (
-                <div className="alert-error">
-                  <i className="fa-solid fa-circle-exclamation"></i> {error}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                  <label htmlFor="userId">User ID / Email</label>
-                  <div className="input-wrap">
-                    <i className="fa-solid fa-user"></i>
-                    <input
-                      type="text"
-                      id="userId"
-                      ref={userIdRef}
-                      value={userId}
-                      onChange={(e) => {
-                        setUserId(e.target.value);
-                        setActivePill('');
-                      }}
-                      className="form-input"
-                      placeholder="e.g. SUPERADMIN001"
-                      required
-                      autoComplete="username"
-                    />
+          {/* Right Column: Combined Login Card & Demo Quick Access */}
+          <div id="login" className="hero-right-col">
+            <div className="login-demo-wrapper">
+              
+              {/* Login Form Side */}
+              <div className="login-side">
+                <div className="login-header-box">
+                  <div className="security-badge">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span>Secure Sign In</span>
                   </div>
+                  <h2 className="login-heading">Welcome Back</h2>
+                  <p className="login-subheading">Sign in to manage your school efficiently and securely.</p>
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="password">Password</label>
-                  <div className="input-wrap">
-                    <i className="fa-solid fa-lock"></i>
-                    <input
-                      type="password"
-                      id="password"
-                      value={password}
-                      onChange={(e) => {
-                        setPassword(e.target.value);
-                        setActivePill('');
-                      }}
-                      className="form-input"
-                      placeholder="••••••••"
-                      required
-                      autoComplete="current-password"
-                    />
+                {error && (
+                  <div className="alert-error">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>{error}</span>
                   </div>
-                </div>
+                )}
 
-                <div className="cta-action-group">
-                  <button type="submit" className="btn-login-secondary" disabled={loading}>
-                    {loading ? (
-                      <><i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }}></i>Authenticating...</>
-                    ) : (
-                      <><i className="fa-solid fa-arrow-right-to-bracket" style={{ marginRight: '8px' }}></i>Sign In to Portal</>
-                    )}
+                <form onSubmit={handleSubmit} className="login-form">
+                  <div className="form-group">
+                    <label htmlFor="userId">User ID / Email</label>
+                    <div className="input-wrap icon-input-wrap">
+                      <span className="input-left-icon">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      </span>
+                      <input
+                        type="text"
+                        id="userId"
+                        ref={userIdRef}
+                        value={userId}
+                        onChange={(e) => {
+                          setUserId(e.target.value);
+                          setActivePill('');
+                        }}
+                        className={`form-input ${activePill ? 'input-auto-filled' : ''}`}
+                        placeholder="e.g. SUPERADMIN001"
+                        required
+                        autoComplete="username"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="password">Password</label>
+                    <div className="input-wrap icon-input-wrap">
+                      <span className="input-left-icon">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                      </span>
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        id="password"
+                        value={password}
+                        onChange={(e) => {
+                          setPassword(e.target.value);
+                          setActivePill('');
+                        }}
+                        className={`form-input ${activePill ? 'input-auto-filled' : ''}`}
+                        placeholder="••••••••"
+                        required
+                        autoComplete="current-password"
+                      />
+                      <button
+                        type="button"
+                        className="password-toggle-btn"
+                        onClick={() => setShowPassword(!showPassword)}
+                        title={showPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showPassword ? (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                        ) : (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="cta-action-group">
+                    <button type="submit" className="btn-primary btn-submit-sign-in" disabled={loading}>
+                      {loading ? (
+                        <span className="btn-inner-content">
+                          <svg className="spinner-anim" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="10"/></svg>
+                          Signing in...
+                        </span>
+                      ) : (
+                        <span className="btn-inner-content">
+                          Sign In
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                </form>
+
+                <div className="login-footer-links">
+                  <button type="button" className="link-forgot" onClick={() => { setShowForgotId(true); setShowForgotPw(false); setForgotMsg(''); setForgotEmail(''); }}>
+                    Forgot User ID?
+                  </button>
+                  <span className="footer-link-divider">•</span>
+                  <button type="button" className="link-forgot" onClick={() => { setShowForgotPw(true); setShowForgotId(false); setForgotMsg(''); setForgotEmail(''); }}>
+                    Forgot Password?
                   </button>
                 </div>
-              </form>
-
-              <div className="login-footer-links">
-                <button type="button" className="link" onClick={() => { setShowForgotPw(true); setShowForgotId(false); setForgotMsg(''); setForgotEmail(''); }}>
-                  Forgot Password?
-                </button>
-                <span className="divider">•</span>
-                <button type="button" className="link" onClick={() => { setShowForgotId(true); setShowForgotPw(false); setForgotMsg(''); setForgotEmail(''); }}>
-                  Forgot User ID?
-                </button>
               </div>
-            </div>
 
-            {/* Demo Portal Side */}
-            <div className="demo-side">
-              <h3 className="demo-heading"><i className="fa-solid fa-wand-magic-sparkles"></i> Demo Portal Access</h3>
-              <p className="demo-subheading">Select a role below to auto-fill valid seed credentials for a live demo.</p>
+              {/* Demo Portal Side */}
+              <div className="demo-side">
+                <div className="demo-header">
+                  <div>
+                    <h3 className="demo-heading">Demo Quick Access</h3>
+                    <p className="demo-subheading">Click any role to auto-fill credentials</p>
+                  </div>
+                  <span className="demo-role-counter">{DEMO_ROLES.length} Demo Roles</span>
+                </div>
 
-              <div className="role-cards-grid">
-                <div className={`role-card ${activePill === 'SUPERADMIN001' ? 'active' : ''}`} onClick={() => handleQuickLogin('SUPERADMIN001', 'Admin@123')}>
-                  <div className="role-card-title"><i className="fa-solid fa-crown"></i> School Admin</div>
-                  <div className="role-card-id">SUPERADMIN001</div>
-                </div>
-                <div className={`role-card ${activePill === 'PRINCIPAL001' ? 'active' : ''}`} onClick={() => handleQuickLogin('PRINCIPAL001', 'Principal@123')}>
-                  <div className="role-card-title"><i className="fa-solid fa-user-tie"></i> Principal</div>
-                  <div className="role-card-id">PRINCIPAL001</div>
-                </div>
-                <div className={`role-card ${activePill === 'ACCOUNTANT001' ? 'active' : ''}`} onClick={() => handleQuickLogin('ACCOUNTANT001', 'Accountant@123')}>
-                  <div className="role-card-title"><i className="fa-solid fa-file-invoice-dollar"></i> Accountant</div>
-                  <div className="role-card-id">ACCOUNTANT001</div>
-                </div>
-                <div className={`role-card ${activePill === 'TEACHER001' ? 'active' : ''}`} onClick={() => handleQuickLogin('TEACHER001', 'Teacher@123')}>
-                  <div className="role-card-title"><i className="fa-solid fa-chalkboard-user"></i> Teacher</div>
-                  <div className="role-card-id">TEACHER001</div>
-                </div>
-                <div className={`role-card ${activePill === 'EXAMINER001' ? 'active' : ''}`} onClick={() => handleQuickLogin('EXAMINER001', 'Examiner@123')}>
-                  <div className="role-card-title"><i className="fa-solid fa-clipboard-check"></i> Examiner</div>
-                  <div className="role-card-id">EXAMINER001</div>
-                </div>
-                <div className={`role-card ${activePill === 'STUDENT001' ? 'active' : ''}`} onClick={() => handleQuickLogin('STUDENT001', 'Student@123')}>
-                  <div className="role-card-title"><i className="fa-solid fa-user-graduate"></i> Student</div>
-                  <div className="role-card-id">STUDENT001</div>
-                </div>
-                <div className={`role-card ${activePill === 'PAR-G1-001' ? 'active' : ''}`} onClick={() => handleQuickLogin('PAR-G1-001', 'Parent@123')}>
-                  <div className="role-card-title"><i className="fa-solid fa-users"></i> Parent</div>
-                  <div className="role-card-id">PAR-G1-001</div>
+                {activePill && (
+                  <div className="auto-fill-status-banner">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Auto-filled: <strong>{DEMO_ROLES.find(r => r.id === activePill)?.label || activePill}</strong> ({activePill})</span>
+                  </div>
+                )}
+
+                <div className="role-cards-grid">
+                  {DEMO_ROLES.map((role) => {
+                    const isActive = activePill === role.id;
+                    return (
+                      <div
+                        key={role.id}
+                        className={`role-grid-card ${isActive ? 'active' : ''}`}
+                        onClick={() => handleQuickLogin(role.id, role.pass)}
+                        title={`Quick login as ${role.label}`}
+                      >
+                        <div className="role-card-inner">
+                          <div className="role-icon-box" style={{ background: role.bg, color: role.color }}>
+                            {role.icon}
+                          </div>
+                          <div className="role-card-text">
+                            <span className="role-name">{role.label}</span>
+                            <span className="role-badge-tag" style={{ color: role.color }}>{role.badge}</span>
+                          </div>
+                        </div>
+                        {isActive && (
+                          <div className="role-active-check">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
+              
             </div>
-            
           </div>
+
         </section>
+
+        {/* 3. Bottom Stats Strip */}
+        <section className="stats-strip-container">
+          <div className="stats-strip-card">
+            <div className="stat-box">
+              <div className="stat-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </div>
+              <div className="stat-number">500+</div>
+              <div className="stat-label">Schools</div>
+            </div>
+            <div className="stat-box">
+              <div className="stat-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div className="stat-number">50K+</div>
+              <div className="stat-label">Students</div>
+            </div>
+            <div className="stat-box">
+              <div className="stat-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+              </div>
+              <div className="stat-number">2K+</div>
+              <div className="stat-label">Teachers</div>
+            </div>
+            <div className="stat-box">
+              <div className="stat-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+              </div>
+              <div className="stat-number">99.9%</div>
+              <div className="stat-label">Uptime</div>
+            </div>
+            <div className="stat-box">
+              <div className="stat-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+              </div>
+              <div className="stat-number">24/7</div>
+              <div className="stat-label">Support</div>
+            </div>
+          </div>
+          <div className="stats-ambient-glow"></div>
+        </section>
+
+      </div>
 
         {showDemoModal && (
           <div className="demo-modal-overlay">
@@ -414,16 +604,7 @@ const Login = ({ onLogin }) => {
                         <input type="text" value={demoFormData.city} onChange={e => setDemoFormData({...demoFormData, city: e.target.value})} required />
                       </div>
                     </div>
-                    <div className="demo-form-group">
-                      <label>Number of Students</label>
-                      <select value={demoFormData.students} onChange={e => setDemoFormData({...demoFormData, students: e.target.value})} required>
-                        <option value="">Select range...</option>
-                        <option value="1-500">1 - 500</option>
-                        <option value="501-1000">501 - 1000</option>
-                        <option value="1001-2000">1001 - 2000</option>
-                        <option value="2000+">2000+</option>
-                      </select>
-                    </div>
+
                     <div className="demo-form-group">
                       <label>Message (Optional)</label>
                       <textarea value={demoFormData.message} onChange={e => setDemoFormData({...demoFormData, message: e.target.value})} rows="3"></textarea>
@@ -580,16 +761,7 @@ const Login = ({ onLogin }) => {
                       <input type="tel" name="phone" placeholder="+1 (555) 000-0000" value={contactForm.phone} onChange={handleContactChange} className="form-input" required />
                     </div>
                   </div>
-                  <div className="form-group">
-                    <label>Number of Students</label>
-                    <select name="students" value={contactForm.students} onChange={handleContactChange} className="form-input" style={{ appearance: 'auto' }} required>
-                      <option value="" disabled>Select range</option>
-                      <option value="1-500">1 - 500</option>
-                      <option value="501-1000">501 - 1,000</option>
-                      <option value="1001-3000">1,001 - 3,000</option>
-                      <option value="3000+">3,000+</option>
-                    </select>
-                  </div>
+
                   <div className="form-group">
                     <label>Message / Requirements</label>
                     <textarea name="message" placeholder="Tell us about your specific needs..." rows="3" value={contactForm.message} onChange={handleContactChange} required className="form-input" style={{ resize: 'none' }}></textarea>
@@ -603,8 +775,6 @@ const Login = ({ onLogin }) => {
             </div>
           </div>
         </section>
-
-      </div>
 
       {/* 8. Footer */}
       <footer className="saas-footer" style={{ width: '100%', padding: '80px 40px 40px' }}>

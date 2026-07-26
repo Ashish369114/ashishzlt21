@@ -3,6 +3,7 @@ const { sequelize } = require('../config/db');
 // Import all models
 const Admission = require('./Admission');
 const Attendance = require('./Attendance');
+const AuditLog = require('./AuditLog');
 const Class = require('./Class');
 const ConcessionRequest = require('./ConcessionRequest');
 const Employee = require('./Employee');
@@ -13,8 +14,11 @@ const Fee = require('./Fee');
 const Homework = require('./Homework');
 const Hostel = require('./Hostel');
 const Leave = require('./Leave');
+const LessonPlan = require('./LessonPlan');
 const Library = require('./Library');
 const Marks = require('./Marks');
+const MeetingMom = require('./MeetingMom');
+const Notice = require('./Notice');
 const Remark = require('./Remark');
 const Report = require('./Report');
 const School = require('./School');
@@ -109,6 +113,7 @@ module.exports = {
   sequelize,
   Admission,
   Attendance,
+  AuditLog,
   Class,
   ConcessionRequest,
   Employee,
@@ -119,8 +124,11 @@ module.exports = {
   Homework,
   Hostel,
   Leave,
+  LessonPlan,
   Library,
   Marks,
+  MeetingMom,
+  Notice,
   Remark,
   Report,
   School,

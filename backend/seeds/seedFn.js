@@ -70,6 +70,28 @@ const seedDataFn = async () => {
     subscriptionPlan: 'gold',
   });
 
+  const librarian = await User.create({
+    userId: 'LIBRARIAN001',
+    password: 'Librarian@123',
+    role: 'librarian',
+    firstName: 'Suresh',
+    lastName: 'Sharma',
+    email: 'librarian@school.com',
+    phone: '9876543288',
+    subscriptionPlan: 'platinum',
+  });
+
+  const adminOfficer = await User.create({
+    userId: 'ADMIN_OFFICER001',
+    password: 'Ao@123',
+    role: 'administrative_officer',
+    firstName: 'Vikram',
+    lastName: 'Rathore',
+    email: 'ao@school.com',
+    phone: '9876543277',
+    subscriptionPlan: 'platinum_with_ocr',
+  });
+
   console.log('Created admin and examiner accounts');
 
   const firstNames = ['Ramesh', 'Priya', 'Rajesh', 'Sneha', 'Suresh', 'Neha', 'Vikram', 'Asha', 'Karthik', 'Nisha',
@@ -385,7 +407,7 @@ const seedDataFn = async () => {
           name: `${type} - ${subject.name}`,
           classId: classItem.id,
           subjectId: subject.id,
-          examDate: new Date(Date.now() + (i + 1) * 3 * 24 * 60 * 60 * 1000 + j * 24 * 60 * 60 * 1000),
+          examDate: j === 0 ? new Date() : new Date(Date.now() + (i + 1) * 3 * 24 * 60 * 60 * 1000 + j * 24 * 60 * 60 * 1000),
           examType: type,
           startTime: '09:00',
           endTime: '11:00',

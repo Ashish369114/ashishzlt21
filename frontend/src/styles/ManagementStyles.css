@@ -1,41 +1,46 @@
-/* Management Styles */
+/* Management Styles - OPTION 5 - LUXE IVORY THEME */
 .management-container {
   padding: 20px;
-  background-color: #f5f5f5;
-  border-radius: 8px;
+  background-color: #F7F6F3;
+  border-radius: 12px;
   margin-bottom: 20px;
 }
 
 .management-container h1 {
-  color: #333;
+  color: #322029;
   margin-bottom: 20px;
   font-size: 28px;
+  font-weight: 800;
 }
 
 .management-container h3 {
-  color: #555;
+  color: #5C4E46;
   margin-top: 20px;
   margin-bottom: 15px;
+  font-weight: 700;
 }
 
 .management-form {
-  background-color: white;
+  background-color: #FFFFFF;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 12px;
+  border: 1px solid #D9D8D9;
   margin-bottom: 30px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(50, 32, 41, 0.04);
 }
 
 .management-form input,
 .management-form select,
 .management-form textarea {
   width: 100%;
-  padding: 10px;
+  padding: 10px 14px;
   margin-bottom: 15px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid #D9D8D9;
+  background-color: #F7F6F3;
+  color: #322029;
+  border-radius: 8px;
   font-size: 14px;
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .form-row {
@@ -49,29 +54,31 @@
 }
 
 .management-form button {
-  background-color: #4CAF50;
-  color: white;
+  background-color: #AC968D;
+  color: #FFFFFF;
   padding: 12px 30px;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
-  font-weight: bold;
-  transition: background-color 0.3s;
+  font-weight: 700;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(172, 150, 141, 0.2);
 }
 
 .management-form button:hover {
-  background-color: #45a049;
+  background-color: #998177;
 }
 
 .status-badge {
-  background-color: #e3f2fd;
-  padding: 10px 15px;
+  background-color: #EFE9E1;
+  padding: 8px 16px;
   border-radius: 20px;
   display: inline-block;
   margin-bottom: 20px;
   font-weight: bold;
-  color: #1976d2;
+  color: #322029;
+  border: 1px solid #D9D8D9;
 }
 
 .schools-list,
@@ -81,10 +88,11 @@
 .routes-list,
 .hostels-list,
 .reports-list {
-  background-color: white;
+  background-color: #FFFFFF;
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  border: 1px solid #D9D8D9;
+  box-shadow: 0 4px 12px rgba(50, 32, 41, 0.04);
   margin-bottom: 20px;
 }
 
@@ -95,24 +103,25 @@ table {
 }
 
 table thead {
-  background-color: #f0f0f0;
-  border-bottom: 2px solid #ddd;
+  background-color: #EFE9E1;
+  border-bottom: 2px solid #AC968D;
 }
 
 table th {
-  padding: 12px;
+  padding: 12px 16px;
   text-align: left;
-  font-weight: bold;
-  color: #333;
+  font-weight: 800;
+  color: #322029;
 }
 
 table td {
-  padding: 12px;
-  border-bottom: 1px solid #eee;
+  padding: 12px 16px;
+  border-bottom: 1px solid #EAE5DF;
+  color: #322029;
 }
 
 table tr:hover {
-  background-color: #fafafa;
+  background-color: #F7F6F3;
 }
 
 .btn-approve,
@@ -120,23 +129,25 @@ table tr:hover {
 .btn-delete,
 .btn-download,
 .btn-borrow {
-  padding: 8px 12px;
+  padding: 8px 14px;
   margin: 2px;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 12px;
   font-weight: bold;
   transition: all 0.3s;
 }
 
-.btn-approve {
-  background-color: #4CAF50;
-  color: white;
+.btn-approve,
+.btn-borrow {
+  background-color: #AC968D;
+  color: #FFFFFF;
 }
 
-.btn-approve:hover {
-  background-color: #45a049;
+.btn-approve:hover,
+.btn-borrow:hover {
+  background-color: #998177;
 }
 
 .btn-reject,

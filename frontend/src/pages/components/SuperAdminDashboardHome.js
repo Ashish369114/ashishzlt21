@@ -5,7 +5,7 @@ import {
   CreditCard, AlertCircle, Clock, TrendingUp,
   PlusCircle, BookOpen, Send, Calendar,
   Activity, Bell, Gift, FileText, CheckCircle,
-  MoreVertical, ChevronRight, PieChart as PieChartIcon, Bus, Home
+  MoreVertical, ChevronRight, PieChart as PieChartIcon, Bus, Home, Archive
 } from 'lucide-react';
 import { 
   LineChart, Line, BarChart, Bar, XAxis, YAxis, 
@@ -136,20 +136,32 @@ const SuperAdminDashboardHome = ({ stats }) => {
     </div>
   );
 
+  const getInventoryCount = () => {
+    try {
+      const saved = localStorage.getItem('inventory_items');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const totalAvail = parsed.reduce((acc, i) => acc + (i.totalStock - i.issuedQuantity), 0);
+        return `${totalAvail} Items`;
+      }
+    } catch (e) {}
+    return '40 Items';
+  };
+
   return (
     <div className="saas-dashboard-container">
       {/* 2. KPI Cards */}
       <div className="kpi-grid">
         {/* KPI Cards */}
-        <KPICard title="Total Students" value={stats?.totalStudents || '1,245'} icon={Users} trend="12%" trendUp={true} color="#3b82f6" />
-        <KPICard title="Teaching Staff" value={stats?.totalTeachers || '84'} icon={UserCheck} trend="4%" trendUp={true} color="#8b5cf6" />
-        <KPICard title="Non-Teaching Staff" value={'28'} icon={Users} trend="1%" trendUp={true} color="#0ea5e9" />
-        <KPICard title="Fee Collection (MTD)" value={stats?.collectedFees ? formatCurrency(stats.collectedFees * 100) : formatCurrency(45200)} icon={CreditCard} trend="8%" trendUp={true} color="#10b981" />
-        <KPICard title="Fees to be Collected" value={stats?.pendingFees ? formatCurrency(stats.pendingFees * 100) : formatCurrency(12400)} icon={AlertCircle} trend="5%" trendUp={false} color="#f59e0b" />
-        <KPICard title="Library Books" value="4,850" icon={BookOpen} trend="1%" trendUp={true} color="#6366f1" />      </div>
+        <KPICard title="Total Students" value={stats?.totalStudents || '1,245'} icon={Users} trend="12%" trendUp={true} color="#AC968D" />
+        <KPICard title="Teaching Staff" value={stats?.totalTeachers || '84'} icon={UserCheck} trend="4%" trendUp={true} color="#AC968D" />
+        <KPICard title="Non-Teaching Staff" value={'28'} icon={Users} trend="1%" trendUp={true} color="#AC968D" />
+        <KPICard title="Fees (Collected / Pending)" value={`${stats?.collectedFees ? formatCurrency(stats.collectedFees * 100) : formatCurrency(45200)} / ${stats?.pendingFees ? formatCurrency(stats.pendingFees * 100) : formatCurrency(12400)}`} icon={CreditCard} trend="8%" trendUp={true} color="#10b981" />
+        <KPICard title="Library Books" value="4,850" icon={BookOpen} trend="1%" trendUp={true} color="#AC968D" />
+        <KPICard title="Inventory" value={getInventoryCount()} icon={Archive} trend="2%" trendUp={true} color="#AC968D" />      </div>
 
       {/* 5. Quick Actions */}
-      <div className="section-title">Quick Actions</div>
+      <div className="section-title" style={{ color: '#322029', fontSize: '1.1rem', fontWeight: '700', margin: '24px 0 16px' }}>Quick Actions</div>
       <div className="quick-actions-grid">
         <Link to="/dashboard/students" className="action-card" style={{ textDecoration: 'none', color: 'inherit' }}><PlusCircle className="action-icon" size={20} /> Add Student</Link>
         <Link to="/dashboard/employees" className="action-card" style={{ textDecoration: 'none', color: 'inherit' }}><Briefcase className="action-icon" size={20} /> Add Employee</Link>
@@ -166,7 +178,7 @@ const SuperAdminDashboardHome = ({ stats }) => {
         <div className="premium-card">
           <div className="card-header border-b">
             <h3 className="card-title">Recent Activities</h3>
-            <button className="text-blue">View All</button>
+            <button className="text-blue" style={{ color: '#AC968D' }}>View All</button>
           </div>
           <div className="card-body p-0">
             <ul className="activity-list">
@@ -194,7 +206,7 @@ const SuperAdminDashboardHome = ({ stats }) => {
         <div className="premium-card">
           <div className="card-header border-b">
             <h3 className="card-title flex items-center gap-2">
-              <Calendar size={18} color="#3b82f6" className="calendar-icon-pulse" /> 
+              <Calendar size={18} color="#AC968D" className="calendar-icon-pulse" /> 
               Upcoming Events
             </h3>
           </div>

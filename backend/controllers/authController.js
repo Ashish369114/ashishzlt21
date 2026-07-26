@@ -16,6 +16,8 @@ const mockUsers = [
   { id: 'mock_s_id_123',   userId: 'STUDENT001',    password: 'Student@123',    role: 'student',         firstName: 'Aarav',  lastName: 'Singh',  email: 'aarav1@school.com',      subscriptionPlan: 'silver',            isActive: true },
   { id: 'mock_pa_id_123',  userId: 'PAR-G1-001',    password: 'Parent@123',     role: 'parent',          firstName: 'Rajesh', lastName: 'Sharma', email: 'parent-g1-001@school.com',subscriptionPlan: 'silver',            isActive: true },
   { id: 'mock_ex_id_123',  userId: 'EXAMINER001',   password: 'Examiner@123',   role: 'examiner',        firstName: 'Amit',   lastName: 'Jha',    email: 'examiner@school.com',    subscriptionPlan: 'gold',              isActive: true },
+  { id: 'mock_lib_id_123', userId: 'LIBRARIAN001',  password: 'Librarian@123',  role: 'librarian',       firstName: 'Suresh', lastName: 'Sharma', email: 'librarian@school.com',  subscriptionPlan: 'platinum',          isActive: true },
+  { id: 'mock_ao_id_123',  userId: 'ADMIN_OFFICER001', password: 'Ao@123',     role: 'administrative_officer', firstName: 'Vikram', lastName: 'Rathore', email: 'ao@school.com', subscriptionPlan: 'platinum_with_ocr', isActive: true },
 ];
 
 const login = async (req, res) => {
@@ -32,6 +34,13 @@ const login = async (req, res) => {
       user = await User.findOne({ where: { userId } });
       if (!user) {
         user = await User.findOne({ where: { email: userId } });
+      }
+      if (!user) {
+        const mockMatch = mockUsers.find(u => u.userId === userId || u.email === userId);
+        if (mockMatch) {
+          user = mockMatch;
+          isDbConnected = false;
+        }
       }
     } catch (dbErr) {
       isDbConnected = false;
