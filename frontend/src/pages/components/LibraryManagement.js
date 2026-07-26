@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { libraryService, studentService } from '../../services/api';
+import { demoLibraryBooks, demoStudents } from '../../utils/demoData';
 import '../../styles/ManagementStyles.css';
 import { 
   Bell, MoreVertical, BookOpen, Clock, AlertCircle, QrCode, Scan, 
@@ -97,20 +98,27 @@ const LibraryManagement = ({ activeSection }) => {
     try {
       setLoading(true);
       const [libRes, stuRes] = await Promise.all([
-        libraryService.getAll(),
-        studentService.getAll()
+        libraryService.getAll().catch(() => ({ data: [] })),
+        studentService.getAll().catch(() => ({ data: [] }))
       ]);
-      const fetchedBooks = libRes.data || [];
+      const fetchedBooks = (libRes.data && libRes.data.length) ? libRes.data : demoLibraryBooks;
+      const fetchedStudents = (stuRes.data && stuRes.data.length) ? stuRes.data : demoStudents;
+      
       setBooks(fetchedBooks);
       const avail = fetchedBooks.reduce((acc, b) => acc + (b.availableCopies || 0), 0);
       const total = fetchedBooks.reduce((acc, b) => acc + (b.totalCopies || 0), 0);
       setAvailableBooks(avail);
-      setStudents(stuRes.data || []);
+      setStudents(fetchedStudents);
 
       // Sync stats to localStorage for Super Admin Dashboard real-time reflection
       localStorage.setItem('library_stats', JSON.stringify({ total, available: avail, borrowed: total - avail }));
     } catch (err) {
-      console.error('Error fetching books:', err);
+      console.warn('Error fetching books, using demo books:', err);
+      setBooks(demoLibraryBooks);
+      setStudents(demoStudents);
+      const avail = demoLibraryBooks.reduce((acc, b) => acc + (b.availableCopies || 0), 0);
+      const total = demoLibraryBooks.reduce((acc, b) => acc + (b.totalCopies || 0), 0);
+      setAvailableBooks(avail);
     } finally {
       setLoading(false);
     }

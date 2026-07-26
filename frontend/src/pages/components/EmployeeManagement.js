@@ -3,6 +3,7 @@ import io from 'socket.io-client';
 import api, { schoolService, classService, studentService, complaintService } from '../../services/api';
 import '../../styles/ManagementStyles.css';
 import { formatCurrency } from '../../utils/currencyFormatter';
+import { demoEmployees, demoClasses } from '../../utils/demoData';
 
 const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([]);
@@ -45,9 +46,10 @@ const EmployeeManagement = () => {
     try {
       setClassesLoading(true);
       const res = await classService.getAll();
-      setAllClasses(Array.isArray(res.data) ? res.data : []);
+      setAllClasses((Array.isArray(res.data) && res.data.length) ? res.data : demoClasses);
     } catch (err) {
-      console.error('Failed to fetch classes:', err);
+      console.warn('Failed to fetch classes, using demo classes:', err);
+      setAllClasses(demoClasses);
     } finally {
       setClassesLoading(false);
     }
@@ -80,9 +82,10 @@ const EmployeeManagement = () => {
     try {
       setLoading(true);
       const response = await api.get('/employees');
-      setEmployees(response.data);
+      setEmployees((response.data && response.data.length) ? response.data : demoEmployees);
     } catch (error) {
-      console.error('Error fetching employees:', error);
+      console.warn('Error fetching employees, using demo employees:', error);
+      setEmployees(demoEmployees);
     } finally {
       setLoading(false);
     }

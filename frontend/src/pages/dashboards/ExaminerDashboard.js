@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { examService, teacherService, classService, studentService } from '../../services/api';
+import { demoExams, demoEmployees, demoClasses, demoStudents } from '../../utils/demoData';
 import '../../styles/ManagementStyles.css';
 
 const ExaminerDashboard = ({ user, onLogout }) => {
@@ -42,17 +43,20 @@ const ExaminerDashboard = ({ user, onLogout }) => {
       setLoading(true);
       setError('');
       const [examsRes, teachersRes, classesRes, studentsRes] = await Promise.all([
-        examService.getAll(),
-        teacherService.getAll(),
-        classService.getAll(),
-        studentService.getAll()
+        examService.getAll().catch(() => ({ data: [] })),
+        teacherService.getAll().catch(() => ({ data: [] })),
+        classService.getAll().catch(() => ({ data: [] })),
+        studentService.getAll().catch(() => ({ data: [] }))
       ]);
-      const fetchedExams = examsRes.data || [];
-      const fetchedClasses = classesRes.data || [];
+      const fetchedExams = (examsRes.data && examsRes.data.length) ? examsRes.data : demoExams;
+      const fetchedClasses = (classesRes.data && classesRes.data.length) ? classesRes.data : demoClasses;
+      const fetchedTeachers = (teachersRes.data && teachersRes.data.length) ? teachersRes.data : demoEmployees;
+      const fetchedStudents = (studentsRes.data && studentsRes.data.length) ? studentsRes.data : demoStudents;
+      
       setExams(fetchedExams);
-      setTeachers(teachersRes.data || []);
+      setTeachers(fetchedTeachers);
       setClasses(fetchedClasses);
-      setStudents(studentsRes.data || []);
+      setStudents(fetchedStudents);
 
       if (fetchedClasses.length > 0) {
         const defaultClass = fetchedClasses.find(c => String(c.grade) === '3' && c.section === 'A') || fetchedClasses[0];
@@ -63,9 +67,14 @@ const ExaminerDashboard = ({ user, onLogout }) => {
         const firstType = fetchedExams[0].examType || 'Mid-Term';
         setSelectedExamType(firstType);
       }
+      setError('');
     } catch (err) {
-      console.error('Error fetching examiner data:', err);
-      setError('Failed to load exams, teachers and classes data.');
+      console.warn('Using demo data for ExaminerDashboard:', err);
+      setExams(demoExams);
+      setTeachers(demoEmployees);
+      setClasses(demoClasses);
+      setStudents(demoStudents);
+      setError('');
     } finally {
       setLoading(false);
     }

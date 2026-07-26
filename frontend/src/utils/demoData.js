@@ -128,3 +128,58 @@ export const demoFees = demoStudents.map((s, idx) => ({
   status: idx % 3 === 0 ? 'Paid' : idx % 3 === 1 ? 'Partial' : 'Pending',
   dueDate: '2026-08-15'
 }));
+
+// Notices
+export const demoNotices = [
+  { _id: 'not_1', title: 'Independence Day Celebration 2026', content: 'All students and staff are invited to participate in the Independence Day flag hoisting ceremony at 8:00 AM in the main playground.', category: 'Event', targetAudience: 'All', priority: 'High', date: '2026-08-14', author: 'Principal' },
+  { _id: 'not_2', title: 'Parent-Teacher Meeting (PTM)', content: 'The first term PTM is scheduled for Saturday, 20th August 2026 from 9:00 AM to 1:00 PM. Parents are requested to attend.', category: 'Notice', targetAudience: 'Parents', priority: 'High', date: '2026-08-10', author: 'Admin' },
+  { _id: 'not_3', title: 'Science Exhibition Registration', content: 'Registrations are open for the Annual Science Fair 2026. Submit your project models to science teachers by 25th August.', category: 'Academics', targetAudience: 'Students', priority: 'Medium', date: '2026-08-05', author: 'Science HOD' }
+];
+
+// Meeting MOMs
+export const demoMeetingMoms = [
+  { _id: 'mom_1', title: 'Academic Planning & Curriculum Review', meetingDate: '2026-08-01', attendees: 'Principal, HODs, Coordinators', agenda: 'Curriculum coverage, unit tests schedule, and smart classroom usage.', keyDecisions: '1. Unit tests start from August 15th. 2. Extra classes for Grade 10 students.', status: 'Approved' },
+  { _id: 'mom_2', title: 'Sports & Cultural Fest Committee Meeting', meetingDate: '2026-08-03', attendees: 'Sports Teacher, Cultural Coordinator, Principal', agenda: 'Venue arrangement, chief guest invitation, event budget.', keyDecisions: 'Budget approved for inter-house sports competitions.', status: 'Approved' }
+];
+
+// Marks for all students
+export const demoMarks = demoStudents.map((s, idx) => ({
+  _id: `mrk_${idx + 1}`,
+  studentId: s._id,
+  studentName: `${s.firstName} ${s.lastName}`,
+  student: s,
+  class: { grade: s.grade, section: s.section },
+  grade: s.grade,
+  section: s.section,
+  examName: 'Mid-Term Examination 2026',
+  subject: idx % 2 === 0 ? 'Mathematics' : 'Science',
+  marksObtained: 75 + (idx % 20),
+  totalMarks: 100,
+  remarks: 'Good Performance'
+}));
+
+// Library Books
+export const demoLibraryBooks = [
+  { _id: 'bk_1', title: 'Concepts of Physics (Vol 1)', author: 'H.C. Verma', category: 'Science', isbn: '978-8177091877', availableCopies: 12, totalCopies: 15, location: 'Shelf A-4' },
+  { _id: 'bk_2', title: 'Higher Algebra', author: 'Hall & Knight', category: 'Mathematics', isbn: '978-9351449584', availableCopies: 8, totalCopies: 10, location: 'Shelf B-2' },
+  { _id: 'bk_3', title: 'To Kill a Mockingbird', author: 'Harper Lee', category: 'Fiction', isbn: '978-0061120084', availableCopies: 5, totalCopies: 6, location: 'Shelf C-1' }
+];
+
+// Inventory Items
+export const demoInventoryItems = [
+  { _id: 'inv_1', itemName: 'Whiteboard Markers (Blue/Black)', category: 'Stationery', quantity: 150, unitPrice: 25, totalValue: 3750, status: 'In Stock' },
+  { _id: 'inv_2', itemName: 'A4 Printing Paper Reams', category: 'Office Supplies', quantity: 80, unitPrice: 280, totalValue: 22400, status: 'In Stock' },
+  { _id: 'inv_3', itemName: 'Basketballs (Spalding)', category: 'Sports Equipment', quantity: 15, unitPrice: 1200, totalValue: 18000, status: 'Low Stock' }
+];
+
+// Transport Routes
+export const demoTransportRoutes = [
+  { _id: 'rt_1', routeName: 'Route 1: City Center to School', busNumber: 'KA-01-F-1234', driverName: 'Ramesh Gowda', driverPhone: '9845012345', capacity: 40, enrolledStudents: 32, feeAmount: 2500 },
+  { _id: 'rt_2', routeName: 'Route 2: Suburb Enclave to School', busNumber: 'KA-01-F-5678', driverName: 'Suresh Kumar', driverPhone: '9845067890', capacity: 40, enrolledStudents: 38, feeAmount: 2800 }
+];
+
+// Hostels
+export const demoHostels = [
+  { _id: 'hst_1', blockName: 'Tagore Boys Hostel (Block A)', wardenName: 'Mr. Mohan Das', totalRooms: 50, occupiedRooms: 42, monthlyFee: 6500 },
+  { _id: 'hst_2', blockName: 'Sarojini Girls Hostel (Block B)', wardenName: 'Ms. Kamala Devi', totalRooms: 50, occupiedRooms: 38, monthlyFee: 6500 }
+];
