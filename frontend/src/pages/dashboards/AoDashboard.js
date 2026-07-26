@@ -112,10 +112,7 @@ const AoDashboard = ({ user, onLogout }) => {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span style={{ padding: '6px 14px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '800', background: 'linear-gradient(135deg, #AC968D, #8E786F)', color: '#fff', boxShadow: '0 2px 6px rgba(172,150,141,0.2)' }}>
-              {planLabel}
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderLeft: '1px solid #D9D8D9', paddingLeft: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingLeft: '16px' }}>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: '0.85rem', fontWeight: '800', color: '#322029' }}>{user?.firstName} {user?.lastName}</div>
                 <div style={{ fontSize: '0.75rem', color: '#6B5B54' }}>Administrative Officer</div>

@@ -157,8 +157,9 @@ const StudentManagement = () => {
         setAllFeesData(feesRes.data || []);
       }
     } catch (err) {
-      setError('Failed to fetch students');
-      console.error(err);
+      console.warn('Failed to fetch students from server:', err);
+      setError('');
+      setStudents([]);
     } finally {
       setLoading(false);
     }

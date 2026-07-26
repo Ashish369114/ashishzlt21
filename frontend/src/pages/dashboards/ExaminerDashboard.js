@@ -419,17 +419,6 @@ const ExaminerDashboard = ({ user, onLogout }) => {
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <span style={{
-              padding: '6px 14px',
-              borderRadius: '20px',
-              fontSize: '0.75rem',
-              fontWeight: '700',
-              background: planBg,
-              color: '#ffffff',
-              textTransform: 'uppercase',
-            }}>
-              {planLabel} PLAN
-            </span>
             <span style={{ fontSize: '0.88rem', color: '#64748b', fontWeight: '500' }}>
               {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' })}
             </span>

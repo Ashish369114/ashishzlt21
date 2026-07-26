@@ -64,9 +64,8 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
     navigate('/login');
   };
 
-  const plan = (localStorage.getItem('subscriptionPlan') || user?.subscriptionPlan || 'silver').toLowerCase();
-  const isGoldOrBetter = plan === 'gold' || plan.startsWith('platinum');
-  const isPlatinum = plan.startsWith('platinum');
+  const isGoldOrBetter = true;
+  const isPlatinum = true;
 
   return (
     <div className="dashboard-layout" style={{ background: '#F7F6F3', minHeight: '100vh' }}>
@@ -132,7 +131,7 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#322029' }}>{user?.firstName} {user?.lastName}</div>
                 <div style={{ fontSize: '0.75rem', color: '#6B5B54', fontWeight: '500' }}>
-                  {plan === 'platinum_with_ocr' ? 'Platinum + OCR' : plan === 'platinum' ? 'Platinum' : plan === 'gold' ? 'Gold' : 'Silver'} Plan
+                  Super Admin
                 </div>
               </div>
               <div style={{ width: '38px', height: '38px', background: '#EFE9E1', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#322029', fontWeight: '700' }}>
@@ -144,20 +143,20 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
 
         <Routes>
           <Route index element={<SuperAdminDashboardHome stats={stats} />} />
-          <Route path="employees" element={isGoldOrBetter ? <EmployeeManagement /> : <PlanUpgradeRequired featureName="Employees" requiredPlan="Gold" />} />
+          <Route path="employees" element={<EmployeeManagement />} />
           <Route path="students" element={<StudentManagement />} />
-          <Route path="teachers" element={isGoldOrBetter ? <EmployeeManagement /> : <PlanUpgradeRequired featureName="Employees" requiredPlan="Gold" />} />
+          <Route path="teachers" element={<EmployeeManagement />} />
           <Route path="fees" element={<FeeManagement user={user} />} />
           <Route path="classes" element={<ClassManagement />} />
-          <Route path="marks" element={isGoldOrBetter ? <MarksManagement /> : <PlanUpgradeRequired featureName="Marks Management" requiredPlan="Gold" />} />
+          <Route path="marks" element={<MarksManagement />} />
           <Route path="attendance" element={<AttendanceManagement />} />
           <Route path="exams" element={<ExamManagement />} />
-          <Route path="library" element={isPlatinum ? <LibraryManagement /> : <PlanUpgradeRequired featureName="Library" requiredPlan="Platinum" />} />
+          <Route path="library" element={<LibraryManagement />} />
           <Route path="inventory" element={<InventoryManagement />} />
-          <Route path="transport" element={isPlatinum ? <TransportManagement /> : <PlanUpgradeRequired featureName="Transport" requiredPlan="Platinum" />} />
-          <Route path="hostel" element={isPlatinum ? <HostelManagement /> : <PlanUpgradeRequired featureName="Hostel" requiredPlan="Platinum" />} />
-          <Route path="reports" element={isPlatinum ? <ReportManagement /> : <PlanUpgradeRequired featureName="Reports & Analytics" requiredPlan="Platinum" />} />
-          <Route path="settings" element={isPlatinum ? <SettingsManagement /> : <PlanUpgradeRequired featureName="System Settings" requiredPlan="Platinum" />} />
+          <Route path="transport" element={<TransportManagement />} />
+          <Route path="hostel" element={<HostelManagement />} />
+          <Route path="reports" element={<ReportManagement />} />
+          <Route path="settings" element={<SettingsManagement />} />
           <Route path="notices" element={<NoticeManagement />} />
           <Route path="meeting-moms" element={<MeetingMomManagement />} />
           <Route path="audit-logs" element={<AuditLogsManagement />} />

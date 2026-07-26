@@ -78,17 +78,8 @@ const PrincipalDashboard = ({ user, onLogout }) => {
     navigate('/login');
   };
 
-  const plan = (localStorage.getItem('subscriptionPlan') || user?.subscriptionPlan || 'silver').toLowerCase();
-  const isGoldOrBetter = plan === 'gold' || plan.startsWith('platinum');
-  const isPlatinum = plan.startsWith('platinum');
-
-  const planLabel = plan === 'platinum_with_ocr' ? '⭐ PLATINUM + OCR' :
-                    plan === 'platinum_without_ocr' || plan === 'platinum' ? '⭐ PLATINUM' :
-                    plan === 'gold' ? '🏆 GOLD' : '🥈 SILVER';
-
-  const planBg = plan.startsWith('platinum') ? 'linear-gradient(135deg, #a78bfa, #7c3aed)' :
-                 plan === 'gold' ? 'linear-gradient(135deg, #f59e0b, #d97706)' :
-                 'linear-gradient(135deg, #64748b, #475569)';
+  const isGoldOrBetter = true;
+  const isPlatinum = true;
 
   return (
     <div className="dashboard-layout">
@@ -125,13 +116,13 @@ const PrincipalDashboard = ({ user, onLogout }) => {
         <Routes>
           <Route index element={<PrincipalDashboardHome stats={stats} user={user} />} />
           <Route path="students" element={<StudentManagement />} />
-          <Route path="employees" element={isGoldOrBetter ? <EmployeeManagement /> : <PlanUpgradeRequired featureName="Employee Management" requiredPlan="Gold" />} />
-          <Route path="teachers" element={isGoldOrBetter ? <EmployeeManagement /> : <PlanUpgradeRequired featureName="Employee Management" requiredPlan="Gold" />} />
+          <Route path="employees" element={<EmployeeManagement />} />
+          <Route path="teachers" element={<EmployeeManagement />} />
           <Route path="exams" element={<PrincipalExamManagement />} />
           <Route path="attendance" element={<PrincipalAttendance />} />
-          <Route path="finance" element={isGoldOrBetter ? <PrincipalFinanceAndFees isPlatinum={isPlatinum} /> : <PlanUpgradeRequired featureName="Finance Overview" requiredPlan="Gold" />} />
-          <Route path="reports" element={isPlatinum ? <ReportManagement /> : <PlanUpgradeRequired featureName="Reports & Analytics" requiredPlan="Platinum" />} />
-          <Route path="leaves" element={isPlatinum ? <PrincipalLeaveManagement /> : <PlanUpgradeRequired featureName="Leave Management" requiredPlan="Platinum" />} />
+          <Route path="finance" element={<PrincipalFinanceAndFees isPlatinum={true} />} />
+          <Route path="reports" element={<ReportManagement />} />
+          <Route path="leaves" element={<PrincipalLeaveManagement />} />
           <Route path="lesson-plans" element={<PrincipalLessonPlanManagement />} />
           <Route path="notices" element={<NoticeManagement />} />
           <Route path="meeting-moms" element={<MeetingMomManagement />} />
