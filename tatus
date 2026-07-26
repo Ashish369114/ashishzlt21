@@ -1,0 +1,5 @@
+[33mae1025a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mnew-version[m[33m, [m[1;31morigin/dev[m[33m, [m[1;31morigin/New-Version[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;31morigin/AAPchanges[m[33m)[m chore(security): Add HPP and secure debug endpoints
+[33m54bad6b[m[33m ([m[1;31morigin/my-changes[m[33m)[m docs: Merge system architecture guide into README.md
+[33mf442023[m docs: Add complete system architecture and maintenance guide
+[33m67aed3a[m docs: Update README with AWS and PostgreSQL architecture
+[33m2003642[m Fix CORS for dev.zltsos.com
