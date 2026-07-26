@@ -1,9 +1,18 @@
 const { sequelize, User, Notice, MeetingMom, AuditLog, Event, Hostel, Library, Transport, LessonPlan } = require('../models');
+const seedDataFn = require('./seedFn');
 
 const seedAllModules = async () => {
   try {
     console.log('Seeding rich demo data into all modules...');
     await sequelize.sync();
+    
+    // Seed core database tables (Users, Teachers, Students, Classes, Fees, Exams, Attendance, Library, Transport, Hostel)
+    try {
+      await seedDataFn();
+      console.log('✅ Core database tables seeded successfully');
+    } catch (fnErr) {
+      console.warn('Notice during core table seeding:', fnErr.message || fnErr);
+    }
 
     // 1. Seed Notices
     const noticesData = [
