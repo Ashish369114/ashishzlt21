@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { exportToCSV, printPDF } from '../../utils/exportUtils';
 import { Search, Filter, BookOpen, CheckCircle, XCircle, Clock, Calendar, User, Download, Printer, ChevronLeft, ChevronRight, MessageSquare } from 'lucide-react';
+import { demoLessonPlans } from '../../utils/demoData';
 
 const PrincipalLessonPlanManagement = () => {
   const [lessonPlans, setLessonPlans] = useState([]);
@@ -35,12 +36,17 @@ const PrincipalLessonPlanManagement = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await res.json();
-      if (data.success) {
-        setLessonPlans(data.lessonPlans || []);
+      if (data.success && data.lessonPlans && data.lessonPlans.length > 0) {
+        setLessonPlans(data.lessonPlans);
         setTotalPages(data.totalPages || 1);
+      } else {
+        setLessonPlans(demoLessonPlans);
+        setTotalPages(1);
       }
     } catch (err) {
-      console.error('Error fetching lesson plans:', err);
+      console.warn('Error fetching lesson plans, using demo plans:', err);
+      setLessonPlans(demoLessonPlans);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }

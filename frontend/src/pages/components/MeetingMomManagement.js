@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { exportToCSV, printPDF } from '../../utils/exportUtils';
 import { Search, Plus, Edit, Trash2, Calendar, Clock, MapPin, Users, FileText, Download, Printer, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { demoMeetingMoms } from '../../utils/demoData';
 
 const MeetingMomManagement = () => {
   const [moms, setMoms] = useState([]);
@@ -44,12 +45,17 @@ const MeetingMomManagement = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await res.json();
-      if (data.success) {
-        setMoms(data.moms || []);
+      if (data.success && data.moms && data.moms.length > 0) {
+        setMoms(data.moms);
         setTotalPages(data.totalPages || 1);
+      } else {
+        setMoms(demoMeetingMoms);
+        setTotalPages(1);
       }
     } catch (err) {
-      console.error('Error fetching MOMs:', err);
+      console.warn('Error fetching MOMs, using demo MOMs:', err);
+      setMoms(demoMeetingMoms);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }

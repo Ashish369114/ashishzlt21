@@ -183,3 +183,10 @@ export const demoHostels = [
   { _id: 'hst_1', blockName: 'Tagore Boys Hostel (Block A)', wardenName: 'Mr. Mohan Das', totalRooms: 50, occupiedRooms: 42, monthlyFee: 6500 },
   { _id: 'hst_2', blockName: 'Sarojini Girls Hostel (Block B)', wardenName: 'Ms. Kamala Devi', totalRooms: 50, occupiedRooms: 38, monthlyFee: 6500 }
 ];
+
+// Lesson Plans
+export const demoLessonPlans = [
+  { _id: 'lp_1', title: 'Quadratic Equations & Parabola Graphs', subject: 'Mathematics', className: 'Grade 10', teacherName: 'Rajesh Kumar', startDate: '2026-08-01', endDate: '2026-08-05', objectives: 'Master quadratic formulas and graph plotting.', topicsCovered: 'Factoring, quadratic formula, discriminant b^2 - 4ac', status: 'pending', principalComments: '' },
+  { _id: 'lp_2', title: 'Cell Biology & Organelle Microscopic Study', subject: 'Science', className: 'Grade 9', teacherName: 'Sunita Rao', startDate: '2026-08-02', endDate: '2026-08-06', objectives: 'Understand plant and animal cell structures.', topicsCovered: 'Mitochondria, Cell Wall, Chloroplasts, Mitosis', status: 'approved', principalComments: 'Approved.' },
+  { _id: 'lp_3', title: 'Shakespearean Literature & Monologues', subject: 'English', className: 'Grade 10', teacherName: 'Anil Mehta', startDate: '2026-08-04', endDate: '2026-08-08', objectives: 'Analyze poetic meters and dramatic devices.', topicsCovered: 'Julius Caesar Act 3, Monologues vs Soliloquy', status: 'pending', principalComments: '' }
+];
