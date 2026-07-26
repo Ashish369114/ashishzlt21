@@ -23,6 +23,10 @@ const ExaminerDashboard = ({ user, onLogout }) => {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedExam, setSelectedExam] = useState(null);
 
+  // View Duty Modal state
+  const [showDutyModal, setShowDutyModal] = useState(false);
+  const [dutyExam, setDutyExam] = useState(null);
+
   // Seating Arrangement state
   const [showSeating, setShowSeating] = useState(false);
   const [seatingSearch, setSeatingSearch] = useState('');
@@ -43,10 +47,22 @@ const ExaminerDashboard = ({ user, onLogout }) => {
         classService.getAll(),
         studentService.getAll()
       ]);
-      setExams(examsRes.data || []);
+      const fetchedExams = examsRes.data || [];
+      const fetchedClasses = classesRes.data || [];
+      setExams(fetchedExams);
       setTeachers(teachersRes.data || []);
-      setClasses(classesRes.data || []);
+      setClasses(fetchedClasses);
       setStudents(studentsRes.data || []);
+
+      if (fetchedClasses.length > 0) {
+        const defaultClass = fetchedClasses.find(c => String(c.grade) === '3' && c.section === 'A') || fetchedClasses[0];
+        setSelectedGrade(String(defaultClass.grade));
+        setSelectedSection(defaultClass.section);
+      }
+      if (fetchedExams.length > 0) {
+        const firstType = fetchedExams[0].examType || 'Mid-Term';
+        setSelectedExamType(firstType);
+      }
     } catch (err) {
       console.error('Error fetching examiner data:', err);
       setError('Failed to load exams, teachers and classes data.');
@@ -72,13 +88,14 @@ const ExaminerDashboard = ({ user, onLogout }) => {
 
   // Toggle Paper Distribution
   const toggleDispatch = async (exam) => {
+    const examId = exam.id || exam._id;
     try {
       setError('');
       setSuccess('');
-      const updated = await examService.update(exam._id, {
+      const updated = await examService.update(examId, {
         paperDispatched: !exam.paperDispatched
       });
-      setExams(prev => prev.map(e => e._id === exam._id ? updated.data : e));
+      setExams(prev => prev.map(e => (e.id || e._id) === examId ? updated.data : e));
       showNotification('Paper distribution status updated!');
     } catch (err) {
       console.error('Error updating paper status:', err);
@@ -88,13 +105,14 @@ const ExaminerDashboard = ({ user, onLogout }) => {
 
   // Toggle Paper Collection
   const toggleCollection = async (exam) => {
+    const examId = exam.id || exam._id;
     try {
       setError('');
       setSuccess('');
-      const updated = await examService.update(exam._id, {
+      const updated = await examService.update(examId, {
         paperCollected: !exam.paperCollected
       });
-      setExams(prev => prev.map(e => e._id === exam._id ? updated.data : e));
+      setExams(prev => prev.map(e => (e.id || e._id) === examId ? updated.data : e));
       showNotification('Paper collection status updated!');
     } catch (err) {
       console.error('Error updating paper status:', err);
@@ -105,13 +123,14 @@ const ExaminerDashboard = ({ user, onLogout }) => {
   // Assign Invigilator
   const assignInvigilator = async (teacherId) => {
     if (!selectedExam) return;
+    const examId = selectedExam.id || selectedExam._id;
     try {
       setError('');
       setSuccess('');
-      const updated = await examService.update(selectedExam._id, {
+      const updated = await examService.update(examId, {
         invigilator: teacherId
       });
-      setExams(prev => prev.map(e => e._id === selectedExam._id ? updated.data : e));
+      setExams(prev => prev.map(e => (e.id || e._id) === examId ? updated.data : e));
       setShowAssignModal(false);
       setSelectedExam(null);
       showNotification('Invigilator assigned successfully!');
@@ -123,13 +142,14 @@ const ExaminerDashboard = ({ user, onLogout }) => {
 
   // Remove Invigilator
   const removeInvigilator = async (exam) => {
+    const examId = exam.id || exam._id;
     try {
       setError('');
       setSuccess('');
-      const updated = await examService.update(exam._id, {
+      const updated = await examService.update(examId, {
         invigilator: null
       });
-      setExams(prev => prev.map(e => e._id === exam._id ? updated.data : e));
+      setExams(prev => prev.map(e => (e.id || e._id) === examId ? updated.data : e));
       showNotification('Invigilator removed.');
     } catch (err) {
       console.error('Error removing invigilator:', err);
@@ -143,44 +163,54 @@ const ExaminerDashboard = ({ user, onLogout }) => {
   };
 
   // Calculate statistics
-  const today = new Date().toDateString();
-  const todaysExamsList = exams.filter(e => e.examDate && new Date(e.examDate).toDateString() === today);
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const todaysExamsList = exams.filter(e => {
+    if (!e.examDate && !e.date) return false;
+    try {
+      const dStr = new Date(e.examDate || e.date).toISOString().slice(0, 10);
+      return dStr === todayIso;
+    } catch (err) {
+      return false;
+    }
+  });
   const todaysExams = todaysExamsList.length;
   const pendingInvigilator = exams.filter(e => !e.invigilator).length;
   const pendingDistribute = exams.filter(e => !e.paperDispatched).length;
   const pendingCollect = exams.filter(e => !e.paperCollected).length;
 
-
   const getExamTeacher = (exam) => {
     if (exam.invigilator) {
       const t = exam.invigilator;
+      if (t.user) {
+        return `${t.user.firstName || ''} ${t.user.lastName || ''}`.trim() || 'Unassigned';
+      }
       if (t.userId) {
         return `${t.userId.firstName || ''} ${t.userId.lastName || ''}`.trim() || 'Unassigned';
       }
     }
     if (!exam.subject) return 'Unassigned';
-    const examSubjectId = exam.subject._id || exam.subject;
-    const examClassId = exam.class?._id || exam.class;
+    const examSubjectId = (typeof exam.subject === 'object' && exam.subject !== null ? (exam.subject.id || exam.subject._id) : null) || exam.subjectId || exam.subject;
+    const examClassId = (typeof exam.class === 'object' && exam.class !== null ? (exam.class.id || exam.class._id) : null) || exam.classId || exam.class;
 
-    let t = teachers.find(t => String(t.subject?._id || t.subject) === String(examSubjectId));
+    let t = teachers.find(t => String(t.subject?.id || t.subject?._id || t.subject) === String(examSubjectId));
     if (!t) {
       t = teachers.find(tt => {
         if (tt.isAllSubjectTeacher) return false;
-        const ids = (tt.teachingSubjects || []).map(s => s._id || s);
+        const ids = (tt.teachingSubjects || []).map(s => s.id || s._id || s);
         return ids.some(id => String(id) === String(examSubjectId));
       });
     }
     if (!t && examClassId) {
       t = teachers.find(tt => {
-        const classIds = (tt.assignedClasses || []).map(c => c._id || c);
+        const classIds = (tt.assignedClasses || []).map(c => c.id || c._id || c);
         if (!classIds.some(id => String(id) === String(examClassId))) return false;
-        const subjectIds = (tt.teachingSubjects || []).map(s => s._id || s);
+        const subjectIds = (tt.teachingSubjects || []).map(s => s.id || s._id || s);
         return subjectIds.some(id => String(id) === String(examSubjectId)) ||
-               String(tt.subject?._id || tt.subject) === String(examSubjectId) ||
+               String(tt.subject?.id || tt.subject?._id || tt.subject) === String(examSubjectId) ||
                tt.isAllSubjectTeacher;
       });
     }
-    if (t) return `${t.userId?.firstName || ''} ${t.userId?.lastName || ''}`.trim();
+    if (t) return `${t.user?.firstName || t.userId?.firstName || ''} ${t.user?.lastName || t.userId?.lastName || ''}`.trim();
     return 'Unassigned';
   };
 
@@ -208,9 +238,14 @@ const ExaminerDashboard = ({ user, onLogout }) => {
   // Filter exams by selected class and exam type
   const filteredExams = exams.filter(exam => {
     if (!selectedClassObj) return false;
-    const examClassId = exam.class?._id || exam.class;
-    if (String(examClassId) !== String(selectedClassObj._id)) return false;
-    if (selectedExamType && exam.examType !== selectedExamType) return false;
+    const examClassId = (typeof exam.class === 'object' && exam.class !== null ? (exam.class.id || exam.class._id) : null) || exam.classId || exam.class;
+    const targetClassId = selectedClassObj.id || selectedClassObj._id;
+    if (String(examClassId) !== String(targetClassId)) return false;
+    if (selectedExamType) {
+      const t1 = (exam.examType || '').toLowerCase().replace(/[\s_-]+/g, '');
+      const t2 = (selectedExamType || '').toLowerCase().replace(/[\s_-]+/g, '');
+      if (t1 !== t2 && !t1.includes(t2) && !t2.includes(t1)) return false;
+    }
     return true;
   });
 
@@ -220,8 +255,10 @@ const ExaminerDashboard = ({ user, onLogout }) => {
   const uniqueExamNames = [...new Set(classExams.map(e => e.name).filter(Boolean))].sort();
 
   const classStudents = students.filter(s => {
-    const cid = s.class?._id || s.class;
-    return selectedClassObj && String(cid) === String(selectedClassObj._id);
+    if (!selectedClassObj) return false;
+    const cid = (typeof s.class === 'object' && s.class !== null ? (s.class.id || s.class._id) : null) || s.classId || s.class;
+    const targetId = selectedClassObj.id || selectedClassObj._id;
+    return String(cid) === String(targetId) || String(s.classId) === String(selectedClassObj.id);
   });
 
   const noSelection = !selectedGrade || !selectedSection || !selectedExamType;
@@ -481,7 +518,7 @@ const ExaminerDashboard = ({ user, onLogout }) => {
                         {todaysExamsList.length === 0 ? (
                           <tr><td colSpan="5" style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>No exams scheduled for today.</td></tr>
                         ) : todaysExamsList.map(e => (
-                          <tr key={e._id}>
+                          <tr key={e.id || e._id}>
                             <td>{e.subject?.name || 'N/A'}</td>
                             <td>{e.class?.grade || 'N/A'}</td>
                             <td>{e.class?.section || 'N/A'}</td>
@@ -543,12 +580,13 @@ const ExaminerDashboard = ({ user, onLogout }) => {
                     <tbody>
                       {filteredExams.map(exam => {
                         const invNode = exam.invigilator;
-                        const invName = invNode && invNode.userId
-                          ? `${invNode.userId.firstName || ''} ${invNode.userId.lastName || ''}`.trim()
+                        const invUser = invNode && (invNode.user || invNode.userId);
+                        const invName = invUser
+                          ? `${invUser.firstName || ''} ${invUser.lastName || ''}`.trim() || null
                           : null;
 
                         return (
-                          <tr key={exam._id}>
+                          <tr key={exam.id || exam._id}>
                             <td style={{ fontWeight: '700', color: '#1e293b' }}>{exam.subject?.name || exam.name || 'N/A'}</td>
                             <td>{exam.class?.grade ? `Grade ${exam.class.grade}` : 'N/A'}</td>
                             <td>{exam.class?.section ? `Section ${exam.class.section}` : 'N/A'}</td>
@@ -567,7 +605,11 @@ const ExaminerDashboard = ({ user, onLogout }) => {
                               <button className="action-btn-primary" style={{ marginRight: '4px', padding: '4px 8px', fontSize: '0.75rem' }} onClick={() => { setSelectedExam(exam); setShowAssignModal(true); }}>
                                 {invName ? 'Change Teacher' : 'Assign Teacher'}
                               </button>
-                              <button className="action-btn-secondary" style={{ padding: '4px 8px', fontSize: '0.75rem', background: '#f1f5f9', border: '1px solid #cbd5e1' }}>
+                              <button
+                                className="action-btn-secondary"
+                                style={{ padding: '4px 8px', fontSize: '0.75rem', background: '#f1f5f9', border: '1px solid #cbd5e1', cursor: 'pointer' }}
+                                onClick={() => { setDutyExam(exam); setShowDutyModal(true); }}
+                              >
                                 View Duty
                               </button>
                             </td>
@@ -981,7 +1023,7 @@ const ExaminerDashboard = ({ user, onLogout }) => {
                 Assign Teacher to: {selectedExam.name}
               </h3>
               <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
-                Class {selectedExam.class?.name || 'N/A'} • {selectedExam.subject?.name || 'N/A'} • {new Date(selectedExam.examDate).toLocaleDateString()}
+                Class {selectedExam.class?.grade ? `Grade ${selectedExam.class.grade} - Section ${selectedExam.class.section}` : selectedExam.class?.name || 'N/A'} • {selectedExam.subject?.name || selectedExam.name || 'N/A'} • {new Date(selectedExam.examDate).toLocaleDateString()}
               </p>
             </div>
 
@@ -1000,17 +1042,25 @@ const ExaminerDashboard = ({ user, onLogout }) => {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {getRecommendedTeachers().map((teacher, index) => {
-                const tName = teacher.userId
-                  ? `${teacher.userId.firstName || ''} ${teacher.userId.lastName || ''}`.trim()
-                  : 'Unknown Teacher';
+                const userObj = (typeof teacher.user === 'object' && teacher.user !== null)
+                  ? teacher.user
+                  : (typeof teacher.userId === 'object' && teacher.userId !== null)
+                    ? teacher.userId
+                    : null;
+
+                const tName = userObj
+                  ? `${userObj.firstName || ''} ${userObj.lastName || ''}`.trim()
+                  : teacher.name || (teacher.employeeId ? `Teacher #${teacher.employeeId}` : `Teacher #${teacher.id || teacher._id}`);
+
                 const classCount = teacher.assignedClasses?.length || 0;
+                const teacherId = teacher.id || teacher._id;
                 
                 // Show badge for teachers with less class periods
                 const isRecommended = index < 3 || classCount <= 1;
 
                 return (
                   <div
-                    key={teacher._id}
+                    key={teacherId}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -1060,8 +1110,8 @@ const ExaminerDashboard = ({ user, onLogout }) => {
                       </div>
                       <button
                         className="action-btn-primary"
-                        style={{ padding: '6px 14px', fontSize: '0.8rem' }}
-                        onClick={() => assignInvigilator(teacher._id)}
+                        style={{ padding: '6px 14px', fontSize: '0.8rem', cursor: 'pointer' }}
+                        onClick={() => assignInvigilator(teacherId)}
                       >
                         Select
                       </button>
@@ -1073,6 +1123,158 @@ const ExaminerDashboard = ({ user, onLogout }) => {
           </div>
         </div>
       )}
+
+      {/* VIEW DUTY DETAILS MODAL */}
+      {showDutyModal && dutyExam && (() => {
+        const invNode = dutyExam.invigilator;
+        const invName = invNode && (invNode.user || invNode.userId)
+          ? `${invNode.user?.firstName || invNode.userId?.firstName || ''} ${invNode.user?.lastName || invNode.userId?.lastName || ''}`.trim()
+          : null;
+        const invEmail = invNode?.user?.email || invNode?.userId?.email || 'N/A';
+        const invPhone = invNode?.user?.phone || invNode?.userId?.phone || 'N/A';
+
+        return (
+          <div style={{
+            position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.65)', zIndex: 9999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)'
+          }}>
+            <div style={{
+              background: '#ffffff', borderRadius: '20px', padding: '32px', maxWidth: '640px',
+              width: '90%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.2)',
+              position: 'relative', border: '1px solid #e2e8f0'
+            }}>
+              <button
+                onClick={() => { setShowDutyModal(false); setDutyExam(null); }}
+                style={{
+                  position: 'absolute', top: '18px', right: '20px', background: '#f1f5f9',
+                  border: 'none', width: '32px', height: '32px', borderRadius: '50%',
+                  fontSize: '1.1rem', cursor: 'pointer', color: '#64748b', display: 'flex',
+                  alignItems: 'center', justifyContent: 'center'
+                }}
+              >
+                ✕
+              </button>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+                <div style={{
+                  width: '48px', height: '48px', borderRadius: '14px', background: '#e0e7ff',
+                  color: '#4f46e5', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '1.5rem', fontWeight: 'bold'
+                }}>
+                  👮
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: '#6366f1', fontWeight: '800', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                    Invigilation Duty Slip
+                  </span>
+                  <h3 style={{ margin: '2px 0 0', fontSize: '1.35rem', fontWeight: '800', color: '#0f172a' }}>
+                    {dutyExam.subject?.name || dutyExam.name || 'Examination Duty'}
+                  </h3>
+                </div>
+              </div>
+
+              {/* Duty Overview Card */}
+              <div style={{
+                display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px',
+                background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px',
+                padding: '16px', marginBottom: '20px'
+              }}>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', display: 'block' }}>Class & Section</span>
+                  <span style={{ fontSize: '0.95rem', fontWeight: '700', color: '#1e293b' }}>
+                    Grade {dutyExam.class?.grade || 'N/A'} - Section {dutyExam.class?.section || 'N/A'}
+                  </span>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', display: 'block' }}>Exam Type</span>
+                  <span style={{ fontSize: '0.95rem', fontWeight: '700', color: '#1e293b' }}>
+                    {dutyExam.examType || 'Mid-Term'}
+                  </span>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', display: 'block' }}>Exam Date</span>
+                  <span style={{ fontSize: '0.95rem', fontWeight: '700', color: '#1e293b' }}>
+                    {new Date(dutyExam.examDate).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
+                  </span>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase', display: 'block' }}>Timing & Room</span>
+                  <span style={{ fontSize: '0.95rem', fontWeight: '700', color: '#6366f1' }}>
+                    {dutyExam.startTime || '09:00'} - {dutyExam.endTime || '11:00'} • {dutyExam.room || 'Room 101'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Assigned Teacher Card */}
+              <div style={{
+                background: invName ? '#f0fdf4' : '#fff1f2',
+                border: `1px solid ${invName ? '#bbf7d0' : '#fecdd3'}`,
+                borderRadius: '14px', padding: '18px', marginBottom: '20px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase', color: invName ? '#166534' : '#9f1239' }}>
+                    Assigned Invigilator
+                  </span>
+                  <span style={{
+                    padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '800',
+                    background: invName ? '#dcfce7' : '#ffe4e6', color: invName ? '#15803d' : '#e11d48'
+                  }}>
+                    {invName ? '✔ Assigned' : '⚠ Pending Assignment'}
+                  </span>
+                </div>
+                {invName ? (
+                  <div>
+                    <h4 style={{ margin: '0 0 6px', fontSize: '1.1rem', fontWeight: '800', color: '#0f172a' }}>{invName}</h4>
+                    <div style={{ display: 'flex', gap: '16px', fontSize: '0.85rem', color: '#475569', flexWrap: 'wrap' }}>
+                      <span>✉ {invEmail}</span>
+                      <span>📞 {invPhone}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <p style={{ margin: 0, fontSize: '0.88rem', color: '#9f1239' }}>
+                    No teacher has been assigned to invigilate this exam yet. Click "Assign Teacher" below to assign one.
+                  </p>
+                )}
+              </div>
+
+              {/* Instructions */}
+              <div style={{ background: '#f8fafc', borderRadius: '14px', border: '1px solid #e2e8f0', padding: '16px', marginBottom: '24px' }}>
+                <h5 style={{ margin: '0 0 8px', fontSize: '0.85rem', fontWeight: '700', color: '#334155', textTransform: 'uppercase' }}>
+                  📋 Invigilator Duty Guidelines
+                </h5>
+                <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '0.83rem', color: '#64748b', lineHeight: '1.6' }}>
+                  <li>Report to the Examination Control Room 20 minutes prior to exam start time.</li>
+                  <li>Collect sealed question papers and official answer booklets.</li>
+                  <li>Verify student ID cards and enforce strict seating arrangements.</li>
+                  <li>Collect and count all answer scripts before allowing students to leave.</li>
+                </ul>
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                <button
+                  className="action-btn-secondary"
+                  style={{ padding: '10px 18px', borderRadius: '10px', fontWeight: '600', fontSize: '0.88rem' }}
+                  onClick={() => { setShowDutyModal(false); setDutyExam(null); }}
+                >
+                  Close
+                </button>
+                <button
+                  className="action-btn-primary"
+                  style={{ padding: '10px 20px', borderRadius: '10px', fontWeight: '700', fontSize: '0.88rem' }}
+                  onClick={() => {
+                    setSelectedExam(dutyExam);
+                    setShowDutyModal(false);
+                    setShowAssignModal(true);
+                  }}
+                >
+                  {invName ? 'Change Teacher' : 'Assign Teacher'}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

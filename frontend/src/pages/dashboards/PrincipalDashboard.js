@@ -19,6 +19,9 @@ import PrincipalFinanceAndFees from '../components/PrincipalFinanceAndFees';
 import ReportManagement from '../components/ReportManagement';
 import EventList from '../components/EventList';
 import PrincipalTeacherComplaints from '../components/PrincipalTeacherComplaints';
+import PrincipalLessonPlanManagement from '../components/PrincipalLessonPlanManagement';
+import NoticeManagement from '../components/NoticeManagement';
+import MeetingMomManagement from '../components/MeetingMomManagement';
 
 const PrincipalDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -104,6 +107,9 @@ const PrincipalDashboard = ({ user, onLogout }) => {
 
           <li><Link to="/dashboard/attendance" className={isActive('/dashboard/attendance') ? 'active' : ''}>✅ Attendance</Link></li>
           <li><Link to="/dashboard/exams" className={isActive('/dashboard/exams') ? 'active' : ''}>📝 Exams</Link></li>
+          <li><Link to="/dashboard/lesson-plans" className={isActive('/dashboard/lesson-plans') ? 'active' : ''}>📖 Lesson Plans</Link></li>
+          <li><Link to="/dashboard/notices" className={isActive('/dashboard/notices') ? 'active' : ''}>📢 Circulars & Notices</Link></li>
+          <li><Link to="/dashboard/meeting-moms" className={isActive('/dashboard/meeting-moms') ? 'active' : ''}>📝 Meeting MOMs</Link></li>
           <li><Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''}>📊 Reports</Link></li>
           <li><Link to="/dashboard/settings" className={isActive('/dashboard/settings') ? 'active' : ''}>⚙️ Change Password</Link></li>
 
@@ -126,6 +132,9 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           <Route path="finance" element={isGoldOrBetter ? <PrincipalFinanceAndFees isPlatinum={isPlatinum} /> : <PlanUpgradeRequired featureName="Finance Overview" requiredPlan="Gold" />} />
           <Route path="reports" element={isPlatinum ? <ReportManagement /> : <PlanUpgradeRequired featureName="Reports & Analytics" requiredPlan="Platinum" />} />
           <Route path="leaves" element={isPlatinum ? <PrincipalLeaveManagement /> : <PlanUpgradeRequired featureName="Leave Management" requiredPlan="Platinum" />} />
+          <Route path="lesson-plans" element={<PrincipalLessonPlanManagement />} />
+          <Route path="notices" element={<NoticeManagement />} />
+          <Route path="meeting-moms" element={<MeetingMomManagement />} />
           <Route path="complaints" element={<PrincipalTeacherComplaints />} />
           <Route path="*" element={<PrincipalDashboardHome stats={stats} user={user} />} />
         </Routes>

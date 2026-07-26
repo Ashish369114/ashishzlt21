@@ -16,3 +16,8 @@ postgres.zip
 pwfile.txt
 setup-postgres.ps1
 temp_repo_analyze/
+colleague_repo/
+*_logs.txt
+frontend_log.txt
+
+

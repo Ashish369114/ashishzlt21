@@ -38,6 +38,11 @@ const expensesRoutes = require('./routes/expenses');
 const concessionRoutes = require('./routes/concessions');
 const leaveRoutes = require('./routes/leaves');
 const contactRoutes = require('./routes/contact');
+const auditLogsRoutes = require('./routes/auditLogs');
+const meetingMomsRoutes = require('./routes/meetingMoms');
+const noticesRoutes = require('./routes/notices');
+const systemAdminRoutes = require('./routes/systemAdmin');
+const lessonPlansRoutes = require('./routes/lessonPlans');
 
 const app = express();
 
@@ -45,7 +50,17 @@ const startServer = async () => {
   try {
     await connectDB();
     if (process.env.NODE_ENV !== 'production') {
-      await sequelize.sync({ alter: true }); // Automatically sync DB only in non-production
+      await sequelize.sync(); // Automatically sync DB in non-production
+      try {
+        const userCount = await require('./models').User.count();
+        if (userCount === 0) {
+          console.log('No users found in database. Seeding demo data...');
+          const seedDataFn = require('./seeds/seedFn');
+          await seedDataFn();
+        }
+      } catch (seedErr) {
+        console.warn('Auto-seed check warning:', seedErr.message);
+      }
     }
 
     // Security Middleware
@@ -54,8 +69,8 @@ const startServer = async () => {
     // Rate Limiting
     const limiter = rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 200, // limit each IP to 200 requests per windowMs
-      message: 'Too many requests from this IP, please try again later.'
+      max: process.env.NODE_ENV === 'production' ? 200 : 5000, // limit each IP to 5000 requests in dev
+      message: JSON.stringify({ success: false, message: 'Too many requests from this IP, please try again later.' })
     });
     app.use('/api', limiter);
 
@@ -67,6 +82,7 @@ const startServer = async () => {
       process.env.FRONTEND_URL,
       process.env.CORS_ORIGIN,
       'http://localhost:3000',
+      'http://127.0.0.1:3000',
       'http://dev.zltsos.com',
       'https://dev.zltsos.com'
     ].filter(Boolean);
@@ -114,6 +130,11 @@ const startServer = async () => {
     app.use('/api/concessions', concessionRoutes);
     app.use('/api/leaves', leaveRoutes);
     app.use('/api/contact', contactRoutes);
+    app.use('/api/audit-logs', auditLogsRoutes);
+    app.use('/api/meeting-moms', meetingMomsRoutes);
+    app.use('/api/notices', noticesRoutes);
+    app.use('/api/system-admin', systemAdminRoutes);
+    app.use('/api/lesson-plans', lessonPlansRoutes);
 
     // Health check
     app.get('/api/health', (req, res) => {

@@ -15,6 +15,8 @@ import StudentDashboard from './pages/dashboards/StudentDashboard';
 import ParentDashboard from './pages/dashboards/ParentDashboard';
 import AccountantDashboard from './pages/dashboards/AccountantDashboard';
 import ExaminerDashboard from './pages/dashboards/ExaminerDashboard';
+import LibrarianDashboard from './pages/dashboards/LibrarianDashboard';
+import AoDashboard from './pages/dashboards/AoDashboard';
 import SilverPlan from './pages/SilverPlan';
 import GoldPlan from './pages/GoldPlan';
 import PlatinumPlan from './pages/PlatinumPlan';
@@ -88,6 +90,12 @@ function App() {
         {user && user.role === 'examiner' && (
           <Route path="/dashboard/*" element={<ExaminerDashboard user={user} onLogout={handleLogout} />} />
         )}
+        {user && user.role === 'librarian' && (
+          <Route path="/dashboard/*" element={<LibrarianDashboard user={user} onLogout={handleLogout} />} />
+        )}
+        {user && (user.role === 'administrative_officer' || user.role === 'ao') && (
+          <Route path="/dashboard/*" element={<AoDashboard user={user} onLogout={handleLogout} />} />
+        )}
 
         {/* Fallback Routes */}
         <Route path="*" element={user ? <Navigate to={getDashboardRoute(user)} replace /> : <Navigate to="/" replace />} />
@@ -104,7 +112,10 @@ function App() {
       'student': '/dashboard',
       'parent': '/dashboard',
       'accountant_admin': '/dashboard',
-      'examiner': '/dashboard'
+      'examiner': '/dashboard',
+      'librarian': '/dashboard',
+      'administrative_officer': '/dashboard',
+      'ao': '/dashboard'
     };
     return dashboardRoutes[userData.role] || '/';
   }

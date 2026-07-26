@@ -5,8 +5,9 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #F7F6F3;
+  color: #322029;
   min-height: 100vh;
 }
 
@@ -16,30 +17,31 @@ body {
   padding: 20px;
 }
 
-/* Login Styles */
+/* Login Styles - Luxe Ivory Theme */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+  background: linear-gradient(135deg, #EFE9E1 0%, #F7F6F3 100%);
 }
 
 .login-box {
-  background: white;
+  background: #FFFFFF;
   padding: 40px;
-  border-radius: 10px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(50, 32, 41, 0.08);
+  border: 1px solid #D9D8D9;
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
 }
 
 .login-box h1 {
   text-align: center;
-  color: #333;
+  color: #322029;
   margin-bottom: 30px;
   font-size: 28px;
-  font-weight: 600;
+  font-weight: 800;
 }
 
 .form-group {
@@ -49,74 +51,79 @@ body {
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  color: #555;
-  font-weight: 500;
+  color: #5C4E46;
+  font-weight: 600;
 }
 
 .form-group input,
 .form-group select {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  border: 1px solid #D9D8D9;
+  border-radius: 8px;
   font-size: 14px;
+  background: #F7F6F3;
+  color: #322029;
   transition: border-color 0.3s;
 }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  border-color: #AC968D;
+  box-shadow: 0 0 0 3px rgba(172, 150, 141, 0.15);
 }
 
 .btn {
   padding: 12px 20px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   transition: all 0.3s ease;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
-  color: white;
+  background: #AC968D;
+  color: #FFFFFF;
   width: 100%;
   margin-top: 10px;
+  box-shadow: 0 4px 12px rgba(172, 150, 141, 0.25);
 }
 
 .btn-primary:hover {
+  background: #998177;
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(124, 58, 237, 0.4);
+  box-shadow: 0 6px 16px rgba(172, 150, 141, 0.35);
 }
 
 .btn-secondary {
-  background: #f0f0f0;
-  color: #333;
+  background: #EFE9E1;
+  color: #322029;
+  border: 1px solid #D9D8D9;
 }
 
 .btn-secondary:hover {
-  background: #e0e0e0;
+  background: #E5DFD7;
 }
 
 .btn-danger {
-  background: #ef4444;
+  background: #993333;
   color: white;
 }
 
 .btn-danger:hover {
-  background: #dc2626;
+  background: #772626;
 }
 
 .btn-success {
-  background: #10b981;
+  background: #AC968D;
   color: white;
 }
 
 .btn-success:hover {
-  background: #059669;
+  background: #998177;
 }
 
 .btn-small {
@@ -124,18 +131,18 @@ body {
   font-size: 12px;
 }
 
-/* Dashboard Layout */
+/* Dashboard Layout - OPTION 5 - LUXE IVORY THEME */
 .dashboard-layout {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 270px 1fr;
   min-height: 100vh;
-  background: #f8fafc;
+  background: #F7F6F3;
 }
 
 .sidebar {
-  background: linear-gradient(135deg, #2d2d44 0%, #1a1a2e 100%);
-  color: white;
-  padding: 24px;
+  background: #EFE9E1;
+  color: #322029;
+  padding: 24px 20px;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -143,13 +150,14 @@ body {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  box-shadow: 4px 0 20px rgba(0,0,0,0.08);
+  border-right: 1px solid #D9D8D9;
+  box-shadow: 2px 0 12px rgba(50, 32, 41, 0.03);
 }
 
 .sidebar-header {
   margin-bottom: 0;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid #D9D8D9;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -162,11 +170,12 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  color: #322029;
 }
 
 .sidebar-header p {
   font-size: 13px;
-  opacity: 0.8;
+  color: #6B5B54;
 }
 
 .nav-menu {
@@ -185,46 +194,46 @@ body {
 
 .nav-menu li[style] {
   margin-top: 16px !important;
-  border-top: 1px solid rgba(255,255,255,0.1) !important;
+  border-top: 1px solid #D9D8D9 !important;
   padding-top: 16px !important;
 }
 
 .nav-menu a {
-  color: white;
+  color: #322029 !important;
   text-decoration: none;
-  padding: 12px 16px;
-  border-radius: 8px;
+  padding: 11px 16px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   gap: 12px;
   transition: all 0.2s ease;
-  background: rgba(255, 255, 255, 0.03);
+  background: transparent;
   border: 1px solid transparent;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .nav-menu a:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
+  background: #F7F6F3 !important;
+  color: #322029 !important;
 }
 
 .nav-menu a.active {
-  background: #ffffff;
-  color: #7c3aed;
-  border-color: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: #AC968D !important;
+  color: #FFFFFF !important;
+  border-color: #AC968D !important;
+  box-shadow: 0 4px 12px rgba(172, 150, 141, 0.25);
   font-weight: 700;
 }
 
 .logout-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #ef4444;
-  padding: 12px 16px;
-  border-radius: 8px;
+  background: #F7F6F3;
+  border: 1px solid #AC968D;
+  color: #322029;
+  padding: 11px 16px;
+  border-radius: 10px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
   width: 100%;
@@ -235,11 +244,9 @@ body {
 }
 
 .logout-btn:hover {
-  background: #ef4444;
-  border-color: #ef4444;
-  color: white;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+  background: #AC968D;
+  border-color: #AC968D;
+  color: #FFFFFF;
 }
 
 .main-content {
@@ -251,39 +258,28 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 30px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: #FFFFFF;
+  padding: 20px 28px;
+  border-radius: 16px;
+  margin-bottom: 28px;
+  border: 1px solid #D9D8D9;
+  box-shadow: 0 4px 12px rgba(50, 32, 41, 0.03);
 }
 
 .header h1 {
-  color: #333;
-  font-size: 28px;
+  color: #322029;
+  font-size: 26px;
+  font-weight: 800;
 }
 
-.logout-btn {
-  background: #ef4444;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.logout-btn:hover {
-  background: #dc2626;
-}
-
-/* Cards */
+/* Cards - OPTION 5 LUXE IVORY SURFACE */
 .card {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid #D9D8D9;
+  box-shadow: 0 4px 12px rgba(50, 32, 41, 0.04);
+  margin-bottom: 24px;
 }
 
 .card-header {
@@ -291,54 +287,62 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 2px solid #EFE9E1;
   padding-bottom: 15px;
 }
 
 .card-header h2 {
-  color: #333;
-  font-size: 22px;
+  color: #322029;
+  font-size: 20px;
+  font-weight: 800;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 20px;
   margin-bottom: 30px;
 }
 
 .main-content .stat-card,
-.dashboard-container .stat-card {
-  background: linear-gradient(135deg, #374151 0%, #1f2937 100%) !important;
-  color: white !important;
-  padding: 25px !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+.dashboard-container .stat-card,
+.stat-card {
+  background: #FFFFFF !important;
+  color: #322029 !important;
+  padding: 24px !important;
+  border-radius: 16px !important;
+  border: 1px solid #D9D8D9 !important;
+  box-shadow: 0 4px 12px rgba(50, 32, 41, 0.04) !important;
   text-align: center !important;
   transition: all 0.3s ease !important;
 }
 
 .main-content .stat-card:hover,
-.dashboard-container .stat-card:hover {
-  transform: translateY(-5px) !important;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3) !important;
+.dashboard-container .stat-card:hover,
+.stat-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 6px 18px rgba(172, 150, 141, 0.15) !important;
 }
 
 .main-content .stat-card h3,
-.dashboard-container .stat-card h3 {
-  font-size: 15px !important;
-  opacity: 0.95 !important;
-  margin-bottom: 10px !important;
-  color: white !important;
+.dashboard-container .stat-card h3,
+.stat-card h3 {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  margin-bottom: 8px !important;
+  color: #6B5B54 !important;
+  text-transform: uppercase !important;
 }
 
 .main-content .stat-card .value,
 .main-content .stat-card .stat-value,
 .dashboard-container .stat-card .value,
-.dashboard-container .stat-card .stat-value {
-  font-size: 32px !important;
+.dashboard-container .stat-card .stat-value,
+.stat-card .value,
+.stat-card .stat-value {
+  font-size: 28px !important;
   font-weight: 800 !important;
-  color: white !important;
+  color: #322029 !important;
 }
 
 /* Table */

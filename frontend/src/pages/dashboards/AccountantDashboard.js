@@ -271,15 +271,13 @@ const AccountantDashboard = ({ user, onLogout }) => {
           .nav-dropdown-menu {
             position: static;
             background: rgba(255, 255, 255, 0.05);
+            width: 100%;
             box-shadow: none;
-            padding: 8px 16px;
-            margin-top: 4px;
-          }
-          .dropdown-item {
-            color: #cbd5e1;
+            border: none;
+            background: rgba(0,0,0,0.05);
           }
           .dropdown-item:hover, .dropdown-item.active {
-            background: rgba(124, 58, 237, 0.3);
+            background: #AC968D;
             color: white;
           }
           .logout-btn-top {
@@ -292,7 +290,7 @@ const AccountantDashboard = ({ user, onLogout }) => {
       <div className="sidebar">
         <div className="sidebar-header">
           <h2>
-            <div style={{ width: '32px', height: '32px', background: '#3b82f6', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '32px', height: '32px', background: '#AC968D', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <span style={{ fontSize: '1.2rem' }}>💼</span>
             </div>
             {user?.role === 'super_admin' ? 'Super Admin' : user?.role === 'principal' ? 'Principal' : 'Accountant'}
@@ -306,7 +304,7 @@ const AccountantDashboard = ({ user, onLogout }) => {
           <li>
             <div 
               onClick={() => setFeesDropdownOpen(!feesDropdownOpen)}
-              style={{ padding: '12px 16px', color: 'white', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: feesDropdownOpen || isActive(['/dashboard/fees', '/dashboard/payments', '/dashboard/pending', '/dashboard/collections', '/dashboard/concessions']) ? 'rgba(255,255,255,0.08)' : 'transparent', borderRadius: '8px', fontSize: '14px', fontWeight: '500', transition: 'all 0.2s ease' }}
+              style={{ padding: '12px 16px', color: '#322029', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: feesDropdownOpen || isActive(['/dashboard/fees', '/dashboard/payments', '/dashboard/pending', '/dashboard/collections', '/dashboard/concessions']) ? '#EFE9E1' : 'transparent', borderRadius: '8px', fontSize: '14px', fontWeight: '600', transition: 'all 0.2s ease' }}
             >
               <span>Fees</span>
               <span style={{ fontSize: '10px', opacity: 0.7 }}>{feesDropdownOpen ? '▲' : '▼'}</span>
@@ -328,7 +326,7 @@ const AccountantDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''}>Reports</Link></li>
           <li><Link to="/dashboard/settings" className={isActive('/dashboard/settings') ? 'active' : ''}>Settings</Link></li>
           
-          <li style={{ marginTop: '30px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
+          <li style={{ marginTop: '30px', borderTop: '1px solid #D9D8D9', paddingTop: '20px' }}>
             <button onClick={handleLogout} className="logout-btn" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444' }}>
               Logout
             </button>
@@ -338,7 +336,7 @@ const AccountantDashboard = ({ user, onLogout }) => {
 
       <div className="main-content">
         <div className="header" style={{ marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '1.75rem', color: '#0f172a', margin: 0 }}>
+          <h1 style={{ fontSize: '1.75rem', color: '#322029', margin: 0 }}>
             {user?.role === 'super_admin' ? 'Super Admin' : user?.role === 'principal' ? 'Principal' : 'Accountant'} Dashboard
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>

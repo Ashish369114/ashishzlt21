@@ -50,12 +50,24 @@ const PrincipalExamManagement = () => {
         classService.getAll(),
         classService.getSubjects(),
       ]);
-      setExams(examsRes.data || []);
+      const fetchedExams = examsRes.data || [];
+      const fetchedClasses = classesRes.data || [];
+      setExams(fetchedExams);
       setMarks(marksRes.data || []);
       setTeachers(teachersRes.data || []);
       setStudents(studentsRes.data || []);
-      setClasses(classesRes.data || []);
+      setClasses(fetchedClasses);
       setSubjects(subjectsRes.data || []);
+
+      if (fetchedClasses.length > 0) {
+        const defaultClass = fetchedClasses.find(c => String(c.grade) === '3' && c.section === 'A') || fetchedClasses[0];
+        setSelectedGrade(String(defaultClass.grade));
+        setSelectedSection(defaultClass.section);
+      }
+      if (fetchedExams.length > 0) {
+        const firstType = fetchedExams[0].examType || 'Mid-Term';
+        setSelectedExamType(firstType);
+      }
     } catch (err) {
       setError(`Failed to load exam data: ${err.response?.data?.message || err.message}`);
       console.error('Failed to load exam data, full error:', err);
@@ -77,8 +89,9 @@ const PrincipalExamManagement = () => {
 
   const classExams = selectedClassObj
     ? exams.filter(e => {
-        const cid = e.class?._id || e.class;
-        return String(cid) === String(selectedClassObj._id);
+        const cid = (typeof e.class === 'object' && e.class !== null ? (e.class.id || e.class._id) : null) || e.classId || e.class;
+        const targetId = selectedClassObj.id || selectedClassObj._id;
+        return String(cid) === String(targetId) || String(e.classId) === String(selectedClassObj.id);
       })
     : [];
 
@@ -87,12 +100,18 @@ const PrincipalExamManagement = () => {
     : [];
 
   const rawFilteredExams = (selectedExamType
-    ? classExams.filter(e => e.examType === selectedExamType)
-    : classExams).sort((a, b) => new Date(a.date || new Date()) - new Date(b.date || new Date()));
+    ? classExams.filter(e => {
+        if (!e.examType) return false;
+        const t1 = e.examType.toLowerCase().replace(/[\s_-]+/g, '');
+        const t2 = selectedExamType.toLowerCase().replace(/[\s_-]+/g, '');
+        return t1 === t2 || t1.includes(t2) || t2.includes(t1);
+      })
+    : classExams).sort((a, b) => new Date(a.date || a.examDate || new Date()) - new Date(b.date || b.examDate || new Date()));
 
   const classStudents = students.filter(s => {
-    const cid = s.class?._id || s.class;
-    return selectedClassObj && String(cid) === String(selectedClassObj._id);
+    const cid = (typeof s.class === 'object' && s.class !== null ? (s.class.id || s.class._id) : null) || s.classId || s.class;
+    const targetId = selectedClassObj ? (selectedClassObj.id || selectedClassObj._id) : null;
+    return selectedClassObj && (String(cid) === String(targetId) || String(s.classId) === String(selectedClassObj.id));
   });
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -120,22 +139,29 @@ const PrincipalExamManagement = () => {
   const getExamTeacher = (exam) => {
     if (exam.invigilator) {
       const t = exam.invigilator;
-      if (t.userId) {
-        return `${t.userId.firstName || ''} ${t.userId.lastName || ''}`.trim() || 'Unassigned';
+      const u = t.user || t.userId;
+      if (u) {
+        return `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Unassigned';
       }
     }
     if (!exam.subject) return 'Unassigned';
-    const examSubjectId = exam.subject._id || exam.subject;
-    const examClassId = exam.class?._id || exam.class;
+    const examSubjectId = (typeof exam.subject === 'object' && exam.subject !== null ? (exam.subject.id || exam.subject._id) : null) || exam.subjectId || exam.subject;
+    const examClassId = (typeof exam.class === 'object' && exam.class !== null ? (exam.class.id || exam.class._id) : null) || exam.classId || exam.class;
+
+    const resolveTeacherName = (t) => {
+      if (!t) return null;
+      const u = t.user || t.userId;
+      return u ? `${u.firstName || ''} ${u.lastName || ''}`.trim() || null : null;
+    };
 
     // 1. Primary subject match
-    let t = teachers.find(t => String(t.subject?._id || t.subject) === String(examSubjectId));
+    let t = teachers.find(t => String(t.subject?.id || t.subject?._id || t.subject) === String(examSubjectId));
 
     // 2. teachingSubjects (non-all-subject teachers first)
     if (!t) {
       t = teachers.find(tt => {
         if (tt.isAllSubjectTeacher) return false;
-        const ids = (tt.teachingSubjects || []).map(s => s._id || s);
+        const ids = (tt.teachingSubjects || []).map(s => s.id || s._id || s);
         return ids.some(id => String(id) === String(examSubjectId));
       });
     }
@@ -143,19 +169,16 @@ const PrincipalExamManagement = () => {
     // 3. Class-assigned fallback
     if (!t && examClassId) {
       t = teachers.find(tt => {
-        const classIds = (tt.assignedClasses || []).map(c => c._id || c);
+        const classIds = (tt.assignedClasses || []).map(c => c.id || c._id || c);
         if (!classIds.some(id => String(id) === String(examClassId))) return false;
-        const subjectIds = (tt.teachingSubjects || []).map(s => s._id || s);
+        const subjectIds = (tt.teachingSubjects || []).map(s => s.id || s._id || s);
         return subjectIds.some(id => String(id) === String(examSubjectId)) ||
-               String(tt.subject?._id || tt.subject) === String(examSubjectId) ||
+               String(tt.subject?.id || tt.subject?._id || tt.subject) === String(examSubjectId) ||
                tt.isAllSubjectTeacher;
       });
     }
 
-    if (t?.userId) {
-      return `${t.userId.firstName || ''} ${t.userId.lastName || ''}`.trim() || 'Unassigned';
-    }
-    return 'Unassigned';
+    return resolveTeacherName(t) || 'Unassigned';
   };
 
   const uniqueFilteredExamsMap = new Map();
