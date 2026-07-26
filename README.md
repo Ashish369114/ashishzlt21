@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # School Operating System - Full Stack
 
 A comprehensive, production-level School Operating System built with React, Node.js, Express, and PostgreSQL. This system provides separate dashboards for Super Admin, Principal, Teachers, Students, Parents, and Accountant & Admin with real-time data synchronization.
@@ -399,3 +400,7 @@ Created as a comprehensive School Operating System with all necessary features f
 ---
 
 **Happy Learning! 🎓**
+=======
+# zltsos.github.io
+this is a school operating system 
+>>>>>>> 96df9bc9735d02f038749f2ee0cf34fd86bfaf3b
