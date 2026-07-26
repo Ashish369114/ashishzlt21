@@ -1,131 +1,130 @@
-export const demoStudents = [
-  {
-    _id: 'std_1',
-    studentId: 'STD-1001',
-    firstName: 'Aarav',
-    lastName: 'Sharma',
-    userId: { _id: 'u_1', firstName: 'Aarav', lastName: 'Sharma', email: 'aarav.sharma@example.com' },
-    class: { _id: 'cls_1', grade: '10', section: 'A' },
-    grade: '10',
-    section: 'A',
-    rollNumber: '1001',
-    gender: 'Male',
-    dob: '2010-05-14',
-    email: 'aarav.sharma@example.com',
-    phone: '9876543210',
-    parentName: 'Rajesh Sharma',
-    parentPhone: '9876543211',
-    parent: { firstName: 'Rajesh', lastName: 'Sharma', phone: '9876543211' },
-    status: 'Active'
-  },
-  {
-    _id: 'std_2',
-    studentId: 'STD-1002',
-    firstName: 'Ananya',
-    lastName: 'Verma',
-    userId: { _id: 'u_2', firstName: 'Ananya', lastName: 'Verma', email: 'ananya.v@example.com' },
-    class: { _id: 'cls_1', grade: '10', section: 'A' },
-    grade: '10',
-    section: 'A',
-    rollNumber: '1002',
-    gender: 'Female',
-    dob: '2010-08-22',
-    email: 'ananya.v@example.com',
-    phone: '9876543212',
-    parentName: 'Suresh Verma',
-    parentPhone: '9876543213',
-    parent: { firstName: 'Suresh', lastName: 'Verma', phone: '9876543213' },
-    status: 'Active'
-  },
-  {
-    _id: 'std_3',
-    studentId: 'STD-1003',
-    firstName: 'Rohan',
-    lastName: 'Gupta',
-    userId: { _id: 'u_3', firstName: 'Rohan', lastName: 'Gupta', email: 'rohan.g@example.com' },
-    class: { _id: 'cls_2', grade: '10', section: 'B' },
-    grade: '10',
-    section: 'B',
-    rollNumber: '1003',
-    gender: 'Male',
-    dob: '2010-02-11',
-    email: 'rohan.g@example.com',
-    phone: '9876543214',
-    parentName: 'Amit Gupta',
-    parentPhone: '9876543215',
-    parent: { firstName: 'Amit', lastName: 'Gupta', phone: '9876543215' },
-    status: 'Active'
-  },
-  {
-    _id: 'std_4',
-    studentId: 'STD-1004',
-    firstName: 'Priya',
-    lastName: 'Singh',
-    userId: { _id: 'u_4', firstName: 'Priya', lastName: 'Singh', email: 'priya.s@example.com' },
-    class: { _id: 'cls_3', grade: '9', section: 'A' },
-    grade: '9',
-    section: 'A',
-    rollNumber: '9001',
-    gender: 'Female',
-    dob: '2011-11-05',
-    email: 'priya.s@example.com',
-    phone: '9876543216',
-    parentName: 'Vikram Singh',
-    parentPhone: '9876543217',
-    parent: { firstName: 'Vikram', lastName: 'Singh', phone: '9876543217' },
-    status: 'Active'
-  },
-  {
-    _id: 'std_5',
-    studentId: 'STD-1005',
-    firstName: 'Kabir',
-    lastName: 'Patel',
-    userId: { _id: 'u_5', firstName: 'Kabir', lastName: 'Patel', email: 'kabir.p@example.com' },
-    class: { _id: 'cls_4', grade: '9', section: 'B' },
-    grade: '9',
-    section: 'B',
-    rollNumber: '9002',
-    gender: 'Male',
-    dob: '2011-04-19',
-    email: 'kabir.p@example.com',
-    phone: '9876543218',
-    parentName: 'Dinesh Patel',
-    parentPhone: '9876543219',
-    parent: { firstName: 'Dinesh', lastName: 'Patel', phone: '9876543219' },
-    status: 'Active'
-  },
-];
+// Generate Grades 1 to 10 classes (Section A and B)
+export const demoClasses = Array.from({ length: 10 }, (_, i) => {
+  const gradeNum = String(i + 1);
+  return [
+    { _id: `cls_${gradeNum}_a`, grade: gradeNum, section: 'A', className: `${gradeNum}-A`, roomNumber: `${100 + i * 2 + 1}`, classTeacher: `Teacher Grade ${gradeNum}-A` },
+    { _id: `cls_${gradeNum}_b`, grade: gradeNum, section: 'B', className: `${gradeNum}-B`, roomNumber: `${100 + i * 2 + 2}`, classTeacher: `Teacher Grade ${gradeNum}-B` }
+  ];
+}).flat();
 
-export const demoExams = [
-  { _id: 'ex_1', name: 'Mid-Term Examination 2026', examName: 'Mid-Term Examination 2026', examType: 'Mid-Term', grade: '10', section: 'A', class: { grade: '10', section: 'A' }, subject: 'Mathematics', examDate: '2026-08-10', startTime: '09:00 AM', endTime: '12:00 PM', totalMarks: 100, passingMarks: 35, roomNo: 'Room 101' },
-  { _id: 'ex_2', name: 'Mid-Term Examination 2026', examName: 'Mid-Term Examination 2026', examType: 'Mid-Term', grade: '10', section: 'A', class: { grade: '10', section: 'A' }, subject: 'Science', examDate: '2026-08-12', startTime: '09:00 AM', endTime: '12:00 PM', totalMarks: 100, passingMarks: 35, roomNo: 'Room 102' },
-  { _id: 'ex_3', name: 'Unit Test 1', examName: 'Unit Test 1', examType: 'Unit Test', grade: '9', section: 'A', class: { grade: '9', section: 'A' }, subject: 'English', examDate: '2026-08-15', startTime: '10:00 AM', endTime: '11:30 AM', totalMarks: 50, passingMarks: 18, roomNo: 'Room 204' },
-  { _id: 'ex_4', name: 'Annual Final Examination', examName: 'Annual Final Examination', examType: 'Final Exam', grade: '10', section: 'B', class: { grade: '10', section: 'B' }, subject: 'Social Science', examDate: '2026-09-01', startTime: '09:00 AM', endTime: '12:00 PM', totalMarks: 100, passingMarks: 35, roomNo: 'Auditorium A' },
-];
+// Generate students for all grades 1 to 10
+const firstNames = ['Aarav', 'Ananya', 'Rohan', 'Priya', 'Kabir', 'Diya', 'Vihaan', 'Ishita', 'Arjun', 'Sanya', 'Aditya', 'Meera', 'Dev', 'Kavya', 'Vivaan', 'Anushka', 'Reyansh', 'Riya', 'Ayaan', 'Tara'];
+const lastNames = ['Sharma', 'Verma', 'Gupta', 'Singh', 'Patel', 'Reddy', 'Joshi', 'Chawla', 'Mehta', 'Nair'];
 
-export const demoAttendance = [
-  { _id: 'att_1', studentId: 'std_1', studentName: 'Aarav Sharma', student: { userId: { firstName: 'Aarav', lastName: 'Sharma' } }, class: { grade: '10', section: 'A' }, grade: '10', section: 'A', date: new Date().toISOString().split('T')[0], status: 'Present', remarks: 'On time' },
-  { _id: 'att_2', studentId: 'std_2', studentName: 'Ananya Verma', student: { userId: { firstName: 'Ananya', lastName: 'Verma' } }, class: { grade: '10', section: 'A' }, grade: '10', section: 'A', date: new Date().toISOString().split('T')[0], status: 'Present', remarks: 'On time' },
-  { _id: 'att_3', studentId: 'std_3', studentName: 'Rohan Gupta', student: { userId: { firstName: 'Rohan', lastName: 'Gupta' } }, class: { grade: '10', section: 'B' }, grade: '10', section: 'B', date: new Date().toISOString().split('T')[0], status: 'Absent', remarks: 'Sick leave' },
-  { _id: 'att_4', studentId: 'std_4', studentName: 'Priya Singh', student: { userId: { firstName: 'Priya', lastName: 'Singh' } }, class: { grade: '9', section: 'A' }, grade: '9', section: 'A', date: new Date().toISOString().split('T')[0], status: 'Present', remarks: 'On time' },
-  { _id: 'att_5', studentId: 'std_5', studentName: 'Kabir Patel', student: { userId: { firstName: 'Kabir', lastName: 'Patel' } }, class: { grade: '9', section: 'B' }, grade: '9', section: 'B', date: new Date().toISOString().split('T')[0], status: 'Late', remarks: '15 mins late' },
-];
+export const demoStudents = Array.from({ length: 10 }, (_, i) => {
+  const gradeNum = String(i + 1);
+  const fn1 = firstNames[(i * 2) % firstNames.length];
+  const ln1 = lastNames[(i * 2) % lastNames.length];
+  const fn2 = firstNames[(i * 2 + 1) % firstNames.length];
+  const ln2 = lastNames[(i * 2 + 1) % lastNames.length];
+  const fn3 = firstNames[(i * 2 + 2) % firstNames.length];
+  const ln3 = lastNames[(i * 2 + 3) % lastNames.length];
 
-export const demoClasses = [
-  { _id: 'cls_1', grade: '10', section: 'A', className: '10-A', roomNumber: '101', classTeacher: 'Mr. Rajesh Kumar' },
-  { _id: 'cls_2', grade: '10', section: 'B', className: '10-B', roomNumber: '102', classTeacher: 'Ms. Sunita Rao' },
-  { _id: 'cls_3', grade: '9', section: 'A', className: '9-A', roomNumber: '201', classTeacher: 'Mr. Anil Mehta' },
-  { _id: 'cls_4', grade: '9', section: 'B', className: '9-B', roomNumber: '202', classTeacher: 'Ms. Pooja Sharma' },
-];
+  return [
+    {
+      _id: `std_${gradeNum}_1`,
+      studentId: `STD-${1000 + i * 10 + 1}`,
+      firstName: fn1,
+      lastName: ln1,
+      userId: { _id: `u_${gradeNum}_1`, firstName: fn1, lastName: ln1, email: `${fn1.toLowerCase()}.${ln1.toLowerCase()}@example.com` },
+      class: { _id: `cls_${gradeNum}_a`, grade: gradeNum, section: 'A' },
+      grade: gradeNum,
+      section: 'A',
+      rollNumber: `${gradeNum}01`,
+      gender: i % 2 === 0 ? 'Male' : 'Female',
+      dob: `201${Math.min(9, i)}-05-14`,
+      email: `${fn1.toLowerCase()}.${ln1.toLowerCase()}@example.com`,
+      phone: `987654320${i}`,
+      parentName: `Parent of ${fn1}`,
+      parentPhone: `987654321${i}`,
+      parent: { firstName: 'Parent', lastName: ln1, phone: `987654321${i}` },
+      status: 'Active'
+    },
+    {
+      _id: `std_${gradeNum}_2`,
+      studentId: `STD-${1000 + i * 10 + 2}`,
+      firstName: fn2,
+      lastName: ln2,
+      userId: { _id: `u_${gradeNum}_2`, firstName: fn2, lastName: ln2, email: `${fn2.toLowerCase()}.${ln2.toLowerCase()}@example.com` },
+      class: { _id: `cls_${gradeNum}_a`, grade: gradeNum, section: 'A' },
+      grade: gradeNum,
+      section: 'A',
+      rollNumber: `${gradeNum}02`,
+      gender: i % 2 === 1 ? 'Male' : 'Female',
+      dob: `201${Math.min(9, i)}-08-22`,
+      email: `${fn2.toLowerCase()}.${ln2.toLowerCase()}@example.com`,
+      phone: `987654322${i}`,
+      parentName: `Parent of ${fn2}`,
+      parentPhone: `987654323${i}`,
+      parent: { firstName: 'Parent', lastName: ln2, phone: `987654323${i}` },
+      status: 'Active'
+    },
+    {
+      _id: `std_${gradeNum}_3`,
+      studentId: `STD-${1000 + i * 10 + 3}`,
+      firstName: fn3,
+      lastName: ln3,
+      userId: { _id: `u_${gradeNum}_3`, firstName: fn3, lastName: ln3, email: `${fn3.toLowerCase()}.${ln3.toLowerCase()}@example.com` },
+      class: { _id: `cls_${gradeNum}_b`, grade: gradeNum, section: 'B' },
+      grade: gradeNum,
+      section: 'B',
+      rollNumber: `${gradeNum}03`,
+      gender: i % 2 === 0 ? 'Female' : 'Male',
+      dob: `201${Math.min(9, i)}-02-11`,
+      email: `${fn3.toLowerCase()}.${ln3.toLowerCase()}@example.com`,
+      phone: `987654324${i}`,
+      parentName: `Parent of ${fn3}`,
+      parentPhone: `987654325${i}`,
+      parent: { firstName: 'Parent', lastName: ln3, phone: `987654325${i}` },
+      status: 'Active'
+    }
+  ];
+}).flat();
 
+// Generate exams for all grades 1 to 10
+export const demoExams = Array.from({ length: 10 }, (_, i) => {
+  const gradeNum = String(i + 1);
+  return [
+    { _id: `ex_${gradeNum}_1`, name: 'Mid-Term Examination 2026', examName: 'Mid-Term Examination 2026', examType: 'Mid-Term', grade: gradeNum, section: 'A', class: { grade: gradeNum, section: 'A' }, subject: 'Mathematics', examDate: '2026-08-10', startTime: '09:00 AM', endTime: '12:00 PM', totalMarks: 100, passingMarks: 35, roomNo: `Room 10${i}` },
+    { _id: `ex_${gradeNum}_2`, name: 'Mid-Term Examination 2026', examName: 'Mid-Term Examination 2026', examType: 'Mid-Term', grade: gradeNum, section: 'A', class: { grade: gradeNum, section: 'A' }, subject: 'Science', examDate: '2026-08-12', startTime: '09:00 AM', endTime: '12:00 PM', totalMarks: 100, passingMarks: 35, roomNo: `Room 10${i}` },
+    { _id: `ex_${gradeNum}_3`, name: 'Unit Test 1', examName: 'Unit Test 1', examType: 'Unit Test', grade: gradeNum, section: 'B', class: { grade: gradeNum, section: 'B' }, subject: 'English', examDate: '2026-08-15', startTime: '10:00 AM', endTime: '11:30 AM', totalMarks: 50, passingMarks: 18, roomNo: `Room 20${i}` }
+  ];
+}).flat();
+
+// Generate attendance for all grades 1 to 10
+export const demoAttendance = demoStudents.map((s, idx) => ({
+  _id: `att_${idx + 1}`,
+  studentId: s._id,
+  studentName: `${s.firstName} ${s.lastName}`,
+  student: { userId: { firstName: s.firstName, lastName: s.lastName } },
+  class: { grade: s.grade, section: s.section },
+  grade: s.grade,
+  section: s.section,
+  date: new Date().toISOString().split('T')[0],
+  status: idx % 4 === 0 ? 'Absent' : idx % 5 === 0 ? 'Late' : 'Present',
+  remarks: idx % 4 === 0 ? 'Sick leave' : idx % 5 === 0 ? '10 mins late' : 'On time'
+}));
+
+// Employees
 export const demoEmployees = [
   { _id: 'emp_1', employeeId: 'EMP-101', firstName: 'Rajesh', lastName: 'Kumar', designation: 'Senior Math Teacher', department: 'Academics', email: 'rajesh.k@school.com', phone: '9876500001', salary: 55000, status: 'Active' },
   { _id: 'emp_2', employeeId: 'EMP-102', firstName: 'Sunita', lastName: 'Rao', designation: 'Physics HOD', department: 'Academics', email: 'sunita.r@school.com', phone: '9876500002', salary: 62000, status: 'Active' },
   { _id: 'emp_3', employeeId: 'EMP-103', firstName: 'Anil', lastName: 'Mehta', designation: 'English Teacher', department: 'Academics', email: 'anil.m@school.com', phone: '9876500003', salary: 48000, status: 'Active' },
+  { _id: 'emp_4', employeeId: 'EMP-104', firstName: 'Pooja', lastName: 'Sharma', designation: 'Primary Teacher', department: 'Academics', email: 'pooja.s@school.com', phone: '9876500004', salary: 42000, status: 'Active' },
+  { _id: 'emp_5', employeeId: 'EMP-105', firstName: 'Vikram', lastName: 'Singh', designation: 'Science Teacher', department: 'Academics', email: 'vikram.s@school.com', phone: '9876500005', salary: 50000, status: 'Active' },
 ];
 
-export const demoFees = [
-  { _id: 'fee_1', studentId: 'std_1', studentName: 'Aarav Sharma', grade: '10', section: 'A', totalFee: 45000, paidFee: 45000, dueFee: 0, status: 'Paid', dueDate: '2026-07-15' },
-  { _id: 'fee_2', studentId: 'std_2', studentName: 'Ananya Verma', grade: '10', section: 'A', totalFee: 45000, paidFee: 30000, dueFee: 15000, status: 'Partial', dueDate: '2026-08-01' },
-  { _id: 'fee_3', studentId: 'std_3', studentName: 'Rohan Gupta', grade: '10', section: 'B', totalFee: 45000, paidFee: 0, dueFee: 45000, status: 'Pending', dueDate: '2026-07-30' },
-];
+// Fees for all students
+export const demoFees = demoStudents.map((s, idx) => ({
+  _id: `fee_${idx + 1}`,
+  studentId: s._id,
+  studentName: `${s.firstName} ${s.lastName}`,
+  student: s,
+  grade: s.grade,
+  section: s.section,
+  totalFee: 45000,
+  paidFee: idx % 3 === 0 ? 45000 : idx % 3 === 1 ? 30000 : 0,
+  dueFee: idx % 3 === 0 ? 0 : idx % 3 === 1 ? 15000 : 45000,
+  status: idx % 3 === 0 ? 'Paid' : idx % 3 === 1 ? 'Partial' : 'Pending',
+  dueDate: '2026-08-15'
+}));
