@@ -18,7 +18,7 @@ const Sidebar = ({ onLogout }) => {
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-sm font-semibold tracking-wide">School Operating System</p>
+            <p className="text-sm font-semibold tracking-wide">ZaynLevi School Operating System</p>
             <p className="text-xs text-slate-400">Teacher Panel</p>
           </div>
         </div>

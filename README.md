@@ -1,7 +1,6 @@
-<<<<<<< HEAD
-# School Operating System - Full Stack
+# AI-Powered ZaynLevi School Operating System - Full Stack
 
-A comprehensive, production-level School Operating System built with React, Node.js, Express, and PostgreSQL. This system provides separate dashboards for Super Admin, Principal, Teachers, Students, Parents, and Accountant & Admin with real-time data synchronization.
+A comprehensive, production-level AI-Powered ZaynLevi School Operating System built with React, Node.js, Express, and PostgreSQL. This system provides separate dashboards for Super Admin, Principal, Teachers, Students, Parents, and Accountant & Admin with real-time data synchronization.
 
 ## 🎯 Features
 
@@ -395,12 +394,8 @@ This project is open source and available under the MIT License.
 
 ## 👨‍💻 Author
 
-Created as a comprehensive School Operating System with all necessary features for modern educational institutions.
+Created as an AI-Powered ZaynLevi School Operating System with all necessary features for modern educational institutions.
 
 ---
 
 **Happy Learning! 🎓**
-=======
-# zltsos.github.io
-this is a school operating system 
->>>>>>> 96df9bc9735d02f038749f2ee0cf34fd86bfaf3b
