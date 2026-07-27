@@ -379,7 +379,7 @@ const Login = ({ onLogin }) => {
 
             <h1 className="hero-title">
               AI-Powered <br />
-              <span className="hero-title-highlight">School Operating System</span>
+              <span className="hero-title-highlight">ZaynLevi School Operating System</span>
             </h1>
 
             <p className="hero-subtitle">
@@ -735,7 +735,7 @@ const Login = ({ onLogin }) => {
               Zayn Levi Technologies is a forward-thinking AI-powered education technology company dedicated to creating digital solutions that simplify complexity and unlock growth for modern educational organizations.
             </p>
             <p>
-              Our vision is to blend innovation, reliability, and user-focused design to deliver a complete School Operating System that empowers administrators, improves student experiences, and scales with ambition.
+              Our vision is to blend innovation, reliability, and user-focused design to deliver a complete AI-Powered ZaynLevi School Operating System that empowers administrators, improves student experiences, and scales with ambition.
             </p>
             <div className="about-features" style={{ display: 'flex', justifyContent: 'center', gap: '40px', marginTop: '30px' }}>
               <div className="about-feature" style={{ display: 'flex', alignItems: 'center', gap: '15px', textAlign: 'left' }}>

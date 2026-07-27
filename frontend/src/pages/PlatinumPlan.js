@@ -148,7 +148,7 @@ const PlatinumPlan = () => {
         </div>
         <div>
           <div className="brand-name" style={{ fontSize: '1.6rem', fontWeight: '800', color: '#0b4d8c' }}>Zayn Levi Technologies</div>
-          <div className="brand-tag" style={{ fontSize: '0.95rem', color: '#64748b', fontWeight: '600' }}>School Operating System Onboarding</div>
+          <div className="brand-tag" style={{ fontSize: '0.95rem', color: '#64748b', fontWeight: '600' }}>ZaynLevi School Operating System Onboarding</div>
         </div>
       </div>
 
@@ -325,7 +325,7 @@ const PlatinumPlan = () => {
       {step === 'success' && successData && (
         <div className="success-popup visible" style={{ zIndex: 100 }}>
           <h3>Payment Successful!</h3>
-          <p>Your School Operating System credentials have been sent to your registered email address.</p>
+          <p>Your ZaynLevi School Operating System credentials have been sent to your registered email address.</p>
           <div className="success-details">
             <p>{successData.emailSent ? 'An email has been delivered to your inbox.' : 'If email delivery is unavailable, please check your email or contact support.'}</p>
           </div>
