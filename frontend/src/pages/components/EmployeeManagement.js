@@ -142,7 +142,7 @@ const EmployeeManagement = () => {
 
     newSocket.on('employee:deleted', (data) => {
       console.log('Employee deleted:', data);
-      setEmployees(prev => prev.filter(emp => emp._id !== data.id));
+      setEmployees(prev => prev.filter(emp => (emp._id || emp.id) !== data.id));
     });
 
     setSocket(newSocket);
@@ -167,11 +167,11 @@ const EmployeeManagement = () => {
   const [editingEmployeeId, setEditingEmployeeId] = useState(null);
 
   const handleEditEmployee = (employee) => {
-    setEditingEmployeeId(employee._id);
+    setEditingEmployeeId(employee._id || employee.id);
     setNewEmployee({
       firstName: employee.firstName || '',
       lastName: employee.lastName || '',
-      school: employee.school?._id || employee.school || '',
+      school: employee.school?._id || employee.school?.id || employee.school || '',
       employeeType: employee.employeeType || 'staff',
       designation: employee.designation || '',
       dateOfJoining: employee.dateOfJoining ? employee.dateOfJoining.split('T')[0] : '',
@@ -599,7 +599,7 @@ const EmployeeManagement = () => {
                     </thead>
                     <tbody>
                       {filteredEmployees.map((employee) => (
-                        <tr key={employee._id}>
+                        <tr key={employee._id || employee.id}>
                           <td>{employee.firstName} {employee.lastName}</td>
                           <td>{employee.designation}</td>
                           <td>{employee.employeeType}</td>
@@ -628,14 +628,14 @@ const EmployeeManagement = () => {
                                       const ct = cls.classTeacher;
                                       if (!ct) return false;
                                       const ctName = `${ct.firstName || ''} ${ct.lastName || ''}`.toLowerCase().trim();
-                                      return ctName === teacherName || String(ct._id) === String(employee._id);
+                                      return ctName === teacherName || String(ct._id || ct.id) === String(employee._id || employee.id);
                                     });
                                     const map = {};
                                     await Promise.all(teacherClasses.map(async cls => {
                                       try {
-                                        const res = await studentService.getByClass(cls._id);
-                                        map[cls._id] = Array.isArray(res.data) ? res.data : [];
-                                      } catch (e) { map[cls._id] = []; }
+                                        const res = await studentService.getByClass(cls._id || cls.id);
+                                        map[cls._id || cls.id] = Array.isArray(res.data) ? res.data : [];
+                                      } catch (e) { map[cls._id || cls.id] = []; }
                                     }));
                                     setClassStudentsMap(map);
                                   } catch (e) { console.error('Error fetching class students:', e); }
@@ -649,7 +649,7 @@ const EmployeeManagement = () => {
                             <button onClick={() => handleEditEmployee(employee)} className="btn btn-secondary btn-small" style={{ marginRight: '8px' }}>
                               Edit
                             </button>
-                            <button onClick={() => handleDeleteEmployee(employee._id)} className="btn-delete">
+                            <button onClick={() => handleDeleteEmployee(employee._id || employee.id)} className="btn-delete">
                               Delete
                             </button>
                           </td>

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { examService, classService } from '../../services/api';
-import { demoExams, demoClasses } from '../../utils/demoData';
+import { examService, classService, teacherService } from '../../services/api';
+import { demoExams, demoClasses, demoEmployees } from '../../utils/demoData';
 
 const ExamManagement = () => {
   const [exams, setExams] = useState([]);
   const [classes, setClasses] = useState([]);
   const [subjects, setSubjects] = useState([]);
+  const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
@@ -18,6 +19,7 @@ const ExamManagement = () => {
     examType: 'Unit Test',
     class: '',
     subject: '',
+    invigilator: '',
     examDate: '',
     startTime: '',
     endTime: '',
@@ -30,6 +32,7 @@ const ExamManagement = () => {
     fetchExams();
     fetchClasses();
     fetchSubjects();
+    fetchTeachers();
   }, []);
 
   useEffect(() => {
@@ -68,7 +71,7 @@ const ExamManagement = () => {
     }
 
     const matchedClass = gradeClasses.find((cls) => String(cls.section) === String(selectedSection || ''));
-    setSelectedClassId(matchedClass?._id || '');
+    setSelectedClassId(matchedClass?.id || matchedClass?._id || '');
   }, [classes, selectedGrade, selectedSection]);
 
   const fetchExams = async () => {
@@ -99,10 +102,31 @@ const ExamManagement = () => {
   const fetchSubjects = async () => {
     try {
       const response = await classService.getSubjects();
-      setSubjects(response.data && response.data.length ? response.data : ['Mathematics', 'Science', 'English', 'Social Science']);
+      const loaded = response.data && response.data.length ? response.data : [
+        { id: 1, name: 'Mathematics' },
+        { id: 2, name: 'Science' },
+        { id: 3, name: 'English' },
+        { id: 4, name: 'Social Science' }
+      ];
+      setSubjects(loaded);
     } catch (err) {
       console.warn('Using demo subjects:', err);
-      setSubjects(['Mathematics', 'Science', 'English', 'Social Science']);
+      setSubjects([
+        { id: 1, name: 'Mathematics' },
+        { id: 2, name: 'Science' },
+        { id: 3, name: 'English' },
+        { id: 4, name: 'Social Science' }
+      ]);
+    }
+  };
+
+  const fetchTeachers = async () => {
+    try {
+      const response = await teacherService.getAll();
+      setTeachers(response.data && response.data.length ? response.data : demoEmployees);
+    } catch (err) {
+      console.warn('Using demo teachers:', err);
+      setTeachers(demoEmployees);
     }
   };
 
@@ -117,18 +141,27 @@ const ExamManagement = () => {
       alert('Please select a class.');
       return;
     }
-    if (subjects.length === 0) {
-      alert('No subjects found to schedule exams for.');
-      return;
-    }
     try {
       setError('');
-      // Create exam for each subject
-      const promises = subjects.map((subject) => {
+      let subjectsToCreate = [];
+
+      if (formData.subject) {
+        subjectsToCreate = [formData.subject];
+      } else {
+        if (!subjects || subjects.length === 0) {
+          alert('No subjects found to schedule exams for.');
+          return;
+        }
+        subjectsToCreate = subjects.map(s => typeof s === 'object' ? (s.id || s._id || s.name) : s);
+      }
+
+      const promises = subjectsToCreate.map((subj) => {
         return examService.add({
           name: formData.name,
+          examType: formData.examType || 'Unit Test',
           class: formData.class,
-          subject: subject._id,
+          subject: subj,
+          invigilator: formData.invigilator || null,
           examDate: formData.examDate,
           startTime: formData.startTime,
           endTime: formData.endTime,
@@ -137,11 +170,14 @@ const ExamManagement = () => {
           description: formData.description,
         });
       });
+
       await Promise.all(promises);
       setFormData({
         name: '',
+        examType: 'Unit Test',
         class: '',
         subject: '',
+        invigilator: '',
         examDate: '',
         startTime: '',
         endTime: '',
@@ -150,20 +186,27 @@ const ExamManagement = () => {
         description: '',
       });
       setShowForm(false);
-      fetchExams();
-      alert('Exams created for all subjects successfully!');
+      await fetchExams();
+      alert('Exam(s) scheduled successfully!');
     } catch (err) {
-      setError('Failed to add exams: ' + (err.response?.data?.message || 'Unknown error'));
+      console.error('Failed to add exam:', err);
+      setError('Failed to add exams: ' + (err.response?.data?.message || err.message || 'Unknown error'));
     }
   };
 
   const handleDeleteExamGroup = async (ids) => {
+    const validIds = (ids || []).filter(Boolean);
+    if (validIds.length === 0) {
+      alert('No valid exam IDs found to delete.');
+      return;
+    }
     if (window.confirm('Are you sure you want to delete these exams?')) {
       try {
-        await Promise.all(ids.map(id => examService.delete(id)));
-        fetchExams();
+        await Promise.all(validIds.map(id => examService.delete(id)));
+        await fetchExams();
       } catch (err) {
-        setError('Failed to delete exams');
+        console.error('Failed to delete exams:', err);
+        setError('Failed to delete exams: ' + (err.response?.data?.message || err.message));
       }
     }
   };
@@ -171,10 +214,11 @@ const ExamManagement = () => {
   const gradeOptions = [...new Set(classes.map((cls) => String(cls.grade)).filter(Boolean))].sort((a, b) => Number(a) - Number(b));
   const visibleClasses = classes.filter((cls) => String(cls.grade) === String(selectedGrade));
   const sectionsForGrade = [...new Set(visibleClasses.map((cls) => cls.section).filter(Boolean))].sort();
-  const examNameOptions = [...new Set(exams.map(e => e.examType || e.name.split(' - ')[0]).filter(Boolean))].sort();
+  const examNameOptions = [...new Set(exams.map(e => e.examType || e.name?.split(' - ')[0]).filter(Boolean))].sort();
 
   const visibleExams = exams.filter((exam) => {
-    const matchClass = !selectedClassId || String(exam.class?._id || exam.class || exam.classId) === String(selectedClassId);
+    const examClassId = exam.class?.id || exam.class?._id || exam.class || exam.classId;
+    const matchClass = !selectedClassId || String(examClassId) === String(selectedClassId);
     const examNameClean = exam.examType || exam.name?.split(' - ')[0] || 'Unknown';
     const matchExamName = !selectedExamName || examNameClean === selectedExamName;
 
@@ -193,19 +237,20 @@ const ExamManagement = () => {
 
   const uniqueExamsMap = new Map();
   visibleExams.forEach(exam => {
-    const key = `${getExamDate(exam.examDate)}-${exam.subject?.name || exam.subject}`;
+    const examId = exam.id || exam._id;
+    const key = `${getExamDate(exam.examDate)}-${exam.subject?.name || exam.subject || 'Unknown'}-${exam.class?.grade || exam.classId || ''}`;
     if (!uniqueExamsMap.has(key)) {
       uniqueExamsMap.set(key, { 
         ...exam, 
-        _ids: [exam._id], 
+        _ids: examId ? [examId] : [], 
         rooms: [exam.room].filter(Boolean),
-        invigilators: [`${exam.invigilator?.firstName || ''} ${exam.invigilator?.lastName || ''}`.trim()].filter(Boolean)
+        invigilators: [`${exam.invigilator?.user?.firstName || exam.invigilator?.firstName || ''} ${exam.invigilator?.user?.lastName || exam.invigilator?.lastName || ''}`.trim()].filter(Boolean)
       });
     } else {
       const existing = uniqueExamsMap.get(key);
-      if (exam._id) existing._ids.push(exam._id);
+      if (examId && !existing._ids.includes(examId)) existing._ids.push(examId);
       if (exam.room && !existing.rooms.includes(exam.room)) existing.rooms.push(exam.room);
-      const invig = `${exam.invigilator?.firstName || ''} ${exam.invigilator?.lastName || ''}`.trim();
+      const invig = `${exam.invigilator?.user?.firstName || exam.invigilator?.firstName || ''} ${exam.invigilator?.user?.lastName || exam.invigilator?.lastName || ''}`.trim();
       if (invig && !existing.invigilators.includes(invig)) existing.invigilators.push(invig);
     }
   });
@@ -215,18 +260,6 @@ const ExamManagement = () => {
     room: g.rooms.length > 2 ? `${g.rooms[0]}, ${g.rooms[1]} (+${g.rooms.length - 2} more)` : (g.rooms.join(', ') || 'N/A'),
     invigilatorName: g.invigilators.length > 2 ? `${g.invigilators[0]}, ${g.invigilators[1]} (+${g.invigilators.length - 2} more)` : (g.invigilators.join(', ') || 'N/A')
   }));
-
-
-
-  const getStatus = (dateString) => {
-    const examDate = dateString ? new Date(dateString) : new Date();
-    const today = new Date();
-    examDate.setHours(0,0,0,0);
-    today.setHours(0,0,0,0);
-    if (examDate < today) return 'Completed';
-    if (examDate.getTime() === today.getTime()) return 'Ongoing';
-    return 'Upcoming';
-  };
 
   const isToday = (dateString) => {
     const examDate = dateString ? new Date(dateString) : new Date();
@@ -290,6 +323,7 @@ const ExamManagement = () => {
         
         <div className="form-row" style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
           <div className="form-group" style={{ flex: '1 1 150px' }}>
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>Grade</label>
             <select value={selectedGrade} onChange={(e) => setSelectedGrade(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
               <option value="">All Grades</option>
               {gradeOptions.map((grade) => (
@@ -298,6 +332,7 @@ const ExamManagement = () => {
             </select>
           </div>
           <div className="form-group" style={{ flex: '1 1 150px' }}>
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>Section</label>
             <select value={selectedSection} onChange={(e) => setSelectedSection(e.target.value)} disabled={!sectionsForGrade.length} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
               <option value="">All Sections</option>
               {sectionsForGrade.map((section) => (
@@ -306,6 +341,7 @@ const ExamManagement = () => {
             </select>
           </div>
           <div className="form-group" style={{ flex: '1 1 150px' }}>
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>Exam Type</label>
             <select value={selectedExamName} onChange={(e) => setSelectedExamName(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
               <option value="">All Exam Types</option>
               {examNameOptions.map((name) => (
@@ -352,12 +388,30 @@ const ExamManagement = () => {
                 <select name="class" value={formData.class} onChange={handleInputChange} required>
                   <option value="">Select a class</option>
                   {classes.map((cls) => (
-                    <option key={cls._id} value={cls._id}>
+                    <option key={cls.id || cls._id} value={cls.id || cls._id}>
                       Grade {cls.grade} - Section {cls.section}
                     </option>
                   ))}
                 </select>
               </div>
+              <div className="form-group">
+                <label>Subject</label>
+                <select name="subject" value={formData.subject} onChange={handleInputChange}>
+                  <option value="">All Subjects</option>
+                  {subjects.map((sub) => {
+                    const subId = typeof sub === 'object' ? (sub.id || sub._id) : sub;
+                    const subName = typeof sub === 'object' ? sub.name : sub;
+                    return (
+                      <option key={subId || subName} value={subId}>
+                        {subName}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            </div>
+
+            <div className="form-row">
               <div className="form-group">
                 <label>Exam Date</label>
                 <input
@@ -367,6 +421,23 @@ const ExamManagement = () => {
                   onChange={handleInputChange}
                   required
                 />
+              </div>
+              <div className="form-group">
+                <label>Invigilators</label>
+                <select name="invigilator" value={formData.invigilator} onChange={handleInputChange}>
+                  <option value="">Select Invigilator (Optional)</option>
+                  {teachers.map((t) => {
+                    const tId = t.id || t._id;
+                    const name = t.user 
+                      ? `${t.user.firstName || ''} ${t.user.lastName || ''}`.trim()
+                      : `${t.firstName || ''} ${t.lastName || ''}`.trim() || t.name || `Teacher ${tId}`;
+                    return (
+                      <option key={tId} value={tId}>
+                        {name}
+                      </option>
+                    );
+                  })}
+                </select>
               </div>
             </div>
 
@@ -450,12 +521,12 @@ const ExamManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {uniqueVisibleExams.map((exam) => {
-                const status = getStatus(exam.examDate);
+              {uniqueVisibleExams.map((exam, idx) => {
                 const isHighlight = isToday(exam.examDate);
+                const rowKey = (exam._ids && exam._ids.length > 0) ? exam._ids.join('-') : (exam.id || exam._id || `exam-${idx}`);
                 
                 return (
-                  <tr key={exam._ids[0]} style={{ borderBottom: '1px solid #e2e8f0', background: isHighlight ? '#eff6ff' : '#fff', transition: 'background 0.2s' }}>
+                  <tr key={rowKey} style={{ borderBottom: '1px solid #e2e8f0', background: isHighlight ? '#eff6ff' : '#fff', transition: 'background 0.2s' }}>
                     <td style={{ padding: '14px 16px', color: '#0f172a', fontWeight: '500', whiteSpace: 'nowrap' }}>
                       {getExamDate(exam.examDate)}
                     </td>
@@ -465,7 +536,7 @@ const ExamManagement = () => {
                     <td style={{ padding: '14px 16px', color: '#475569' }}>{exam.invigilatorName}</td>
                     <td style={{ padding: '14px 16px' }}>
                       <button
-                        onClick={() => handleDeleteExamGroup(exam._ids)}
+                        onClick={() => handleDeleteExamGroup(exam._ids?.length ? exam._ids : [exam.id || exam._id])}
                         style={{ padding: '6px 12px', background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' }}
                       >
                         Delete

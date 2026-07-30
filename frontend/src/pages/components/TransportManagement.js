@@ -48,7 +48,7 @@ const TransportManagement = () => {
   };
 
   const handleEditRoute = (route) => {
-    setEditingRouteId(route._id);
+    setEditingRouteId(route._id || route.id);
     setNewRoute({
       routeName: route.routeName,
       startPoint: { name: route.startPoint?.name || '' },
@@ -225,7 +225,7 @@ const TransportManagement = () => {
             </thead>
             <tbody>
               {routes.map((route) => (
-                <tr key={route._id}>
+                <tr key={route._id || route.id}>
                   <td>{route.routeName}</td>
                   <td>{route.startPoint?.name}</td>
                   <td>{route.endPoint?.name}</td>
@@ -238,7 +238,7 @@ const TransportManagement = () => {
                     <button onClick={() => handleEditRoute(route)} style={{ marginRight: '8px' }}>
                       Edit
                     </button>
-                    <button onClick={() => handleDeleteRoute(route._id)} className="btn-delete">
+                    <button onClick={() => handleDeleteRoute(route._id || route.id)} className="btn-delete">
                       Delete
                     </button>
                   </td>

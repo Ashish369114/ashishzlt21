@@ -225,7 +225,7 @@ const LibraryManagement = ({ activeSection }) => {
 
   const handleReturnBook = async (bookId) => {
     try {
-      const book = books.find(b => b._id === bookId);
+      const book = books.find(b => (b._id || b.id) === bookId);
       const activeRecord = book?.borrowHistory?.find(r => r.status === 'borrowed' || r.status === 'overdue');
       if (!activeRecord) {
         alert('No active borrow record found to return');
@@ -242,7 +242,7 @@ const LibraryManagement = ({ activeSection }) => {
 
   const handleRenewBook = async (bookId) => {
     try {
-      const book = books.find(b => b._id === bookId);
+      const book = books.find(b => (b._id || b.id) === bookId);
       const activeRecord = book?.borrowHistory?.find(r => r.status === 'borrowed' || r.status === 'overdue');
       if (!activeRecord) {
         alert('No active borrow record found to renew');

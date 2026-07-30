@@ -76,7 +76,7 @@ const MarksManagement = ({ teacherUserId }) => {
     }
 
     const matchedClass = gradeClasses.find((cls) => String(cls.section) === String(selectedSection || ''));
-    setSelectedClassId(matchedClass?._id || '');
+    setSelectedClassId(matchedClass?._id || matchedClass?.id || '');
     setSelectedStudentId('');
     setSelectedExamType('');
   }, [classes, selectedGrade, selectedSection]);

@@ -77,6 +77,7 @@ export const demoEmployees = demoClasses.map((cls, cIdx) => {
     employeeId: `EMP-${100 + cIdx + 1}`,
     firstName: fn,
     lastName: ln,
+    employeeType: cIdx % 4 === 0 ? 'Non-Teaching Staff' : 'teaching',
     designation: designation,
     department: dept,
     email: `${fn.toLowerCase()}.${ln.toLowerCase()}@school.com`,

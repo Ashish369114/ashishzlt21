@@ -62,14 +62,22 @@ const getExamsByClass = async (req, res) => {
   }
 };
 
-const sanitizeExamBody = (body) => {
+const sanitizeExamBody = async (body) => {
   const payload = { ...body };
   if (payload.class) {
     payload.classId = payload.class;
     delete payload.class;
   }
   if (payload.subject) {
-    payload.subjectId = payload.subject;
+    if (isNaN(payload.subject)) {
+      const [subjObj] = await Subject.findOrCreate({
+        where: { name: String(payload.subject) },
+        defaults: { name: String(payload.subject), code: String(payload.subject).substring(0, 4).toUpperCase() }
+      });
+      payload.subjectId = subjObj.id;
+    } else {
+      payload.subjectId = Number(payload.subject);
+    }
     delete payload.subject;
   }
   if (payload.invigilator) {
@@ -81,7 +89,7 @@ const sanitizeExamBody = (body) => {
 
 const addExam = async (req, res) => {
   try {
-    const payload = sanitizeExamBody(req.body);
+    const payload = await sanitizeExamBody(req.body);
     const exam = await Exam.create(payload);
 
     const populatedExam = await Exam.findByPk(exam.id, {
@@ -104,7 +112,7 @@ const addExam = async (req, res) => {
 
 const updateExam = async (req, res) => {
   try {
-    const payload = sanitizeExamBody(req.body);
+    const payload = await sanitizeExamBody(req.body);
     const exam = await Exam.findByPk(req.params.id);
     
     if (!exam) {

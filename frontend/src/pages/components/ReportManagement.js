@@ -64,7 +64,7 @@ const ReportManagement = () => {
       return;
     }
     const matchedClass = gradeClasses.find(cls => String(cls.section) === String(selectedSection));
-    setReportFilters(prev => ({ ...prev, classId: matchedClass?._id || '' }));
+    setReportFilters(prev => ({ ...prev, classId: matchedClass?._id || matchedClass?.id || '' }));
   }, [classes, selectedGrade, selectedSection]);
 
   useEffect(() => {
