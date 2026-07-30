@@ -446,7 +446,7 @@ const PrincipalPendingFees = () => {
             setSelectedSection(sec);
             if (sec) {
               const matchedClass = classes.find(c => String(c.grade) === String(selectedGrade) && String(c.section) === String(sec));
-              setSelectedClassId(matchedClass?._id || '');
+              setSelectedClassId(matchedClass?._id || matchedClass?.id || '');
             } else {
               setSelectedClassId('');
             }

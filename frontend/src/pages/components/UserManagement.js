@@ -258,7 +258,7 @@ const UserManagement = () => {
               <tr><td colSpan="8">Loading...</td></tr>
             ) : (
               users.map((user) => (
-                <tr key={user._id}>
+                <tr key={user._id || user.id}>
                   <td>{user.firstName} {user.lastName}</td>
                   <td>{user.userId}</td>
                   <td>{user.role}</td>
@@ -272,7 +272,7 @@ const UserManagement = () => {
                   </td>
                   <td>
                     <button className="btn btn-secondary btn-small" onClick={() => handleEdit(user)}>Edit</button>
-                    <button className="btn btn-danger btn-small" onClick={() => handleDelete(user._id)}>Delete</button>
+                    <button className="btn btn-danger btn-small" onClick={() => handleDelete(user._id || user.id)}>Delete</button>
                   </td>
                 </tr>
               ))

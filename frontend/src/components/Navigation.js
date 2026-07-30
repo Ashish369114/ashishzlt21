@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import ZaynLeviLogo from './ZaynLeviLogo';
 import '../styles/Navigation.css';
 
 const Navigation = ({ user = null, onLogout = null }) => {
@@ -41,9 +42,8 @@ const Navigation = ({ user = null, onLogout = null }) => {
     <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
       <div className="navbar-container">
         <div className="navbar-brand">
-          <div className="school-logo" onClick={() => navigate('/')}>
-            <span className="logo-icon">🎓</span>
-            <span className="logo-text">EduManage</span>
+          <div className="school-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+            <ZaynLeviLogo size={32} textColor="dark" />
           </div>
         </div>
 

@@ -75,7 +75,7 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
             <div style={{ width: '32px', height: '32px', background: '#AC968D', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <span style={{ fontSize: '1.2rem' }}>🎓</span>
             </div>
-            Admin
+            Super Admin
           </h2>
         </div>
         <ul className="nav-menu" style={{ marginTop: '20px' }}>
@@ -119,7 +119,7 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
           zIndex: 10
         }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '700', color: '#322029' }}>Good Morning, Admin 👋</h1>
+            <h1 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '700', color: '#322029' }}>Good Morning, Super Admin 👋</h1>
             <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#6B5B54' }}>Here's what's happening with your school today.</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>

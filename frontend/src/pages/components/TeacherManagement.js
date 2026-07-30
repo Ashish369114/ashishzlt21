@@ -89,7 +89,7 @@ const TeacherManagement = () => {
     }
 
     const matchedClass = gradeClasses.find((cls) => String(cls.section) === String(selectedSection || ''));
-    setSelectedClassId(matchedClass?._id || '');
+    setSelectedClassId(matchedClass?._id || matchedClass?.id || '');
   }, [classes, selectedGrade, selectedSection]);
 
   const fetchTeachers = async () => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { examService, teacherService, classService, studentService } from '../../services/api';
 import { demoExams, demoEmployees, demoClasses, demoStudents } from '../../utils/demoData';
+import ExamManagement from '../components/ExamManagement';
 import '../../styles/ManagementStyles.css';
 
 const ExaminerDashboard = ({ user, onLogout }) => {
@@ -382,6 +383,11 @@ const ExaminerDashboard = ({ user, onLogout }) => {
             </a>
           </li>
           <li>
+            <a href="#" className={activeTab === 'exams' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActiveTab('exams'); }}>
+              📋 Exams Management
+            </a>
+          </li>
+          <li>
             <a href="#" className={activeTab === 'invigilators' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActiveTab('invigilators'); }}>
               Invigilators
             </a>
@@ -544,6 +550,11 @@ const ExaminerDashboard = ({ user, onLogout }) => {
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* EXAMS MANAGEMENT TAB */}
+            {activeTab === 'exams' && (
+              <ExamManagement />
             )}
 
             {/* INVIGILATORS TAB */}

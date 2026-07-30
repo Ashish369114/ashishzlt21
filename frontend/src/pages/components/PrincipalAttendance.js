@@ -360,7 +360,7 @@ const PrincipalAttendance = () => {
                 setSelectedWeek('');
                 if (sec) {
                   const matchedClass = classes.find(c => String(c.grade) === String(selectedGrade) && String(c.section) === String(sec));
-                  setSelectedClassId(matchedClass?._id || '');
+                  setSelectedClassId(matchedClass?._id || matchedClass?.id || '');
                 } else {
                   setSelectedClassId('');
                 }
@@ -393,11 +393,18 @@ const PrincipalAttendance = () => {
           <div className="form-group">
             <select value={selectedStudentId} onChange={(e) => setSelectedStudentId(e.target.value)} disabled={!selectedClassId}>
               <option value="">All Students</option>
-              {sectionStudents.map((student) => (
-                <option key={student._id} value={student.userId?._id || student.userId}>
-                  {student.userId?.firstName} {student.userId?.lastName} ({student.rollNumber})
-                </option>
-              ))}
+              {sectionStudents.map((student) => {
+                const sId = student._id || student.id;
+                const uId = student.userId?._id || student.userId?.id || (typeof student.userId === 'object' ? student.userId?.id : student.userId) || sId;
+                const fName = student.userId?.firstName || student.firstName || '';
+                const lName = student.userId?.lastName || student.lastName || '';
+                const roll = student.rollNumber ? ` (${student.rollNumber})` : '';
+                return (
+                  <option key={sId} value={uId}>
+                    {fName} {lName}{roll}
+                  </option>
+                );
+              })}
             </select>
           </div>
         </div>

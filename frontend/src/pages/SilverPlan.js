@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { schoolService } from '../services/api';
 import { getPlanModules } from '../utils/planModules';
+import ZaynLeviLogo from '../components/ZaynLeviLogo';
 import '../styles/LandingPage.css';
 import '../styles/Login.css';
 import { formatCurrency } from '../utils/currencyFormatter';
@@ -134,16 +135,7 @@ const SilverPlan = () => {
       </div>
 
       <div className="brand" style={{ marginBottom: '24px', display: 'flex', gap: '12px', alignItems: 'center', cursor: 'pointer', zIndex: 10 }} onClick={() => navigate('/')}>
-        <div className="brand-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#ffffff', border: '1.5px solid #e2e8f0', borderRadius: '12px', width: '48px', height: '48px', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.05)' }}>
-          <svg viewBox="0 0 100 100" style={{ width: '28px', height: '28px', overflow: 'visible' }}>
-            <path d="M 24 45 V 32 A 8 8 0 0 1 32 24 H 76 L 46 54" fill="none" stroke="#0b4d8c" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M 76 55 V 68 A 8 8 0 0 1 68 76 H 24 L 54 46" fill="none" stroke="#00a2e8" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
-        <div>
-          <div className="brand-name" style={{ fontSize: '1.6rem', fontWeight: '800', color: '#0b4d8c' }}>Zayn Levi Technologies</div>
-          <div className="brand-tag" style={{ fontSize: '0.95rem', color: '#64748b', fontWeight: '600' }}>ZaynLevi School Operating System Onboarding</div>
-        </div>
+        <ZaynLeviLogo size={42} textColor="dark" />
       </div>
 
       <div className="login-wrapper" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '40px', padding: '40px', maxWidth: '1200px', width: '100%', boxSizing: 'border-box' }}>

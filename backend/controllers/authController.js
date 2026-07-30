@@ -30,8 +30,6 @@ const login = async (req, res) => {
 
     let user;
     let isDbConnected = true;
-    let user;
-    let isDbConnected = true;
     try {
       user = await User.findOne({ where: { userId } });
       if (!user) {
