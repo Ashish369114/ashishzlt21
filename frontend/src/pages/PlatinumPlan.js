@@ -317,7 +317,7 @@ const PlatinumPlan = () => {
       {step === 'success' && successData && (
         <div className="success-popup visible" style={{ zIndex: 100 }}>
           <h3>Payment Successful!</h3>
-          <p>Your School Operating System credentials have been sent to your registered email address.</p>
+          <p>Your ZaynLevi School Operating System credentials have been sent to your registered email address.</p>
           <div className="success-details">
             <p>{successData.emailSent ? 'An email has been delivered to your inbox.' : 'If email delivery is unavailable, please check your email or contact support.'}</p>
           </div>

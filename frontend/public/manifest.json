@@ -1,7 +1,7 @@
 {
-  "name": "School Operating System",
-  "short_name": "SMS",
-  "description": "A comprehensive School Operating System",
+  "name": "AI-Powered ZaynLevi School Operating System",
+  "short_name": "ZaynLevi SOS",
+  "description": "A comprehensive AI-Powered ZaynLevi School Operating System",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
