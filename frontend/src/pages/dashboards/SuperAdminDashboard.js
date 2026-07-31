@@ -89,7 +89,6 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/exams" className={isActive('/dashboard/exams') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><ClipboardList size={20} /> Exams</Link></li>
           <li><Link to="/dashboard/library" className={isActive('/dashboard/library') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><BookOpen size={20} /> Library</Link></li>
           <li><Link to="/dashboard/inventory" className={isActive('/dashboard/inventory') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Archive size={20} /> Inventory</Link></li>
-          <li><Link to="/dashboard/transport" className={isActive('/dashboard/transport') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Bus size={20} /> Transport</Link></li>
           <li><Link to="/dashboard/hostel" className={isActive('/dashboard/hostel') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><BedDouble size={20} /> Hostel</Link></li>
           <li><Link to="/dashboard/notices" className={isActive('/dashboard/notices') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Bell size={20} /> Circulars & Notices</Link></li>
           <li><Link to="/dashboard/meeting-moms" className={isActive('/dashboard/meeting-moms') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><ClipboardList size={20} /> Meeting MOMs</Link></li>
