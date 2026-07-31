@@ -25,7 +25,6 @@ const AoDashboard = ({ user, onLogout }) => {
     { id: 'accommodation', label: 'Accommodation Management', icon: Building },
     { id: 'maintenance', label: 'Maintenance Requests', icon: Wrench },
     { id: 'visitors', label: 'Visitor Register', icon: Users },
-    { id: 'transport', label: 'Transport Coordination', icon: Bus },
     { id: 'reports', label: 'Reports & Analytics', icon: BarChart2 },
   ];
 
