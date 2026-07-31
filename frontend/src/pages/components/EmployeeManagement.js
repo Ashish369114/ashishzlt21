@@ -9,6 +9,7 @@ const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([]);
   const userRole = localStorage.getItem('role');
   const isPrincipal = userRole === 'principal';
+  const canViewSalary = userRole === 'principal' || userRole === 'accountant' || userRole === 'accountant_admin';
   const [schools, setSchools] = useState([]);
   const [socket, setSocket] = useState(null);
   const socketRef = useRef(null);
@@ -24,6 +25,8 @@ const EmployeeManagement = () => {
   });
   const [loading, setLoading] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showTopActionsMenu, setShowTopActionsMenu] = useState(false);
+  const [actionMenuOpenFor, setActionMenuOpenFor] = useState(null);
 
   // Sub-tabs state
   const [activeTab, setActiveTab] = useState('directory');
@@ -576,10 +579,79 @@ const EmployeeManagement = () => {
               <div className="employees-list">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                   <h3 style={{ margin: 0 }}>{selectedTypeFilter === 'teaching' ? '📖 Teaching Staff' : '💼 Non-Teaching Staff'} — Employees List</h3>
-                  <button onClick={() => setShowAddForm(true)} className="btn-primary" style={{ padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}>
-                    + Add Employee
-                  </button>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative' }}>
+                    <button
+                      onClick={() => setShowTopActionsMenu(!showTopActionsMenu)}
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        background: '#f1f5f9',
+                        color: '#0f172a',
+                        border: '1px solid #cbd5e1',
+                        fontWeight: '700',
+                        fontSize: '0.88rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      ⚙️ Actions & Operations ▾
+                    </button>
+
+                    <button onClick={() => setShowAddForm(true)} className="btn-primary" style={{ padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}>
+                      + Add Employee
+                    </button>
+
+                    {showTopActionsMenu && (
+                      <>
+                        <div style={{ position: 'fixed', inset: 0, zIndex: 99 }} onClick={() => setShowTopActionsMenu(false)} />
+                        <div style={{
+                          position: 'absolute',
+                          right: 0,
+                          top: '46px',
+                          background: '#ffffff',
+                          borderRadius: '12px',
+                          border: '1px solid #e2e8f0',
+                          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                          padding: '8px',
+                          zIndex: 100,
+                          minWidth: '260px',
+                          maxHeight: '350px',
+                          overflowY: 'auto',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '4px'
+                        }}>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#94a3b8', padding: '6px 10px', textTransform: 'uppercase', borderBottom: '1px solid #f1f5f9' }}>
+                            Select Employee to Manage
+                          </div>
+                          {filteredEmployees.map(emp => (
+                            <div key={emp._id || emp.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', borderRadius: '6px', borderBottom: '1px solid #fafafa' }}>
+                              <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#1e293b' }}>{emp.firstName} {emp.lastName}</span>
+                              <div style={{ display: 'flex', gap: '6px' }}>
+                                <button
+                                  onClick={() => { setShowTopActionsMenu(false); handleEditEmployee(emp); }}
+                                  style={{ background: '#f8fafc', color: '#334155', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '3px 8px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer' }}
+                                >
+                                  ✏️ Edit
+                                </button>
+                                <button
+                                  onClick={() => { setShowTopActionsMenu(false); handleDeleteEmployee(emp._id || emp.id); }}
+                                  style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: '4px', padding: '3px 8px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer' }}
+                                >
+                                  🗑️ Delete
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
+
                 {loading ? (
                   <p>Loading...</p>
                 ) : filteredEmployees.length === 0 ? (
@@ -591,19 +663,25 @@ const EmployeeManagement = () => {
                         <th style={{ whiteSpace: 'nowrap' }}>Name</th>
                         <th style={{ whiteSpace: 'nowrap' }}>Designation</th>
                         <th style={{ whiteSpace: 'nowrap' }}>Type</th>
-                        <th style={{ whiteSpace: 'nowrap' }}>Base Salary</th>
+                        {canViewSalary && <th style={{ whiteSpace: 'nowrap' }}>Base Salary</th>}
                         <th style={{ whiteSpace: 'nowrap' }}>Joining Date</th>
                         <th style={{ whiteSpace: 'nowrap' }}>Remarks</th>
-                        <th style={{ width: '180px', textAlign: 'center', whiteSpace: 'nowrap' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredEmployees.map((employee) => (
-                        <tr key={employee._id || employee.id}>
-                          <td>{employee.firstName} {employee.lastName}</td>
+                        <tr 
+                          key={employee._id || employee.id} 
+                          onClick={() => handleEditEmployee(employee)}
+                          style={{ cursor: 'pointer', transition: 'background 0.15s' }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                          title="Click row to Edit Employee"
+                        >
+                          <td style={{ fontWeight: '600', color: '#0f172a' }}>{employee.firstName} {employee.lastName}</td>
                           <td>{employee.designation}</td>
                           <td>{employee.employeeType}</td>
-                          <td>{formatCurrency(employee.salary?.baseSalary || 0)}</td>
+                          {canViewSalary && <td>{formatCurrency(employee.salary?.baseSalary || 0)}</td>}
                           <td>{new Date(employee.dateOfJoining).toLocaleDateString()}</td>
                           <td>
                             {employee.status === 'terminated' || employee.status === 'inactive' ? (
@@ -615,43 +693,6 @@ const EmployeeManagement = () => {
                             ) : (
                               <span style={{ color: '#059669', fontWeight: '500', padding: '4px 8px', background: '#d1fae5', borderRadius: '4px', fontSize: '0.85rem' }}>Working</span>
                             )}
-                          </td>
-                          <td>
-                            {selectedTypeFilter === 'teaching' && (
-                              <button
-                                onClick={async () => {
-                                  setViewingTeacherClasses(employee);
-                                  // Fetch students for all classes where this teacher is classTeacher
-                                  try {
-                                    const teacherName = `${employee.firstName} ${employee.lastName}`.toLowerCase().trim();
-                                    const teacherClasses = allClasses.filter(cls => {
-                                      const ct = cls.classTeacher;
-                                      if (!ct) return false;
-                                      const ctName = `${ct.firstName || ''} ${ct.lastName || ''}`.toLowerCase().trim();
-                                      return ctName === teacherName || String(ct._id || ct.id) === String(employee._id || employee.id);
-                                    });
-                                    const map = {};
-                                    await Promise.all(teacherClasses.map(async cls => {
-                                      try {
-                                        const res = await studentService.getByClass(cls._id || cls.id);
-                                        map[cls._id || cls.id] = Array.isArray(res.data) ? res.data : [];
-                                      } catch (e) { map[cls._id || cls.id] = []; }
-                                    }));
-                                    setClassStudentsMap(map);
-                                  } catch (e) { console.error('Error fetching class students:', e); }
-                                }}
-                                className="btn btn-small"
-                                style={{ marginRight: '8px', background: 'linear-gradient(135deg,#4f46e5,#6366f1)', color: '#fff', border: 'none', borderRadius: '6px', padding: '5px 10px', cursor: 'pointer', fontSize: '0.8rem' }}
-                              >
-                                📚 Classes
-                              </button>
-                            )}
-                            <button onClick={() => handleEditEmployee(employee)} className="btn btn-secondary btn-small" style={{ marginRight: '8px' }}>
-                              Edit
-                            </button>
-                            <button onClick={() => handleDeleteEmployee(employee._id || employee.id)} className="btn-delete">
-                              Delete
-                            </button>
                           </td>
                         </tr>
                       ))}

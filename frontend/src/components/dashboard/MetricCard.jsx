@@ -1,20 +1,26 @@
 import React from 'react';
+import { TrendingUp } from 'lucide-react';
 
 const MetricCard = ({ title, value, subtitle, icon: Icon, accent }) => {
   return (
-    <button type="button" className="group rounded-[1.5rem] border border-slate-200 bg-white p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl">
-      <div className="flex items-center justify-between">
-        <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${accent}`}>
-          <Icon className="h-5 w-5 text-white" />
+    <div className="group rounded-2xl border border-[#BFDBFE] bg-white p-5.5 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+      <div className="flex items-center gap-3.5">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#EBF5FF] text-[#0096DA] border border-[#BFDBFE]">
+          {Icon ? <Icon className="h-5.5 w-5.5 text-[#0C4A86]" /> : <TrendingUp className="h-5.5 w-5.5 text-[#0C4A86]" />}
         </div>
-        <span className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Live</span>
+        <p className="text-sm font-bold text-[#736B63] leading-tight">{title}</p>
       </div>
-      <div className="mt-6">
-        <p className="text-3xl font-semibold text-slate-900">{value}</p>
-        <p className="mt-1 text-sm font-medium text-slate-500">{title}</p>
-        <p className="mt-2 text-sm text-slate-400">{subtitle}</p>
+      
+      <div className="mt-4">
+        <p className="text-3xl font-black tracking-tight text-[#0C4A86]">{value}</p>
+        {subtitle && (
+          <div className="mt-2.5 flex items-center gap-1.5 text-xs font-semibold text-[#0096DA]">
+            <span className="text-emerald-700 font-bold">↑</span>
+            <span>{subtitle}</span>
+          </div>
+        )}
       </div>
-    </button>
+    </div>
   );
 };
 

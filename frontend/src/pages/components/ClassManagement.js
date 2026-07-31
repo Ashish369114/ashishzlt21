@@ -292,19 +292,22 @@ const ClassManagement = () => {
                   <td>{getTeacherDisplayName(cls.classTeacher) || 'No teacher assigned'}</td>
                   <td>{cls.students?.length || 0}</td>
                   <td>
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => handleEditClass(cls)}
-                      style={{ marginRight: '8px' }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleDeleteClass(cls._id)}
-                    >
-                      Delete
-                    </button>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '80px' }}>
+                      <button
+                        className="btn btn-small"
+                        onClick={() => handleEditClass(cls)}
+                        style={{ background: '#F3EDE2', color: '#1e293b', border: 'none', borderRadius: '8px', padding: '6px 12px', fontWeight: '700', cursor: 'pointer' }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="btn btn-small"
+                        onClick={() => handleDeleteClass(cls._id)}
+                        style={{ background: '#F03D33', color: '#ffffff', border: 'none', borderRadius: '8px', padding: '6px 12px', fontWeight: '700', cursor: 'pointer' }}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

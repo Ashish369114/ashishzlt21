@@ -16,7 +16,7 @@ const StudentAssignments = ({ userId }) => {
       try {
         setLoading(true);
         const response = await homeworkService.getByStudent(userId);
-        setAssignments(response.data || []);
+        setAssignments(Array.isArray(response.data) ? response.data : []);
       } catch (err) {
         console.error(err);
         setError('Unable to load assignment tasks.');

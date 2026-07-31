@@ -1,14 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AoManagement from '../components/AoManagement';
+import SchoolCalendarManagement from '../components/SchoolCalendarManagement';
 import DailyInsightWidget from '../../components/DailyInsightWidget';
-import { 
-  LayoutDashboard, Building, UserPlus, Package, Wrench, Shield, Users, DoorOpen, Bus, BarChart2, LogOut 
-} from 'lucide-react';
+import { subscribeToDataChanges } from '../../services/syncService';
+import { LayoutDashboard, Users, FileText, Settings, ShieldCheck, LogOut, Calendar as CalendarIcon, Camera } from 'lucide-react';
 
 const AoDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [profileImage, setProfileImage] = useState(localStorage.getItem('aoProfileImage') || '');
+
+  useEffect(() => {
+    const unsubscribe = subscribeToDataChanges((data) => {
+      console.log('Realtime sync in AO:', data);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result);
+        localStorage.setItem('aoProfileImage', reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleLogout = () => {
     onLogout();
@@ -19,27 +40,28 @@ const AoDashboard = ({ user, onLogout }) => {
   const planLabel = plan.includes('ocr') ? '⭐ PLATINUM + OCR' : '⭐ PLATINUM';
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'admissions', label: 'Admissions', icon: UserPlus },
-    { id: 'inventory', label: 'Inventory Management', icon: Package },
-    { id: 'accommodation', label: 'Accommodation Management', icon: Building },
-    { id: 'maintenance', label: 'Maintenance Requests', icon: Wrench },
-    { id: 'visitors', label: 'Visitor Register', icon: Users },
-    { id: 'reports', label: 'Reports & Analytics', icon: BarChart2 },
+    { id: 'dashboard', label: 'AO Dashboard', icon: LayoutDashboard },
+    { id: 'calendar', label: 'School Calendar', icon: CalendarIcon },
+    { id: 'staff', label: 'Staff Management', icon: Users },
+    { id: 'infrastructure', label: 'Infrastructure', icon: ShieldCheck },
+    { id: 'inventory', label: 'Inventory & Assets', icon: FileText },
+    { id: 'procurement', label: 'Procurement', icon: FileText },
+    { id: 'vendors', label: 'Vendors & Contracts', icon: Users },
+    { id: 'maintenance', label: 'Maintenance Requests', icon: Settings },
   ];
 
   return (
-    <div className="dashboard-layout" style={{ background: '#F7F6F3', minHeight: '100vh', display: 'flex', fontFamily: 'Inter, sans-serif' }}>
+    <div className="dashboard-layout" style={{ background: '#FAF6F0', minHeight: '100vh', display: 'flex' }}>
       
-      {/* Sidebar - Luxe Ivory Palette (#EFE9E1) */}
-      <div className="sidebar" style={{ width: '270px', background: '#EFE9E1', borderRight: '1px solid #D9D8D9', padding: '24px 20px', flexShrink: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+      {/* Sidebar Navigation */}
+      <div className="sidebar" style={{ width: '260px', background: '#FAF6F0', borderRight: '1px solid #BFDBFE', padding: '24px 20px', flexShrink: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
         <div>
-          <div className="sidebar-header" style={{ borderBottom: '1px solid #D9D8D9', paddingBottom: '20px' }}>
-            <h2 style={{ color: '#322029', fontSize: '1.1rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
-              <div style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg, #AC968D, #8E786F)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: '0 4px 10px rgba(172,150,141,0.3)' }}>
-                <Building size={20} />
+          <div className="sidebar-header" style={{ borderBottom: '1px solid #BFDBFE', paddingBottom: '20px' }}>
+            <h2 style={{ color: '#0C4A86', fontSize: '1.2rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
+              <div style={{ width: '36px', height: '36px', background: '#0C4A86', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                <ShieldCheck size={20} />
               </div>
-              Admin Officer
+              AO Portal
             </h2>
           </div>
 
@@ -60,18 +82,17 @@ const AoDashboard = ({ user, onLogout }) => {
                       display: 'flex',
                       alignItems: 'center',
                       gap: '12px',
-                      color: isActive ? '#ffffff' : '#5C4E46',
-                      background: isActive ? '#AC968D' : 'transparent',
-                      padding: '11px 16px',
-                      borderRadius: '12px',
+                      color: isActive ? '#ffffff' : '#0C4A86',
+                      background: isActive ? '#0C4A86' : 'transparent',
+                      padding: '12px 16px',
+                      borderRadius: '10px',
                       textDecoration: 'none',
-                      fontWeight: '700',
-                      fontSize: '0.88rem',
-                      transition: 'all 0.2s ease',
-                      boxShadow: isActive ? '0 4px 12px rgba(172,150,141,0.25)' : 'none'
+                      fontWeight: '600',
+                      fontSize: '0.9rem',
+                      transition: 'all 0.2s'
                     }}
                   >
-                    <Icon size={18} color={isActive ? '#ffffff' : '#5C4E46'} /> {item.label}
+                    <Icon size={18} color={isActive ? '#ffffff' : '#0C4A86'} /> {item.label}
                   </a>
                 </li>
               );
@@ -79,62 +100,107 @@ const AoDashboard = ({ user, onLogout }) => {
           </ul>
         </div>
 
-        <div style={{ marginTop: 'auto', padding: '0 4px', marginBottom: '16px' }}>
-          <DailyInsightWidget />
-        </div>
+        <div>
+          <div style={{ marginBottom: '16px' }}>
+            <DailyInsightWidget />
+          </div>
 
-        <div style={{ borderTop: '1px solid #D9D8D9', paddingTop: '16px' }}>
-          <button onClick={handleLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#F7F6F3', color: '#322029', border: '1px solid #AC968D', padding: '10px', borderRadius: '50px', fontWeight: '700', cursor: 'pointer', fontSize: '0.88rem', transition: 'all 0.2s' }}>
-            <LogOut size={16} color="#AC968D" /> Logout
+          <button onClick={handleLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#FAF6F0', color: '#0C4A86', border: '1px solid #0C4A86', padding: '10px', borderRadius: '50px', fontWeight: '700', cursor: 'pointer', fontSize: '0.88rem', transition: 'all 0.2s' }}>
+            <LogOut size={16} color="#0C4A86" /> Logout
           </button>
         </div>
       </div>
 
       {/* Main Content Body */}
-      <div className="main-content" style={{ flex: 1, background: '#F7F6F3', overflowY: 'auto' }}>
+      <div className="main-content" style={{ flex: 1, background: '#FAF6F0', overflowY: 'auto' }}>
         
         {/* Top Header Bar */}
         <div style={{
           background: '#ffffff',
           padding: '18px 32px',
-          borderBottom: '1px solid #D9D8D9',
+          borderBottom: '1px solid #BFDBFE',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           position: 'sticky',
           top: 0,
-          zIndex: 10,
-          boxShadow: '0 2px 8px rgba(50,32,41,0.03)'
+          zIndex: 10
         }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: '1.35rem', fontWeight: '800', color: '#322029' }}>
-              Welcome back, {user?.firstName || 'Vikram'} 👋
-            </h1>
-            <p style={{ margin: '3px 0 0', fontSize: '0.85rem', color: '#6B5B54' }}>
-              Administrative Officer Operations Dashboard
-            </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '7px 14px',
+                borderRadius: '50px',
+                background: '#EBF5FF',
+                color: '#0C4A86',
+                border: '1.5px solid #BFDBFE',
+                fontSize: '0.82rem',
+                fontWeight: '700',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              ← Back
+            </button>
+            <div>
+              <h1 style={{ margin: 0, fontSize: '1.35rem', fontWeight: '800', color: '#0C4A86' }}>
+                Good Morning, {user?.firstName ? `${user.firstName} ${user.lastName || ''}` : 'Ramesh Gupta'} 👋
+              </h1>
+              <p style={{ margin: '3px 0 0', fontSize: '0.85rem', color: '#0C4A86' }}>
+                Administrative Operations & School Infrastructure Overview
+              </p>
+            </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingLeft: '16px' }}>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: '800', color: '#322029' }}>{user?.firstName} {user?.lastName}</div>
-                <div style={{ fontSize: '0.75rem', color: '#6B5B54' }}>Administrative Officer</div>
-              </div>
-              <div style={{ width: '36px', height: '36px', background: '#EFE9E1', color: '#322029', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', border: '1px solid #AC968D' }}>
-                {user?.firstName?.[0] || 'A'}
-              </div>
-            </div>
+            <span style={{ fontSize: '0.82rem', fontWeight: '700', padding: '6px 14px', background: '#EBF5FF', color: '#0C4A86', borderRadius: '50px', border: '1px solid #BFDBFE' }}>
+              {planLabel}
+            </span>
+
+            {/* Profile Avatar Upload Feature */}
+            <input type="file" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" className="hidden" style={{ display: 'none' }} />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              title="Click to upload profile photo"
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ffffff',
+                fontWeight: '700',
+                border: '2px solid #BFDBFE',
+                cursor: 'pointer',
+                overflow: 'hidden'
+              }}
+            >
+              {profileImage ? (
+                <img src={profileImage} alt="AO" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <span>{user?.firstName?.[0] || 'A'}</span>
+              )}
+            </button>
           </div>
         </div>
 
-        {/* AO Management Component Body */}
-        <div style={{ padding: '10px' }}>
-          <AoManagement activeSection={activeTab} />
+        {/* Workspace Views */}
+        <div style={{ padding: '28px' }}>
+          {activeTab === 'calendar' ? (
+            <SchoolCalendarManagement />
+          ) : (
+            <AoManagement activeTab={activeTab} />
+          )}
         </div>
 
       </div>
-
     </div>
   );
 };

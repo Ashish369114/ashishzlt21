@@ -1,50 +1,82 @@
-import React from 'react';
-import { Bell, MessageCircleMore, Search, Settings, Sparkles } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { MessageCircleMore, Search, User, Camera } from 'lucide-react';
+import NotificationDrawer from '../common/NotificationDrawer';
 
-const TopBar = ({ userName, subject, onOpenMessages, onOpenNotifications, onOpenSettings }) => {
+const TopBar = ({ userName = 'Ramesh Sharma', subject = 'Mathematics', onOpenMessages, user }) => {
+  const [profileImage, setProfileImage] = useState(
+    localStorage.getItem('teacherProfileImage') || ''
+  );
+  const fileInputRef = useRef(null);
+
+  const handleImageClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Url = reader.result;
+        setProfileImage(base64Url);
+        localStorage.setItem('teacherProfileImage', base64Url);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
-    <header className="flex items-center justify-between rounded-[1.6rem] border border-slate-200/80 bg-white/80 px-5 py-3 shadow-sm backdrop-blur">
+    <header className="flex items-center justify-between rounded-2xl border border-[#BFDBFE] bg-white px-6 py-3.5 shadow-sm">
       <div className="flex items-center gap-4">
-        <div className="min-w-[360px]">
+        <div className="min-w-[340px]">
           <label className="relative block">
             <span className="sr-only">Search</span>
-            <span className="absolute inset-y-0 left-3 flex items-center text-slate-400"><Search className="h-4 w-4" /></span>
-            <input aria-label="Search" className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-2 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400" placeholder="Search classes, students, tasks, activities..." />
+            <span className="absolute inset-y-0 left-3.5 flex items-center text-slate-400"><Search className="h-4 w-4" /></span>
+            <input aria-label="Search" className="w-full rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] py-2 pl-10 pr-4 text-sm text-[#0C4A86] placeholder:text-slate-400 focus:border-[#0096DA] focus:outline-none" placeholder="Search classes, students, tasks, activities..." />
           </label>
         </div>
 
-        <div className="hidden md:flex items-center gap-3 text-sm text-slate-500">
-          <span className="px-2 py-1 rounded-full bg-slate-100">Dashboard</span>
-          <span className="px-2 py-1 rounded-full bg-slate-100">My Classes</span>
-          <span className="px-2 py-1 rounded-full bg-slate-100">Timetable</span>
+        <div className="hidden md:flex items-center gap-2.5 text-xs font-semibold text-slate-600">
+          <span className="px-3 py-1.5 rounded-xl bg-[#EBF5FF] text-[#0C4A86] font-bold border border-[#BFDBFE]">Academic Year 2026-27</span>
         </div>
       </div>
 
       <div className="flex items-center gap-3">
-        <button onClick={onOpenNotifications} className="relative rounded-2xl border border-slate-200 bg-slate-50 p-2.5 text-slate-600 transition hover:-translate-y-0.5 hover:bg-slate-100">
-          <Bell className="h-5 w-5" />
-          <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-rose-500" />
-        </button>
-        <button onClick={onOpenMessages} className="relative rounded-2xl border border-slate-200 bg-slate-50 p-2.5 text-slate-600 transition hover:-translate-y-0.5 hover:bg-slate-100">
+        <NotificationDrawer user={user} />
+        <button onClick={onOpenMessages} className="relative rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] p-2.5 text-[#0C4A86] transition hover:bg-sky-100" title="Messages">
           <MessageCircleMore className="h-5 w-5" />
-          <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-violet-500" />
-        </button>
-        <button onClick={onOpenSettings} className="rounded-2xl border border-slate-200 bg-slate-50 p-2.5 text-slate-600 transition hover:-translate-y-0.5 hover:bg-slate-100">
-          <Settings className="h-5 w-5" />
+          <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-[#0096DA]" />
         </button>
 
-        <div className="ml-2 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 via-indigo-500 to-sky-500 text-white">
-            <Sparkles className="h-5 w-5" />
-          </div>
-          <div className="min-w-[160px]">
-            <p className="text-sm font-semibold text-slate-800">{userName}</p>
-            <div className="mt-1 flex items-center gap-2">
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">{subject}</span>
-              <span className="flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-600">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" /> Online
-              </span>
+        {/* Teacher Profile Info & Avatar Upload (Settings button removed) */}
+        <div className="ml-2 flex items-center gap-3 rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] px-3.5 py-1.5">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            className="hidden"
+          />
+          <button
+            onClick={handleImageClick}
+            className="relative group flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#0C4A86] to-[#0096DA] text-white font-bold transition hover:opacity-90"
+            title="Click to upload or change profile image"
+          >
+            {profileImage ? (
+              <img src={profileImage} alt="Profile" className="h-full w-full object-cover" />
+            ) : (
+              <User className="h-5 w-5 text-white" />
+            )}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Camera className="h-4 w-4 text-white" />
             </div>
+          </button>
+          
+          <div className="text-xs">
+            <p className="font-extrabold text-[#0C4A86] leading-tight">{userName || 'Ramesh Sharma'}</p>
+            <p className="text-[11px] font-bold text-[#0096DA]">{subject}</p>
           </div>
         </div>
       </div>

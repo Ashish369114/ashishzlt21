@@ -17,10 +17,12 @@ const StudentMarks = ({ userId }) => {
       try {
         setLoading(true);
         const response = await marksService.getByStudent(userId);
-        setMarks(response.data);
+        const marksData = Array.isArray(response.data) ? response.data : [];
+        setMarks(marksData);
       } catch (err) {
         setError('Failed to fetch marks');
         console.error(err);
+        setMarks([]);
       } finally {
         setLoading(false);
       }
@@ -29,10 +31,12 @@ const StudentMarks = ({ userId }) => {
     loadMarks();
   }, [userId]);
 
+  const safeMarks = Array.isArray(marks) ? marks : [];
+
   const calculateAverage = () => {
-    if (marks.length === 0) return 0;
-    const total = marks.reduce((sum, mark) => sum + (mark.marks || 0), 0);
-    return (total / marks.length).toFixed(2);
+    if (safeMarks.length === 0) return 0;
+    const total = safeMarks.reduce((sum, mark) => sum + Number(mark.marks || 0), 0);
+    return (total / safeMarks.length).toFixed(2);
   };
 
   const getGrade = (score) => {
@@ -58,7 +62,7 @@ const StudentMarks = ({ userId }) => {
         </div>
         <div className="stat-card">
           <h3>Total Exams</h3>
-          <div className="value">{marks.length}</div>
+          <div className="value">{safeMarks.length}</div>
         </div>
       </div>
 
@@ -77,7 +81,7 @@ const StudentMarks = ({ userId }) => {
               </tr>
             </thead>
             <tbody>
-              {marks.map((mark) => (
+              {safeMarks.map((mark) => (
                 <tr key={mark._id}>
                   <td>
                     <strong>{mark.subject?.name || 'Unknown'}</strong>

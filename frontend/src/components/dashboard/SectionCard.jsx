@@ -2,15 +2,15 @@ import React from 'react';
 
 const SectionCard = ({ title, subtitle, action, children, className = '' }) => {
   return (
-    <section className={`rounded-[1.8rem] border border-slate-200/80 bg-white p-6 shadow-sm ${className}`}>
-      <div className="flex items-start justify-between gap-4">
+    <section className={`rounded-2xl border border-[#BFDBFE] bg-white p-6 shadow-sm ${className}`}>
+      <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-400">{title}</p>
-          <h3 className="mt-2 text-xl font-semibold text-slate-900">{subtitle}</h3>
+          <h3 className="text-base font-extrabold tracking-tight text-[#0C4A86]">{title || subtitle}</h3>
+          {subtitle && title && <p className="mt-0.5 text-xs font-semibold text-[#736B63]">{subtitle}</p>}
         </div>
         {action}
       </div>
-      <div className="mt-5">{children}</div>
+      <div className="mt-4">{children}</div>
     </section>
   );
 };

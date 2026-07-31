@@ -123,28 +123,28 @@ const PrincipalLessonPlanManagement = () => {
   };
 
   return (
-    <div style={{ padding: '24px', background: '#F7F6F3', minHeight: '100vh' }}>
+    <div style={{ padding: '24px', background: '#FAF6F0', minHeight: '100vh' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
         <div>
-          <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#322029', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <BookOpen size={22} color="#AC968D" /> Teacher Lesson Plan Approvals
+          <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#0C4A86', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <BookOpen size={22} color="#0C4A86" /> Teacher Lesson Plan Approvals
           </h2>
           <p style={{ fontSize: '13px', color: '#6B5B54', margin: '4px 0 0' }}>Review, evaluate, approve or request revisions on weekly curriculum lesson plans.</p>
         </div>
 
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button onClick={handleExportCSV} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', background: '#ffffff', border: '1px solid #D9D8D9', borderRadius: '10px', fontSize: '13px', fontWeight: '600', color: '#322029', cursor: 'pointer' }}>
+          <button onClick={handleExportCSV} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', background: '#ffffff', border: '1px solid #BFDBFE', borderRadius: '10px', fontSize: '13px', fontWeight: '600', color: '#0C4A86', cursor: 'pointer' }}>
             <Download size={15} /> Export CSV
           </button>
-          <button onClick={handlePrintPDF} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', background: '#ffffff', border: '1px solid #D9D8D9', borderRadius: '10px', fontSize: '13px', fontWeight: '600', color: '#322029', cursor: 'pointer' }}>
+          <button onClick={handlePrintPDF} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', background: '#ffffff', border: '1px solid #BFDBFE', borderRadius: '10px', fontSize: '13px', fontWeight: '600', color: '#0C4A86', cursor: 'pointer' }}>
             <Printer size={15} /> Print PDF
           </button>
         </div>
       </div>
 
       {/* Filter Bar */}
-      <div style={{ background: '#ffffff', border: '1px solid #D9D8D9', borderRadius: '14px', padding: '16px', marginBottom: '20px', display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
+      <div style={{ background: '#ffffff', border: '1px solid #BFDBFE', borderRadius: '14px', padding: '16px', marginBottom: '20px', display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
         <form onSubmit={handleSearchSubmit} style={{ flex: 1, minWidth: '240px', display: 'flex', gap: '8px' }}>
           <div style={{ position: 'relative', width: '100%' }}>
             <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#8C7F79' }} />
@@ -153,13 +153,13 @@ const PrincipalLessonPlanManagement = () => {
               placeholder="Search teacher name, topic, or subject..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{ width: '100%', padding: '9px 12px 9px 36px', borderRadius: '8px', border: '1px solid #D9D8D9', fontSize: '13px', outline: 'none' }}
+              style={{ width: '100%', padding: '9px 12px 9px 36px', borderRadius: '8px', border: '1px solid #BFDBFE', fontSize: '13px', outline: 'none' }}
             />
           </div>
           <button type="submit" style={{ padding: '9px 16px', background: '#6B5B54', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Search</button>
         </form>
 
-        <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }} style={{ padding: '9px 12px', borderRadius: '8px', border: '1px solid #D9D8D9', fontSize: '13px', outline: 'none', color: '#322029' }}>
+        <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }} style={{ padding: '9px 12px', borderRadius: '8px', border: '1px solid #BFDBFE', fontSize: '13px', outline: 'none', color: '#0C4A86' }}>
           <option value="">All Statuses</option>
           <option value="pending">Pending Review</option>
           <option value="approved">Approved</option>

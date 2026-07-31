@@ -13,8 +13,11 @@ import ParentNotices from '../components/ParentNotices';
 import ParentCommunication from '../components/ParentCommunication';
 import ParentDownloads from '../components/ParentDownloads';
 import ParentProfileSettings from '../components/ParentProfileSettings';
+import ParentSettingsPage from '../components/ParentSettingsPage';
 import ParentHomePage from './ParentHomePage';
 import RemarkList from '../components/RemarkList';
+import StudentActivities from '../components/StudentActivities';
+import StudentAssignments from '../components/StudentAssignments';
 
 const ParentDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -103,15 +106,17 @@ const ParentDashboard = ({ user, onLogout }) => {
     navigate('/login');
   };
 
+  const currentChildUserId = students[0]?.userId?._id || students[0]?.userId || students[0]?._id;
+
   return (
     <div className="dashboard-layout">
       <div className="sidebar">
         <div className="sidebar-header">
-          <h2>👨‍👩‍👧 Parent</h2>
+          <h2>👨‍👩‍👧 Parent Portal</h2>
           <p>{user?.firstName} {user?.lastName}</p>
           {students.length > 0 && (
-            <p style={{ marginTop: '8px', fontSize: '0.95rem', color: '#cbd5e1' }}>
-              Linked Student: {students[0].userId?.firstName} {students[0].userId?.lastName}
+            <p style={{ marginTop: '8px', fontSize: '0.9rem', color: '#cbd5e1' }}>
+              Child: {students[0].userId?.firstName} {students[0].userId?.lastName}
             </p>
           )}
         </div>
@@ -122,23 +127,23 @@ const ParentDashboard = ({ user, onLogout }) => {
             </NavLink>
           </li>
           <li>
-            <NavLink to="/dashboard/student" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              👩‍🎓 Student Profile
+            <NavLink to="/dashboard/student-overview" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+              👩‍🎓 Student Overview
             </NavLink>
           </li>
           <li>
-            <NavLink to="/dashboard/marks" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              📝 Marks
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/dashboard/results" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              🏆 Results
+            <NavLink to="/dashboard/communication" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+              💬 Teacher Communication
             </NavLink>
           </li>
           <li>
             <NavLink to="/dashboard/attendance" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              ✅ Attendance
+              📅 Attendance
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/dashboard/activities" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+              🎨 Activities
             </NavLink>
           </li>
           <li>
@@ -147,51 +152,36 @@ const ParentDashboard = ({ user, onLogout }) => {
             </NavLink>
           </li>
           <li>
-            <NavLink to="/dashboard/fees" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              💰 Fees
+            <NavLink to="/dashboard/assignments" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+              📝 Assignments
             </NavLink>
           </li>
           <li>
             <NavLink to="/dashboard/exams" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              📋 Exams
+              📋 Exam Schedule
             </NavLink>
           </li>
           <li>
-            <NavLink to="/dashboard/remarks" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              💬 Remarks
+            <NavLink to="/dashboard/results" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+              🏆 Results
             </NavLink>
           </li>
           <li>
-            <NavLink to="/dashboard/timetable" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              🕒 Timetable
+            <NavLink to="/dashboard/fees" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+              💰 Fee Details
             </NavLink>
           </li>
           <li>
-            <NavLink to="/dashboard/notices" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              📰 Notices
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/dashboard/communication" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              💬 Communication
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/dashboard/downloads" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              📥 Downloads
+            <NavLink to="/dashboard/pay-fees" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+              💳 Online Fee Payments
             </NavLink>
           </li>
           <li>
             <NavLink to="/dashboard/settings" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              ⚙️ Profile Settings
+              ⚙️ Settings
             </NavLink>
           </li>
-          <li>
-            <NavLink to="/change-password" className="nav-link">
-              🔒 Change Password
-            </NavLink>
-          </li>
-          <li style={{ marginTop: '30px', borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '20px' }}>
+          <li style={{ marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.15)', paddingTop: '15px' }}>
             <button onClick={handleLogout} className="logout-btn" style={{ width: '100%' }}>
               🚪 Logout
             </button>
@@ -201,11 +191,35 @@ const ParentDashboard = ({ user, onLogout }) => {
 
       <div className="main-content">
         <div className="header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-          <div>
-            <h1>Parent Dashboard</h1>
-            <p style={{ margin: 0, color: '#64748b' }}>Welcome back, {user?.firstName || 'Parent'}.</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '7px 14px',
+                borderRadius: '50px',
+                background: '#EBF5FF',
+                color: '#0C4A86',
+                border: '1.5px solid #BFDBFE',
+                fontSize: '0.82rem',
+                fontWeight: '700',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              ← Back
+            </button>
+            <div>
+              <h1 style={{ margin: 0, fontSize: '1.35rem', fontWeight: '800', color: '#0C4A86' }}>
+                Good Morning, {user?.firstName ? `${user.firstName} ${user.lastName || ''}` : 'Priya Sharma'} 👋
+              </h1>
+              <p style={{ margin: 0, color: '#0C4A86', fontSize: '0.85rem' }}>Parent Academic & School Operations Portal</p>
+            </div>
           </div>
-          <div style={{ color: '#64748b', fontSize: '0.95rem' }}>{new Date().toLocaleDateString()}</div>
+          <div style={{ color: '#0C4A86', fontSize: '0.88rem', fontWeight: '700' }}>{new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</div>
         </div>
 
         {loading ? (
@@ -213,19 +227,28 @@ const ParentDashboard = ({ user, onLogout }) => {
         ) : (
           <Routes>
             <Route index element={<ParentHomePage user={user} students={students} stats={stats} />} />
+            <Route path="overview" element={<ParentHomePage user={user} students={students} stats={stats} />} />
+            <Route path="student-overview" element={<ParentStudentProfile students={students} />} />
             <Route path="student" element={<ParentStudentProfile students={students} />} />
-            <Route path="marks" element={<ParentMarks />} />
-            <Route path="results" element={<ParentResults />} />
+            <Route path="communication" element={<ParentCommunication />} />
+            <Route path="teacher-communication" element={<ParentCommunication />} />
             <Route path="attendance" element={<ParentAttendance />} />
+            <Route path="activities" element={<StudentActivities />} />
             <Route path="homework" element={<ParentHomework />} />
-            <Route path="fees" element={<ParentFees />} />
+            <Route path="assignments" element={<StudentAssignments userId={currentChildUserId} />} />
             <Route path="exams" element={<ParentExams />} />
+            <Route path="exam-schedule" element={<ParentExams />} />
+            <Route path="results" element={<ParentResults />} />
+            <Route path="marks" element={<ParentMarks />} />
+            <Route path="fees" element={<ParentFees />} />
+            <Route path="fee-details" element={<ParentFees />} />
+            <Route path="pay-fees" element={<ParentFees isPaymentMode={true} />} />
+            <Route path="online-fee-payments" element={<ParentFees isPaymentMode={true} />} />
             <Route path="remarks" element={<RemarkList />} />
             <Route path="timetable" element={<ParentTimetable />} />
             <Route path="notices" element={<ParentNotices />} />
-            <Route path="communication" element={<ParentCommunication />} />
             <Route path="downloads" element={<ParentDownloads />} />
-            <Route path="settings" element={<ParentProfileSettings />} />
+            <Route path="settings" element={<ParentSettingsPage user={user} onLogout={handleLogout} />} />
             <Route path="*" element={<ParentHomePage user={user} students={students} stats={stats} />} />
           </Routes>
         )}

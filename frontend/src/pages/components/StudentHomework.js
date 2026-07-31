@@ -13,7 +13,7 @@ const StudentHomework = ({ userId }) => {
     try {
       setLoading(true);
       const response = await homeworkService.getByStudent(userId);
-      setHomework(response.data || []);
+      setHomework(Array.isArray(response.data) ? response.data : []);
       setError('');
     } catch (err) {
       setError('Failed to fetch homework');
@@ -79,13 +79,15 @@ const StudentHomework = ({ userId }) => {
     try {
       setLoading(true);
       setError('');
-      const fileData = await readFileAsBase64(upload.file);
-      await homeworkService.submit(homeworkId, {
-        fileName: upload.fileName,
-        fileType: upload.fileType,
-        fileData,
-        comments: upload.comments || '',
-      });
+      
+      const formData = new FormData();
+      formData.append('homeworkId', homeworkId);
+      formData.append('file', upload.file);
+      formData.append('notes', upload.comments || '');
+
+      const { submissionService } = require('../../services/api');
+      await submissionService.submit(formData);
+
       setSuccessMessage('Homework submitted successfully.');
       setUploadData((prev) => ({
         ...prev,
@@ -94,7 +96,7 @@ const StudentHomework = ({ userId }) => {
       fetchHomework();
       window.dispatchEvent(new Event('homeworkUpdated'));
     } catch (err) {
-      setError('Failed to submit homework');
+      setError('Failed to submit homework: ' + (err.response?.data?.error || err.message));
       console.error(err);
     } finally {
       setLoading(false);

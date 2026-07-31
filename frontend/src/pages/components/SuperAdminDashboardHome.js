@@ -153,15 +153,15 @@ const SuperAdminDashboardHome = ({ stats }) => {
       {/* 2. KPI Cards */}
       <div className="kpi-grid">
         {/* KPI Cards */}
-        <KPICard title="Total Students" value={stats?.totalStudents || '1,245'} icon={Users} trend="12%" trendUp={true} color="#AC968D" />
-        <KPICard title="Teaching Staff" value={stats?.totalTeachers || '84'} icon={UserCheck} trend="4%" trendUp={true} color="#AC968D" />
-        <KPICard title="Non-Teaching Staff" value={'28'} icon={Users} trend="1%" trendUp={true} color="#AC968D" />
+        <KPICard title="Total Students" value={stats?.totalStudents || '1,245'} icon={Users} trend="12%" trendUp={true} color="#0C4A86" />
+        <KPICard title="Teaching Staff" value={stats?.totalTeachers || '84'} icon={UserCheck} trend="4%" trendUp={true} color="#0C4A86" />
+        <KPICard title="Non-Teaching Staff" value={'28'} icon={Users} trend="1%" trendUp={true} color="#0C4A86" />
         <KPICard title="Fees (Collected / Pending)" value={`${stats?.collectedFees ? formatCurrency(stats.collectedFees * 100) : formatCurrency(45200)} / ${stats?.pendingFees ? formatCurrency(stats.pendingFees * 100) : formatCurrency(12400)}`} icon={CreditCard} trend="8%" trendUp={true} color="#10b981" />
-        <KPICard title="Library Books" value="4,850" icon={BookOpen} trend="1%" trendUp={true} color="#AC968D" />
-        <KPICard title="Inventory" value={getInventoryCount()} icon={Archive} trend="2%" trendUp={true} color="#AC968D" />      </div>
+        <KPICard title="Library Books" value="4,850" icon={BookOpen} trend="1%" trendUp={true} color="#0C4A86" />
+        <KPICard title="Inventory" value={getInventoryCount()} icon={Archive} trend="2%" trendUp={true} color="#0C4A86" />      </div>
 
       {/* 5. Quick Actions */}
-      <div className="section-title" style={{ color: '#322029', fontSize: '1.1rem', fontWeight: '700', margin: '24px 0 16px' }}>Quick Actions</div>
+      <div className="section-title" style={{ color: '#0C4A86', fontSize: '1.1rem', fontWeight: '700', margin: '24px 0 16px' }}>Quick Actions</div>
       <div className="quick-actions-grid">
         <Link to="/dashboard/students" className="action-card" style={{ textDecoration: 'none', color: 'inherit' }}><PlusCircle className="action-icon" size={20} /> Add Student</Link>
         <Link to="/dashboard/employees" className="action-card" style={{ textDecoration: 'none', color: 'inherit' }}><Briefcase className="action-icon" size={20} /> Add Employee</Link>
@@ -176,7 +176,7 @@ const SuperAdminDashboardHome = ({ stats }) => {
         <div className="premium-card">
           <div className="card-header border-b">
             <h3 className="card-title">Recent Activities</h3>
-            <button className="text-blue" style={{ color: '#AC968D' }}>View All</button>
+            <button className="text-blue" style={{ color: '#0C4A86' }}>View All</button>
           </div>
           <div className="card-body p-0">
             <ul className="activity-list">
@@ -204,7 +204,7 @@ const SuperAdminDashboardHome = ({ stats }) => {
         <div className="premium-card">
           <div className="card-header border-b">
             <h3 className="card-title flex items-center gap-2">
-              <Calendar size={18} color="#AC968D" className="calendar-icon-pulse" /> 
+              <Calendar size={18} color="#0C4A86" className="calendar-icon-pulse" /> 
               Upcoming Events
             </h3>
           </div>

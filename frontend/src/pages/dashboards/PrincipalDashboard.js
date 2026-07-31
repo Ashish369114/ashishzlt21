@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
-import { ChevronDown, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, CheckCircle2, Camera } from 'lucide-react';
 import { studentService, teacherService, feeService, attendanceService, examService } from '../../services/api';
+import { subscribeToDataChanges } from '../../services/syncService';
 import StudentManagement from '../components/StudentManagement';
 import PrincipalDashboardHome from '../components/PrincipalDashboardHome';
 import PrincipalAttendance from '../components/PrincipalAttendance';
@@ -23,15 +24,22 @@ import PrincipalLessonPlanManagement from '../components/PrincipalLessonPlanMana
 import DailyInsightWidget from '../../components/DailyInsightWidget';
 import NoticeManagement from '../components/NoticeManagement';
 import MeetingMomManagement from '../components/MeetingMomManagement';
+import SchoolCalendarManagement from '../components/SchoolCalendarManagement';
 
 const PrincipalDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const fileInputRef = useRef(null);
   const [stats, setStats] = useState(null);
-  const [isEmployeesOpen, setIsEmployeesOpen] = useState(false);
+  const [profileImage, setProfileImage] = useState(localStorage.getItem('principalProfileImage') || '');
 
   useEffect(() => {
     fetchData();
+    const unsubscribe = subscribeToDataChanges((eventData) => {
+      console.log('Realtime sync received in Principal:', eventData);
+      fetchData();
+    });
+    return () => unsubscribe();
   }, []);
 
   const isActive = (path) => location.pathname === path;
@@ -74,25 +82,41 @@ const PrincipalDashboard = ({ user, onLogout }) => {
     }
   };
 
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result);
+        localStorage.setItem('principalProfileImage', reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleLogout = () => {
     onLogout();
     navigate('/login');
   };
 
-  const isGoldOrBetter = true;
-  const isPlatinum = true;
-
   return (
     <div className="dashboard-layout">
       {/* Horizontal top nav */}
       <div className="sidebar" style={{ overflowY: 'auto' }}>
-        <div className="sidebar-header">
-          <h2>👔 Principal</h2>
-          <p>{user?.firstName} {user?.lastName}</p>
+        {/* Examiner-style clean brand header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingBottom: '20px', borderBottom: '1px solid #BFDBFE', marginBottom: '20px' }}>
+          <div style={{ width: '42px', height: '42px', background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', boxShadow: '0 4px 15px rgba(20, 158, 242, 0.25)', flexShrink: 0, fontSize: '1.3rem' }}>
+            👔
+          </div>
+          <div>
+            <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#0C4A86', letterSpacing: '-0.3px', lineHeight: 1.1 }}>Principal</div>
+            <div style={{ fontSize: '10px', fontWeight: '800', color: '#0096DA', textTransform: 'uppercase', letterSpacing: '0.6px', marginTop: '3px' }}>PORTAL DASHBOARD</div>
+          </div>
         </div>
 
         <ul className="nav-menu">
           <li><Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''}>📊 Dashboard</Link></li>
+          <li><Link to="/dashboard/school-calendar" className={isActive('/dashboard/school-calendar') ? 'active' : ''}>📅 School Calendar</Link></li>
           <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''}>👨‍🎓 Students</Link></li>
           
           <li><Link to="/dashboard/employees" className={isActive('/dashboard/employees') ? 'active' : ''}>👨‍💼 Employees</Link></li>
@@ -103,7 +127,6 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/notices" className={isActive('/dashboard/notices') ? 'active' : ''}>📢 Circulars & Notices</Link></li>
           <li><Link to="/dashboard/meeting-moms" className={isActive('/dashboard/meeting-moms') ? 'active' : ''}>📝 Meeting MOMs</Link></li>
           <li><Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''}>📊 Reports</Link></li>
-          <li><Link to="/dashboard/settings" className={isActive('/dashboard/settings') ? 'active' : ''}>⚙️ Change Password</Link></li>
 
           <li style={{ marginTop: '20px', padding: '0 4px' }}>
             <DailyInsightWidget />
@@ -120,6 +143,7 @@ const PrincipalDashboard = ({ user, onLogout }) => {
       <div className="main-content">
         <Routes>
           <Route index element={<PrincipalDashboardHome stats={stats} user={user} />} />
+          <Route path="school-calendar" element={<SchoolCalendarManagement />} />
           <Route path="students" element={<StudentManagement />} />
           <Route path="employees" element={<EmployeeManagement />} />
           <Route path="teachers" element={<EmployeeManagement />} />
@@ -140,3 +164,4 @@ const PrincipalDashboard = ({ user, onLogout }) => {
 };
 
 export default PrincipalDashboard;
+

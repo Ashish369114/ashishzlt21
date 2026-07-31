@@ -375,3 +375,62 @@ export const messageService = {
 };
 
 export default api;
+
+export const anecdoteService = {
+  getAll: (params) => api.get('/anecdotes', { params }),
+  create: (data) => api.post('/anecdotes', data),
+};
+
+export const remedialService = {
+  getAll: (params) => api.get('/remedials', { params }),
+  create: (data) => api.post('/remedials', data),
+};
+
+export const curriculumService = {
+  getAll: (params) => api.get('/curriculum', { params }),
+  create: (data) => api.post('/curriculum', data),
+  update: (id, data) => api.put(`/curriculum/${id}`, data),
+};
+
+export const submissionService = {
+  getAll: (params) => api.get('/submissions', { params }),
+  grade: (id, data) => api.put(`/submissions/${id}/grade`, data),
+};
+
+export const lessonPlanService = {
+  getAll: (params) => api.get('/lesson-plans', { params }),
+  create: (data) => api.post('/lesson-plans', data),
+  update: (id, data) => api.put(`/lesson-plans/${id}`, data),
+  delete: (id) => api.delete(`/lesson-plans/${id}`),
+};
+
+export const meetingMOMService = {
+  getAll: (params) => api.get('/meeting-mom', { params }),
+  create: (data) => api.post('/meeting-mom', data),
+};
+
+export const notificationService = {
+  getAll: (params) => api.get('/notifications', { params }),
+  markRead: (data) => api.put('/notifications/mark-read', data),
+};
+
+export const circularService = {
+  getAll: () => api.get('/circulars'),
+  create: (formData) => api.post('/circulars', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+};
+
+export const notesService = {
+  getAll: (params) => api.get('/notes', { params }),
+  upload: (formData) => api.post('/notes', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+};
+
+export const paymentService = {
+  getHistory: (studentId) => api.get(`/payments?studentId=${studentId}`),
+  payFee: (data) => api.post('/payments/pay', data),
+};
+
+export const examSyllabusService = {
+  getAll: (params) => api.get('/exam-syllabus', { params }),
+  create: (data) => api.post('/exam-syllabus', data),
+};
+
