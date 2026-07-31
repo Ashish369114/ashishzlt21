@@ -439,18 +439,7 @@ const LibraryManagement = ({ activeSection }) => {
       {/* TAB 0: DASHBOARD OVERVIEW */}
       {activeTab === 'dashboard' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {/* Top Quick Actions Banner */}
-          <div style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)', borderRadius: '18px', padding: '24px 30px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '800' }}>📖 Librarian Executive Overview</h2>
-              <p style={{ margin: '6px 0 0', color: '#c7d2fe', fontSize: '0.88rem' }}>Real-time library catalog analytics, active issue returns, overdue fines & inventory stock health.</p>
-            </div>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button onClick={() => setShowAddForm(true)} style={{ padding: '10px 16px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Plus size={16} /> Add Book
-              </button>
-            </div>
-          </div>
+
 
           {/* 10 Dashboard Summary Cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
