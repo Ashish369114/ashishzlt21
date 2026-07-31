@@ -161,7 +161,7 @@ const LandingPage = () => {
               <div className="image1-title-underline"></div>
             </div>
 
-            <h2 className="hero-sub-title">Smart School. Seamless Future.</h2>
+            <h2 className="hero-sub-title">Smart School. Seamless Future. this is a demo text</h2>
 
             <p className="hero-description-text">
               A unified platform to automate school operations, enhance communication, and drive better learning outcomes.
