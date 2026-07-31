@@ -479,7 +479,7 @@ const LibraryManagement = ({ activeSection }) => {
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.85rem' }}>
                 <li style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', color: '#b91c1c', fontWeight: '600' }}>⚠️ 3 Books are past due date for return.</li>
                 <li style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9', color: '#15803d' }}>✅ 5 New fiction arrivals cataloged today.</li>
-                <li style={{ padding: '10px 0', color: '#334155' }}>📦 School Uniform Set M restocked (+20 items).</li>
+                <li style={{ padding: '10px 0', color: '#0C4A86', fontWeight: '600' }}>📚 45 New Science & Literature Books added to Digital Catalogue.</li>
               </ul>
             </div>
           </div>
