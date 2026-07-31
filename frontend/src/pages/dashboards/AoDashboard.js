@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AoManagement from '../components/AoManagement';
+import DailyInsightWidget from '../../components/DailyInsightWidget';
 import { 
   LayoutDashboard, Building, UserPlus, Package, Wrench, Shield, Users, DoorOpen, Bus, BarChart2, LogOut 
 } from 'lucide-react';
@@ -79,8 +80,12 @@ const AoDashboard = ({ user, onLogout }) => {
           </ul>
         </div>
 
-        <div style={{ borderTop: '1px solid #D9D8D9', paddingTop: '20px' }}>
-          <button onClick={handleLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#F7F6F3', color: '#322029', border: '1px solid #AC968D', padding: '10px', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', fontSize: '0.88rem', transition: 'all 0.2s' }}>
+        <div style={{ marginTop: 'auto', padding: '0 4px', marginBottom: '16px' }}>
+          <DailyInsightWidget />
+        </div>
+
+        <div style={{ borderTop: '1px solid #D9D8D9', paddingTop: '16px' }}>
+          <button onClick={handleLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#F7F6F3', color: '#322029', border: '1px solid #AC968D', padding: '10px', borderRadius: '50px', fontWeight: '700', cursor: 'pointer', fontSize: '0.88rem', transition: 'all 0.2s' }}>
             <LogOut size={16} color="#AC968D" /> Logout
           </button>
         </div>

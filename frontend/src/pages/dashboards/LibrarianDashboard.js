@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LibraryManagement from '../components/LibraryManagement';
+import DailyInsightWidget from '../../components/DailyInsightWidget';
 import { LayoutDashboard, BookOpen, Repeat, DollarSign, CheckCircle2, FileText, LogOut } from 'lucide-react';
 
 const LibrarianDashboard = ({ user, onLogout }) => {
@@ -71,8 +72,12 @@ const LibrarianDashboard = ({ user, onLogout }) => {
             );
           })}
 
-          <li style={{ marginTop: '40px', borderTop: '1px solid #D9D8D9', paddingTop: '20px' }}>
-            <button onClick={handleLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444', padding: '10px', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', fontSize: '0.88rem' }}>
+          <li style={{ marginTop: '20px', padding: '0 4px' }}>
+            <DailyInsightWidget />
+          </li>
+
+          <li style={{ marginTop: '10px', borderTop: '1px solid #D9D8D9', paddingTop: '16px' }}>
+            <button onClick={handleLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444', padding: '10px', borderRadius: '50px', fontWeight: '700', cursor: 'pointer', fontSize: '0.88rem' }}>
               <LogOut size={16} /> Logout
             </button>
           </li>

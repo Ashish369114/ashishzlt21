@@ -20,6 +20,7 @@ import ReportManagement from '../components/ReportManagement';
 import EventList from '../components/EventList';
 import PrincipalTeacherComplaints from '../components/PrincipalTeacherComplaints';
 import PrincipalLessonPlanManagement from '../components/PrincipalLessonPlanManagement';
+import DailyInsightWidget from '../../components/DailyInsightWidget';
 import NoticeManagement from '../components/NoticeManagement';
 import MeetingMomManagement from '../components/MeetingMomManagement';
 
@@ -104,7 +105,11 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''}>📊 Reports</Link></li>
           <li><Link to="/dashboard/settings" className={isActive('/dashboard/settings') ? 'active' : ''}>⚙️ Change Password</Link></li>
 
-          <li style={{ marginTop: '20px' }}>
+          <li style={{ marginTop: '20px', padding: '0 4px' }}>
+            <DailyInsightWidget />
+          </li>
+
+          <li style={{ marginTop: '10px' }}>
             <button onClick={handleLogout} className="logout-btn">
               🚪 Logout
             </button>

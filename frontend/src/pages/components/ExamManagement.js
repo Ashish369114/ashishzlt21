@@ -14,10 +14,12 @@ const ExamManagement = () => {
   const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
   const [selectedClassId, setSelectedClassId] = useState('');
+  const [formGrade, setFormGrade] = useState('');
+  const [formSection, setFormSection] = useState('');
+  const [customExamType, setCustomExamType] = useState('');
+  const [customSubject, setCustomSubject] = useState('');
   const [formData, setFormData] = useState({
-    name: '',
     examType: 'Unit Test',
-    class: '',
     subject: '',
     invigilator: '',
     examDate: '',
@@ -58,32 +60,29 @@ const ExamManagement = () => {
       return;
     }
 
-    const gradeClasses = classes.filter((cls) => String(cls.grade) === String(selectedGrade));
-    const sections = [...new Set(gradeClasses.map((cls) => cls.section).filter(Boolean))].sort();
-    if (!sections.length) {
+    const visibleClasses = classes.filter((cls) => String(cls.grade) === String(selectedGrade));
+    const sectionOptions = [...new Set(visibleClasses.map((cls) => cls.section).filter(Boolean))].sort();
+
+    if (selectedSection && !sectionOptions.includes(selectedSection)) {
       setSelectedSection('');
       setSelectedClassId('');
       return;
     }
 
-    if (!selectedSection || !sections.includes(selectedSection)) {
-      setSelectedSection('');
-    }
-
-    const matchedClass = gradeClasses.find((cls) => String(cls.section) === String(selectedSection || ''));
-    setSelectedClassId(matchedClass?.id || matchedClass?._id || '');
+    const targetClass = visibleClasses.find((cls) => cls.section === selectedSection);
+    setSelectedClassId(targetClass ? (targetClass.id || targetClass._id) : '');
   }, [classes, selectedGrade, selectedSection]);
 
   const fetchExams = async () => {
     try {
       setLoading(true);
+      setError('');
       const response = await examService.getAll();
-      setExams(response.data && response.data.length ? response.data : demoExams);
-      setError('');
+      const loaded = (response.data && response.data.length) ? response.data : demoExams;
+      setExams(loaded);
     } catch (err) {
-      console.warn('Using demo exams data:', err);
+      console.warn('Using demo exams:', err);
       setExams(demoExams);
-      setError('');
     } finally {
       setLoading(false);
     }
@@ -92,9 +91,10 @@ const ExamManagement = () => {
   const fetchClasses = async () => {
     try {
       const response = await classService.getAll();
-      setClasses(response.data && response.data.length ? response.data : demoClasses);
+      const loaded = response.data && response.data.length ? response.data : demoClasses;
+      setClasses(loaded);
     } catch (err) {
-      console.warn('Using demo classes data:', err);
+      console.warn('Using demo classes:', err);
       setClasses(demoClasses);
     }
   };
@@ -137,15 +137,32 @@ const ExamManagement = () => {
 
   const handleAddExam = async (e) => {
     e.preventDefault();
-    if (!formData.class) {
-      alert('Please select a class.');
+    if (!formGrade || !formSection) {
+      alert('Please select both Grade and Section.');
       return;
     }
+
+    const matchedClass = classes.find((cls) => String(cls.grade) === String(formGrade) && String(cls.section) === String(formSection));
+    const targetClassId = matchedClass ? (matchedClass.id || matchedClass._id) : null;
+    if (!targetClassId) {
+      alert('Selected Grade and Section combination not found.');
+      return;
+    }
+
+    const effectiveExamType = formData.examType === 'Other' ? (customExamType.trim() || 'Custom Exam') : formData.examType;
+    const effectiveExamName = effectiveExamType;
+
     try {
       setError('');
       let subjectsToCreate = [];
 
-      if (formData.subject) {
+      if (formData.subject === 'Other') {
+        if (!customSubject.trim()) {
+          alert('Please enter custom subject name.');
+          return;
+        }
+        subjectsToCreate = [customSubject.trim()];
+      } else if (formData.subject) {
         subjectsToCreate = [formData.subject];
       } else {
         if (!subjects || subjects.length === 0) {
@@ -157,9 +174,9 @@ const ExamManagement = () => {
 
       const promises = subjectsToCreate.map((subj) => {
         return examService.add({
-          name: formData.name,
-          examType: formData.examType || 'Unit Test',
-          class: formData.class,
+          name: effectiveExamName,
+          examType: effectiveExamType,
+          class: targetClassId,
           subject: subj,
           invigilator: formData.invigilator || null,
           examDate: formData.examDate,
@@ -173,9 +190,7 @@ const ExamManagement = () => {
 
       await Promise.all(promises);
       setFormData({
-        name: '',
         examType: 'Unit Test',
-        class: '',
         subject: '',
         invigilator: '',
         examDate: '',
@@ -185,6 +200,10 @@ const ExamManagement = () => {
         room: '',
         description: '',
       });
+      setFormGrade('');
+      setFormSection('');
+      setCustomExamType('');
+      setCustomSubject('');
       setShowForm(false);
       await fetchExams();
       alert('Exam(s) scheduled successfully!');
@@ -194,13 +213,16 @@ const ExamManagement = () => {
     }
   };
 
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const [selectedExamIds, setSelectedExamIds] = useState([]);
+
   const handleDeleteExamGroup = async (ids) => {
     const validIds = (ids || []).filter(Boolean);
     if (validIds.length === 0) {
       alert('No valid exam IDs found to delete.');
       return;
     }
-    if (window.confirm('Are you sure you want to delete these exams?')) {
+    if (window.confirm('Are you sure you want to delete these exam(s)?')) {
       try {
         await Promise.all(validIds.map(id => examService.delete(id)));
         await fetchExams();
@@ -208,6 +230,34 @@ const ExamManagement = () => {
         console.error('Failed to delete exams:', err);
         setError('Failed to delete exams: ' + (err.response?.data?.message || err.message));
       }
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedExamIds.length === 0) {
+      alert('Please select at least one exam to delete.');
+      return;
+    }
+    if (window.confirm(`Are you sure you want to delete ${selectedExamIds.length} selected exam(s)?`)) {
+      try {
+        await Promise.all(selectedExamIds.map(id => examService.delete(id)));
+        setSelectedExamIds([]);
+        await fetchExams();
+        alert('Selected exam(s) deleted successfully!');
+      } catch (err) {
+        console.error('Failed to bulk delete exams:', err);
+        setError('Failed to delete exams: ' + (err.response?.data?.message || err.message));
+      }
+    }
+  };
+
+  const toggleSelectExamGroup = (examGroupIds) => {
+    const idsToToggle = (examGroupIds || []).filter(Boolean);
+    const isAllSelected = idsToToggle.every(id => selectedExamIds.includes(id));
+    if (isAllSelected) {
+      setSelectedExamIds(prev => prev.filter(id => !idsToToggle.includes(id)));
+    } else {
+      setSelectedExamIds(prev => [...new Set([...prev, ...idsToToggle])]);
     }
   };
 
@@ -223,7 +273,23 @@ const ExamManagement = () => {
     const matchExamName = !selectedExamName || examNameClean === selectedExamName;
 
     return matchClass && matchExamName;
-  }).sort((a, b) => new Date(a.examDate || new Date()) - new Date(b.examDate || new Date()));
+  }).sort((a, b) => {
+    const gradeA = Number(a.class?.grade || a.grade || 0);
+    const gradeB = Number(b.class?.grade || b.grade || 0);
+    if (gradeA !== gradeB) return gradeA - gradeB;
+
+    const secA = String(a.class?.section || a.section || '').toUpperCase();
+    const secB = String(b.class?.section || b.section || '').toUpperCase();
+    if (secA !== secB) return secA.localeCompare(secB);
+
+    const dA = new Date(a.examDate || a.date || 0);
+    const dB = new Date(b.examDate || b.date || 0);
+    if (dA.getTime() !== dB.getTime()) return dA - dB;
+
+    const subjA = typeof a.subject === 'object' ? (a.subject?.name || '') : String(a.subject || '');
+    const subjB = typeof b.subject === 'object' ? (b.subject?.name || '') : String(b.subject || '');
+    return subjA.localeCompare(subjB);
+  });
 
   const getExamDate = (dateString) => {
     const d = dateString ? new Date(dateString) : new Date();
@@ -277,11 +343,15 @@ const ExamManagement = () => {
 
       {error && <div className="alert alert-error">{error}</div>}
 
-      <div className="form-container" style={{ marginBottom: '20px', padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '16px' }}>
-          <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1e293b' }}>Filter & Search</h3>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button className="btn btn-primary" onClick={() => {
+      <div style={{ marginBottom: '24px', padding: '24px', background: '#ffffff', borderRadius: '16px', border: '1.5px solid #e2e8f0', boxShadow: '0 15px 35px -10px rgba(12, 74, 134, 0.08), 0 4px 15px rgba(0,0,0,0.02)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', color: '#0C4A86', letterSpacing: '-0.3px' }}>Filter & Search</h3>
+            <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#64748b' }}>Select parameters to display or manage scheduled exams</p>
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <button onClick={() => {
               const printWin = window.open('', '_blank');
               const rows = uniqueVisibleExams.map(exam => {
                 return `<tr>
@@ -292,7 +362,7 @@ const ExamManagement = () => {
                 </tr>`;
               }).join('');
               printWin.document.write(`<html><head><title>Exam Timetable</title>
-                <style>body{font-family:Arial,sans-serif;padding:20px}h1{text-align:center;color:#1e293b}
+                <style>body{font-family:Arial,sans-serif;padding:20px}h1{text-align:center;color:#0C4A86}
                 table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #cbd5e1;padding:10px;text-align:left;font-size:13px}
                 th{background:#f1f5f9;color:#475569;text-transform:uppercase;font-size:11px}</style></head>
                 <body><h1>📋 Exam Timetable</h1><p style="text-align:center;color:#64748b;font-weight:bold;font-size:14px;text-transform:uppercase;">${selectedExamName ? selectedExamName + ' EXAMS' : 'ALL EXAMS'}</p>
@@ -301,8 +371,11 @@ const ExamManagement = () => {
                 </body></html>`);
               printWin.document.close();
               printWin.print();
-            }} style={{ background: '#475569', borderColor: '#475569' }}>🖨️ Print Timetable</button>
-            <button className="btn btn-primary" onClick={() => {
+            }} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 22px', borderRadius: '50px', border: 'none', background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', color: '#ffffff', fontSize: '0.88rem', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap', boxShadow: '0 4px 15px rgba(20, 158, 242, 0.25)' }}>
+              🖨️ Print Timetable
+            </button>
+
+            <button onClick={() => {
               let csv = 'Date,Day,Subject,Room,Invigilator\n';
               uniqueVisibleExams.forEach(exam => {
                 csv += `"${getExamDate(exam.examDate)}","${getExamDay(exam.examDate)}","${exam.subject?.name || exam.subject || 'Unknown'}","${exam.room}","${exam.invigilatorName}"\n`;
@@ -314,35 +387,71 @@ const ExamManagement = () => {
               a.download = `exam_timetable_${new Date().toISOString().slice(0,10)}.csv`;
               a.click();
               URL.revokeObjectURL(url);
-            }} style={{ background: '#dc2626', borderColor: '#dc2626' }}>📄 Export PDF</button>
-            <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-              {showForm ? 'Cancel Form' : '➕ Add Exam'}
+            }} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 22px', borderRadius: '50px', border: 'none', background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', color: '#ffffff', fontSize: '0.88rem', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap', boxShadow: '0 4px 15px rgba(20, 158, 242, 0.25)' }}>
+              📄 Export PDF
             </button>
+
+            <button onClick={() => setShowForm(!showForm)} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 22px', borderRadius: '50px', border: 'none', background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', color: '#ffffff', fontSize: '0.88rem', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap', boxShadow: '0 4px 15px rgba(20, 158, 242, 0.25)' }}>
+              {showForm ? '✖ Cancel Form' : '➕ Add Exam'}
+            </button>
+
+            <button
+              onClick={() => {
+                setIsDeleteMode(!isDeleteMode);
+                setSelectedExamIds([]);
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 22px',
+                borderRadius: '50px',
+                border: 'none',
+                background: isDeleteMode ? 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)' : 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)',
+                color: '#ffffff',
+                fontSize: '0.88rem',
+                fontWeight: '700',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                boxShadow: isDeleteMode ? '0 4px 15px rgba(239, 68, 68, 0.3)' : '0 4px 15px rgba(20, 158, 242, 0.25)'
+              }}
+            >
+              {isDeleteMode ? '✖ Exit Delete Mode' : '🗑️ Delete Exams'}
+            </button>
+
+            {isDeleteMode && selectedExamIds.length > 0 && (
+              <button
+                onClick={handleBulkDelete}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 22px', borderRadius: '50px', border: 'none', background: 'linear-gradient(135deg, #b91c1c 0%, #dc2626 100%)', color: '#ffffff', fontSize: '0.88rem', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap', boxShadow: '0 4px 15px rgba(185, 28, 28, 0.3)' }}
+              >
+                Confirm Delete ({selectedExamIds.length})
+              </button>
+            )}
           </div>
         </div>
-        
-        <div className="form-row" style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-          <div className="form-group" style={{ flex: '1 1 150px' }}>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>Grade</label>
-            <select value={selectedGrade} onChange={(e) => setSelectedGrade(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Grade</label>
+            <select value={selectedGrade} onChange={(e) => setSelectedGrade(e.target.value)} style={{ width: '100%', height: '42px', padding: '0 12px', borderRadius: '8px', border: '1.5px solid #cbd5e1', background: '#f8fafc', fontSize: '0.9rem', color: '#0f172a', fontWeight: '500', outline: 'none' }}>
               <option value="">All Grades</option>
               {gradeOptions.map((grade) => (
                 <option key={grade} value={grade}>Grade {grade}</option>
               ))}
             </select>
           </div>
-          <div className="form-group" style={{ flex: '1 1 150px' }}>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>Section</label>
-            <select value={selectedSection} onChange={(e) => setSelectedSection(e.target.value)} disabled={!sectionsForGrade.length} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Section</label>
+            <select value={selectedSection} onChange={(e) => setSelectedSection(e.target.value)} disabled={!sectionsForGrade.length} style={{ width: '100%', height: '42px', padding: '0 12px', borderRadius: '8px', border: '1.5px solid #cbd5e1', background: '#f8fafc', fontSize: '0.9rem', color: '#0f172a', fontWeight: '500', outline: 'none', opacity: !sectionsForGrade.length ? 0.6 : 1 }}>
               <option value="">All Sections</option>
               {sectionsForGrade.map((section) => (
                 <option key={section} value={section}>Section {section}</option>
               ))}
             </select>
           </div>
-          <div className="form-group" style={{ flex: '1 1 150px' }}>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>Exam Type</label>
-            <select value={selectedExamName} onChange={(e) => setSelectedExamName(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Exam Type</label>
+            <select value={selectedExamName} onChange={(e) => setSelectedExamName(e.target.value)} style={{ width: '100%', height: '42px', padding: '0 12px', borderRadius: '8px', border: '1.5px solid #cbd5e1', background: '#f8fafc', fontSize: '0.9rem', color: '#0f172a', fontWeight: '500', outline: 'none' }}>
               <option value="">All Exam Types</option>
               {examNameOptions.map((name) => (
                 <option key={name} value={name}>{name}</option>
@@ -352,49 +461,68 @@ const ExamManagement = () => {
         </div>
       </div>
 
+      {isDeleteMode && (
+        <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', color: '#991b1b', fontWeight: '600', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>⚠️ Delete Mode Active: Check items or click Delete on any row to delete exams.</span>
+          <button onClick={() => setIsDeleteMode(false)} style={{ background: 'transparent', border: 'none', color: '#991b1b', cursor: 'pointer', fontWeight: 'bold' }}>✕ Exit</button>
+        </div>
+      )}
+
       {showForm && (
         <div className="form-container" style={{ marginBottom: '30px' }}>
           <h3>Add New Exam</h3>
           <form onSubmit={handleAddExam}>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Exam Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Unit Test 1"
-                  required
-                />
-              </div>
-              <div className="form-group">
+            <div className="form-row" style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+              <div className="form-group" style={{ flex: '1 1 200px' }}>
                 <label>Exam Type</label>
                 <select name="examType" value={formData.examType || 'Unit Test'} onChange={handleInputChange} required>
                   <option value="Unit Test">Unit Test</option>
+                  <option value="Slip Test">Slip Test</option>
+                  <option value="Admission Exam">Admission Exam</option>
                   <option value="Mid-Term">Mid-Term</option>
-                  <option value="Final">Final</option>
                   <option value="Half-Yearly">Half-Yearly</option>
                   <option value="Quarterly">Quarterly</option>
                   <option value="Annual">Annual</option>
+                  <option value="Final">Final</option>
                   <option value="Practical">Practical</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
-            </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>Class</label>
-                <select name="class" value={formData.class} onChange={handleInputChange} required>
-                  <option value="">Select a class</option>
-                  {classes.map((cls) => (
-                    <option key={cls.id || cls._id} value={cls.id || cls._id}>
-                      Grade {cls.grade} - Section {cls.section}
-                    </option>
+              {formData.examType === 'Other' && (
+                <div className="form-group" style={{ flex: '1 1 200px' }}>
+                  <label>Custom Exam Name / Type</label>
+                  <input
+                    type="text"
+                    placeholder="Enter custom exam name..."
+                    value={customExamType}
+                    onChange={(e) => setCustomExamType(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+
+              <div className="form-group" style={{ flex: '1 1 200px' }}>
+                <label>Grade</label>
+                <select value={formGrade} onChange={(e) => { setFormGrade(e.target.value); setFormSection(''); }} required>
+                  <option value="">Select Grade</option>
+                  {[...new Set(classes.map((cls) => String(cls.grade)).filter(Boolean))].sort((a, b) => Number(a) - Number(b)).map((grade) => (
+                    <option key={grade} value={grade}>Grade {grade}</option>
                   ))}
                 </select>
               </div>
-              <div className="form-group">
+
+              <div className="form-group" style={{ flex: '1 1 200px' }}>
+                <label>Section</label>
+                <select value={formSection} onChange={(e) => setFormSection(e.target.value)} required disabled={!formGrade}>
+                  <option value="">Select Section</option>
+                  {[...new Set(classes.filter((cls) => String(cls.grade) === String(formGrade)).map((cls) => cls.section).filter(Boolean))].sort().map((sec) => (
+                    <option key={sec} value={sec}>Section {sec}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group" style={{ flex: '1 1 200px' }}>
                 <label>Subject</label>
                 <select name="subject" value={formData.subject} onChange={handleInputChange}>
                   <option value="">All Subjects</option>
@@ -407,8 +535,22 @@ const ExamManagement = () => {
                       </option>
                     );
                   })}
+                  <option value="Other">Other</option>
                 </select>
               </div>
+
+              {formData.subject === 'Other' && (
+                <div className="form-group" style={{ flex: '1 1 200px' }}>
+                  <label>Custom Subject Name</label>
+                  <input
+                    type="text"
+                    placeholder="Enter custom subject name..."
+                    value={customSubject}
+                    onChange={(e) => setCustomSubject(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
             </div>
 
             <div className="form-row">
@@ -498,49 +640,87 @@ const ExamManagement = () => {
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary">Save Exam</button>
+            <button type="submit" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 28px', borderRadius: '50px', border: 'none', background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', color: '#ffffff', fontSize: '0.92rem', fontWeight: '700', cursor: 'pointer', boxShadow: '0 4px 15px rgba(20, 158, 242, 0.25)' }}>💾 Save Exam</button>
           </form>
         </div>
       )}
 
-      {uniqueVisibleExams.length === 0 ? (
+      {!selectedGrade && !selectedSection && !selectedExamName ? (
+        <div style={{ textAlign: 'center', padding: '60px 20px', background: '#ffffff', borderRadius: '16px', border: '1.5px dashed #0096DA', boxShadow: '0 10px 25px -5px rgba(12, 74, 134, 0.05)' }}>
+          <p style={{ fontSize: '1.15rem', fontWeight: '700', color: '#0C4A86', margin: '0 0 8px 0' }}>🔍 Please select a Grade, Section, or Exam Type above</p>
+          <p style={{ fontSize: '0.9rem', color: '#64748b', margin: 0 }}>Select any filter option to view the scheduled exam timetable.</p>
+        </div>
+      ) : uniqueVisibleExams.length === 0 ? (
         <p style={{ textAlign: 'center', padding: '40px 20px', color: '#9ca3af' }}>
-          No exams found matching your criteria.
+          No exams found matching your selected criteria.
         </p>
       ) : (
-        <div style={{ overflowX: 'auto', background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+        <div style={{ overflowX: 'auto', background: '#fff', borderRadius: '16px', border: '1.5px solid #e2e8f0', boxShadow: '0 10px 25px -5px rgba(12, 74, 134, 0.05)' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1000px' }}>
             <thead>
-              <tr style={{ background: '#f1f5f9', color: '#475569', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <tr style={{ background: '#EBF5FF', color: '#0C4A86', fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                {isDeleteMode && (
+                  <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1', width: '40px' }}>
+                    <input
+                      type="checkbox"
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          const allIds = uniqueVisibleExams.flatMap(g => g._ids?.length ? g._ids : [g.id || g._id]).filter(Boolean);
+                          setSelectedExamIds(allIds);
+                        } else {
+                          setSelectedExamIds([]);
+                        }
+                      }}
+                      checked={selectedExamIds.length > 0 && selectedExamIds.length === uniqueVisibleExams.flatMap(g => g._ids?.length ? g._ids : [g.id || g._id]).filter(Boolean).length}
+                    />
+                  </th>
+                )}
                 <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Date</th>
                 <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Day</th>
                 <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Subject</th>
                 <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Room</th>
                 <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Invigilator</th>
-                <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Actions</th>
+                <th style={{ padding: '14px 16px', borderBottom: '2px solid #cbd5e1' }}>Status / Action</th>
               </tr>
             </thead>
             <tbody>
               {uniqueVisibleExams.map((exam, idx) => {
                 const isHighlight = isToday(exam.examDate);
-                const rowKey = (exam._ids && exam._ids.length > 0) ? exam._ids.join('-') : (exam.id || exam._id || `exam-${idx}`);
-                
+                const examIds = exam._ids?.length ? exam._ids : [exam.id || exam._id];
+                const rowKey = examIds.join('-') || `exam-${idx}`;
+                const isRowSelected = examIds.length > 0 && examIds.every(id => selectedExamIds.includes(id));
+
                 return (
-                  <tr key={rowKey} style={{ borderBottom: '1px solid #e2e8f0', background: isHighlight ? '#eff6ff' : '#fff', transition: 'background 0.2s' }}>
+                  <tr key={rowKey} style={{ borderBottom: '1px solid #e2e8f0', background: isRowSelected ? '#fee2e2' : isHighlight ? '#eff6ff' : '#fff', transition: 'background 0.2s' }}>
+                    {isDeleteMode && (
+                      <td style={{ padding: '14px 16px' }}>
+                        <input
+                          type="checkbox"
+                          checked={isRowSelected}
+                          onChange={() => toggleSelectExamGroup(examIds)}
+                        />
+                      </td>
+                    )}
                     <td style={{ padding: '14px 16px', color: '#0f172a', fontWeight: '500', whiteSpace: 'nowrap' }}>
                       {getExamDate(exam.examDate)}
                     </td>
                     <td style={{ padding: '14px 16px', color: '#64748b' }}>{getExamDay(exam.examDate)}</td>
-                    <td style={{ padding: '14px 16px', color: '#3b82f6', fontWeight: '600' }}>{exam.subject?.name || exam.subject || 'Unknown'}</td>
+                    <td style={{ padding: '14px 16px', color: '#0C4A86', fontWeight: '700' }}>{typeof exam.subject === 'object' ? (exam.subject?.name || 'Unknown') : (exam.subject || 'Unknown')}</td>
                     <td style={{ padding: '14px 16px', color: '#475569' }}>{exam.room}</td>
                     <td style={{ padding: '14px 16px', color: '#475569' }}>{exam.invigilatorName}</td>
                     <td style={{ padding: '14px 16px' }}>
-                      <button
-                        onClick={() => handleDeleteExamGroup(exam._ids?.length ? exam._ids : [exam.id || exam._id])}
-                        style={{ padding: '6px 12px', background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' }}
-                      >
-                        Delete
-                      </button>
+                      {isDeleteMode ? (
+                        <button
+                          onClick={() => handleDeleteExamGroup(examIds)}
+                          style={{ padding: '6px 12px', background: '#fee2e2', color: '#ef4444', border: '1px solid #fca5a5', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600' }}
+                        >
+                          🗑️ Delete
+                        </button>
+                      ) : (
+                        <span style={{ padding: '4px 10px', background: '#ecfdf5', color: '#059669', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase' }}>
+                          Scheduled
+                        </span>
+                      )}
                     </td>
                   </tr>
                 );
