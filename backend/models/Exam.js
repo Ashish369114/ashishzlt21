@@ -24,7 +24,7 @@ const Exam = sequelize.define('Exam', {
     allowNull: false,
   },
   examType: {
-    type: DataTypes.ENUM('Unit Test', 'Half-Yearly', 'Quarterly', 'Annual', 'Mid-Term', 'Final', 'Practical'),
+    type: DataTypes.STRING,
     defaultValue: 'Unit Test',
   },
   startTime: {

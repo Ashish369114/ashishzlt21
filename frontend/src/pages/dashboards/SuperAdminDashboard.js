@@ -33,6 +33,7 @@ import AuditLogsManagement from '../components/AuditLogsManagement';
 import MeetingMomManagement from '../components/MeetingMomManagement';
 import NoticeManagement from '../components/NoticeManagement';
 import BackupRestoreManagement from '../components/BackupRestoreManagement';
+import DailyInsightWidget from '../../components/DailyInsightWidget';
 
 const SuperAdminDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -97,8 +98,12 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/backup-restore" className={isActive('/dashboard/backup-restore') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Archive size={20} /> Backup & Restore</Link></li>
           <li><Link to="/dashboard/settings" className={isActive('/dashboard/settings') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Settings size={20} /> Settings</Link></li>
 
-          <li style={{ marginTop: '30px', borderTop: '1px solid #D9D8D9', paddingTop: '20px' }}>
-            <button onClick={handleLogout} className="logout-btn" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444' }}>
+          <li style={{ marginTop: '20px', padding: '0 4px' }}>
+            <DailyInsightWidget />
+          </li>
+
+          <li style={{ marginTop: '10px', borderTop: '1px solid #D9D8D9', paddingTop: '16px' }}>
+            <button onClick={handleLogout} className="logout-btn" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '50px', padding: '10px' }}>
               <LogOut size={18} /> Logout
             </button>
           </li>

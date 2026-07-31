@@ -1,4 +1,6 @@
 // Utility functions for exporting data to CSV/Excel and printing PDF
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export const exportToCSV = (data, filename = 'export.csv') => {
   if (!data || !data.length) return;
@@ -29,6 +31,47 @@ export const exportToCSV = (data, filename = 'export.csv') => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+};
+
+export const exportToPDF = (title, columns, data, filename = 'document.pdf') => {
+  try {
+    const doc = new jsPDF();
+
+    // Title & Header styling
+    doc.setFontSize(16);
+    doc.setTextColor(12, 74, 134); // #0C4A86
+    doc.text(title, 14, 18);
+
+    doc.setFontSize(9);
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Generated on ${new Date().toLocaleString()}`, 14, 25);
+
+    const headers = columns.map(c => c.header);
+    const rows = data.map(row => columns.map(c => row[c.key] || ''));
+
+    autoTable(doc, {
+      startY: 30,
+      head: [headers],
+      body: rows,
+      headStyles: {
+        fillColor: [12, 74, 134],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold'
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252]
+      },
+      styles: {
+        fontSize: 10,
+        cellPadding: 4
+      }
+    });
+
+    doc.save(filename.endsWith('.pdf') ? filename : `${filename}.pdf`);
+  } catch (err) {
+    console.error('jsPDF error, falling back to print window:', err);
+    printPDF(title, columns, data);
+  }
 };
 
 export const printPDF = (title, columns, data) => {
