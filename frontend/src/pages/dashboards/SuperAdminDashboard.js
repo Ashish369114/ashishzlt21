@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import { classService } from '../../services/api';
+import { subscribeToDataChanges } from '../../services/syncService';
 import AdmissionManagement from '../components/AdmissionManagement';
 import EmployeeManagement from '../components/EmployeeManagement';
 import HostelManagement from '../components/HostelManagement';
@@ -20,11 +21,12 @@ import TransportManagement from '../components/TransportManagement';
 import InventoryManagement from '../components/InventoryManagement';
 import SuperAdminDashboardHome from '../components/SuperAdminDashboardHome';
 import UserManagement from '../components/UserManagement';
+import SchoolCalendarManagement from '../components/SchoolCalendarManagement';
 import { 
   LayoutDashboard, Users, GraduationCap, ClipboardList, 
   BookOpen, Bus, BedDouble, BarChart3, Settings, 
   Calendar as CalendarIcon, LogOut, Bell,
-  ChevronDown, ChevronRight, Archive
+  ChevronDown, ChevronRight, Archive, Camera, ArrowLeft
 } from 'lucide-react';
 import AcademicManagement from '../components/AcademicManagement';
 import SettingsManagement from '../components/SettingsManagement';
@@ -38,8 +40,11 @@ import DailyInsightWidget from '../../components/DailyInsightWidget';
 const SuperAdminDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const fileInputRef = useRef(null);
+  const rawName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim();
+  const userName = (rawName && rawName !== 'Super Admin') ? rawName : (user?.name && user.name !== 'Super Admin') ? user.name : 'Rajesh Sharma';
   const [stats, setStats] = useState(null);
-  const [isEmployeesOpen, setIsEmployeesOpen] = useState(false);
+  const [profileImage, setProfileImage] = useState(localStorage.getItem('adminProfileImage') || '');
 
   const isActive = (path) => {
     if (path === '/dashboard' && location.pathname === '/dashboard') return true;
@@ -49,6 +54,12 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
 
   useEffect(() => {
     fetchStats();
+    // Subscribe to realtime cross-portal changes (from Teacher, Parent, etc.)
+    const unsubscribe = subscribeToDataChanges((eventData) => {
+      console.log('Realtime sync received in SuperAdmin:', eventData);
+      fetchStats();
+    });
+    return () => unsubscribe();
   }, []);
 
   const fetchStats = async () => {
@@ -60,20 +71,29 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
     }
   };
 
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result);
+        localStorage.setItem('adminProfileImage', reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleLogout = () => {
     onLogout();
     navigate('/login');
   };
 
-  const isGoldOrBetter = true;
-  const isPlatinum = true;
-
   return (
-    <div className="dashboard-layout" style={{ background: '#F7F6F3', minHeight: '100vh' }}>
-      <div className="sidebar" style={{ background: '#EFE9E1', borderRight: '1px solid #D9D8D9' }}>
-        <div className="sidebar-header" style={{ borderBottom: '1px solid #D9D8D9', paddingBottom: '20px' }}>
-          <h2 style={{ color: '#322029', fontSize: '1.25rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: '32px', height: '32px', background: '#AC968D', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div className="dashboard-layout" style={{ background: '#FAF6F0', minHeight: '100vh' }}>
+      <div className="sidebar" style={{ background: '#FAF6F0', borderRight: '1px solid #BFDBFE' }}>
+        <div className="sidebar-header" style={{ borderBottom: '1px solid #BFDBFE', paddingBottom: '20px' }}>
+          <h2 style={{ color: '#0C4A86', fontSize: '1.25rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '32px', height: '32px', background: '#0C4A86', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <span style={{ fontSize: '1.2rem' }}>🎓</span>
             </div>
             Super Admin
@@ -81,6 +101,7 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
         </div>
         <ul className="nav-menu" style={{ marginTop: '20px' }}>
           <li><Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><LayoutDashboard size={20} /> Dashboard</Link></li>
+          <li><Link to="/dashboard/school-calendar" className={isActive('/dashboard/school-calendar') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CalendarIcon size={20} /> School Calendar</Link></li>
           <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><GraduationCap size={20} /> Students</Link></li>
           
           <li><Link to="/dashboard/employees" className={isActive('/dashboard/employees') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Users size={20} /> Employees</Link></li>
@@ -101,7 +122,7 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
             <DailyInsightWidget />
           </li>
 
-          <li style={{ marginTop: '10px', borderTop: '1px solid #D9D8D9', paddingTop: '16px' }}>
+          <li style={{ marginTop: '10px', borderTop: '1px solid #BFDBFE', paddingTop: '16px' }}>
             <button onClick={handleLogout} className="logout-btn" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '50px', padding: '10px' }}>
               <LogOut size={18} /> Logout
             </button>
@@ -109,12 +130,12 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
         </ul>
       </div>
 
-      <div className="main-content" style={{ background: '#F7F6F3', padding: 0 }}>
+      <div className="main-content" style={{ background: '#FAF6F0', padding: 0 }}>
         {/* Top Header */}
         <div style={{
           background: '#ffffff',
           padding: '20px 32px',
-          borderBottom: '1px solid #D9D8D9',
+          borderBottom: '1px solid #BFDBFE',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -122,31 +143,79 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
           top: 0,
           zIndex: 10
         }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '700', color: '#322029' }}>Good Morning, Super Admin 👋</h1>
-            <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#6B5B54' }}>Here's what's happening with your school today.</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '7px 14px',
+                borderRadius: '50px',
+                background: '#EBF5FF',
+                color: '#0C4A86',
+                border: '1.5px solid #BFDBFE',
+                fontSize: '0.82rem',
+                fontWeight: '700',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <ArrowLeft size={16} /> Back
+            </button>
+            <div>
+              <h1 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '700', color: '#0C4A86' }}>Good Morning, {userName} 👋</h1>
+              <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#6B5B54' }}>Here's what's happening with your school today.</p>
+            </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             <span style={{ fontSize: '0.85rem', color: '#6B5B54', fontWeight: '500' }}>
               {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
             </span>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderLeft: '1px solid #D9D8D9', paddingLeft: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderLeft: '1px solid #BFDBFE', paddingLeft: '20px' }}>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#322029' }}>{user?.firstName} {user?.lastName}</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0C4A86' }}>{userName}</div>
                 <div style={{ fontSize: '0.75rem', color: '#6B5B54', fontWeight: '500' }}>
                   Super Admin
                 </div>
               </div>
-              <div style={{ width: '38px', height: '38px', background: '#EFE9E1', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#322029', fontWeight: '700' }}>
-                {user?.firstName?.[0] || 'A'}
-              </div>
+
+              {/* Photo Upload Avatar Feature */}
+              <input type="file" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" className="hidden" style={{ display: 'none' }} />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                title="Click to upload profile photo"
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ffffff',
+                  fontWeight: '700',
+                  border: '2px solid #BFDBFE',
+                  cursor: 'pointer',
+                  overflow: 'hidden',
+                  position: 'relative'
+                }}
+              >
+                {profileImage ? (
+                  <img src={profileImage} alt="Admin" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <span>{user?.firstName?.[0] || 'A'}</span>
+                )}
+              </button>
             </div>
           </div>
         </div>
 
         <Routes>
           <Route index element={<SuperAdminDashboardHome stats={stats} />} />
+          <Route path="school-calendar" element={<SchoolCalendarManagement />} />
           <Route path="employees" element={<EmployeeManagement />} />
           <Route path="students" element={<StudentManagement />} />
           <Route path="teachers" element={<EmployeeManagement />} />
@@ -174,3 +243,4 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
 };
 
 export default SuperAdminDashboard;
+

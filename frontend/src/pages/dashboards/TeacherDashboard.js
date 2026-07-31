@@ -4,7 +4,10 @@ import TeacherDashboardLayout from '../../layouts/TeacherDashboardLayout';
 import TeacherHomePage from './TeacherHomePage';
 import TeacherClassesPage from './TeacherClassesPage';
 import TeacherCommunicationsPage from './TeacherCommunicationsPage';
+import TeacherActivitiesPage from './TeacherActivitiesPage';
+import TeacherDailySlidesPage from './TeacherDailySlidesPage';
 import TeacherSettingsPage from './TeacherSettingsPage';
+import TeacherStudentModule from '../components/TeacherStudentModule';
 
 const TeacherDashboard = ({ user, onLogout }) => {
   if (!user) {
@@ -15,8 +18,11 @@ const TeacherDashboard = ({ user, onLogout }) => {
     <TeacherDashboardLayout user={user} onLogout={onLogout}>
       <Routes>
         <Route index element={<TeacherHomePage user={user} />} />
+        <Route path="students" element={<Navigate to="/dashboard/classes" replace />} />
         <Route path="classes" element={<TeacherClassesPage user={user} />} />
         <Route path="communications" element={<TeacherCommunicationsPage user={user} />} />
+        <Route path="activities" element={<TeacherActivitiesPage user={user} />} />
+        <Route path="daily-slides" element={<TeacherDailySlidesPage user={user} />} />
         <Route path="settings" element={<TeacherSettingsPage user={user} />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
@@ -25,4 +31,3 @@ const TeacherDashboard = ({ user, onLogout }) => {
 };
 
 export default TeacherDashboard;
-

@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { studentService, classService, concessionService, feeService, marksService, attendanceService, studentNotesService } from '../../services/api';
 import { formatCurrency } from '../../utils/currencyFormatter';
 import { ChevronRight } from 'lucide-react';
-import { demoStudents, demoClasses } from '../../utils/demoData';
 
 const StudentManagement = () => {
   const [students, setStudents] = useState([]);
@@ -34,8 +33,6 @@ const StudentManagement = () => {
   const [attendanceList, setAttendanceList] = useState([]);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
   const [attendanceError, setAttendanceError] = useState('');
-
-  const [viewingProgressCardStudent, setViewingProgressCardStudent] = useState(null);
   
   const [concessionStudent, setConcessionStudent] = useState(null);
   const [studentFees, setStudentFees] = useState([]);
@@ -144,7 +141,7 @@ const StudentManagement = () => {
     }
 
     const matchedClass = gradeClasses.find((cls) => String(cls.section) === String(selectedSection || ''));
-    setSelectedClassId(matchedClass?._id || matchedClass?.id || '');
+    setSelectedClassId(matchedClass?._id || '');
   }, [classes, selectedGrade, selectedSection]);
 
   const fetchStudents = async (userObj = currentUser) => {
@@ -152,19 +149,16 @@ const StudentManagement = () => {
       setLoading(true);
       const isAcc = userObj && (userObj.role === 'accountant' || userObj.role === 'accountant_admin');
       const [studentsRes, feesRes] = await Promise.all([
-        studentService.getAll().catch(() => ({ data: [] })),
-        isAcc ? feeService.getAll().catch(() => ({ data: [] })) : Promise.resolve({ data: [] })
+        studentService.getAll(),
+        isAcc ? feeService.getAll() : Promise.resolve({ data: [] })
       ]);
-      const resStudents = (studentsRes.data && studentsRes.data.length) ? studentsRes.data : demoStudents;
-      setStudents(resStudents);
+      setStudents(studentsRes.data || []);
       if (isAcc) {
         setAllFeesData(feesRes.data || []);
       }
-      setError('');
     } catch (err) {
-      console.warn('Failed to fetch students from server, using demo students:', err);
-      setError('');
-      setStudents(demoStudents);
+      setError('Failed to fetch students');
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -173,10 +167,9 @@ const StudentManagement = () => {
   const fetchClasses = async () => {
     try {
       const response = await classService.getAll();
-      setClasses((response.data && response.data.length) ? response.data : demoClasses);
+      setClasses(response.data);
     } catch (err) {
-      console.warn('Failed to fetch classes, using demo classes:', err);
-      setClasses(demoClasses);
+      console.error('Failed to fetch classes', err);
     }
   };
 
@@ -342,19 +335,21 @@ const StudentManagement = () => {
     setFeesLoading(true);
     setFeesError('');
     setFeesList([]);
-    const defaultFees = [
-      { _id: 'dummy1', description: 'Tuition Fee - Term 1', amount: 5000, paidAmount: 5000, status: 'Paid' },
-      { _id: 'dummy2', description: 'Transport Fee - Term 1', amount: 1500, paidAmount: 500, status: 'Partial' },
-      { _id: 'dummy3', description: 'Library & Sports Fee', amount: 500, paidAmount: 500, status: 'Paid' }
-    ];
     try {
       const response = await feeService.getByStudent(student.userId?._id || student.userId || student._id);
       let data = response.data || [];
-      if (!Array.isArray(data) || data.length === 0) data = defaultFees;
+      // Dummy data fallback if empty
+      if (data.length === 0) {
+        data = [
+          { _id: 'dummy1', description: 'Tuition Fee - Term 1', amount: 5000, paidAmount: 5000, status: 'Paid' },
+          { _id: 'dummy2', description: 'Transport Fee - Term 1', amount: 1500, paidAmount: 500, status: 'Partial' },
+          { _id: 'dummy3', description: 'Library Fee', amount: 500, paidAmount: 0, status: 'Unpaid' }
+        ];
+      }
       setFeesList(data);
     } catch (err) {
-      console.warn('Backend fee call failed, displaying fallback student fee record:', err);
-      setFeesList(defaultFees);
+      setFeesError('Failed to load fees for this student.');
+      console.error(err);
     } finally {
       setFeesLoading(false);
     }
@@ -365,20 +360,22 @@ const StudentManagement = () => {
     setMarksLoading(true);
     setMarksError('');
     setMarksList([]);
-    const defaultMarks = [
-      { _id: 'm1', examType: 'Mid Term 2026', subject: { name: 'Mathematics' }, marks: 88, status: 'Pass' },
-      { _id: 'm2', examType: 'Mid Term 2026', subject: { name: 'Science' }, marks: 92, status: 'Pass' },
-      { _id: 'm3', examType: 'Mid Term 2026', subject: { name: 'English' }, marks: 84, status: 'Pass' },
-      { _id: 'm4', examType: 'Mid Term 2026', subject: { name: 'History' }, marks: 78, status: 'Pass' }
-    ];
     try {
       const response = await marksService.getByStudent(student.userId?._id || student.userId || student._id);
       let data = response.data || [];
-      if (!Array.isArray(data) || data.length === 0) data = defaultMarks;
+      // Dummy data fallback if empty
+      if (data.length === 0) {
+        data = [
+          { _id: 'm1', examType: 'Mid Term', subject: { name: 'Mathematics' }, marks: 85, status: 'Pass' },
+          { _id: 'm2', examType: 'Mid Term', subject: { name: 'Science' }, marks: 92, status: 'Pass' },
+          { _id: 'm3', examType: 'Mid Term', subject: { name: 'English' }, marks: 78, status: 'Pass' },
+          { _id: 'm4', examType: 'Mid Term', subject: { name: 'History' }, marks: 35, status: 'Fail' }
+        ];
+      }
       setMarksList(data);
     } catch (err) {
-      console.warn('Backend marks call failed, displaying fallback marks data:', err);
-      setMarksList(defaultMarks);
+      setMarksError('Failed to load marks for this student.');
+      console.error(err);
     } finally {
       setMarksLoading(false);
     }
@@ -389,29 +386,27 @@ const StudentManagement = () => {
     setAttendanceLoading(true);
     setAttendanceError('');
     setAttendanceList([]);
-    const today = new Date();
-    const defaultAttendance = [
-      { _id: 'a1', date: new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString(), status: 'Present', remarks: 'On time' },
-      { _id: 'a2', date: new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(), status: 'Present', remarks: 'Active' },
-      { _id: 'a3', date: new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString(), status: 'Present', remarks: '' },
-      { _id: 'a4', date: new Date(today.getTime() - 4 * 24 * 60 * 60 * 1000).toISOString(), status: 'Absent', remarks: 'Sick leave' },
-      { _id: 'a5', date: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString(), status: 'Present', remarks: '' }
-    ];
     try {
       const response = await attendanceService.getByStudent(student.userId?._id || student.userId || student._id);
       let data = response.data || [];
-      if (!Array.isArray(data) || data.length === 0) data = defaultAttendance;
+      // Dummy data fallback if empty
+      if (data.length === 0) {
+        const today = new Date();
+        data = [
+          { _id: 'a1', date: new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString(), status: 'Present', remarks: 'On time' },
+          { _id: 'a2', date: new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(), status: 'Present', remarks: '' },
+          { _id: 'a3', date: new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString(), status: 'Absent', remarks: 'Sick leave' },
+          { _id: 'a4', date: new Date(today.getTime() - 4 * 24 * 60 * 60 * 1000).toISOString(), status: 'Late', remarks: 'Traffic' },
+          { _id: 'a5', date: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString(), status: 'Present', remarks: '' }
+        ];
+      }
       setAttendanceList(data);
     } catch (err) {
-      console.warn('Backend attendance call failed, displaying fallback attendance record:', err);
-      setAttendanceList(defaultAttendance);
+      setAttendanceError('Failed to load attendance for this student.');
+      console.error(err);
     } finally {
       setAttendanceLoading(false);
     }
-  };
-
-  const handleViewProgressCard = (student) => {
-    setViewingProgressCardStudent(student);
   };
  
   const handleOpenConcessionModal = async (student) => {
@@ -469,24 +464,20 @@ const StudentManagement = () => {
     : [];
 
   const filteredStudentsForSelect = students.filter((student) => {
-    const stGrade = student.class?.grade || student.grade;
-    const stSec = student.class?.section || student.section;
-    if (selectedGrade && String(stGrade) !== String(selectedGrade)) {
+    if (selectedGrade && (!student.class || String(student.class.grade) !== String(selectedGrade))) {
       return false;
     }
-    if (selectedSection && String(stSec) !== String(selectedSection)) {
+    if (selectedSection && (!student.class || String(student.class.section) !== String(selectedSection))) {
       return false;
     }
     return true;
   });
 
   const visibleStudents = students.filter((student) => {
-    const stGrade = student.class?.grade || student.grade;
-    const stSec = student.class?.section || student.section;
-    if (selectedGrade && String(stGrade) !== String(selectedGrade)) {
+    if (selectedGrade && (!student.class || String(student.class.grade) !== String(selectedGrade))) {
       return false;
     }
-    if (selectedSection && String(stSec) !== String(selectedSection)) {
+    if (selectedSection && (!student.class || String(student.class.section) !== String(selectedSection))) {
       return false;
     }
     if (selectedStudentId && String(student._id) !== String(selectedStudentId)) {
@@ -614,22 +605,19 @@ const StudentManagement = () => {
         }
       `}</style>
       <div className="card">
-        <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '12px', margin: 0 }}>
-            <span style={{ fontSize: '2.4rem', lineHeight: '1' }}>👨‍🎓</span>
-            {isAccountant ? 'Student Fee Management' : 'Student Management'}
-          </h2>
-          {!isAccountant && currentUser && ['super_admin', 'principal'].includes(currentUser.role) && (
-            <button className="btn btn-primary" onClick={() => setShowForm(!showForm)} style={{ width: 'auto', marginTop: '0', padding: '10px 24px' }}>
-              {showForm ? 'Cancel' : '➕ Add Student'}
-            </button>
-          )}
-          {isAccountant && (
-            <Link to="/dashboard/fees" className="btn btn-primary" style={{ textDecoration: 'none', width: 'auto', padding: '10px 24px', whiteSpace: 'nowrap' }}>
-              💰 Collect Fee
-            </Link>
-          )}
-        </div>
+      <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2>👨‍🎓 {isAccountant ? 'Student Fee Management' : 'Student Management'}</h2>
+        {!isAccountant && currentUser && ['super_admin', 'principal'].includes(currentUser.role) && (
+          <button className="btn btn-primary" onClick={() => setShowForm(!showForm)} style={{ width: 'auto', marginTop: '0', padding: '10px 24px' }}>
+            {showForm ? 'Cancel' : '➕ Add Student'}
+          </button>
+        )}
+        {isAccountant && (
+          <Link to="/dashboard/fees" className="btn btn-primary" style={{ textDecoration: 'none', width: 'auto', padding: '10px 24px', whiteSpace: 'nowrap' }}>
+            💰 Collect Fee
+          </Link>
+        )}
+      </div>
 
       {error && <div className="alert alert-error">{error}</div>}
 
@@ -896,7 +884,7 @@ const StudentManagement = () => {
               <option value="">Select student</option>
               {filteredStudentsForSelect.map((st) => (
                 <option key={st._id} value={st._id}>
-                  {st.userId?.firstName || st.firstName} {st.userId?.lastName || st.lastName} ({st.rollNumber || 'N/A'})
+                  {st.userId?.firstName} {st.userId?.lastName} ({st.rollNumber || 'N/A'})
                 </option>
               ))}
             </select>
@@ -947,17 +935,17 @@ const StudentManagement = () => {
                 return (
                 <tr key={student._id}>
                   <td>
-                    {student.userId?.firstName || student.firstName} {student.userId?.lastName || student.lastName}
+                    {student.userId?.firstName} {student.userId?.lastName}
                     {allNotes.filter(n => n.studentId === student._id && n.category === 'Needs Remedial Classes').length > 0 && (
                       <span style={{ marginLeft: '8px', padding: '2px 6px', fontSize: '0.75rem', background: '#fee2e2', color: '#ef4444', borderRadius: '4px', border: '1px solid #fca5a5' }}>
                         🚨 Remedial Required
                       </span>
                     )}
                   </td>
-                  <td>{student.class ? `Grade ${student.class.grade} - Section ${student.class.section}` : `Grade ${student.grade || 'N/A'} - Section ${student.section || 'N/A'}`}</td>
-                  <td>{student.rollNumber || 'N/A'}</td>
-                  <td>{student.userId?.phone || student.phone || 'N/A'}</td>
-                  <td>{student.parentId?.firstName ? `${student.parentId.firstName} ${student.parentId.lastName}` : (student.parentName || (student.parent?.firstName ? `${student.parent.firstName} ${student.parent.lastName}` : 'N/A'))}</td>
+                  <td>{student.class ? `Grade ${student.class.grade} - Section ${student.class.section}` : 'N/A'}</td>
+                  <td>{student.rollNumber}</td>
+                  <td>{student.userId?.phone}</td>
+                  <td>{student.parentId?.firstName ? `${student.parentId.firstName} ${student.parentId.lastName}` : 'N/A'}</td>
                   {isAccountant && (
                     <td style={{ fontWeight: 'bold', color: pendingAmt > 0 ? '#ef4444' : '#10b981' }}>
                       {formatCurrency(pendingAmt)}
@@ -981,7 +969,7 @@ const StudentManagement = () => {
                           <div className="action-menu-dropdown" onClick={(e) => e.stopPropagation()}>
                             {!isAccountant && currentUser && ['super_admin', 'principal', 'teacher'].includes(currentUser.role) && (
                               <button className="action-menu-item" onClick={() => { setActionMenuOpenFor(null); handleOpenNotes(student); }}>
-                                📝 Student Remarks
+                                📝 Student Notes
                               </button>
                             )}
                             {!isAccountant && currentUser && ['super_admin', 'principal'].includes(currentUser.role) && (
@@ -1000,9 +988,6 @@ const StudentManagement = () => {
                                 </button>
                                 <button className="action-menu-item" onClick={() => { setActionMenuOpenFor(null); handleViewAttendance(student); }}>
                                   ✅ Check Attendance
-                                </button>
-                                <button className="action-menu-item" onClick={() => { setActionMenuOpenFor(null); handleViewProgressCard(student); }}>
-                                  📊 Check Progress Card
                                 </button>
                               </>
                             )}
@@ -1475,123 +1460,6 @@ const StudentManagement = () => {
         </div>
       )}
 
-      {/* Progress Card Modal */}
-      {viewingProgressCardStudent && (
-        <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <div className="modal-content" style={{ background: 'white', padding: '28px', borderRadius: '16px', width: '92%', maxWidth: '720px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '2px solid #e2e8f0', paddingBottom: '14px' }}>
-              <div>
-                <h2 style={{ margin: 0, color: '#0C4A86', fontSize: '1.4rem', fontWeight: '800' }}>📊 Student Progress Report Card</h2>
-                <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '0.85rem' }}>Academic Year 2025–2026 • Term 1 Evaluation</p>
-              </div>
-              <button onClick={() => setViewingProgressCardStudent(null)} style={{ background: '#f1f5f9', border: 'none', borderRadius: '50%', width: '32px', height: '32px', fontSize: '1.2rem', cursor: 'pointer', color: '#64748b' }}>&times;</button>
-            </div>
-
-            {/* Student Info Card Header */}
-            <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '16px 20px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #e2e8f0' }}>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1e293b', fontWeight: 700 }}>
-                  {viewingProgressCardStudent.userId?.firstName || viewingProgressCardStudent.firstName} {viewingProgressCardStudent.userId?.lastName || viewingProgressCardStudent.lastName}
-                </h3>
-                <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>
-                  Roll No: <strong>{viewingProgressCardStudent.rollNumber || '101'}</strong> | Class: <strong>{viewingProgressCardStudent.class?.name || 'Grade 10-A'}</strong>
-                </p>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <span style={{ display: 'inline-block', padding: '6px 14px', background: '#dcfce7', color: '#15803d', borderRadius: '20px', fontWeight: 800, fontSize: '0.9rem' }}>
-                  Grade: A+ (91.4%)
-                </span>
-              </div>
-            </div>
-
-            {/* Marks Table */}
-            <h4 style={{ margin: '0 0 10px', color: '#334155', fontSize: '0.95rem', fontWeight: 700 }}>Subject-wise Marks & Grades</h4>
-            <div style={{ overflowX: 'auto', marginBottom: '20px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
-                <thead>
-                  <tr style={{ background: '#0C4A86', color: '#ffffff', fontSize: '0.85rem', textTransform: 'uppercase' }}>
-                    <th style={{ padding: '10px 14px', textAlign: 'left' }}>Subject</th>
-                    <th style={{ padding: '10px 14px', textAlign: 'center' }}>Max Marks</th>
-                    <th style={{ padding: '10px 14px', textAlign: 'center' }}>Marks Obtained</th>
-                    <th style={{ padding: '10px 14px', textAlign: 'center' }}>Grade</th>
-                    <th style={{ padding: '10px 14px', textAlign: 'center' }}>Result</th>
-                  </tr>
-                </thead>
-                <tbody style={{ fontSize: '0.9rem' }}>
-                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                    <td style={{ padding: '10px 14px' }}>Mathematics</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center' }}>100</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center', color: '#0C4A86' }}>92</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center', color: '#16a34a' }}>A+</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center' }}><span style={{ padding: '3px 8px', background: '#dcfce7', color: '#166534', borderRadius: '4px', fontSize: '0.75rem' }}>PASS</span></td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
-                    <td style={{ padding: '10px 14px' }}>Science & Technology</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center' }}>100</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center', color: '#0C4A86' }}>89</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center', color: '#16a34a' }}>A</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center' }}><span style={{ padding: '3px 8px', background: '#dcfce7', color: '#166534', borderRadius: '4px', fontSize: '0.75rem' }}>PASS</span></td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                    <td style={{ padding: '10px 14px' }}>English Literature</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center' }}>100</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center', color: '#0C4A86' }}>94</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center', color: '#16a34a' }}>A+</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center' }}><span style={{ padding: '3px 8px', background: '#dcfce7', color: '#166534', borderRadius: '4px', fontSize: '0.75rem' }}>PASS</span></td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
-                    <td style={{ padding: '10px 14px' }}>Social Studies</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center' }}>100</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center', color: '#0C4A86' }}>86</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center', color: '#16a34a' }}>A</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center' }}><span style={{ padding: '3px 8px', background: '#dcfce7', color: '#166534', borderRadius: '4px', fontSize: '0.75rem' }}>PASS</span></td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                    <td style={{ padding: '10px 14px' }}>Computer Applications</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center' }}>100</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center', color: '#0C4A86' }}>96</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center', color: '#16a34a' }}>O (Outstanding)</td>
-                    <td style={{ padding: '10px 14px', textAlign: 'center' }}><span style={{ padding: '3px 8px', background: '#dcfce7', color: '#166534', borderRadius: '4px', fontSize: '0.75rem' }}>PASS</span></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* Attendance & Remarks Summary */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
-              <div style={{ background: '#f0fdf4', padding: '14px 18px', borderRadius: '10px', border: '1px solid #bbf7d0' }}>
-                <div style={{ fontSize: '0.8rem', color: '#15803d', textTransform: 'uppercase' }}>Attendance Record</div>
-                <div style={{ fontSize: '1.4rem', color: '#166534', marginTop: '2px' }}>96.5% Present</div>
-                <div style={{ fontSize: '0.8rem', color: '#166534', marginTop: '2px' }}>178 Working Days Attended</div>
-              </div>
-              <div style={{ background: '#eff6ff', padding: '14px 18px', borderRadius: '10px', border: '1px solid #bfdbfe' }}>
-                <div style={{ fontSize: '0.8rem', color: '#1d4ed8', textTransform: 'uppercase' }}>Teacher Remarks</div>
-                <div style={{ fontSize: '0.85rem', color: '#1e40af', marginTop: '4px', fontStyle: 'italic' }}>
-                  "Exceptional academic performance. Demonstrates strong logical reasoning and active leadership."
-                </div>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <button
-                type="button"
-                onClick={() => window.print()}
-                style={{ padding: '10px 20px', background: '#0C4A86', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem' }}
-              >
-                🖨️ Print Progress Card
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewingProgressCardStudent(null)}
-                style={{ padding: '10px 20px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem', color: '#475569' }}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {isAccountant && (
         <div className="premium-card mt-6" style={{ marginTop: '24px' }}>
           <div className="card-header border-b" style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1645,13 +1513,13 @@ const StudentManagement = () => {
         <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
           <div className="modal-content" style={{ background: 'white', padding: '24px', borderRadius: '12px', width: '90%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #e5e7eb', paddingBottom: '10px' }}>
-              <h2 style={{ margin: 0 }}>📝 Remarks for {notesModalStudent.userId?.firstName} {notesModalStudent.userId?.lastName}</h2>
+              <h2 style={{ margin: 0 }}>📝 Notes for {notesModalStudent.userId?.firstName} {notesModalStudent.userId?.lastName}</h2>
               <button onClick={() => setNotesModalStudent(null)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#6b7280' }}>&times;</button>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
               <div>
-                <h3 style={{ marginTop: 0 }}>Add New Remark</h3>
+                <h3 style={{ marginTop: 0 }}>Add New Note</h3>
                 <form onSubmit={handleAddNote}>
                   <div className="form-group" style={{ marginBottom: '15px' }}>
                     <label>Category</label>

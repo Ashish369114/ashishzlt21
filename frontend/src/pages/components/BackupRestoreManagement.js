@@ -98,17 +98,17 @@ const BackupRestoreManagement = () => {
   };
 
   return (
-    <div style={{ padding: '24px', background: '#F7F6F3', minHeight: '100vh' }}>
+    <div style={{ padding: '24px', background: '#FAF6F0', minHeight: '100vh' }}>
       {/* Title Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
         <div>
-          <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#322029', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Database size={22} color="#AC968D" /> Backup & System Administration
+          <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#0C4A86', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Database size={22} color="#0C4A86" /> Backup & System Administration
           </h2>
           <p style={{ fontSize: '13px', color: '#6B5B54', margin: '4px 0 0' }}>Manage database backups, system restore, and configuration health.</p>
         </div>
 
-        <button onClick={fetchSystemStatus} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', background: '#ffffff', border: '1px solid #D9D8D9', borderRadius: '10px', fontSize: '13px', fontWeight: '600', color: '#322029', cursor: 'pointer' }}>
+        <button onClick={fetchSystemStatus} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', background: '#ffffff', border: '1px solid #BFDBFE', borderRadius: '10px', fontSize: '13px', fontWeight: '600', color: '#0C4A86', cursor: 'pointer' }}>
           <RefreshCw size={15} /> Refresh Status
         </button>
       </div>
@@ -122,19 +122,19 @@ const BackupRestoreManagement = () => {
 
       {/* System Health Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-        <div style={{ background: '#ffffff', border: '1px solid #D9D8D9', borderRadius: '14px', padding: '20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: '#EFE9E1', color: '#322029', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ background: '#ffffff', border: '1px solid #BFDBFE', borderRadius: '14px', padding: '20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: '#FAF6F0', color: '#0C4A86', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Server size={22} />
           </div>
           <div>
             <span style={{ fontSize: '11px', color: '#6B5B54', fontWeight: '700', textTransform: 'uppercase' }}>Database Engine</span>
-            <h4 style={{ fontSize: '16px', fontWeight: '800', color: '#322029', margin: '2px 0 0', textTransform: 'capitalize' }}>
+            <h4 style={{ fontSize: '16px', fontWeight: '800', color: '#0C4A86', margin: '2px 0 0', textTransform: 'capitalize' }}>
               {systemStatus?.dbDialect || 'SQLite / PostgreSQL'}
             </h4>
           </div>
         </div>
 
-        <div style={{ background: '#ffffff', border: '1px solid #D9D8D9', borderRadius: '14px', padding: '20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <div style={{ background: '#ffffff', border: '1px solid #BFDBFE', borderRadius: '14px', padding: '20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
           <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: '#dcfce7', color: '#15803d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <ShieldCheck size={22} />
           </div>
@@ -144,13 +144,13 @@ const BackupRestoreManagement = () => {
           </div>
         </div>
 
-        <div style={{ background: '#ffffff', border: '1px solid #D9D8D9', borderRadius: '14px', padding: '20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <div style={{ background: '#ffffff', border: '1px solid #BFDBFE', borderRadius: '14px', padding: '20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
           <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: '#FEF3C7', color: '#B45309', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Activity size={22} />
           </div>
           <div>
             <span style={{ fontSize: '11px', color: '#6B5B54', fontWeight: '700', textTransform: 'uppercase' }}>Server Uptime</span>
-            <h4 style={{ fontSize: '16px', fontWeight: '800', color: '#322029', margin: '2px 0 0' }}>
+            <h4 style={{ fontSize: '16px', fontWeight: '800', color: '#0C4A86', margin: '2px 0 0' }}>
               {systemStatus?.uptimeSeconds ? `${Math.floor(systemStatus.uptimeSeconds / 60)} mins` : 'Active'}
             </h4>
           </div>
@@ -160,13 +160,13 @@ const BackupRestoreManagement = () => {
       {/* Backup & Restore Action Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '20px' }}>
         {/* Backup Card */}
-        <div style={{ background: '#ffffff', border: '1px solid #D9D8D9', borderRadius: '16px', padding: '24px' }}>
+        <div style={{ background: '#ffffff', border: '1px solid #BFDBFE', borderRadius: '16px', padding: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
-            <div style={{ padding: '10px', borderRadius: '10px', background: '#EFE9E1', color: '#AC968D' }}>
+            <div style={{ padding: '10px', borderRadius: '10px', background: '#FAF6F0', color: '#0C4A86' }}>
               <Download size={20} />
             </div>
             <div>
-              <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#322029', margin: 0 }}>Download Complete Backup</h3>
+              <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#0C4A86', margin: 0 }}>Download Complete Backup</h3>
               <p style={{ fontSize: '12px', color: '#6B5B54', margin: '2px 0 0' }}>Export a JSON snapshot of all database tables.</p>
             </div>
           </div>
@@ -178,7 +178,7 @@ const BackupRestoreManagement = () => {
           <button
             onClick={handleDownloadBackup}
             disabled={backupLoading}
-            style={{ width: '100%', padding: '12px', background: '#AC968D', color: '#ffffff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+            style={{ width: '100%', padding: '12px', background: '#0C4A86', color: '#ffffff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
           >
             <Download size={16} />
             {backupLoading ? 'Generating Backup JSON...' : 'Create & Download Backup'}
@@ -186,32 +186,32 @@ const BackupRestoreManagement = () => {
         </div>
 
         {/* Restore Card */}
-        <div style={{ background: '#ffffff', border: '1px solid #D9D8D9', borderRadius: '16px', padding: '24px' }}>
+        <div style={{ background: '#ffffff', border: '1px solid #BFDBFE', borderRadius: '16px', padding: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
             <div style={{ padding: '10px', borderRadius: '10px', background: '#FEF3C7', color: '#D97706' }}>
               <Upload size={20} />
             </div>
             <div>
-              <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#322029', margin: 0 }}>Restore System Database</h3>
+              <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#0C4A86', margin: 0 }}>Restore System Database</h3>
               <p style={{ fontSize: '12px', color: '#6B5B54', margin: '2px 0 0' }}>Import records from a previously generated backup JSON file.</p>
             </div>
           </div>
 
           <form onSubmit={handleRestoreSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#322029', marginBottom: '6px' }}>Select Backup JSON File</label>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#0C4A86', marginBottom: '6px' }}>Select Backup JSON File</label>
               <input
                 type="file"
                 accept=".json"
                 onChange={(e) => setSelectedFile(e.target.files[0])}
-                style={{ width: '100%', padding: '10px', border: '1px dashed #D9D8D9', borderRadius: '8px', fontSize: '13px', background: '#F7F6F3' }}
+                style={{ width: '100%', padding: '10px', border: '1px dashed #BFDBFE', borderRadius: '8px', fontSize: '13px', background: '#FAF6F0' }}
               />
             </div>
 
             <button
               type="submit"
               disabled={restoreLoading || !selectedFile}
-              style={{ width: '100%', padding: '12px', background: selectedFile ? '#B45309' : '#D9D8D9', color: '#ffffff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: selectedFile ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              style={{ width: '100%', padding: '12px', background: selectedFile ? '#B45309' : '#BFDBFE', color: '#ffffff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: selectedFile ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
             >
               <Upload size={16} />
               {restoreLoading ? 'Restoring System Data...' : 'Upload & Restore Database'}

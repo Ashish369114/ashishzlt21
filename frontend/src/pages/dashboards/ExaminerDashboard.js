@@ -3,14 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { examService, teacherService, classService, studentService } from '../../services/api';
 import { demoExams, demoEmployees, demoClasses, demoStudents } from '../../utils/demoData';
 import ExamManagement from '../components/ExamManagement';
+import SchoolCalendarManagement from '../components/SchoolCalendarManagement';
+import { subscribeToDataChanges } from '../../services/syncService';
 import ZaynLeviLogo from '../../components/ZaynLeviLogo';
 import { exportToPDF } from '../../utils/exportUtils';
 import '../../styles/ManagementStyles.css';
 
 const ExaminerDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
   const userName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || user?.name || user?.username || 'Examiner';
   const [activeTab, setActiveTab] = useState('overview');
+  const [profileImage, setProfileImage] = useState(localStorage.getItem('examinerProfileImage') || '');
   const [exams, setExams] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [classes, setClasses] = useState([]);
@@ -18,6 +22,25 @@ const ExaminerDashboard = ({ user, onLogout }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    const unsubscribe = subscribeToDataChanges((data) => {
+      console.log('Realtime sync in Examiner:', data);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result);
+        localStorage.setItem('examinerProfileImage', reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Shared filters state
   const [selectedGrade, setSelectedGrade] = useState('');
@@ -803,6 +826,16 @@ const ExaminerDashboard = ({ user, onLogout }) => {
                 )
               },
               { 
+                key: 'calendar', 
+                label: 'School Calendar', 
+                sub: 'ACADEMIC SCHEDULE', 
+                icon: (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                )
+              },
+              { 
                 key: 'exams', 
                 label: 'Exams Management', 
                 sub: 'TIMETABLE & EXAMS', 
@@ -983,22 +1016,71 @@ const ExaminerDashboard = ({ user, onLogout }) => {
           boxShadow: '0 15px 35px -10px rgba(12, 74, 134, 0.08), 0 4px 15px rgba(0,0,0,0.02)',
           border: '1.5px solid #e2e8f0',
         }}>
-          <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '20px', background: 'rgba(12, 74, 134, 0.08)', color: '#0C4A86', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              <span>Examiner Portal</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button
+              type="button"
+              onClick={() => window.history.back()}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '7px 14px',
+                borderRadius: '50px',
+                background: '#EBF5FF',
+                color: '#0C4A86',
+                border: '1.5px solid #BFDBFE',
+                fontSize: '0.82rem',
+                fontWeight: '700',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              ← Back
+            </button>
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '20px', background: 'rgba(12, 74, 134, 0.08)', color: '#0C4A86', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>Examiner Portal</span>
+              </div>
+              <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: '800', color: '#0C4A86', letterSpacing: '-0.5px' }}>
+                Good Morning, {userName} 👋
+              </h1>
+              <p style={{ margin: '4px 0 0', fontSize: '0.88rem', color: '#64748b' }}>
+                Schedule exams, assign invigilators, and manage paper dispatches.
+              </p>
             </div>
-            <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: '800', color: '#0C4A86', letterSpacing: '-0.5px' }}>
-              Welcome back, {userName}!
-            </h1>
-            <p style={{ margin: '4px 0 0', fontSize: '0.88rem', color: '#64748b' }}>
-              Schedule exams, assign invigilators, and manage paper dispatches.
-            </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <span style={{ fontSize: '0.88rem', color: '#0C4A86', fontWeight: '700', background: '#ebf5ff', border: '1px solid #0096DA', padding: '8px 18px', borderRadius: '50px' }}>
               {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' })}
             </span>
+
+            {/* Profile Avatar Upload Feature */}
+            <input type="file" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" className="hidden" style={{ display: 'none' }} />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              title="Click to upload profile photo"
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ffffff',
+                fontWeight: '700',
+                border: '2px solid #BFDBFE',
+                cursor: 'pointer',
+                overflow: 'hidden'
+              }}
+            >
+              {profileImage ? (
+                <img src={profileImage} alt="Examiner" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <span>{user?.firstName?.[0] || 'E'}</span>
+              )}
+            </button>
           </div>
         </div>
 
@@ -1033,6 +1115,10 @@ const ExaminerDashboard = ({ user, onLogout }) => {
         {/* Tabs Content */}
         {!loading && (
           <>
+            {activeTab === 'calendar' && (
+              <SchoolCalendarManagement />
+            )}
+
             {/* OVERVIEW STATS TAB */}
             {activeTab === 'overview' && (
               <div>

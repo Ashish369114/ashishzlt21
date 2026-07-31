@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import { studentService, feeService, teacherService, expenseService, classService } from '../../services/api';
+import { subscribeToDataChanges } from '../../services/syncService';
 import StudentManagement from '../components/StudentManagement';
 import AccountantTeachers from '../components/AccountantTeachers';
 import FeeManagement from '../components/FeeManagement';
@@ -13,6 +14,7 @@ import AccountantExpenses from '../components/AccountantExpenses';
 import AccountantPayroll from '../components/AccountantPayroll';
 import ConcessionManagement from '../components/ConcessionManagement';
 import PlanUpgradeRequired from '../components/PlanUpgradeRequired';
+import SchoolCalendarManagement from '../components/SchoolCalendarManagement';
 
 // Shows a locked feature banner WITHIN a page (not a full block)
 const FeatureLockBanner = ({ featureName, requiredPlan = 'Gold' }) => (
@@ -40,12 +42,26 @@ const FeatureLockBanner = ({ featureName, requiredPlan = 'Gold' }) => (
 const AccountantDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const fileInputRef = useRef(null);
   const [stats, setStats] = useState(null);
+  const [profileImage, setProfileImage] = useState(localStorage.getItem('accountantProfileImage') || '');
   const plan = localStorage.getItem('subscriptionPlan') || 'silver';
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [feesDropdownOpen, setFeesDropdownOpen] = useState(false);
   const feesRef = useRef(null);
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result);
+        localStorage.setItem('accountantProfileImage', reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Handle click outside to close fees dropdown
   useEffect(() => {
@@ -135,17 +151,18 @@ const AccountantDashboard = ({ user, onLogout }) => {
     <div className="dashboard-layout">
       <style>{`
         .accountant-top-nav {
-          background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-          color: white;
+          background: #ffffff;
+          color: #0C4A86;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 0 24px;
-          height: 64px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-          position: relative;
+          padding: 16px 24px;
+          border-bottom: 1px solid #BFDBFE;
+          position: sticky;
+          top: 0;
           z-index: 100;
           flex-shrink: 0;
+          box-shadow: 0 2px 6px rgba(12, 74, 134, 0.04);
         }
         .nav-brand {
           font-size: 1.1rem;
@@ -264,7 +281,7 @@ const AccountantDashboard = ({ user, onLogout }) => {
             background: rgba(0,0,0,0.05);
           }
           .dropdown-item:hover, .dropdown-item.active {
-            background: #AC968D;
+            background: #0C4A86;
             color: white;
           }
           .logout-btn-top {
@@ -277,7 +294,7 @@ const AccountantDashboard = ({ user, onLogout }) => {
       <div className="sidebar">
         <div className="sidebar-header">
           <h2>
-            <div style={{ width: '32px', height: '32px', background: '#AC968D', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '32px', height: '32px', background: '#0C4A86', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <span style={{ fontSize: '1.2rem' }}>💼</span>
             </div>
             {user?.role === 'super_admin' ? 'Super Admin' : user?.role === 'principal' ? 'Principal' : 'Accountant'}
@@ -286,12 +303,13 @@ const AccountantDashboard = ({ user, onLogout }) => {
 
         <ul className="nav-menu">
           <li><Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''}>Dashboard</Link></li>
+          <li><Link to="/dashboard/school-calendar" className={isActive('/dashboard/school-calendar') ? 'active' : ''}>📅 School Calendar</Link></li>
           <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''}>Students</Link></li>
 
           <li>
             <div 
               onClick={() => setFeesDropdownOpen(!feesDropdownOpen)}
-              style={{ padding: '12px 16px', color: '#322029', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: feesDropdownOpen || isActive(['/dashboard/fees', '/dashboard/payments', '/dashboard/pending', '/dashboard/collections', '/dashboard/concessions']) ? '#EFE9E1' : 'transparent', borderRadius: '8px', fontSize: '14px', fontWeight: '600', transition: 'all 0.2s ease' }}
+              style={{ padding: '12px 16px', color: '#0C4A86', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: feesDropdownOpen || isActive(['/dashboard/fees', '/dashboard/payments', '/dashboard/pending', '/dashboard/collections', '/dashboard/concessions']) ? '#FAF6F0' : 'transparent', borderRadius: '8px', fontSize: '14px', fontWeight: '600', transition: 'all 0.2s ease' }}
             >
               <span>Fees</span>
               <span style={{ fontSize: '10px', opacity: 0.7 }}>{feesDropdownOpen ? '▲' : '▼'}</span>
@@ -313,7 +331,7 @@ const AccountantDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''}>Reports</Link></li>
           <li><Link to="/dashboard/settings" className={isActive('/dashboard/settings') ? 'active' : ''}>Settings</Link></li>
           
-          <li style={{ marginTop: '30px', borderTop: '1px solid #D9D8D9', paddingTop: '20px' }}>
+          <li style={{ marginTop: '30px', borderTop: '1px solid #BFDBFE', paddingTop: '20px' }}>
             <button onClick={handleLogout} className="logout-btn" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444' }}>
               Logout
             </button>
@@ -324,18 +342,80 @@ const AccountantDashboard = ({ user, onLogout }) => {
       <div className="main-content">
         {/* Modern Accountant Header */}
         <div className="accountant-top-nav">
-          <div>
-            <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', color: '#0f172a' }}>
-              {user?.role === 'super_admin' ? 'Super Admin' : user?.role === 'principal' ? 'Principal' : 'Accountant'} Dashboard
-            </h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
-              <span style={{ color: '#64748b', fontWeight: '500', fontSize: '0.9rem' }}>{new Date().toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '7px 14px',
+                borderRadius: '50px',
+                background: '#EBF5FF',
+                color: '#0C4A86',
+                border: '1.5px solid #BFDBFE',
+                fontSize: '0.82rem',
+                fontWeight: '700',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              ← Back
+            </button>
+            <div>
+              <h1 style={{ margin: 0, fontSize: '1.35rem', fontWeight: '800', color: '#0C4A86' }}>
+                Good Morning, {
+                  [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() && [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() !== 'Mr.'
+                    ? [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim()
+                    : 'Vikram Malhotra'
+                } 👋
+              </h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
+                <span style={{ color: '#0096DA', fontWeight: '700', fontSize: '0.88rem' }}>
+                  {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' })}
+                </span>
+              </div>
             </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span style={{ fontSize: '0.82rem', fontWeight: '700', padding: '6px 14px', background: '#EBF5FF', color: '#0C4A86', borderRadius: '50px', border: '1px solid #BFDBFE' }}>
+              Finance & Accounts
+            </span>
+
+            {/* Profile Avatar Upload Feature */}
+            <input type="file" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" className="hidden" style={{ display: 'none' }} />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              title="Click to upload profile photo"
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ffffff',
+                fontWeight: '700',
+                border: '2px solid #BFDBFE',
+                cursor: 'pointer',
+                overflow: 'hidden'
+              }}
+            >
+              {profileImage ? (
+                <img src={profileImage} alt="Accountant" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <span>{user?.firstName?.[0] || 'A'}</span>
+              )}
+            </button>
           </div>
         </div>
 
         <Routes>
           <Route index element={<DashboardHome stats={stats} user={user} />} />
+          <Route path="school-calendar" element={<SchoolCalendarManagement />} />
           <Route path="students" element={<StudentManagement />} />
           <Route path="teachers" element={<AccountantTeachers />} />
           <Route path="payroll" element={<AccountantPayroll />} />

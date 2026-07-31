@@ -148,9 +148,15 @@ const PrincipalDashboardHome = ({ stats, user }) => {
     <div className="principal-dashboard-container">
       
       <div className="hero-section">
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
           <div className="hero-greeting">
-            <h1>Good Morning, {user?.firstName ? user.firstName : 'Principal'} 👋</h1>
+            <h1>
+              Good Morning, {
+                [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() && [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() !== 'Dr.'
+                  ? [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim()
+                  : 'Dr. Anita Roy'
+              } 👋
+            </h1>
             <div className="hero-date">{todayDate}</div>
           </div>
         </div>
