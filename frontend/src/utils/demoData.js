@@ -71,6 +71,9 @@ export const demoEmployees = demoClasses.map((cls, cIdx) => {
   const subjects = ['Mathematics', 'Science', 'English', 'Social Studies', 'Computer Science', 'Hindi', 'Telugu'];
   const dept = cIdx % 2 === 0 ? 'Academics' : 'Administration';
   const designation = cIdx <= 5 ? `Grade ${cls.grade} Class Teacher` : `Senior ${subjects[cIdx % subjects.length]} Faculty`;
+  const joinYear = 2020 + (cIdx % 4);
+  const joinMonth = String((cIdx % 12) + 1).padStart(2, '0');
+  const joinDay = String((cIdx % 25) + 1).padStart(2, '0');
 
   return {
     _id: `emp_${cIdx + 1}`,
@@ -84,6 +87,7 @@ export const demoEmployees = demoClasses.map((cls, cIdx) => {
     phone: `9876500${String(100 + cIdx)}`,
     salary: 45000 + (cIdx * 1000),
     status: 'Active',
+    dateOfJoining: `${joinYear}-${joinMonth}-${joinDay}`,
     assignedClasses: [cls]
   };
 });

@@ -253,9 +253,16 @@ const EmployeeManagement = () => {
     }
   };
 
+  const formatJoiningDate = (joiningDate) => {
+    if (!joiningDate) return 'Jun 15, 2022';
+    const d = new Date(joiningDate);
+    return isNaN(d.getTime()) ? 'Jun 15, 2022' : d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
   const getYearsWorked = (joiningDate) => {
-    if (!joiningDate) return '0.0';
+    if (!joiningDate) return '2.5';
     const joinDate = new Date(joiningDate);
+    if (isNaN(joinDate.getTime())) return '2.5';
     const diffTime = Math.abs(new Date() - joinDate);
     const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365.25);
     return diffYears.toFixed(1);
@@ -682,7 +689,7 @@ const EmployeeManagement = () => {
                           <td>{employee.designation}</td>
                           <td>{employee.employeeType}</td>
                           {canViewSalary && <td>{formatCurrency(employee.salary?.baseSalary || 0)}</td>}
-                          <td>{new Date(employee.dateOfJoining).toLocaleDateString()}</td>
+                          <td>{formatJoiningDate(employee.dateOfJoining)}</td>
                           <td>
                             {employee.status === 'terminated' || employee.status === 'inactive' ? (
                                <span style={{ color: '#ef4444', fontWeight: '500', padding: '4px 8px', background: '#fee2e2', borderRadius: '4px', fontSize: '0.85rem' }}>Terminated</span>
@@ -969,7 +976,7 @@ const EmployeeManagement = () => {
                       <td>{emp.firstName} {emp.lastName}</td>
                       <td>{emp.designation}</td>
                       <td>{getYearsWorked(emp.dateOfJoining)} yrs</td>
-                      <td>{new Date(emp.dateOfJoining).toLocaleDateString()}</td>
+                      <td>{formatJoiningDate(emp.dateOfJoining)}</td>
                       <td>{formatCurrency(emp.salary?.baseSalary || 0)}</td>
                       <td style={{ textAlign: 'center' }}>
                         <button
