@@ -87,11 +87,6 @@ const TeacherHomePage = ({ user, openActivityModal = false }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isLoading, setIsLoading] = useState(true);
 
-  // Daily Quote (Fixed 1 day per date seed)
-  const dailyQuoteIndex = getDailyQuoteIndex();
-  const currentQuoteObj = motivationalQuotesList[dailyQuoteIndex];
-  const [copiedQuote, setCopiedQuote] = useState(false);
-
   // New Activity Modal
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(openActivityModal);
   const [newActivityForm, setNewActivityForm] = useState({ title: '', className: 'Grade 9 - A', description: '' });
@@ -133,11 +128,7 @@ const TeacherHomePage = ({ user, openActivityModal = false }) => {
     return () => window.clearInterval(timer);
   }, []);
 
-  const handleCopyQuote = () => {
-    navigator.clipboard.writeText(`"${currentQuoteObj.quote}" — ${currentQuoteObj.author}`);
-    setCopiedQuote(true);
-    setTimeout(() => setCopiedQuote(false), 2000);
-  };
+
 
   const handleAddActivity = (e) => {
     e.preventDefault();
@@ -205,30 +196,6 @@ const TeacherHomePage = ({ user, openActivityModal = false }) => {
               <span>My Classes</span>
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* 2. Daily Quote */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0C4A86] to-[#0096DA] p-6 text-white shadow-md">
-        <div className="flex items-center justify-between border-b border-white/15 pb-2.5">
-          <div className="flex items-center gap-2 rounded-full bg-white/15 px-3.5 py-1 text-xs font-extrabold backdrop-blur-md">
-            <Sparkles className="h-3.5 w-3.5 text-amber-400" /> Daily Quote — {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-          </div>
-
-          <button
-            onClick={handleCopyQuote}
-            className="flex items-center gap-1.5 rounded-lg bg-white/10 px-2.5 py-1 text-xs font-bold transition hover:bg-white/20"
-          >
-            {copiedQuote ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-            <span>{copiedQuote ? 'Copied' : 'Copy Quote'}</span>
-          </button>
-        </div>
-
-        <div className="my-3 space-y-1.5">
-          <h3 className="text-xl font-black italic text-white font-serif leading-snug">
-            "{currentQuoteObj.quote}"
-          </h3>
-          <p className="text-xs font-bold uppercase tracking-widest text-amber-300">— {currentQuoteObj.author}</p>
         </div>
       </div>
 

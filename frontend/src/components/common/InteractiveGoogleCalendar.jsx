@@ -236,32 +236,54 @@ const InteractiveGoogleCalendar = ({
           </div>
         </div>
 
-        {/* Date Navigation */}
-        <div className="flex items-center gap-2">
+        {/* Date / Year / Month Selectors & Navigation (Requirement 3: [ Year ▼ ] [ Month ▼ ] [ Today ]) */}
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={year}
+            onChange={(e) => setCurrentDate(new Date(parseInt(e.target.value, 10), month, 1))}
+            className="rounded-xl border border-slate-300 bg-slate-50 px-2.5 py-1 text-xs font-black text-slate-800 focus:border-[#0C4A86] focus:outline-none cursor-pointer"
+          >
+            {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map((y) => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
+
+          <select
+            value={month}
+            onChange={(e) => setCurrentDate(new Date(year, parseInt(e.target.value, 10), 1))}
+            className="rounded-xl border border-slate-300 bg-slate-50 px-2.5 py-1 text-xs font-black text-slate-800 focus:border-[#0C4A86] focus:outline-none cursor-pointer"
+          >
+            {monthNames.map((m, idx) => (
+              <option key={m} value={idx}>{m}</option>
+            ))}
+          </select>
+
           <button
             type="button"
             onClick={goToToday}
-            className="rounded-xl border border-slate-300 bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-700 hover:bg-[#0C4A86] hover:text-white transition"
+            className="rounded-xl border border-[#0C4A86] bg-[#EBF5FF] px-3 py-1 text-xs font-black text-[#0C4A86] hover:bg-[#0C4A86] hover:text-white transition shadow-2xs"
           >
             Today
           </button>
-          <button
-            type="button"
-            onClick={prevMonth}
-            className="rounded-xl border border-slate-200 bg-slate-50 p-1 text-slate-600 hover:bg-slate-200 transition"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={nextMonth}
-            className="rounded-xl border border-slate-200 bg-slate-50 p-1 text-slate-600 hover:bg-slate-200 transition"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-          <span className="text-sm font-black text-slate-900 ml-1">
-            {monthNames[month]} {year}
-          </span>
+
+          <div className="flex items-center gap-1 ml-1">
+            <button
+              type="button"
+              onClick={prevMonth}
+              className="rounded-xl border border-slate-200 bg-slate-50 p-1 text-slate-600 hover:bg-slate-200 transition"
+              title="Previous Month"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={nextMonth}
+              className="rounded-xl border border-slate-200 bg-slate-50 p-1 text-slate-600 hover:bg-slate-200 transition"
+              title="Next Month"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
 
