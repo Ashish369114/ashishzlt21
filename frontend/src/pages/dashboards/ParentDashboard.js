@@ -68,7 +68,7 @@ const ParentDashboard = ({ user, onLogout }) => {
           setSelectedStudentId(firstId);
         }
       } catch (error) {
-        console.error('Error fetching parent dashboard data:', error);
+        console.warn('Backend API connection unavailable, using local student store data:', error?.message);
       } finally {
         setLoading(false);
       }

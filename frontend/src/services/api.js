@@ -57,6 +57,7 @@ export const teacherService = {
   getAll: () => api.get('/teachers'),
   getById: (id) => api.get(`/teachers/${id}`),
   getByUserId: (userId) => api.get(`/teachers/user/${userId}`),
+  getProfile: (id) => (id ? api.get(`/teachers/${id}`) : api.get('/auth/profile')),
   add: (data) => api.post('/teachers', data),
   update: (id, data) => api.put(`/teachers/${id}`, data),
   delete: (id) => api.delete(`/teachers/${id}`),

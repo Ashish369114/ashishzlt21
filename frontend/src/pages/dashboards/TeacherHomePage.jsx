@@ -102,13 +102,21 @@ const TeacherHomePage = ({ user, openActivityModal = false }) => {
     let isMounted = true;
     const fetchData = async () => {
       try {
-        const profileRes = await teacherService.getProfile(teacherId);
-        if (!isMounted) return;
-        if (profileRes?.data?.name) {
-          setTeacherName(profileRes.data.name);
+        if (user?.name) {
+          setTeacherName(user.name);
+        } else if (user?.firstName) {
+          setTeacherName(`${user.firstName} ${user.lastName || ''}`.trim());
+        }
+
+        if (teacherId && typeof teacherService?.getProfile === 'function') {
+          const profileRes = await teacherService.getProfile(teacherId);
+          if (!isMounted) return;
+          if (profileRes?.data?.name) {
+            setTeacherName(profileRes.data.name);
+          }
         }
       } catch (error) {
-        console.error(error);
+        console.warn('Could not fetch teacher profile from API, using default name:', error?.message);
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -116,7 +124,7 @@ const TeacherHomePage = ({ user, openActivityModal = false }) => {
 
     fetchData();
     return () => { isMounted = false; };
-  }, [teacherId]);
+  }, [teacherId, user]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
