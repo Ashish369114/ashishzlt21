@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LibraryManagement from '../components/LibraryManagement';
 import SchoolCalendarManagement from '../components/SchoolCalendarManagement';
+import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogleCalendar';
 import DailyInsightWidget from '../../components/DailyInsightWidget';
 import { subscribeToDataChanges } from '../../services/syncService';
 import { LayoutDashboard, BookOpen, Repeat, DollarSign, CheckCircle2, FileText, LogOut, Calendar as CalendarIcon, Camera } from 'lucide-react';
@@ -41,6 +42,7 @@ const LibrarianDashboard = ({ user, onLogout }) => {
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'google_calendar', label: 'Calendar', icon: CalendarIcon },
     { id: 'calendar', label: 'School Calendar', icon: CalendarIcon },
     { id: 'catalogue', label: 'Book Catalogue', icon: BookOpen },
     { id: 'issue_return', label: 'Issue & Return', icon: Repeat },
@@ -190,7 +192,9 @@ const LibrarianDashboard = ({ user, onLogout }) => {
 
         {/* Dynamic Page Content */}
         <div style={{ padding: '28px' }}>
-          {activeTab === 'calendar' ? (
+          {activeTab === 'google_calendar' ? (
+            <InteractiveGoogleCalendar />
+          ) : activeTab === 'calendar' ? (
             <SchoolCalendarManagement />
           ) : (
             <LibraryManagement initialTab={activeTab === 'dashboard' ? 'catalogue' : activeTab} />

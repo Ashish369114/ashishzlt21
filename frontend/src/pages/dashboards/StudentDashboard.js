@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
-  LayoutGrid, User, BookOpen, ClipboardCheck, FileText, Clock, CalendarDays, Award,
-  Trophy, Sparkles, Bell, Settings, LogOut, ShieldCheck, ArrowLeft, CheckCircle2, GraduationCap
+  LayoutGrid, User, BookOpen, ClipboardCheck, FileText, Clock, CalendarDays, Calendar, Award,
+  Trophy, Sparkles, Bell, Settings, LogOut, ShieldCheck, ArrowLeft, CheckCircle2, GraduationCap, Camera, Layers
 } from 'lucide-react';
 import { marksService, attendanceService, homeworkService, studentService, feeService } from '../../services/api';
 
@@ -19,6 +19,9 @@ import StudentTimetable from '../components/StudentTimetable';
 import StudentExamSchedule from '../components/StudentExamSchedule';
 import StudentResults from '../components/StudentResults';
 import StudentNotifications from '../components/StudentNotifications';
+import StudentClassroomActivity from '../components/StudentClassroomActivity';
+import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogleCalendar';
+import MultiRoleMessagingSystem from '../../components/common/MultiRoleMessagingSystem';
 
 const StudentDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -39,6 +42,21 @@ const StudentDashboard = ({ user, onLogout }) => {
     window.addEventListener('storage', handleAvatarUpdate);
     return () => window.removeEventListener('storage', handleAvatarUpdate);
   }, []);
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Data = reader.result;
+        setProfileAvatar(base64Data);
+        localStorage.setItem('student_profile_avatar', base64Data);
+        window.dispatchEvent(new Event('storage'));
+        alert('Profile picture updated successfully!');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -104,12 +122,12 @@ const StudentDashboard = ({ user, onLogout }) => {
   };
 
   const studentId = student?.userId?._id || student?.userId || student?._id || user?.id || user?._id || user?.userId;
-  const studentName = `${user?.firstName || 'Rohan'} ${user?.lastName || 'Verma'}`.trim();
+  const studentName = `${user?.firstName || 'Student'}`.trim();
   const isSubPage = location.pathname !== '/dashboard' && location.pathname !== '/dashboard/';
 
   return (
     <div className="flex min-h-screen bg-[#F6F0E8] text-slate-800">
-      {/* Left Sidebar (Matching Examiner #0C4A86 / #FAF6F0 palette & design system) */}
+      {/* Left Sidebar */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col justify-between overflow-y-auto bg-[#FAF6F0] px-5 py-6 text-slate-800 border-r border-slate-200 shadow-lg lg:flex">
         <div className="space-y-6">
           {/* Brand Header */}
@@ -118,23 +136,8 @@ const StudentDashboard = ({ user, onLogout }) => {
               <GraduationCap className="h-6 w-6 text-white" />
             </div>
             <div>
-              <p className="text-base font-extrabold tracking-tight text-[#0C4A86] leading-tight">ABC International</p>
-              <p className="text-xs font-bold text-[#0096DA]">Student Portal</p>
-            </div>
-          </div>
-
-          {/* Student Quick Card */}
-          <div className="flex items-center gap-3 rounded-2xl bg-[#EBF5FF] p-3 border border-[#BFDBFE]">
-            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#0C4A86] to-[#0096DA] font-bold text-white shadow-sm">
-              {profileAvatar ? (
-                <img src={profileAvatar} alt={studentName} className="h-full w-full object-cover" />
-              ) : (
-                <span>{studentName.charAt(0)}</span>
-              )}
-            </div>
-            <div className="overflow-hidden text-xs">
-              <p className="font-extrabold text-[#0C4A86] truncate">{studentName}</p>
-              <p className="text-[11px] text-[#0096DA]">Grade 9 - Section A</p>
+              <p className="text-base font-extrabold tracking-tight text-[#0C4A86] leading-tight">ABS International</p>
+              <p className="text-xs font-bold text-[#0096DA]">School Portal</p>
             </div>
           </div>
 
@@ -173,6 +176,18 @@ const StudentDashboard = ({ user, onLogout }) => {
             </div>
 
             <NavLink
+              to="/dashboard/classroom-activity"
+              className={({ isActive }) =>
+                `flex items-center gap-3 rounded-xl px-3.5 py-2 font-bold transition-all ${
+                  isActive ? 'bg-[#EBF5FF] text-[#0C4A86] border border-[#0096DA] shadow-xs' : 'text-slate-700 hover:bg-[#F0F9FF] hover:text-[#0C4A86]'
+                }`
+              }
+            >
+              <Layers className="h-4 w-4" />
+              <span>Classroom Activity</span>
+            </NavLink>
+
+            <NavLink
               to="/dashboard/attendance"
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-xl px-3.5 py-2 font-bold transition-all ${
@@ -180,7 +195,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                 }`
               }
             >
-              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              <CheckCircle2 className="h-4 w-4" />
               <span>Attendance</span>
             </NavLink>
 
@@ -192,7 +207,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                 }`
               }
             >
-              <BookOpen className="h-4 w-4 text-amber-600" />
+              <BookOpen className="h-4 w-4" />
               <span>Homework</span>
             </NavLink>
 
@@ -204,7 +219,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                 }`
               }
             >
-              <ClipboardCheck className="h-4 w-4 text-sky-600" />
+              <ClipboardCheck className="h-4 w-4" />
               <span>Assignments</span>
             </NavLink>
 
@@ -216,7 +231,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                 }`
               }
             >
-              <FileText className="h-4 w-4 text-teal-600" />
+              <FileText className="h-4 w-4" />
               <span>Study Notes</span>
             </NavLink>
 
@@ -228,7 +243,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                 }`
               }
             >
-              <Clock className="h-4 w-4 text-indigo-600" />
+              <Clock className="h-4 w-4" />
               <span>Timetable</span>
             </NavLink>
 
@@ -240,7 +255,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                 }`
               }
             >
-              <CalendarDays className="h-4 w-4 text-orange-600" />
+              <CalendarDays className="h-4 w-4" />
               <span>Exam Schedule</span>
             </NavLink>
 
@@ -252,7 +267,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                 }`
               }
             >
-              <Award className="h-4 w-4 text-rose-600" />
+              <Award className="h-4 w-4" />
               <span>Results</span>
             </NavLink>
 
@@ -264,7 +279,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                 }`
               }
             >
-              <Trophy className="h-4 w-4 text-amber-500" />
+              <Trophy className="h-4 w-4" />
               <span>Activities</span>
             </NavLink>
 
@@ -276,6 +291,18 @@ const StudentDashboard = ({ user, onLogout }) => {
             </div>
 
             <NavLink
+              to="/dashboard/calendar"
+              className={({ isActive }) =>
+                `flex items-center gap-3 rounded-xl px-3.5 py-2 font-bold transition-all ${
+                  isActive ? 'bg-[#EBF5FF] text-[#0C4A86] border border-[#0096DA] shadow-xs' : 'text-slate-700 hover:bg-[#F0F9FF] hover:text-[#0C4A86]'
+                }`
+              }
+            >
+              <Calendar className="h-4 w-4" />
+              <span>Calendar</span>
+            </NavLink>
+
+            <NavLink
               to="/dashboard/daily-insights"
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-xl px-3.5 py-2 font-bold transition-all ${
@@ -283,8 +310,20 @@ const StudentDashboard = ({ user, onLogout }) => {
                 }`
               }
             >
-              <Sparkles className="h-4 w-4 text-amber-500" />
+              <Sparkles className="h-4 w-4" />
               <span>Daily Insights</span>
+            </NavLink>
+
+            <NavLink
+              to="/dashboard/communications"
+              className={({ isActive }) =>
+                `flex items-center gap-3 rounded-xl px-3.5 py-2 font-bold transition-all ${
+                  isActive ? 'bg-[#EBF5FF] text-[#0C4A86] border border-[#0096DA] shadow-xs' : 'text-slate-700 hover:bg-[#F0F9FF] hover:text-[#0C4A86]'
+                }`
+              }
+            >
+              <Bell className="h-4 w-4" />
+              <span>Communications</span>
             </NavLink>
 
             <NavLink
@@ -295,7 +334,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                 }`
               }
             >
-              <Bell className="h-4 w-4 text-sky-600" />
+              <Bell className="h-4 w-4" />
               <span>Notifications</span>
             </NavLink>
 
@@ -307,7 +346,7 @@ const StudentDashboard = ({ user, onLogout }) => {
                 }`
               }
             >
-              <Settings className="h-4 w-4 text-slate-600" />
+              <Settings className="h-4 w-4" />
               <span>Settings</span>
             </NavLink>
           </nav>
@@ -356,9 +395,12 @@ const StudentDashboard = ({ user, onLogout }) => {
             <Routes>
               <Route index element={<StudentHomePage user={user} student={student} stats={stats} />} />
               <Route path="profile" element={<StudentProfile user={user} student={student} />} />
+              <Route path="calendar" element={<InteractiveGoogleCalendar />} />
+              <Route path="classroom-activity" element={<StudentClassroomActivity user={user} student={student} />} />
               <Route path="activities" element={<StudentActivities />} />
               <Route path="daily-insights" element={<StudentDailyInsights user={user} stats={stats} />} />
               <Route path="notifications" element={<StudentNotifications />} />
+              <Route path="communications" element={<MultiRoleMessagingSystem currentUserRole="Student" currentUserName={studentName} />} />
               <Route path="settings" element={<StudentSettings user={user} />} />
 
               {/* Sub-Routes */}
@@ -382,3 +424,4 @@ const StudentDashboard = ({ user, onLogout }) => {
 };
 
 export default StudentDashboard;
+

@@ -36,6 +36,7 @@ import MeetingMomManagement from '../components/MeetingMomManagement';
 import NoticeManagement from '../components/NoticeManagement';
 import BackupRestoreManagement from '../components/BackupRestoreManagement';
 import DailyInsightWidget from '../../components/DailyInsightWidget';
+import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogleCalendar';
 
 const SuperAdminDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -101,6 +102,7 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
         </div>
         <ul className="nav-menu" style={{ marginTop: '20px' }}>
           <li><Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><LayoutDashboard size={20} /> Dashboard</Link></li>
+          <li><Link to="/dashboard/calendar" className={isActive('/dashboard/calendar') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CalendarIcon size={20} /> Calendar</Link></li>
           <li><Link to="/dashboard/school-calendar" className={isActive('/dashboard/school-calendar') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CalendarIcon size={20} /> School Calendar</Link></li>
           <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><GraduationCap size={20} /> Students</Link></li>
           
@@ -215,6 +217,7 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
 
         <Routes>
           <Route index element={<SuperAdminDashboardHome stats={stats} />} />
+          <Route path="calendar" element={<InteractiveGoogleCalendar />} />
           <Route path="school-calendar" element={<SchoolCalendarManagement />} />
           <Route path="employees" element={<EmployeeManagement />} />
           <Route path="students" element={<StudentManagement />} />

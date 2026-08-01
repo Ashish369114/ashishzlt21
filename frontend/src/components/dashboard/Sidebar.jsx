@@ -13,6 +13,7 @@ import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
+  Calendar
 } from 'lucide-react';
 
 const motivationalQuotes = [
@@ -25,7 +26,7 @@ const motivationalQuotes = [
 const navigation = [
   { label: 'Dashboard', to: '/dashboard', icon: LayoutGrid, end: true },
   { label: 'My Classes', to: '/dashboard/classes', icon: BookOpen },
-  { label: 'Parent Communications', to: '/dashboard/communications', icon: MessageSquare },
+  { label: 'Communication', to: '/dashboard/communications', icon: MessageSquare },
   { label: 'Classroom Activity', to: '/dashboard/activities', icon: PlusCircle },
   { label: 'Daily Slides', to: '/dashboard/daily-slides', icon: Presentation },
   { label: 'Settings', to: '/dashboard/settings', icon: Settings },

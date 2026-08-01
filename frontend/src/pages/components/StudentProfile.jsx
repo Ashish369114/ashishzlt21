@@ -30,7 +30,7 @@ const StudentProfile = ({ student, user }) => {
     return () => window.removeEventListener('storage', handleAvatarUpdate);
   }, []);
 
-  const studentName = `${user?.firstName || student?.firstName || 'Rohan'} ${user?.lastName || student?.lastName || 'Verma'}`.trim();
+  const studentName = `${user?.firstName || student?.firstName || 'Aro'} ${user?.lastName || student?.lastName || 'Patel'}`.trim();
   const className = student?.class?.grade ? `Grade ${student.class.grade}` : 'Grade 9';
   const sectionName = student?.class?.section ? `Section ${student.class.section}` : 'Section A';
   const rollNo = student?.rollNumber || student?.rollNo || '901';

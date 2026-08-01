@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, User, Camera, PlusCircle } from 'lucide-react';
-import useRealtimeUpdates from '../../hooks/useRealtimeUpdates';
+import { BookOpen, Sparkles, MessageSquare, PlusCircle, Check, Copy, Calendar, Clock, MapPin, Tag, ChevronRight, Presentation } from 'lucide-react';
 import SectionCard from '../../components/dashboard/SectionCard';
 import TeacherTimetable from '../../components/dashboard/TeacherTimetable';
+import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogleCalendar';
 import { teacherService } from '../../services/api';
 
 const defaultTimetable = [
@@ -13,32 +13,86 @@ const defaultTimetable = [
   { time: '11:00 AM - 11:45 AM', monday: 'Grade 9B • Geometry', tuesday: 'Grade 10A • Algebra', wednesday: 'Grade 9B • Geometry', thursday: 'Grade 10A • Algebra', friday: 'Grade 9B • Geometry', saturday: 'Activity Hour' },
 ];
 
-const defaultEventsList = [
-  { id: 1, title: 'Parent-Teacher Meeting (PTM)', date: 'May 24, 2026', time: '10:00 AM - 12:00 PM', location: 'Main Auditorium', category: 'Meeting', bg: 'bg-amber-50 border-amber-200 text-amber-900' },
-  { id: 2, title: 'Periodic Test - Grade 9 & 10', date: 'May 27, 2026', time: '08:30 AM - 11:30 AM', location: 'Exam Halls 1-4', category: 'Examination', bg: 'bg-rose-50 border-rose-200 text-rose-900' },
-  { id: 3, title: 'Annual Science & Tech Exhibition', date: 'May 31, 2026', time: '09:00 AM - 03:00 PM', location: 'Science Block Grounds', category: 'Exhibition', bg: 'bg-sky-50 border-sky-200 text-sky-900' },
-  { id: 4, title: 'Inter-House Sports Tournament', date: 'Jun 05, 2026', time: '08:00 AM - 02:00 PM', location: 'Sports Complex', category: 'Sports', bg: 'bg-emerald-50 border-emerald-200 text-emerald-900' },
-  { id: 5, title: 'Teacher Training & Curriculum Workshop', date: 'Jun 12, 2026', time: '02:00 PM - 05:00 PM', location: 'Conference Hall B', category: 'Workshop', bg: 'bg-purple-50 border-purple-200 text-purple-900' },
+const upcomingEventsList = [
+  {
+    id: 1,
+    title: 'Annual Mathematics Olympiad & Speed Quiz',
+    date: 'August 5, 2026',
+    time: '09:30 AM - 12:30 PM',
+    category: 'Annual Day',
+    location: 'Main Auditorium',
+    badgeColor: 'bg-[#0C4A86] text-white',
+    description: 'Inter-house mathematics competition for Grade 8 to 10.'
+  },
+  {
+    id: 2,
+    title: 'Parent-Teacher Meeting (PTM)',
+    date: 'August 12, 2026',
+    time: '10:00 AM - 01:00 PM',
+    category: 'Parent-Teacher Meetings',
+    location: 'School Classrooms',
+    badgeColor: 'bg-[#0096DA] text-white',
+    description: 'Academic progress discussion between teachers & parents.'
+  },
+  {
+    id: 3,
+    title: 'Independence Day Holiday & Cultural Fest',
+    date: 'August 15, 2026',
+    time: '08:30 AM - 11:30 AM',
+    category: 'Holidays',
+    location: 'Flag Hoisting Ground',
+    badgeColor: 'bg-purple-600 text-white',
+    description: 'Flag hoisting ceremony & student patriotic performances.'
+  },
+  {
+    id: 4,
+    title: 'Mid-Term 1 Half-Yearly Mathematics Exam',
+    date: 'August 25, 2026',
+    time: '09:00 AM - 12:00 PM',
+    category: 'Exams',
+    location: 'Exam Halls 1-4',
+    badgeColor: 'bg-rose-600 text-white',
+    description: 'Mid-Term 1 Evaluation for Grade 9 & 10 students.'
+  }
 ];
 
 const defaultActivityList = [
-  { id: 1, title: 'Grade 9 Mathematics Science Quiz Competition', className: 'Grade 9 - A', description: 'Interactive mental math and formula challenge organized in class.', date: 'Today, 10:30 AM', author: 'Ramesh Sharma' },
+  { id: 1, title: 'Grade 9 Mathematics Quiz Competition', className: 'Grade 9 - A', description: 'Interactive mental math and formula challenge organized in class.', date: 'Today, 10:30 AM', author: 'Ramesh Sharma' },
   { id: 2, title: 'Geometry Field Measurement Workshop', className: 'Grade 10 - B', description: 'Outdoor practical measuring perimeter & area of school grounds.', date: 'Yesterday, 02:15 PM', author: 'Ramesh Sharma' },
   { id: 3, title: 'Remedial Class Session on Quadratic Equations', className: 'Grade 8 - C', description: 'Extra practice session conducted for students requiring guidance.', date: 'May 22, 2026', author: 'Ramesh Sharma' },
 ];
 
+const motivationalQuotesList = [
+  { quote: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
+  { quote: "Education is not the learning of facts, but the training of the mind to think.", author: "Albert Einstein" },
+  { quote: "The art of teaching is the art of assisting discovery.", author: "Mark Van Doren" },
+  { quote: "Teachers can change lives with just the right mix of chalk and challenges.", author: "Joyce Meyer" },
+  { quote: "Success comes from consistent effort.", author: "Sophocles" },
+];
+
+const getDailyQuoteIndex = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
+  const day = today.getDate();
+  const dateSeed = year * 10000 + month * 100 + day;
+  return dateSeed % motivationalQuotesList.length;
+};
+
 const TeacherHomePage = ({ user, openActivityModal = false }) => {
   const navigate = useNavigate();
-  const fileInputRef = useRef(null);
   const [teacherName, setTeacherName] = useState('Ramesh Sharma');
-  const [profileImage, setProfileImage] = useState(localStorage.getItem('teacherProfileImage') || '');
-  const [timetableRows, setTimetableRows] = useState(defaultTimetable);
-  const [eventsList, setEventsList] = useState(defaultEventsList);
+  const [timetableRows] = useState(defaultTimetable);
   const [activitiesList, setActivitiesList] = useState(defaultActivityList);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isLoading, setIsLoading] = useState(true);
 
-  // New Activity Modal state
+  // Daily Quote (Fixed 1 day per date seed)
+  const dailyQuoteIndex = getDailyQuoteIndex();
+  const currentQuoteObj = motivationalQuotesList[dailyQuoteIndex];
+  const [copiedQuote, setCopiedQuote] = useState(false);
+
+  // New Activity Modal
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(openActivityModal);
   const [newActivityForm, setNewActivityForm] = useState({ title: '', className: 'Grade 9 - A', description: '' });
 
@@ -71,23 +125,16 @@ const TeacherHomePage = ({ user, openActivityModal = false }) => {
     return () => window.clearInterval(timer);
   }, []);
 
-  const handleProfileImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64Url = reader.result;
-        setProfileImage(base64Url);
-        localStorage.setItem('teacherProfileImage', base64Url);
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleCopyQuote = () => {
+    navigator.clipboard.writeText(`"${currentQuoteObj.quote}" — ${currentQuoteObj.author}`);
+    setCopiedQuote(true);
+    setTimeout(() => setCopiedQuote(false), 2000);
   };
 
   const handleAddActivity = (e) => {
     e.preventDefault();
     if (!newActivityForm.title || !newActivityForm.description) {
-      alert('Please fill out the title and description');
+      alert('Please fill out title and description');
       return;
     }
 
@@ -112,9 +159,9 @@ const TeacherHomePage = ({ user, openActivityModal = false }) => {
 
   return (
     <div className="space-y-6">
-      {/* 1. Header Banner & Teacher Profile Directly Below Navbar */}
-      <div className="rounded-2xl border border-[#BFDBFE] bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between border-b border-[#BFDBFE] pb-6">
+      {/* 1. Welcome Header Banner & Navigation */}
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
             <button
               type="button"
@@ -125,81 +172,97 @@ const TeacherHomePage = ({ user, openActivityModal = false }) => {
             </button>
             <div>
               <div className="flex items-center gap-2.5">
-                <h1 className="text-2xl font-black tracking-tight text-[#1A1817]">Welcome Back, {teacherName}</h1>
-                <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800">Active</span>
+                <h1 className="text-2xl font-black tracking-tight text-slate-900">Welcome Back, {teacherName} 👋</h1>
+                <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-extrabold text-emerald-800">Faculty</span>
               </div>
-              <p className="mt-1 text-sm font-semibold text-[#736B63]">
-                Senior Mathematics Faculty • Employee ID: <span className="text-[#0C4A86] font-bold">TCH-2026-88</span>
+              <p className="mt-1 text-xs font-semibold text-slate-500">
+                Senior Mathematics Faculty • Department of Mathematics • Assigned Classes: <span className="font-extrabold text-[#0C4A86]">Grade 9A, 9B, 10A, 10B, 8C</span>
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <button
-              onClick={() => navigate('/dashboard/activities')}
-              className="flex items-center gap-2 rounded-xl bg-[#0C4A86] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#0096DA]"
+              onClick={() => navigate('/dashboard/communications')}
+              className="flex items-center gap-2 rounded-2xl bg-[#0C4A86] px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition hover:bg-black"
             >
-              <PlusCircle className="h-4 w-4" />
-              <span>Post Classroom Activity</span>
+              <MessageSquare className="h-4 w-4 text-amber-400" />
+              <span>Communication</span>
             </button>
             <button
               onClick={() => navigate('/dashboard/classes')}
-              className="flex items-center gap-2 rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] px-4 py-2.5 text-xs font-bold text-[#0C4A86] transition hover:bg-[#EFEAE4]"
+              className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-extrabold text-slate-800 transition hover:bg-slate-100"
             >
-              <BookOpen className="h-4 w-4 text-[#0096DA]" />
+              <BookOpen className="h-4 w-4 text-[#0C4A86]" />
               <span>My Classes</span>
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Teacher Profile Info Grid */}
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] p-3.5">
-            <p className="text-xs font-bold text-[#736B63] uppercase tracking-wider">Department & Subject</p>
-            <p className="mt-1 text-sm font-extrabold text-[#0C4A86]">Mathematics & Statistics</p>
+      {/* 2. Fixed Daily Quote / Thought for the Day */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0C4A86] to-[#0096DA] p-6 text-white shadow-md">
+        <div className="flex items-center justify-between border-b border-white/15 pb-2.5">
+          <div className="flex items-center gap-2 rounded-full bg-white/15 px-3.5 py-1 text-xs font-extrabold backdrop-blur-md">
+            <Sparkles className="h-3.5 w-3.5 text-amber-400" /> Thought for the Day — {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </div>
-          <div className="rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] p-3.5">
-            <p className="text-xs font-bold text-[#736B63] uppercase tracking-wider">Assigned Classes</p>
-            <p className="mt-1 text-sm font-extrabold text-[#0C4A86]">Grade 9-A & Grade 10-B</p>
-          </div>
-          <div className="rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] p-3.5">
-            <p className="text-xs font-bold text-[#736B63] uppercase tracking-wider">Email Address</p>
-            <p className="mt-1 text-sm font-extrabold text-[#0C4A86]">ramesh.sharma@school.edu</p>
-          </div>
-          <div className="rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] p-3.5">
-            <p className="text-xs font-bold text-[#736B63] uppercase tracking-wider">Contact Phone</p>
-            <p className="mt-1 text-sm font-extrabold text-[#0C4A86]">+91 98765 43210</p>
-          </div>
+
+          <button
+            onClick={handleCopyQuote}
+            className="flex items-center gap-1.5 rounded-lg bg-white/10 px-2.5 py-1 text-xs font-bold transition hover:bg-white/20"
+          >
+            {copiedQuote ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+            <span>{copiedQuote ? 'Copied' : 'Copy Quote'}</span>
+          </button>
+        </div>
+
+        <div className="my-3 space-y-1.5">
+          <h3 className="text-xl font-black italic text-white font-serif leading-snug">
+            "{currentQuoteObj.quote}"
+          </h3>
+          <p className="text-xs font-bold uppercase tracking-widest text-amber-300">— {currentQuoteObj.author}</p>
         </div>
       </div>
 
-      {/* 2. Combined Timetable & Scrollable Events Section Row (Metrics Row Removed) */}
-      <div className="grid gap-6 lg:grid-cols-12">
-        {/* Combined Timetable Column */}
-        <div className="lg:col-span-7">
-          <TeacherTimetable timetable={timetableRows} currentTime={currentTime} />
+      {/* 3. Main Dashboard Grid: Calendar, Restored Upcoming Events & Class Timetable (Req 1 & 14) */}
+      <div className="grid gap-6 lg:grid-cols-12 items-start">
+        {/* Monthly Calendar View */}
+        <div className="lg:col-span-6">
+          <InteractiveGoogleCalendar
+            hideCreateEvent={true}
+            hideViewToggle={true}
+            assignedClassesOnly={true}
+          />
         </div>
 
-        {/* Scrollable Events Section Column */}
-        <div className="lg:col-span-5">
+        {/* Restored Upcoming Events Section (Req 1) */}
+        <div className="lg:col-span-6 space-y-6">
           <SectionCard
             title="Upcoming Events"
-            subtitle="Scrollable event schedule"
-            action={<span className="rounded-full bg-[#EBF5FF] border border-[#BFDBFE] px-2.5 py-1 text-xs font-bold text-[#0096DA]">{eventsList.length} Events</span>}
+            subtitle="Important school functions, exams & holidays"
           >
-            <div className="max-h-[380px] overflow-y-auto pr-1 space-y-3">
-              {eventsList.map((event) => (
-                <div key={event.id} className={`rounded-xl border p-3.5 transition-all hover:shadow-sm ${event.bg}`}>
+            <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1">
+              {upcomingEventsList.map((evt) => (
+                <div key={evt.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 hover:bg-white transition-all space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-white/70">
-                      {event.category}
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${evt.badgeColor}`}>
+                      {evt.category}
                     </span>
-                    <span className="text-xs font-bold">{event.date}</span>
+                    <span className="text-xs font-bold text-[#0C4A86] flex items-center gap-1">
+                      <Calendar className="h-3.5 w-3.5" /> {evt.date}
+                    </span>
                   </div>
-                  <h4 className="mt-2 text-sm font-extrabold">{event.title}</h4>
-                  <div className="mt-1.5 flex items-center justify-between text-xs opacity-90">
-                    <span className="font-semibold">🕒 {event.time}</span>
-                    <span className="font-semibold">📍 {event.location}</span>
+
+                  <h4 className="text-xs font-extrabold text-slate-900">{evt.title}</h4>
+                  <p className="text-[11px] text-slate-600">{evt.description}</p>
+
+                  <div className="pt-1.5 border-t border-slate-200 flex items-center justify-between text-[11px] font-semibold text-slate-500">
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3 text-[#0096DA]" /> {evt.time}
+                    </span>
+                    <span className="flex items-center gap-1 text-emerald-700 font-bold">
+                      <MapPin className="h-3 w-3" /> {evt.location}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -208,34 +271,38 @@ const TeacherHomePage = ({ user, openActivityModal = false }) => {
         </div>
       </div>
 
-      {/* 3. New Activity List & Activity Management Section */}
-      <div className="grid gap-6 lg:grid-cols-12">
-        <div className="lg:col-span-12">
+      {/* 4. Class Timetable Section */}
+      <TeacherTimetable timetable={timetableRows} currentTime={currentTime} />
+
+      {/* 5. New Activity List & Daily Slides Section (Req 14) */}
+      <div className="grid gap-6 lg:grid-cols-12 items-start">
+        {/* New Activity List */}
+        <div className="lg:col-span-6">
           <SectionCard
             title="New Activity List"
-            subtitle="School & classroom activities published by faculty"
+            subtitle="Published school & classroom activities"
             action={
               <button
-                onClick={() => navigate('/dashboard/activities')}
-                className="flex items-center gap-1.5 rounded-xl bg-[#0C4A86] px-3.5 py-2 text-xs font-bold text-white transition hover:bg-[#0096DA]"
+                onClick={() => setIsActivityModalOpen(true)}
+                className="flex items-center gap-1.5 rounded-xl bg-[#0C4A86] px-3.5 py-2 text-xs font-bold text-white transition hover:bg-black"
               >
                 <PlusCircle className="h-4 w-4" />
                 <span>Add Activity</span>
               </button>
             }
           >
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
               {activitiesList.map((activity) => (
-                <div key={activity.id} className="rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] p-4 hover:bg-white transition-all">
+                <div key={activity.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 hover:bg-white transition-all space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="rounded-md bg-[#0C4A86]/15 px-2 py-0.5 text-xs font-bold text-[#0C4A86]">
                       {activity.className}
                     </span>
-                    <span className="text-xs font-semibold text-[#736B63]">{activity.date}</span>
+                    <span className="text-xs font-semibold text-slate-500">{activity.date}</span>
                   </div>
-                  <h4 className="mt-2 text-sm font-extrabold text-[#0C4A86]">{activity.title}</h4>
-                  <p className="mt-1.5 text-xs text-[#736B63] line-clamp-2">{activity.description}</p>
-                  <div className="mt-3 pt-2.5 border-t border-[#BFDBFE] flex items-center justify-between text-[11px] font-bold text-[#0096DA]">
+                  <h4 className="text-sm font-extrabold text-slate-900">{activity.title}</h4>
+                  <p className="text-xs text-slate-600">{activity.description}</p>
+                  <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-[11px] font-bold text-[#0096DA]">
                     <span>By: {activity.author}</span>
                     <span className="text-emerald-700">Published ✓</span>
                   </div>
@@ -244,72 +311,112 @@ const TeacherHomePage = ({ user, openActivityModal = false }) => {
             </div>
           </SectionCard>
         </div>
+
+        {/* Daily Slides Main Module Link & Summary Card */}
+        <div className="lg:col-span-6">
+          <SectionCard
+            title="Daily Slides"
+            subtitle="Daily academic content deck & lesson presentations"
+            action={
+              <button
+                onClick={() => navigate('/dashboard/daily-slides')}
+                className="flex items-center gap-1.5 rounded-xl bg-[#0096DA] px-3.5 py-2 text-xs font-bold text-white transition hover:bg-[#0C4A86]"
+              >
+                <Presentation className="h-4 w-4" />
+                <span>Open Daily Slides</span>
+              </button>
+            }
+          >
+            <div className="rounded-2xl border border-[#BFDBFE] bg-[#EBF5FF] p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#0C4A86] border border-[#BFDBFE]">
+                  Today's Slide Deck Ready
+                </span>
+                <span className="text-xs font-extrabold text-[#0096DA]">4 Presentations</span>
+              </div>
+              <h4 className="text-sm font-black text-slate-900">Grade 9 & 10 Mathematics Slide Series</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Access interactive teaching slides, practice problems, formulas, and digital blackboard content.
+              </p>
+              <div className="pt-2">
+                <button
+                  onClick={() => navigate('/dashboard/daily-slides')}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#0C4A86] py-2.5 text-xs font-extrabold text-white shadow-xs hover:bg-black transition"
+                >
+                  <span>Launch Interactive Slide Reader</span>
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </SectionCard>
+        </div>
       </div>
 
       {/* Modal for Posting New Activity */}
       {isActivityModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-2xl border border-[#BFDBFE] bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#BFDBFE] pb-3.5">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <h3 className="text-lg font-black text-[#0C4A86]">Post New Activity</h3>
               <button
                 onClick={() => setIsActivityModalOpen(false)}
-                className="rounded-lg p-1 text-[#736B63] hover:bg-[#EBF5FF]"
+                className="rounded-lg p-1 text-slate-400 hover:text-black font-bold"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleAddActivity} className="mt-4 space-y-4">
+            <form onSubmit={handleAddActivity} className="space-y-3 text-xs">
               <div>
-                <label className="block text-xs font-bold text-[#334155] uppercase tracking-wider">Target Class</label>
+                <label className="block font-bold text-slate-700">Target Class</label>
                 <select
                   value={newActivityForm.className}
                   onChange={(e) => setNewActivityForm({ ...newActivityForm, className: e.target.value })}
-                  className="mt-1 w-full rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] p-2.5 text-xs font-bold text-[#0C4A86] focus:border-[#0C4A86] focus:outline-none"
+                  className="mt-1 w-full rounded-2xl border border-slate-300 bg-slate-50 p-2.5 font-bold text-slate-800"
                 >
                   <option value="Grade 9 - A">Grade 9 - A</option>
+                  <option value="Grade 9 - B">Grade 9 - B</option>
+                  <option value="Grade 10 - A">Grade 10 - A</option>
                   <option value="Grade 10 - B">Grade 10 - B</option>
                   <option value="Grade 8 - C">Grade 8 - C</option>
-                  <option value="All Classes">All Classes</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#334155] uppercase tracking-wider">Activity Title</label>
+                <label className="block font-bold text-slate-700">Activity Title</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Science Exhibition Preparation Session"
+                  placeholder="e.g. Science Exhibition Preparation"
                   value={newActivityForm.title}
                   onChange={(e) => setNewActivityForm({ ...newActivityForm, title: e.target.value })}
-                  className="mt-1 w-full rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] p-2.5 text-xs font-bold text-[#0C4A86] focus:border-[#0C4A86] focus:outline-none"
+                  className="mt-1 w-full rounded-2xl border border-slate-300 bg-slate-50 p-2.5 font-bold text-slate-800"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#334155] uppercase tracking-wider">Description & Details</label>
+                <label className="block font-bold text-slate-700">Description</label>
                 <textarea
                   rows="3"
                   required
-                  placeholder="Enter details of the classroom activity..."
+                  placeholder="Details of the classroom activity..."
                   value={newActivityForm.description}
                   onChange={(e) => setNewActivityForm({ ...newActivityForm, description: e.target.value })}
-                  className="mt-1 w-full rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] p-2.5 text-xs font-semibold text-[#0C4A86] focus:border-[#0C4A86] focus:outline-none"
+                  className="mt-1 w-full rounded-2xl border border-slate-300 bg-slate-50 p-2.5 font-semibold text-slate-800"
                 ></textarea>
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-2">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setIsActivityModalOpen(false)}
-                  className="rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] px-4 py-2 text-xs font-bold text-[#334155]"
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 font-bold text-slate-600"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-[#0C4A86] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#0096DA]"
+                  className="rounded-xl bg-[#0C4A86] px-4 py-2 font-bold text-white shadow-sm hover:bg-black"
                 >
                   Publish Activity
                 </button>

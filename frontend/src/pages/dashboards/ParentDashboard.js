@@ -18,6 +18,8 @@ import ParentHomePage from './ParentHomePage';
 import RemarkList from '../components/RemarkList';
 import StudentActivities from '../components/StudentActivities';
 import StudentAssignments from '../components/StudentAssignments';
+import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogleCalendar';
+import MultiRoleMessagingSystem from '../../components/common/MultiRoleMessagingSystem';
 
 const ParentDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -143,7 +145,12 @@ const ParentDashboard = ({ user, onLogout }) => {
           </li>
           <li>
             <NavLink to="/dashboard/activities" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-              🎨 Activities
+              🏆 Classroom & School Activities
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/dashboard/calendar" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+              📅 Calendar
             </NavLink>
           </li>
           <li>
@@ -230,10 +237,11 @@ const ParentDashboard = ({ user, onLogout }) => {
             <Route path="overview" element={<ParentHomePage user={user} students={students} stats={stats} />} />
             <Route path="student-overview" element={<ParentStudentProfile students={students} />} />
             <Route path="student" element={<ParentStudentProfile students={students} />} />
-            <Route path="communication" element={<ParentCommunication />} />
-            <Route path="teacher-communication" element={<ParentCommunication />} />
+            <Route path="communication" element={<MultiRoleMessagingSystem currentUserRole="Parent" currentUserName={`${user?.firstName || 'Suresh'} ${user?.lastName || 'Verma'} (Parent)`} />} />
+            <Route path="teacher-communication" element={<MultiRoleMessagingSystem currentUserRole="Parent" currentUserName={`${user?.firstName || 'Suresh'} ${user?.lastName || 'Verma'} (Parent)`} />} />
             <Route path="attendance" element={<ParentAttendance />} />
             <Route path="activities" element={<StudentActivities />} />
+            <Route path="calendar" element={<InteractiveGoogleCalendar />} />
             <Route path="homework" element={<ParentHomework />} />
             <Route path="assignments" element={<StudentAssignments userId={currentChildUserId} />} />
             <Route path="exams" element={<ParentExams />} />

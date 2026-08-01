@@ -9,7 +9,7 @@ const quotesDeck = [
 ];
 
 const StudentDailyInsights = ({ stats, user }) => {
-  const studentName = `${user?.firstName || 'Rohan'}`;
+  const studentName = `${user?.firstName || 'Aro'}`;
   const [deckIndex, setDeckIndex] = useState(0);
 
   const currentQuote = quotesDeck[deckIndex];
@@ -24,7 +24,7 @@ const StudentDailyInsights = ({ stats, user }) => {
       <div className="rounded-3xl border border-[#BFDBFE] bg-[#0C4A86] p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3.5 py-1 text-xs font-extrabold text-amber-300">
-            <Sparkles className="h-3.5 w-3.5" /> Daily Inspiration & Study Motivation Deck
+            <Sparkles className="h-3.5 w-3.5" /> Thought for the Day & Learning Insights
           </div>
           <h1 className="text-3xl font-black text-white">Daily Learning Insights, {studentName}! 🚀</h1>
           <p className="text-xs font-semibold text-amber-100/90 max-w-xl">

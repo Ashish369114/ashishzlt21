@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, ChevronLeft, ChevronRight, Play, Pause, PlusCircle, Quote, Maximize2, Share2, Copy, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Sparkles, ChevronLeft, ChevronRight, Play, Pause, PlusCircle, Quote, Copy, Check, ArrowLeft } from 'lucide-react';
 import SectionCard from '../../components/dashboard/SectionCard';
 
 const initialQuotes = [
@@ -102,6 +103,7 @@ const initialQuotes = [
 ];
 
 const TeacherDailySlidesPage = ({ user }) => {
+  const navigate = useNavigate();
   const [quotesList, setQuotesList] = useState(initialQuotes);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -170,19 +172,28 @@ const TeacherDailySlidesPage = ({ user }) => {
 
   return (
     <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="rounded-2xl border border-[#BFDBFE] bg-white p-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-black text-[#1A1817]">Daily Slides & Motivational Quotes</h1>
-          <p className="text-sm font-semibold text-[#736B63]">
-            School Lesson Academic • Daily inspirational slides deck for morning assembly & classroom presentation
-          </p>
+      {/* Header Banner with In-App Back Button (Req 12 & 13) */}
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#EBF5FF] px-3.5 py-1.5 text-xs font-bold text-[#0C4A86] border border-[#BFDBFE] hover:bg-[#0C4A86] hover:text-white transition-all"
+          >
+            ← Back
+          </button>
+          <div>
+            <h1 className="text-2xl font-black text-slate-900">Daily Slides & Motivational Deck</h1>
+            <p className="text-xs font-semibold text-slate-500">
+              Interactive slide deck for morning assembly & classroom presentation
+            </p>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsPlaying((prev) => !prev)}
-            className="flex items-center gap-1.5 rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] px-3.5 py-2 text-xs font-bold text-[#0C4A86] hover:bg-[#EFEAE4]"
+            className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-bold text-slate-800 hover:bg-slate-100"
           >
             {isPlaying ? <Pause className="h-4 w-4 text-amber-600" /> : <Play className="h-4 w-4 text-emerald-600" />}
             <span>{isPlaying ? 'Pause Slides' : 'Auto Play'}</span>
@@ -190,9 +201,9 @@ const TeacherDailySlidesPage = ({ user }) => {
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-1.5 rounded-xl bg-[#0C4A86] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#0096DA]"
+            className="flex items-center gap-1.5 rounded-xl bg-[#0C4A86] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-black transition"
           >
-            <PlusCircle className="h-4 w-4" />
+            <PlusCircle className="h-4 w-4 text-amber-400" />
             <span>Add Daily Slide</span>
           </button>
         </div>
@@ -202,7 +213,7 @@ const TeacherDailySlidesPage = ({ user }) => {
       <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${currentSlide.bgGradient} p-8 sm:p-12 text-white shadow-xl transition-all duration-700 min-h-[340px] flex flex-col justify-between`}>
         {/* Decorative Quote Icon & Badge */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold backdrop-blur-md">
+          <div className="flex items-center gap-2 rounded-full bg-white/15 px-3.5 py-1 text-xs font-bold backdrop-blur-md">
             <Sparkles className="h-3.5 w-3.5 text-sky-200" />
             <span>{currentSlide.category}</span>
           </div>
@@ -276,18 +287,18 @@ const TeacherDailySlidesPage = ({ user }) => {
               onClick={() => setCurrentIndex(idx)}
               className={`rounded-2xl border p-5 cursor-pointer transition-all ${
                 idx === currentIndex
-                  ? 'border-[#0C4A86] bg-[#EBF5FF]/30 ring-2 ring-[#0C4A86] shadow-md'
-                  : 'border-[#BFDBFE] bg-[#EBF5FF] hover:bg-white'
+                  ? 'border-[#0C4A86] bg-[#EBF5FF]/50 ring-2 ring-[#0C4A86] shadow-md'
+                  : 'border-slate-200 bg-white hover:border-[#0C4A86]'
               }`}
             >
               <div className="flex items-center justify-between">
                 <span className="rounded-md bg-[#0C4A86]/15 px-2.5 py-0.5 text-[11px] font-bold text-[#0C4A86]">
                   {q.category}
                 </span>
-                <span className="text-xs font-bold text-[#736B63]">#Slide {idx + 1}</span>
+                <span className="text-xs font-bold text-slate-400">#Slide {idx + 1}</span>
               </div>
-              <p className="mt-3 text-xs font-semibold text-[#0C4A86] line-clamp-3">"{q.quote}"</p>
-              <p className="mt-2 text-[11px] font-bold text-[#0096DA]">— {q.author}</p>
+              <p className="mt-3 text-xs font-semibold text-slate-800 line-clamp-3">"{q.quote}"</p>
+              <p className="mt-2 text-[11px] font-extrabold text-[#0096DA]">— {q.author}</p>
             </div>
           ))}
         </div>
@@ -296,42 +307,42 @@ const TeacherDailySlidesPage = ({ user }) => {
       {/* Add New Slide Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-2xl border border-[#BFDBFE] bg-white p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#BFDBFE] pb-3">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <h3 className="text-base font-black text-[#0C4A86]">Add New Daily Quote Slide</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-[#736B63]">✕</button>
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 font-bold hover:text-black">✕</button>
             </div>
             <form onSubmit={handleAddSlideSubmit} className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-[#334155]">Motivational Quote Text</label>
+                <label className="block text-xs font-bold text-slate-700">Motivational Quote Text</label>
                 <textarea
                   rows="3"
                   required
                   placeholder="Enter inspiring quote text..."
                   value={newQuoteForm.quote}
                   onChange={(e) => setNewQuoteForm({ ...newQuoteForm, quote: e.target.value })}
-                  className="mt-1 w-full rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] p-2.5 text-xs font-semibold text-[#0C4A86]"
+                  className="mt-1 w-full rounded-2xl border border-slate-300 bg-slate-50 p-2.5 text-xs font-semibold text-slate-800"
                 ></textarea>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#334155]">Author / Source</label>
+                <label className="block text-xs font-bold text-slate-700">Author / Source</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. APJ Abdul Kalam, Albert Einstein, Proverb"
                   value={newQuoteForm.author}
                   onChange={(e) => setNewQuoteForm({ ...newQuoteForm, author: e.target.value })}
-                  className="mt-1 w-full rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] p-2.5 text-xs font-bold text-[#0C4A86]"
+                  className="mt-1 w-full rounded-2xl border border-slate-300 bg-slate-50 p-2.5 text-xs font-bold text-slate-800"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#334155]">Category / Theme</label>
+                <label className="block text-xs font-bold text-slate-700">Category / Theme</label>
                 <select
                   value={newQuoteForm.category}
                   onChange={(e) => setNewQuoteForm({ ...newQuoteForm, category: e.target.value })}
-                  className="mt-1 w-full rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] p-2.5 text-xs font-bold text-[#0C4A86]"
+                  className="mt-1 w-full rounded-2xl border border-slate-300 bg-slate-50 p-2.5 text-xs font-bold text-slate-800"
                 >
                   <option value="Inspiration & Growth">Inspiration & Growth</option>
                   <option value="Motivation & Perseverance">Motivation & Perseverance</option>
@@ -340,9 +351,9 @@ const TeacherDailySlidesPage = ({ user }) => {
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#BFDBFE]">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] px-3.5 py-2 text-xs font-bold">Cancel</button>
-                <button type="submit" className="rounded-xl bg-[#0C4A86] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#0096DA]">Add Slide</button>
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-bold text-slate-600">Cancel</button>
+                <button type="submit" className="rounded-xl bg-[#0C4A86] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-black transition">Add Slide</button>
               </div>
             </form>
           </div>
