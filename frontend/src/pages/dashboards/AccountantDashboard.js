@@ -15,6 +15,7 @@ import AccountantPayroll from '../components/AccountantPayroll';
 import ConcessionManagement from '../components/ConcessionManagement';
 import PlanUpgradeRequired from '../components/PlanUpgradeRequired';
 import SchoolCalendarManagement from '../components/SchoolCalendarManagement';
+import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogleCalendar';
 
 // Shows a locked feature banner WITHIN a page (not a full block)
 const FeatureLockBanner = ({ featureName, requiredPlan = 'Gold' }) => (
@@ -303,6 +304,7 @@ const AccountantDashboard = ({ user, onLogout }) => {
 
         <ul className="nav-menu">
           <li><Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''}>Dashboard</Link></li>
+          <li><Link to="/dashboard/calendar" className={isActive('/dashboard/calendar') ? 'active' : ''}>📅 Calendar</Link></li>
           <li><Link to="/dashboard/school-calendar" className={isActive('/dashboard/school-calendar') ? 'active' : ''}>📅 School Calendar</Link></li>
           <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''}>Students</Link></li>
 
@@ -415,6 +417,7 @@ const AccountantDashboard = ({ user, onLogout }) => {
 
         <Routes>
           <Route index element={<DashboardHome stats={stats} user={user} />} />
+          <Route path="calendar" element={<InteractiveGoogleCalendar />} />
           <Route path="school-calendar" element={<SchoolCalendarManagement />} />
           <Route path="students" element={<StudentManagement />} />
           <Route path="teachers" element={<AccountantTeachers />} />

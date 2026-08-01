@@ -25,6 +25,8 @@ import DailyInsightWidget from '../../components/DailyInsightWidget';
 import NoticeManagement from '../components/NoticeManagement';
 import MeetingMomManagement from '../components/MeetingMomManagement';
 import SchoolCalendarManagement from '../components/SchoolCalendarManagement';
+import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogleCalendar';
+import MultiRoleMessagingSystem from '../../components/common/MultiRoleMessagingSystem';
 
 const PrincipalDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -116,6 +118,8 @@ const PrincipalDashboard = ({ user, onLogout }) => {
 
         <ul className="nav-menu">
           <li><Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''}>📊 Dashboard</Link></li>
+          <li><Link to="/dashboard/calendar" className={isActive('/dashboard/calendar') ? 'active' : ''}>📅 Calendar</Link></li>
+          <li><Link to="/dashboard/communications" className={isActive('/dashboard/communications') ? 'active' : ''}>💬 Communications</Link></li>
           <li><Link to="/dashboard/school-calendar" className={isActive('/dashboard/school-calendar') ? 'active' : ''}>📅 School Calendar</Link></li>
           <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''}>👨‍🎓 Students</Link></li>
           
@@ -143,6 +147,8 @@ const PrincipalDashboard = ({ user, onLogout }) => {
       <div className="main-content">
         <Routes>
           <Route index element={<PrincipalDashboardHome stats={stats} user={user} />} />
+          <Route path="calendar" element={<InteractiveGoogleCalendar />} />
+          <Route path="communications" element={<MultiRoleMessagingSystem currentUserRole="Principal" currentUserName={`${user?.firstName || 'Dr. Anita'} ${user?.lastName || 'Roy'} (Principal)`} />} />
           <Route path="school-calendar" element={<SchoolCalendarManagement />} />
           <Route path="students" element={<StudentManagement />} />
           <Route path="employees" element={<EmployeeManagement />} />

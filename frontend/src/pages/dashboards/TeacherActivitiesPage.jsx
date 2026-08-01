@@ -53,15 +53,24 @@ const TeacherActivitiesPage = ({ user }) => {
       grade: activityForm.grade,
       section: activityForm.section,
       subject: activityForm.subject,
+      teacherName: user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Dr. Vikram Sharma',
       category: activityForm.category,
-      date: activityForm.date || 'Today',
+      date: activityForm.date || new Date().toISOString().substring(0, 10),
       venue: activityForm.venue || 'Classroom',
       description: activityForm.description,
       fileName: activityForm.fileName || 'Activity_Resources.pdf',
       fileType: activityForm.fileType,
     };
 
-    setActivitiesList((prev) => [newActivity, ...prev]);
+    const updated = [newActivity, ...activitiesList];
+    setActivitiesList(updated);
+    try {
+      localStorage.setItem('classroom_activities', JSON.stringify(updated));
+      window.dispatchEvent(new Event('classroomActivitiesUpdated'));
+    } catch (e) {
+      console.error(e);
+    }
+
     setActivityForm({
       title: '',
       grade: 'Grade 9',

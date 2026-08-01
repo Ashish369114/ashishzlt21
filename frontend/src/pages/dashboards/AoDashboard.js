@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AoManagement from '../components/AoManagement';
 import SchoolCalendarManagement from '../components/SchoolCalendarManagement';
+import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogleCalendar';
 import DailyInsightWidget from '../../components/DailyInsightWidget';
 import { subscribeToDataChanges } from '../../services/syncService';
 import { LayoutDashboard, Users, FileText, Settings, ShieldCheck, LogOut, Calendar as CalendarIcon, Camera } from 'lucide-react';
@@ -41,6 +42,7 @@ const AoDashboard = ({ user, onLogout }) => {
 
   const navItems = [
     { id: 'dashboard', label: 'AO Dashboard', icon: LayoutDashboard },
+    { id: 'google_calendar', label: 'Calendar', icon: CalendarIcon },
     { id: 'calendar', label: 'School Calendar', icon: CalendarIcon },
     { id: 'staff', label: 'Staff Management', icon: Users },
     { id: 'infrastructure', label: 'Infrastructure', icon: ShieldCheck },
@@ -193,7 +195,9 @@ const AoDashboard = ({ user, onLogout }) => {
 
         {/* Workspace Views */}
         <div style={{ padding: '28px' }}>
-          {activeTab === 'calendar' ? (
+          {activeTab === 'google_calendar' ? (
+            <InteractiveGoogleCalendar />
+          ) : activeTab === 'calendar' ? (
             <SchoolCalendarManagement />
           ) : (
             <AoManagement activeTab={activeTab} />

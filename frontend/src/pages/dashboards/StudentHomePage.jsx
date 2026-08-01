@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   User, CheckCircle2, BookOpen, ClipboardCheck, FileText, Clock, CalendarDays, Award,
-  Sparkles, Bell, Trophy, Camera, Quote, Calendar, MapPin, ArrowRight, Share2, Check, Copy
+  Sparkles, Bell, Trophy, Camera, Calendar, MapPin, ArrowRight, Check, Copy, Layers
 } from 'lucide-react';
 import SectionCard from '../../components/dashboard/SectionCard';
 
@@ -18,29 +18,35 @@ const motivationalQuotesList = [
   { quote: "Education is not the learning of facts, but the training of the mind to think.", author: "Albert Einstein", tip: "Learning Tip: Explain complex math formulas in your own words to solidify understanding." },
   { quote: "The beautiful thing about learning is that no one can take it away from you.", author: "B.B. King", tip: "Productivity Tip: Review daily class notes for 10 minutes every evening." },
   { quote: "It always seems impossible until it's done. Keep striving with confidence.", author: "Nelson Mandela", tip: "Exam Tip: Solve past test papers under timed conditions to boost confidence." },
+  { quote: "Believe in yourself and keep learning.", author: "Anonymous", tip: "Mindset Tip: Approach every topic with curiosity and patience." },
+  { quote: "Success comes from consistent effort.", author: "Sophocles", tip: "Habit Tip: Maintain a daily study planner for tracking tasks." },
+  { quote: "Every day is a new opportunity to learn.", author: "John Locke", tip: "Focus Tip: Clear your desk of distractions before beginning study." },
 ];
+
+// Calculate a fixed, deterministic quote index based strictly on calendar date (YYYY-MM-DD)
+const getDailyQuoteIndex = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
+  const day = today.getDate();
+  // Hash formula guarantees the quote remains fixed for the date across all refreshes
+  const dateSeed = year * 10000 + month * 100 + day;
+  return dateSeed % motivationalQuotesList.length;
+};
 
 const StudentHomePage = ({ user, student, stats }) => {
   const navigate = useNavigate();
-  const studentName = `${user?.firstName || 'Rohan'} ${user?.lastName || 'Verma'}`.trim();
+  const studentName = `${user?.firstName || 'Aro'} ${user?.lastName || 'Patel'}`.trim();
 
   // Avatar state
   const [profileAvatar, setProfileAvatar] = useState(() => {
     return localStorage.getItem('student_profile_avatar') || null;
   });
 
-  // Daily Quote state
-  const [quoteIndex, setQuoteIndex] = useState(0);
+  // Daily Quote is fixed by date
+  const dailyQuoteIndex = getDailyQuoteIndex();
+  const currentQuoteObj = motivationalQuotesList[dailyQuoteIndex];
   const [copiedQuote, setCopiedQuote] = useState(false);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setQuoteIndex((prev) => (prev + 1) % motivationalQuotesList.length);
-    }, 9000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const currentQuoteObj = motivationalQuotesList[quoteIndex];
 
   // Handle Photo Upload
   const handlePhotoUpload = (e) => {
@@ -64,23 +70,25 @@ const StudentHomePage = ({ user, student, stats }) => {
     setTimeout(() => setCopiedQuote(false), 2000);
   };
 
-  // 10 Feature Navigation Cards
+  // Feature Navigation Cards - Renamed to "Calendar" (Req 1)
   const featureCards = [
     { title: 'My Profile', subtitle: 'View student profile & contact details', icon: User, path: '/dashboard/profile', accent: 'bg-[#0C4A86]' },
-    { title: 'Attendance', subtitle: '96% attendance record logged', icon: CheckCircle2, path: '/dashboard/attendance', accent: 'bg-emerald-600' },
-    { title: 'Homework', subtitle: '2 active worksheets assigned', icon: BookOpen, path: '/dashboard/homework', accent: 'bg-amber-600' },
-    { title: 'Assignments', subtitle: '1 term project coursework', icon: ClipboardCheck, path: '/dashboard/assignments', accent: 'bg-sky-600' },
-    { title: 'Study Notes', subtitle: 'Chapter notes & PDF downloads', icon: FileText, path: '/dashboard/study-notes', accent: 'bg-teal-600' },
-    { title: 'Timetable', subtitle: 'Mon-Fri daily period schedule', icon: Clock, path: '/dashboard/timetable', accent: 'bg-indigo-600' },
-    { title: 'Exam Schedule', subtitle: 'Upcoming datesheet & syllabus', icon: CalendarDays, path: '/dashboard/exam-schedule', accent: 'bg-orange-600' },
-    { title: 'Results', subtitle: 'Exam marks, grades & report cards', icon: Award, path: '/dashboard/results', accent: 'bg-rose-600' },
-    { title: 'Activities', subtitle: 'School events, quizzes & sports', icon: Trophy, path: '/dashboard/activities', accent: 'bg-yellow-600' },
-    { title: 'Notifications', subtitle: '3 unread announcements', icon: Bell, path: '/dashboard/notifications', accent: 'bg-[#0C4A86]' },
+    { title: 'Calendar', subtitle: 'Interactive Calendar schedule', icon: Calendar, path: '/dashboard/calendar', accent: 'bg-[#0C4A86]' },
+    { title: 'Classroom Activity', subtitle: 'Workshops, experiments, docs & videos', icon: Layers, path: '/dashboard/classroom-activity', accent: 'bg-[#0C4A86]' },
+    { title: 'Attendance', subtitle: 'Date-wise calendar & weekly view', icon: CheckCircle2, path: '/dashboard/attendance', accent: 'bg-[#0C4A86]' },
+    { title: 'Homework', subtitle: 'Worksheets, files, photos & videos', icon: BookOpen, path: '/dashboard/homework', accent: 'bg-[#0C4A86]' },
+    { title: 'Assignments', subtitle: 'Coursework reports, files & videos', icon: ClipboardCheck, path: '/dashboard/assignments', accent: 'bg-[#0C4A86]' },
+    { title: 'Study Notes', subtitle: 'Chapter notes, PDFs, photos & videos', icon: FileText, path: '/dashboard/study-notes', accent: 'bg-[#0C4A86]' },
+    { title: 'Timetable', subtitle: 'Mon-Fri daily period schedule', icon: Clock, path: '/dashboard/timetable', accent: 'bg-[#0C4A86]' },
+    { title: 'Exam Schedule', subtitle: '7-stage datesheet & max marks', icon: CalendarDays, path: '/dashboard/exam-schedule', accent: 'bg-[#0C4A86]' },
+    { title: 'Results', subtitle: 'Subject-wise marks & report cards', icon: Award, path: '/dashboard/results', accent: 'bg-[#0C4A86]' },
+    { title: 'Activities', subtitle: 'School events, quizzes & sports', icon: Trophy, path: '/dashboard/activities', accent: 'bg-[#0C4A86]' },
+    { title: 'Notifications', subtitle: 'Unread alerts & announcements', icon: Bell, path: '/dashboard/notifications', accent: 'bg-[#0C4A86]' },
   ];
 
   return (
     <div className="space-y-8">
-      {/* 1. Header Welcome Banner with Right-Side Profile Image Upload Option */}
+      {/* 1. Header Welcome Board */}
       <div className="rounded-3xl border border-[#BFDBFE] bg-white p-6 md:p-8 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
@@ -102,23 +110,22 @@ const StudentHomePage = ({ user, student, stats }) => {
             </div>
           </div>
 
-          {/* Right Side Avatar Upload Component */}
-          <div className="flex items-center gap-4 bg-[#EBF5FF] p-3.5 rounded-2xl border border-[#BFDBFE] self-start md:self-auto">
-            <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-[#0C4A86] text-2xl font-black text-white shadow-md border-2 border-white">
+          {/* Avatar Upload Component */}
+          <div className="flex items-center gap-4 bg-[#EBF5FF] p-3.5 rounded-2xl border border-[#BFDBFE] self-start md:self-auto shadow-xs">
+            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#0C4A86] text-2xl font-black text-white shadow-md border-2 border-white">
               {profileAvatar ? (
                 <img src={profileAvatar} alt={studentName} className="h-full w-full object-cover" />
               ) : (
                 <span>{studentName.charAt(0)}</span>
               )}
-              {/* Photo Upload Camera Badge */}
               <label
-                htmlFor="student-photo-upload"
+                htmlFor="student-photo-upload-main"
                 className="absolute bottom-0 right-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-[#0C4A86] text-white shadow-md hover:bg-black transition"
-                title="Upload/Change Profile Photo"
+                title="Upload Profile Image"
               >
                 <Camera className="h-3.5 w-3.5" />
                 <input
-                  id="student-photo-upload"
+                  id="student-photo-upload-main"
                   type="file"
                   accept="image/*"
                   onChange={handlePhotoUpload}
@@ -126,10 +133,10 @@ const StudentHomePage = ({ user, student, stats }) => {
                 />
               </label>
             </div>
-            <div className="text-left">
+            <div className="text-left space-y-0.5">
               <label
-                htmlFor="student-photo-upload"
-                className="cursor-pointer text-xs font-black text-[#0C4A86] hover:text-[#0C4A86] block"
+                htmlFor="student-photo-upload-main"
+                className="cursor-pointer text-xs font-black text-[#0C4A86] hover:underline block"
               >
                 Upload Profile Photo
               </label>
@@ -137,47 +144,26 @@ const StudentHomePage = ({ user, student, stats }) => {
             </div>
           </div>
         </div>
-
-        {/* Quick Academic Snapshot Cards */}
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 pt-4 border-t border-[#BFDBFE]">
-          <div className="rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] p-3 text-center">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#736B63]">Attendance</p>
-            <p className="mt-0.5 text-xl font-black text-emerald-700">96%</p>
-          </div>
-          <div className="rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] p-3 text-center">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#736B63]">Pending Tasks</p>
-            <p className="mt-0.5 text-xl font-black text-amber-700">2 Items</p>
-          </div>
-          <div className="rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] p-3 text-center">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#736B63]">Exam Grade Avg</p>
-            <p className="mt-0.5 text-xl font-black text-sky-800">88.5% (A)</p>
-          </div>
-          <div className="rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] p-3 text-center">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#736B63]">Class Rank</p>
-            <p className="mt-0.5 text-xl font-black text-[#0C4A86]">#3 in Class</p>
-          </div>
-        </div>
       </div>
 
-      {/* 2. Requirement 12: Prominent Daily Insight / Motivation Card directly on Homepage */}
+      {/* 2. Thought for the Day Section (Fixed Daily Quote - Req 1) */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0C4A86] to-[#0096DA] p-6 md:p-8 text-white shadow-xl">
         <div className="flex items-center justify-between border-b border-white/15 pb-3">
-          <div className="flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-extrabold backdrop-blur-md">
-            <Sparkles className="h-3.5 w-3.5 text-amber-400" /> Daily Inspiration & Learning Tip
+          <div className="flex items-center gap-2 rounded-full bg-white/15 px-3.5 py-1 text-xs font-extrabold backdrop-blur-md">
+            <Sparkles className="h-3.5 w-3.5 text-amber-400" /> Thought for the Day — {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </div>
 
           <button
             onClick={handleCopyQuote}
             className="flex items-center gap-1.5 rounded-lg bg-white/10 px-2.5 py-1 text-xs font-bold transition hover:bg-white/20"
-            title="Copy quote"
+            title="Copy thought"
           >
             {copiedQuote ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-            <span>{copiedQuote ? 'Copied' : 'Copy Quote'}</span>
+            <span>{copiedQuote ? 'Copied' : 'Copy Thought'}</span>
           </button>
         </div>
 
         <div className="my-4 space-y-2">
-          <Quote className="h-8 w-8 text-amber-400/50" />
           <h3 className="text-xl md:text-2xl font-black italic text-white font-serif leading-snug">
             "{currentQuoteObj.quote}"
           </h3>
@@ -190,7 +176,7 @@ const StudentHomePage = ({ user, student, stats }) => {
         </div>
       </div>
 
-      {/* 3. Feature Cards Grid (10 Options) */}
+      {/* 3. Feature Cards Grid */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-black text-[#1A1817] flex items-center gap-2">
@@ -199,7 +185,7 @@ const StudentHomePage = ({ user, student, stats }) => {
           <span className="text-xs font-bold text-[#736B63]">Click card to open page</span>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-5">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
           {featureCards.map((card) => {
             const Icon = card.icon;
             return (
@@ -222,7 +208,7 @@ const StudentHomePage = ({ user, student, stats }) => {
         </div>
       </div>
 
-      {/* 4. Requirement 3: Scrollable Live Updates & Events Section */}
+      {/* 4. Live Updates & Announcements */}
       <SectionCard title="Live Updates & School Announcements" subtitle="Scrollable list of upcoming events and academic notices">
         <div className="max-h-80 overflow-y-auto pr-2 space-y-3 divide-y divide-[#BFDBFE]">
           {initialEventsList.map((evt) => (

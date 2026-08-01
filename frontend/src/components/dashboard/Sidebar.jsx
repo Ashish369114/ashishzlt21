@@ -1,18 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutGrid,
-  Users,
   BookOpen,
   MessageSquare,
   PlusCircle,
-  Presentation,
   Settings,
   ShieldCheck,
   LogOut,
-  Sparkles,
-  ChevronLeft,
-  ChevronRight,
+  Sparkles
 } from 'lucide-react';
 
 const motivationalQuotes = [
@@ -20,28 +16,32 @@ const motivationalQuotes = [
   { quote: "The secret of getting ahead is getting started.", author: "Mark Twain" },
   { quote: "Develop a passion for learning. You will never cease to grow.", author: "Anthony J. D'Angelo" },
   { quote: "Curiosity is the spark of all learning.", author: "Proverb" },
+  { quote: "Teaching is the one profession that creates all other professions.", author: "Unknown" },
+  { quote: "It is the supreme art of the teacher to awaken joy in creative expression and knowledge.", author: "Albert Einstein" },
+  { quote: "The mind is not a vessel to be filled, but a fire to be kindled.", author: "Plutarch" }
 ];
+
+// Date-seeded deterministic quote calculation (Req 2: 1 Date = 1 Fixed Quote)
+const getDailyQuote = () => {
+  const today = new Date();
+  const startOfYear = new Date(today.getFullYear(), 0, 0);
+  const diff = today - startOfYear;
+  const oneDay = 1000 * 60 * 60 * 24;
+  const dayOfYear = Math.floor(diff / oneDay);
+  return motivationalQuotes[dayOfYear % motivationalQuotes.length];
+};
 
 const navigation = [
   { label: 'Dashboard', to: '/dashboard', icon: LayoutGrid, end: true },
   { label: 'My Classes', to: '/dashboard/classes', icon: BookOpen },
-  { label: 'Parent Communications', to: '/dashboard/communications', icon: MessageSquare },
+  { label: 'Communication', to: '/dashboard/communications', icon: MessageSquare },
   { label: 'Classroom Activity', to: '/dashboard/activities', icon: PlusCircle },
-  { label: 'Daily Slides', to: '/dashboard/daily-slides', icon: Presentation },
   { label: 'Settings', to: '/dashboard/settings', icon: Settings },
 ];
 
 const Sidebar = ({ onLogout }) => {
-  const [quoteIndex, setQuoteIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setQuoteIndex((prev) => (prev + 1) % motivationalQuotes.length);
-    }, 8000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const currentQuote = motivationalQuotes[quoteIndex];
+  const currentQuote = getDailyQuote();
+  const dateFormatted = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col justify-between overflow-y-auto bg-[#FAF6F0] px-5 py-6 text-slate-800 border-r 1.5 border-slate-200 shadow-lg lg:flex">
@@ -85,37 +85,22 @@ const Sidebar = ({ onLogout }) => {
           ))}
         </nav>
 
-        {/* Daily Motivational Quote Card Widget in Sidebar */}
+        {/* Fixed Daily Quote Widget in Sidebar (Requirement 2: Exactly 1 Quote Per Day, Fixed, No Scrolling) */}
         <div className="rounded-2xl bg-gradient-to-br from-[#0C4A86] to-[#0096DA] p-4 text-white shadow-md space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-sky-200">
-              <Sparkles className="h-3.5 w-3.5 text-sky-300" />
+              <Sparkles className="h-3.5 w-3.5 text-amber-300" />
               <span>Daily Quote</span>
             </div>
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => setQuoteIndex((prev) => (prev - 1 + motivationalQuotes.length) % motivationalQuotes.length)}
-                className="rounded-md p-1 hover:bg-white/20 text-white/80 transition-colors"
-                title="Previous Quote"
-              >
-                <ChevronLeft className="h-3.5 w-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setQuoteIndex((prev) => (prev + 1) % motivationalQuotes.length)}
-                className="rounded-md p-1 hover:bg-white/20 text-white/80 transition-colors"
-                title="Next Quote"
-              >
-                <ChevronRight className="h-3.5 w-3.5" />
-              </button>
-            </div>
+            <span className="text-[10px] font-bold text-sky-100 bg-white/20 px-2 py-0.5 rounded-full">
+              {dateFormatted}
+            </span>
           </div>
 
           <p className="text-xs font-medium text-white italic leading-relaxed">
             "{currentQuote.quote}"
           </p>
-          <p className="text-[11px] font-extrabold text-sky-100 text-right">
+          <p className="text-[11px] font-extrabold text-amber-300 text-right">
             — {currentQuote.author}
           </p>
         </div>
