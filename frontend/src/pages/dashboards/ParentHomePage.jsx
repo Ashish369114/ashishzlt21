@@ -15,7 +15,7 @@ import {
   MapPin,
   TrendingUp
 } from 'lucide-react';
-import { academicExamTypes } from '../../utils/academicExamConfig';
+import { academicExamTypes, getExamResultsData } from '../../utils/academicExamConfig';
 
 const upcomingSchoolEvents = [
   {
@@ -138,14 +138,16 @@ const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStuden
     { label: 'View Fees', path: '/dashboard/fees', icon: CreditCard, bg: 'bg-slate-100 text-slate-800 border-slate-300' }
   ];
 
-  // 3. Subject-wise Marks Breakdown according to selected exam term
-  const subjectMarksData = [
-    { subject: 'Mathematics', max: 100, score: 92, grade: 'O', status: 'Pass' },
-    { subject: 'Science', max: 100, score: 88, grade: 'A+', status: 'Pass' },
-    { subject: 'English', max: 100, score: 90, grade: 'O', status: 'Pass' },
-    { subject: 'Social Studies', max: 100, score: 85, grade: 'A+', status: 'Pass' },
-    { subject: 'Computer Science', max: 100, score: 95, grade: 'O', status: 'Pass' },
-  ];
+  // 3. Dynamic Subject-wise Marks Breakdown based on selectedExamId
+  const rawExamData = getExamResultsData(selectedExamId);
+  const subjectMarksData = rawExamData.map((r) => ({
+    subject: r.subject,
+    max: r.maxMarks,
+    score: r.marks,
+    pct: Math.round((r.marks / r.maxMarks) * 100),
+    grade: r.grade,
+    status: r.status,
+  }));
 
   return (
     <div className="space-y-6">

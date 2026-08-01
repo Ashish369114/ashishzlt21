@@ -316,8 +316,8 @@ const StudentAttendance = ({ userId }) => {
           </div>
         </div>
 
-        {/* 6 Academic Year Summary Cards (Req 1) */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {/* 7 Academic Year Summary Cards (Req 1 & 10) */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Card 1: Total Working Days */}
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-1">
             <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Total Working Days</p>
@@ -350,7 +350,16 @@ const StudentAttendance = ({ userId }) => {
             <p className="text-xs font-semibold text-rose-700">Absences recorded</p>
           </div>
 
-          {/* Card 5: Off Days / Holidays */}
+          {/* Card 5: Half Days */}
+          <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 space-y-1">
+            <p className="text-[11px] font-extrabold uppercase tracking-wider text-amber-800">Half Days</p>
+            <p className="text-3xl font-black text-amber-600 flex items-center gap-2">
+              <Clock className="h-6 w-6 text-amber-600" /> 0 Days
+            </p>
+            <p className="text-xs font-semibold text-amber-700">Half-day sessions attended</p>
+          </div>
+
+          {/* Card 6: Off Days / Holidays */}
           <div className="rounded-2xl border border-purple-200 bg-purple-50/50 p-4 space-y-1">
             <p className="text-[11px] font-extrabold uppercase tracking-wider text-purple-800">Off Days / Holidays</p>
             <p className="text-3xl font-black text-purple-700 flex items-center gap-2">
@@ -359,13 +368,13 @@ const StudentAttendance = ({ userId }) => {
             <p className="text-xs font-semibold text-purple-700">Weekends & official school holidays</p>
           </div>
 
-          {/* Card 6: Remaining / Unrecorded Days */}
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 space-y-1">
-            <p className="text-[11px] font-extrabold uppercase tracking-wider text-amber-800">Remaining / Unrecorded Days</p>
-            <p className="text-3xl font-black text-amber-700 flex items-center gap-2">
-              <Clock className="h-6 w-6 text-amber-600" /> {yearStats.remainingDays} Days
+          {/* Card 7: Remaining / Unrecorded Days */}
+          <div className="rounded-2xl border border-slate-200 bg-slate-100/60 p-4 space-y-1 sm:col-span-2 lg:col-span-1">
+            <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Remaining / Unrecorded Days</p>
+            <p className="text-3xl font-black text-slate-800 flex items-center gap-2">
+              <Info className="h-6 w-6 text-slate-600" /> {yearStats.remainingDays} Days
             </p>
-            <p className="text-xs font-semibold text-amber-700">Working days remaining in {academicYear}</p>
+            <p className="text-xs font-semibold text-slate-500">Working days remaining in {academicYear}</p>
           </div>
         </div>
       </div>
