@@ -28,7 +28,6 @@ const navigation = [
   { label: 'My Classes', to: '/dashboard/classes', icon: BookOpen },
   { label: 'Communication', to: '/dashboard/communications', icon: MessageSquare },
   { label: 'Classroom Activity', to: '/dashboard/activities', icon: PlusCircle },
-  { label: 'Daily Slides', to: '/dashboard/daily-slides', icon: Presentation },
   { label: 'Settings', to: '/dashboard/settings', icon: Settings },
 ];
 

@@ -30,12 +30,13 @@ const TeacherClassesPage = ({ user }) => {
     setStudents(list);
   }, [selectedClassId]);
 
-  // 2. Attendance State (Req 4, 5, 6 & 16)
-  // - Current Status removed completely
-  // - Present = 🟢 Green tick checkbox, Absent = 🔴 Red tick checkbox
-  // - All Present + Edit individual student workflow
+  // 2. Attendance State (Req 7, 8, 9, 10, 11, 12, 13, 14, 15)
+  // - Remove individual Actions column
+  // - All Present + Edit next to All Present
+  // - Present = 🟢✓, Absent = 🔴✓ compact visual controls
+  // - Save Attendance positioned above Maximum Marks section
   const [attendanceRecords, setAttendanceRecords] = useState({});
-  const [editingStudentId, setEditingStudentId] = useState(null);
+  const [isEditAttendanceMode, setIsEditAttendanceMode] = useState(false);
   const [attendanceSuccessMsg, setAttendanceSuccessMsg] = useState('');
 
   useEffect(() => {
@@ -51,18 +52,18 @@ const TeacherClassesPage = ({ user }) => {
     }
   }, [selectedClassId, attendanceDate, students]);
 
-  // "All Present" Action (Req 6 & 16)
+  // "All Present" Action
   const handleMarkAllPresent = () => {
     const updated = {};
     students.forEach((st) => {
       updated[st._id] = 'Present';
     });
     setAttendanceRecords(updated);
-    setAttendanceSuccessMsg('All students marked Present! You can now click Edit on individual students if needed.');
+    setAttendanceSuccessMsg('All students marked Present!');
     setTimeout(() => setAttendanceSuccessMsg(''), 4000);
   };
 
-  // Toggle or Edit Individual Student Status (Req 5, 6 & 16)
+  // Toggle Individual Student Status
   const handleToggleStudentStatus = (studentId) => {
     setAttendanceRecords((prev) => {
       const current = prev[studentId] || 'Present';
@@ -74,12 +75,12 @@ const TeacherClassesPage = ({ user }) => {
     });
   };
 
-  // "Save Attendance" Action (Req 6 & 17)
+  // "Save Attendance" Action
   const handleSaveAttendance = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     schoolDataService.saveAttendanceRecord(selectedClassId, attendanceDate, attendanceRecords);
-    setEditingStudentId(null);
-    const msg = `Attendance saved successfully to backend database for ${activeClass.className} (${new Date(attendanceDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })})`;
+    setIsEditAttendanceMode(false);
+    const msg = 'Attendance saved successfully.';
     setAttendanceSuccessMsg(msg);
     setTimeout(() => setAttendanceSuccessMsg(''), 5000);
     alert(msg);
@@ -448,13 +449,13 @@ const TeacherClassesPage = ({ user }) => {
         </div>
       )}
 
-      {/* 2. Attendance Tab – All Present + Edit Flow & No Current Status (Req 4, 5, 6 & 16) */}
+      {/* 2. Attendance Tab – All Present + Edit Flow & Compact Visual Controls */}
       {activeTab === 'Attendance' && (
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
             <div>
               <h3 className="text-xl font-black text-slate-900">Attendance Register — {activeClass.className}</h3>
-              <p className="text-xs font-semibold text-slate-500">Click <strong>All Present</strong> to mark all 30 students, then click <strong>Edit</strong> for individual status adjustments.</p>
+              <p className="text-xs font-semibold text-slate-500">Click <strong>All Present</strong> to mark all students, click <strong>Edit</strong> to toggle individual student attendance.</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -468,23 +469,27 @@ const TeacherClassesPage = ({ user }) => {
                 />
               </div>
 
-              {/* All Present Button (Req 6 & 16) */}
-              <button
-                type="button"
-                onClick={handleMarkAllPresent}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-extrabold text-white shadow-sm hover:bg-emerald-700 transition"
-              >
-                <Check className="h-4 w-4" /> All Present
-              </button>
-
-              {/* Save Attendance Button (Req 6 & 17) */}
-              <button
-                type="button"
-                onClick={handleSaveAttendance}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-[#0C4A86] px-5 py-2 text-xs font-extrabold text-white shadow-md hover:bg-black transition"
-              >
-                <Save className="h-4 w-4 text-amber-400" /> Save Attendance
-              </button>
+              {/* All Present & Edit side-by-side (Req 8 & 13) */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleMarkAllPresent}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-extrabold text-white shadow-sm hover:bg-emerald-700 transition"
+                >
+                  <Check className="h-4 w-4" /> All Present
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsEditAttendanceMode((prev) => !prev)}
+                  className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-extrabold transition border ${
+                    isEditAttendanceMode
+                      ? 'bg-[#0C4A86] text-white border-[#0C4A86] shadow-sm'
+                      : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+                  }`}
+                >
+                  <Edit className="h-4 w-4" /> {isEditAttendanceMode ? 'Editing Active' : 'Edit'}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -494,7 +499,7 @@ const TeacherClassesPage = ({ user }) => {
             </div>
           )}
 
-          {/* Attendance Summary Cards (No Current Status - Req 4 & 16) */}
+          {/* Attendance Summary Cards */}
           <div className="grid grid-cols-3 gap-4 text-xs font-bold">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <span className="text-slate-400 uppercase tracking-wider text-[10px] block">Total Students</span>
@@ -510,7 +515,22 @@ const TeacherClassesPage = ({ user }) => {
             </div>
           </div>
 
-          {/* Attendance Table Structure (Req 16: Roll No | Student Name | Admission No | Attendance | Action) */}
+          {/* Attendance Legend / Control Guide (Req 10 & 13) */}
+          <div className="flex items-center justify-between bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-xs font-extrabold">
+            <span className="text-[#0C4A86]">Attendance Visual Controls:</span>
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                <span>Present</span>
+                <span className="font-black text-sm">🟢✓</span>
+              </span>
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-300">
+                <span>Absent</span>
+                <span className="font-black text-sm">🔴✓</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Student Attendance Table (No Actions Column - Req 7, 9, 10, 11, 12, 13) */}
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
@@ -519,7 +539,6 @@ const TeacherClassesPage = ({ user }) => {
                   <th className="p-3">Student Name</th>
                   <th className="p-3">Admission No</th>
                   <th className="p-3">Attendance</th>
-                  <th className="p-3">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-semibold">
@@ -532,25 +551,20 @@ const TeacherClassesPage = ({ user }) => {
                       <td className="p-3 font-black text-[#0C4A86]">{st.rollNumber}</td>
                       <td className="p-3 font-bold text-slate-900">{st.name}</td>
                       <td className="p-3 text-slate-500">{st.admissionNo}</td>
-                      {/* Attendance Badge Column (Green Present / Red Absent - Req 5 & 16) */}
-                      <td className="p-3">
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black border ${
-                          isPresent
-                            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                            : 'bg-rose-100 text-rose-800 border-rose-300'
-                        }`}>
-                          {isPresent ? '🟢 Present' : '🔴 Absent'}
-                        </span>
-                      </td>
-
-                      {/* Action Column with Edit Button (Req 6 & 16) */}
+                      {/* Compact Visual Control (🟢✓ / 🔴✓ - Req 9, 10, 11, 12) */}
                       <td className="p-3">
                         <button
                           type="button"
                           onClick={() => handleToggleStudentStatus(st._id)}
-                          className="inline-flex items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-1 text-xs font-extrabold text-[#0C4A86] hover:bg-[#0C4A86] hover:text-white transition shadow-2xs"
+                          className={`inline-flex items-center justify-center h-8 px-3.5 rounded-xl border text-xs font-black transition-all shadow-2xs ${
+                            isPresent
+                              ? 'bg-emerald-100 text-emerald-800 border-emerald-400 hover:bg-emerald-200'
+                              : 'bg-rose-100 text-rose-800 border-rose-400 hover:bg-rose-200'
+                          }`}
+                          title={isPresent ? 'Present - Click to toggle to Absent' : 'Absent - Click to toggle to Present'}
                         >
-                          <Edit className="h-3.5 w-3.5" /> Edit
+                          <span className="text-sm mr-1">{isPresent ? '🟢' : '🔴'}</span>
+                          <span>✓</span>
                         </button>
                       </td>
                     </tr>
@@ -558,6 +572,21 @@ const TeacherClassesPage = ({ user }) => {
                 })}
               </tbody>
             </table>
+          </div>
+
+          {/* Save Attendance Button Positioned Above Marks Section (Req 14 & 15) */}
+          <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+            <span className="text-xs font-semibold text-slate-500">
+              Review attendance records above and click save to lock attendance to database.
+            </span>
+            <button
+              type="button"
+              onClick={handleSaveAttendance}
+              className="inline-flex items-center gap-2 rounded-2xl bg-[#0C4A86] px-6 py-2.5 text-xs font-extrabold text-white shadow-md hover:bg-black transition-all"
+            >
+              <Save className="h-4 w-4 text-amber-400" />
+              <span>Save Attendance</span>
+            </button>
           </div>
         </div>
       )}

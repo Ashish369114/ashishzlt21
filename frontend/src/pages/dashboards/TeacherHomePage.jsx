@@ -200,11 +200,11 @@ const TeacherHomePage = ({ user, openActivityModal = false }) => {
         </div>
       </div>
 
-      {/* 2. Fixed Daily Quote / Thought for the Day */}
+      {/* 2. Daily Quote */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0C4A86] to-[#0096DA] p-6 text-white shadow-md">
         <div className="flex items-center justify-between border-b border-white/15 pb-2.5">
           <div className="flex items-center gap-2 rounded-full bg-white/15 px-3.5 py-1 text-xs font-extrabold backdrop-blur-md">
-            <Sparkles className="h-3.5 w-3.5 text-amber-400" /> Thought for the Day — {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            <Sparkles className="h-3.5 w-3.5 text-amber-400" /> Daily Quote — {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </div>
 
           <button
@@ -224,10 +224,10 @@ const TeacherHomePage = ({ user, openActivityModal = false }) => {
         </div>
       </div>
 
-      {/* 3. Main Dashboard Grid: Calendar, Restored Upcoming Events & Class Timetable (Req 1 & 14) */}
-      <div className="grid gap-6 lg:grid-cols-12 items-start">
+      {/* 3. Main Dashboard Grid: Calendar & Upcoming Events (Equal Box Size & Scrollable) */}
+      <div className="grid gap-6 lg:grid-cols-12 items-stretch">
         {/* Monthly Calendar View */}
-        <div className="lg:col-span-6">
+        <div className="lg:col-span-6 max-h-[520px] overflow-y-auto rounded-3xl border border-slate-200 bg-white shadow-sm">
           <InteractiveGoogleCalendar
             hideCreateEvent={true}
             hideViewToggle={true}
@@ -235,49 +235,48 @@ const TeacherHomePage = ({ user, openActivityModal = false }) => {
           />
         </div>
 
-        {/* Restored Upcoming Events Section (Req 1) */}
-        <div className="lg:col-span-6 space-y-6">
-          <SectionCard
-            title="Upcoming Events"
-            subtitle="Important school functions, exams & holidays"
-          >
-            <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1">
-              {upcomingEventsList.map((evt) => (
-                <div key={evt.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 hover:bg-white transition-all space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${evt.badgeColor}`}>
-                      {evt.category}
-                    </span>
-                    <span className="text-xs font-bold text-[#0C4A86] flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5" /> {evt.date}
-                    </span>
-                  </div>
-
-                  <h4 className="text-xs font-extrabold text-slate-900">{evt.title}</h4>
-                  <p className="text-[11px] text-slate-600">{evt.description}</p>
-
-                  <div className="pt-1.5 border-t border-slate-200 flex items-center justify-between text-[11px] font-semibold text-slate-500">
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3 text-[#0096DA]" /> {evt.time}
-                    </span>
-                    <span className="flex items-center gap-1 text-emerald-700 font-bold">
-                      <MapPin className="h-3 w-3" /> {evt.location}
-                    </span>
-                  </div>
+        {/* Upcoming Events Section */}
+        <div className="lg:col-span-6 max-h-[520px] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+          <div className="border-b border-slate-100 pb-3">
+            <h3 className="text-base font-extrabold text-[#0C4A86]">Upcoming Events</h3>
+            <p className="text-[11px] font-semibold text-slate-500">Important school functions, exams & holidays</p>
+          </div>
+          <div className="space-y-3 pr-1">
+            {upcomingEventsList.map((evt) => (
+              <div key={evt.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 hover:bg-white transition-all space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${evt.badgeColor}`}>
+                    {evt.category}
+                  </span>
+                  <span className="text-xs font-bold text-[#0C4A86] flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" /> {evt.date}
+                  </span>
                 </div>
-              ))}
-            </div>
-          </SectionCard>
+
+                <h4 className="text-xs font-extrabold text-slate-900">{evt.title}</h4>
+                <p className="text-[11px] text-slate-600">{evt.description}</p>
+
+                <div className="pt-1.5 border-t border-slate-200 flex items-center justify-between text-[11px] font-semibold text-slate-500">
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3 text-[#0096DA]" /> {evt.time}
+                  </span>
+                  <span className="flex items-center gap-1 text-emerald-700 font-bold">
+                    <MapPin className="h-3 w-3" /> {evt.location}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* 4. Class Timetable Section */}
       <TeacherTimetable timetable={timetableRows} currentTime={currentTime} />
 
-      {/* 5. New Activity List & Daily Slides Section (Req 14) */}
+      {/* 5. New Activity List Section */}
       <div className="grid gap-6 lg:grid-cols-12 items-start">
         {/* New Activity List */}
-        <div className="lg:col-span-6">
+        <div className="lg:col-span-12">
           <SectionCard
             title="New Activity List"
             subtitle="Published school & classroom activities"
@@ -308,45 +307,6 @@ const TeacherHomePage = ({ user, openActivityModal = false }) => {
                   </div>
                 </div>
               ))}
-            </div>
-          </SectionCard>
-        </div>
-
-        {/* Daily Slides Main Module Link & Summary Card */}
-        <div className="lg:col-span-6">
-          <SectionCard
-            title="Daily Slides"
-            subtitle="Daily academic content deck & lesson presentations"
-            action={
-              <button
-                onClick={() => navigate('/dashboard/daily-slides')}
-                className="flex items-center gap-1.5 rounded-xl bg-[#0096DA] px-3.5 py-2 text-xs font-bold text-white transition hover:bg-[#0C4A86]"
-              >
-                <Presentation className="h-4 w-4" />
-                <span>Open Daily Slides</span>
-              </button>
-            }
-          >
-            <div className="rounded-2xl border border-[#BFDBFE] bg-[#EBF5FF] p-5 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#0C4A86] border border-[#BFDBFE]">
-                  Today's Slide Deck Ready
-                </span>
-                <span className="text-xs font-extrabold text-[#0096DA]">4 Presentations</span>
-              </div>
-              <h4 className="text-sm font-black text-slate-900">Grade 9 & 10 Mathematics Slide Series</h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Access interactive teaching slides, practice problems, formulas, and digital blackboard content.
-              </p>
-              <div className="pt-2">
-                <button
-                  onClick={() => navigate('/dashboard/daily-slides')}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#0C4A86] py-2.5 text-xs font-extrabold text-white shadow-xs hover:bg-black transition"
-                >
-                  <span>Launch Interactive Slide Reader</span>
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
             </div>
           </SectionCard>
         </div>
