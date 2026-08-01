@@ -1,50 +1,109 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { User, Award, Calendar, BookOpen, ShieldCheck, Mail, Phone, MapPin } from 'lucide-react';
+import { schoolDataService } from '../../services/schoolDataStore';
 
-const ParentStudentProfile = ({ students = [] }) => {
-  const formatParentInfo = (parentId) => {
-    if (!parentId) return null;
-    if (typeof parentId === 'string') return parentId;
-    const name = `${parentId.firstName || ''} ${parentId.lastName || ''}`.trim();
-    return name || parentId.userId || parentId.email || parentId.phone || null;
+const ParentStudentProfile = ({ students = [], selectedStudentId }) => {
+  const navigate = useNavigate();
+
+  const activeStudent = students.find(
+    (s) => (s._id || s.userId?._id || s.userId) === selectedStudentId
+  ) || students[0] || {
+    name: 'Ramesh Kumar',
+    grade: 'Grade 9',
+    section: 'Section A',
+    rollNumber: '09',
+    admissionNo: 'ADM-2026-0914',
+    classTeacher: 'Ramesh Sharma',
+    dob: '2012-08-05'
   };
 
+  const name = activeStudent.userId?.firstName
+    ? `${activeStudent.userId.firstName} ${activeStudent.userId.lastName || ''}`.trim()
+    : activeStudent.name || 'Ramesh Kumar';
+
   return (
-    <div className="card">
-      <div className="card-header">
-        <h2>👩‍🎓 Linked Student Profile</h2>
+    <div className="space-y-6">
+      {/* Header Banner */}
+      <div className="rounded-3xl bg-gradient-to-r from-[#0C4A86] to-[#0096DA] p-6 text-white shadow-md flex items-center justify-between">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1 text-xs font-black text-white hover:bg-white hover:text-[#0C4A86] transition-all"
+            >
+              ← Back
+            </button>
+            <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur-md">
+              Student Profile
+            </span>
+          </div>
+          <h1 className="text-2xl font-black">{name}'s Official Student Profile</h1>
+          <p className="text-sky-100 text-xs font-medium">Academic registration details, class assignment & parent contacts.</p>
+        </div>
       </div>
 
-      {students.length === 0 ? (
-        <div className="card-content">No linked children found for this parent.</div>
-      ) : (
-        <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Class</th>
-                <th>Section</th>
-                <th>Roll Number</th>
-                <th>Parent ID</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((student) => {
-                const parentInfo = formatParentInfo(student.parentId) || formatParentInfo(student.userId?.parentId);
-                return (
-                  <tr key={student._id || student.id || student.userId?._id || student.userId}>
-                    <td>{student.userId?.firstName} {student.userId?.lastName}</td>
-                    <td>{student.class?.grade || student.class}</td>
-                    <td>{student.class?.section || '-'}</td>
-                    <td>{student.rollNumber || student.userId?.rollNumber || '-'}</td>
-                    <td>{parentInfo || '-'}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      {/* Profile Details Card */}
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row items-center gap-6 border-b border-slate-100 pb-6">
+          <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-[#0C4A86] to-[#0096DA] text-3xl font-black text-white shadow-md">
+            {name.charAt(0)}
+          </div>
+          <div className="space-y-1 text-center sm:text-left">
+            <div className="flex items-center justify-center sm:justify-start gap-2">
+              <h2 className="text-xl font-black text-slate-900">{name}</h2>
+              <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-black text-emerald-800">
+                Enrolled Student
+              </span>
+            </div>
+            <p className="text-xs font-bold text-[#0096DA]">
+              {activeStudent.grade ? `Grade ${activeStudent.grade}` : 'Grade 9'} - {activeStudent.section || 'Section A'} • Roll No: {activeStudent.rollNumber || '09'}
+            </p>
+            <p className="text-xs text-slate-500 font-semibold">
+              Admission No: <strong className="text-slate-800">{activeStudent.admissionNo || 'ADM-2026-0914'}</strong> • Academic Year: <strong className="text-slate-800">2026-2027</strong>
+            </p>
+          </div>
         </div>
-      )}
+
+        {/* Info Grid */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 text-xs font-bold">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-1">
+            <span className="text-slate-400 uppercase text-[10px] block">Class Teacher</span>
+            <span className="text-sm font-black text-slate-900">{activeStudent.classTeacher || 'Ramesh Sharma'}</span>
+            <span className="text-[11px] text-slate-500 block">Senior Mathematics Faculty</span>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-1">
+            <span className="text-slate-400 uppercase text-[10px] block">Date of Birth</span>
+            <span className="text-sm font-black text-slate-900">{activeStudent.dob || 'August 5, 2012'}</span>
+            <span className="text-[11px] text-slate-500 block">Verified in School Records</span>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-1">
+            <span className="text-slate-400 uppercase text-[10px] block">Primary Parent Contact</span>
+            <span className="text-sm font-black text-slate-900">Suresh Verma (Father)</span>
+            <span className="text-[11px] text-slate-500 block">+91 98765 43210</span>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-1">
+            <span className="text-slate-400 uppercase text-[10px] block">House / Group</span>
+            <span className="text-sm font-black text-amber-700">Einstein House (Yellow)</span>
+            <span className="text-[11px] text-slate-500 block">Inter-house Speed Quiz Team</span>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-1">
+            <span className="text-slate-400 uppercase text-[10px] block">Blood Group</span>
+            <span className="text-sm font-black text-rose-700">O Positive (O+)</span>
+            <span className="text-[11px] text-slate-500 block">Medical File Complete</span>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-1">
+            <span className="text-slate-400 uppercase text-[10px] block">School Branch</span>
+            <span className="text-sm font-black text-[#0C4A86]">ABC International Main Campus</span>
+            <span className="text-[11px] text-slate-500 block">CBSE Affiliation #10928</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

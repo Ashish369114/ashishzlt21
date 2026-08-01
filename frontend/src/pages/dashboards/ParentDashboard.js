@@ -16,10 +16,9 @@ import ParentNotifications from '../components/ParentNotifications';
 import ParentFees from '../components/ParentFees';
 import ParentSettingsPage from '../components/ParentSettingsPage';
 import StudentActivities from '../components/StudentActivities';
-import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogleCalendar';
 import MultiRoleMessagingSystem from '../../components/common/MultiRoleMessagingSystem';
-import { studentService, feeService, marksService, attendanceService } from '../../services/api';
-import { assignedTeacherClasses } from '../../services/schoolDataStore';
+import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogleCalendar';
+import { studentService } from '../../services/api';
 
 const mockChildrenList = [
   {
