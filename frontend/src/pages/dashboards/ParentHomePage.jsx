@@ -12,24 +12,68 @@ import {
   MessageSquare,
   CreditCard,
   ChevronRight,
-  TrendingUp,
-  FileCode,
-  Trophy,
-  AlertCircle
+  MapPin,
+  TrendingUp
 } from 'lucide-react';
 import { academicExamTypes } from '../../utils/academicExamConfig';
+
+const upcomingSchoolEvents = [
+  {
+    id: 1,
+    title: 'Parent-Teacher Meeting (PTM)',
+    date: 'August 12, 2026',
+    time: '09:00 AM - 01:00 PM',
+    category: 'Meeting',
+    location: 'Main Auditorium',
+    badgeColor: 'bg-[#EBF5FF] text-[#0C4A86] border border-[#BFDBFE]',
+    description: 'Quarterly review of student progress, attendance, and exam prep.'
+  },
+  {
+    id: 2,
+    title: 'Independence Day Celebration',
+    date: 'August 15, 2026',
+    time: '08:00 AM - 11:30 AM',
+    category: 'Cultural',
+    location: 'School Grounds',
+    badgeColor: 'bg-emerald-100 text-emerald-800 border border-emerald-300',
+    description: 'Flag hoisting ceremony, March Past & inter-house cultural performances.'
+  },
+  {
+    id: 3,
+    title: 'Unit Test 2 Examination Starts',
+    date: 'August 22, 2026',
+    time: '09:00 AM - 12:00 PM',
+    category: 'Examination',
+    location: 'All Classrooms',
+    badgeColor: 'bg-rose-100 text-rose-800 border border-rose-300',
+    description: 'Unit Test 2 written examinations across Grade 1 to 12.'
+  },
+  {
+    id: 4,
+    title: 'Annual Science & Robotics Exhibition',
+    date: 'August 28, 2026',
+    time: '10:00 AM - 03:00 PM',
+    category: 'Exhibition',
+    location: 'Science Block',
+    badgeColor: 'bg-purple-100 text-purple-800 border border-purple-300',
+    description: 'Innovative student projects, working models & robotics showcase.'
+  }
+];
 
 const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStudent, stats }) => {
   const navigate = useNavigate();
   const [selectedExamId, setSelectedExamId] = useState('unit_test_1');
-  const parentName = user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Priya Sharma';
+
+  const parentName = user?.firstName
+    ? `${user.firstName} ${user.lastName || ''}`.trim()
+    : 'Priya Sharma';
 
   const activeStudent = students.find(
     (s) => (s._id || s.userId?._id || s.userId) === selectedStudentId
   ) || students[0] || {
-    name: 'Ramesh Kumar',
-    grade: 'Grade 9',
-    section: 'Section A',
+    name: 'Aarav Singh',
+    grade: '6',
+    section: 'A',
     rollNumber: '09',
     admissionNo: 'ADM-2026-0914',
     classTeacher: 'Ramesh Sharma'
@@ -37,7 +81,10 @@ const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStuden
 
   const activeStudentName = activeStudent.userId?.firstName
     ? `${activeStudent.userId.firstName} ${activeStudent.userId.lastName || ''}`.trim()
-    : activeStudent.name || 'Ramesh Kumar';
+    : activeStudent.name || 'Aarav Singh';
+
+  const studentGradeDisplay = activeStudent.grade || activeStudent.class?.grade || '6';
+  const studentSectionDisplay = activeStudent.section || activeStudent.class?.section || 'A';
 
   // 1. Summary Cards
   const summaryCards = [
@@ -126,7 +173,7 @@ const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStuden
               >
                 {students.map((st) => (
                   <option key={st._id || st.userId?._id} value={st._id || st.userId?._id}>
-                    {st.userId?.firstName || st.name}
+                    {st.userId?.firstName || st.name} (Class {st.grade || '6'}{st.section || 'A'})
                   </option>
                 ))}
               </select>
@@ -140,7 +187,7 @@ const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStuden
             <div>
               <p className="font-black text-white text-sm">{activeStudentName}</p>
               <p className="text-[11px] text-sky-100 font-semibold">
-                Grade 9 - Sec A • Roll No: {activeStudent.rollNumber || '09'} • Class Teacher: Ramesh Sharma
+                Class {studentGradeDisplay} - Sec {studentSectionDisplay} • Roll No: {activeStudent.rollNumber || '09'} • Class Teacher: Ramesh Sharma
               </p>
             </div>
           </div>
@@ -180,9 +227,9 @@ const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStuden
         })}
       </div>
 
-      {/* Main Grid: Attendance Overview & Academic Performance */}
+      {/* Main Grid: Attendance Overview, Academic Performance, Upcoming Events */}
       <div className="grid gap-6 lg:grid-cols-12 items-start">
-        {/* Monthly Attendance Overview (Req 6) */}
+        {/* Monthly Attendance Overview */}
         <div className="lg:col-span-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
@@ -259,7 +306,7 @@ const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStuden
           </div>
         </div>
 
-        {/* Academic Performance & 7-Stage Exam Selector (Req 7 & 8) */}
+        {/* Academic Performance & 7-Stage Exam Selector */}
         <div className="lg:col-span-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
             <div>
@@ -328,7 +375,52 @@ const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStuden
         </div>
       </div>
 
-      {/* Quick Actions Grid (8 Buttons - Req 22) */}
+      {/* Upcoming Events Box (Requirement 13: Internal Scroll max-h-[520px]) */}
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div>
+            <h3 className="text-base font-black text-[#0C4A86] flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-[#0C4A86]" /> Upcoming School Events & Notices
+            </h3>
+            <p className="text-xs font-semibold text-slate-500">Important school functions, exams, meetings & holidays</p>
+          </div>
+          <button
+            onClick={() => navigate('/dashboard/calendar')}
+            className="text-xs font-extrabold text-[#0096DA] hover:underline"
+          >
+            View Full Calendar →
+          </button>
+        </div>
+
+        <div className="max-h-[520px] overflow-y-auto space-y-3 pr-1">
+          {upcomingSchoolEvents.map((evt) => (
+            <div key={evt.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 hover:bg-white transition-all space-y-2">
+              <div className="flex items-center justify-between">
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${evt.badgeColor}`}>
+                  {evt.category}
+                </span>
+                <span className="text-xs font-bold text-[#0C4A86] flex items-center gap-1">
+                  <Calendar className="h-3.5 w-3.5" /> {evt.date}
+                </span>
+              </div>
+
+              <h4 className="text-sm font-black text-slate-900">{evt.title}</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">{evt.description}</p>
+
+              <div className="pt-2 border-t border-slate-200 flex flex-wrap items-center justify-between text-xs font-semibold text-slate-500">
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3.5 w-3.5 text-[#0096DA]" /> {evt.time}
+                </span>
+                <span className="flex items-center gap-1 text-emerald-700 font-bold">
+                  <MapPin className="h-3.5 w-3.5" /> {evt.location}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Quick Actions Grid (8 Buttons) */}
       <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
         <h3 className="text-base font-black text-[#0C4A86]">Parent Quick Actions</h3>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

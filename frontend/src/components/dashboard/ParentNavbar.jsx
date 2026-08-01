@@ -56,8 +56,8 @@ const ParentNavbar = ({
 
       {/* Right Controls: Child Selector, Notification Bell, Parent Profile */}
       <div className="flex items-center gap-3 sm:gap-4">
-        {/* Child Selector Dropdown */}
-        {students.length > 0 && (
+        {/* Child Selector / Badge */}
+        {students.length > 1 ? (
           <div className="flex items-center gap-2 rounded-2xl border border-[#BFDBFE] bg-[#EBF5FF] px-3 py-1.5 shadow-2xs">
             <Users className="h-4 w-4 text-[#0C4A86] shrink-0" />
             <span className="hidden text-xs font-black text-[#0C4A86] md:inline">Child:</span>
@@ -78,7 +78,12 @@ const ParentNavbar = ({
               })}
             </select>
           </div>
-        )}
+        ) : students.length === 1 ? (
+          <div className="flex items-center gap-2 rounded-2xl border border-[#BFDBFE] bg-[#EBF5FF] px-3 py-1.5 shadow-2xs text-xs font-black text-[#0C4A86]">
+            <Users className="h-4 w-4 text-[#0C4A86] shrink-0" />
+            <span>Child: {`${students[0].userId?.firstName || students[0].name || 'Aarav'} ${students[0].userId?.lastName || 'Singh'}`.trim()} (Grade {students[0].grade || students[0].class?.grade || '9A'})</span>
+          </div>
+        ) : null}
 
         {/* Notification Bell */}
         <button

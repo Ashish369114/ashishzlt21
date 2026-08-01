@@ -81,6 +81,10 @@ const ParentDashboard = ({ user, onLogout }) => {
     navigate('/login');
   };
 
+  const activeStudent = students.find(
+    (s) => (s._id || s.userId?._id || s.userId) === selectedStudentId
+  ) || students[0];
+
   return (
     <div className="min-h-screen bg-[#FDFBF7]">
       {/* 1. Left Sidebar Navigation */}
@@ -135,17 +139,17 @@ const ParentDashboard = ({ user, onLogout }) => {
                   />
                 }
               />
-              <Route path="child" element={<ParentStudentProfile students={students} selectedStudentId={selectedStudentId} />} />
-              <Route path="student-overview" element={<ParentStudentProfile students={students} selectedStudentId={selectedStudentId} />} />
-              <Route path="attendance" element={<ParentAttendance selectedStudentId={selectedStudentId} />} />
-              <Route path="homework" element={<ParentHomework selectedStudentId={selectedStudentId} />} />
-              <Route path="assignments" element={<ParentAssignments selectedStudentId={selectedStudentId} />} />
-              <Route path="study-notes" element={<ParentStudyNotes selectedStudentId={selectedStudentId} />} />
-              <Route path="timetable" element={<ParentTimetable selectedStudentId={selectedStudentId} />} />
-              <Route path="exams" element={<ParentExams selectedStudentId={selectedStudentId} />} />
-              <Route path="results" element={<ParentResults selectedStudentId={selectedStudentId} />} />
+              <Route path="child" element={<ParentStudentProfile students={students} selectedStudentId={selectedStudentId} student={activeStudent} />} />
+              <Route path="student-overview" element={<ParentStudentProfile students={students} selectedStudentId={selectedStudentId} student={activeStudent} />} />
+              <Route path="attendance" element={<ParentAttendance selectedStudentId={selectedStudentId} student={activeStudent} />} />
+              <Route path="homework" element={<ParentHomework selectedStudentId={selectedStudentId} student={activeStudent} />} />
+              <Route path="assignments" element={<ParentAssignments selectedStudentId={selectedStudentId} student={activeStudent} />} />
+              <Route path="study-notes" element={<ParentStudyNotes selectedStudentId={selectedStudentId} student={activeStudent} />} />
+              <Route path="timetable" element={<ParentTimetable selectedStudentId={selectedStudentId} student={activeStudent} />} />
+              <Route path="exams" element={<ParentExams selectedStudentId={selectedStudentId} student={activeStudent} />} />
+              <Route path="results" element={<ParentResults selectedStudentId={selectedStudentId} student={activeStudent} />} />
               <Route path="activities" element={<StudentActivities />} />
-              <Route path="classroom-activities" element={<ParentClassroomActivities selectedStudentId={selectedStudentId} />} />
+              <Route path="classroom-activities" element={<ParentClassroomActivities selectedStudentId={selectedStudentId} student={activeStudent} />} />
               <Route
                 path="communication"
                 element={
@@ -156,7 +160,7 @@ const ParentDashboard = ({ user, onLogout }) => {
                 }
               />
               <Route path="notifications" element={<ParentNotifications />} />
-              <Route path="fees" element={<ParentFees selectedStudentId={selectedStudentId} />} />
+              <Route path="fees" element={<ParentFees selectedStudentId={selectedStudentId} student={activeStudent} />} />
               <Route path="calendar" element={<InteractiveGoogleCalendar />} />
               <Route path="settings" element={<ParentSettingsPage user={user} onLogout={handleLogout} />} />
               <Route

@@ -355,10 +355,19 @@ const MultiRoleMessagingSystem = ({ currentUserRole = 'Teacher', currentUserName
                     onChange={(e) => setNewMessageForm({ ...newMessageForm, targetRole: e.target.value })}
                     className="mt-1 w-full rounded-2xl border border-slate-300 bg-slate-50 p-2.5 font-bold text-slate-800 focus:border-[#0C4A86] focus:bg-white focus:outline-none"
                   >
-                    <option value="Teacher">Teacher</option>
-                    <option value="Parent">Parent</option>
-                    <option value="Student">Student</option>
-                    <option value="Principal">Principal</option>
+                    {currentUserRole === 'Parent' ? (
+                      <>
+                        <option value="Teacher">Teacher</option>
+                        <option value="Principal">Principal</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="Teacher">Teacher</option>
+                        <option value="Parent">Parent</option>
+                        <option value="Student">Student</option>
+                        <option value="Principal">Principal</option>
+                      </>
+                    )}
                   </select>
                 </div>
 
@@ -370,24 +379,34 @@ const MultiRoleMessagingSystem = ({ currentUserRole = 'Teacher', currentUserName
                     className="mt-1 w-full rounded-2xl border border-slate-300 bg-slate-50 p-2.5 font-bold text-slate-800 focus:border-[#0C4A86] focus:bg-white focus:outline-none"
                   >
                     <option value="Grade 9 - A">Grade 9 - A</option>
-                    <option value="Grade 9 - B">Grade 9 - B</option>
-                    <option value="Grade 10 - A">Grade 10 - A</option>
-                    <option value="Grade 10 - B">Grade 10 - B</option>
-                    <option value="Grade 8 - C">Grade 8 - C</option>
+                    <option value="Grade 6 - B">Grade 6 - B</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="font-extrabold text-slate-700">Recipient Name / Contact *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Ramesh Sharma / Suresh Verma"
-                  value={newMessageForm.targetName}
-                  onChange={(e) => setNewMessageForm({ ...newMessageForm, targetName: e.target.value })}
-                  className="mt-1 w-full rounded-2xl border border-slate-300 bg-slate-50 p-2.5 font-bold text-slate-800 focus:border-[#0C4A86] focus:bg-white focus:outline-none"
-                />
+                <label className="font-extrabold text-slate-700">Recipient Name / Authorized Contact *</label>
+                {currentUserRole === 'Parent' ? (
+                  <select
+                    value={newMessageForm.targetName}
+                    onChange={(e) => setNewMessageForm({ ...newMessageForm, targetName: e.target.value })}
+                    className="mt-1 w-full rounded-2xl border border-slate-300 bg-slate-50 p-2.5 font-bold text-slate-800 focus:border-[#0C4A86] focus:bg-white focus:outline-none cursor-pointer"
+                  >
+                    <option value="Ramesh Sharma (Class Teacher - Mathematics)">Ramesh Sharma (Class Teacher - Mathematics)</option>
+                    <option value="Sunita Verma (Science Faculty)">Sunita Verma (Science Faculty)</option>
+                    <option value="Vikram Patel (English Literature)">Vikram Patel (English Literature)</option>
+                    <option value="Dr. Anita Roy (School Principal)">Dr. Anita Roy (School Principal)</option>
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Ramesh Sharma / Suresh Verma"
+                    value={newMessageForm.targetName}
+                    onChange={(e) => setNewMessageForm({ ...newMessageForm, targetName: e.target.value })}
+                    className="mt-1 w-full rounded-2xl border border-slate-300 bg-slate-50 p-2.5 font-bold text-slate-800 focus:border-[#0C4A86] focus:bg-white focus:outline-none"
+                  />
+                )}
               </div>
 
               <div>
