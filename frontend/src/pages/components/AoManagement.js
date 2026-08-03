@@ -23,20 +23,26 @@ const CBSE_SUBJECTS_BY_GRADE = {
   'Grade 12': ['English', 'Physics', 'Chemistry', 'Mathematics', 'Biology', 'Computer Science', 'Accountancy', 'Business Studies', 'Economics']
 };
 
-const AoManagement = ({ activeSection }) => {
+const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
   const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'admissions' | 'inventory' | 'accommodation' | 'maintenance' | 'visitors' | 'transport' | 'reports'
 
+  const targetSec = activeSection || activeTabProp;
   useEffect(() => {
-    if (activeSection) {
-      if (activeSection === 'hostel' || activeSection === 'accommodation') {
-        setActiveTab('accommodation');
-      } else if (activeSection === 'assets' || activeSection === 'gatepass') {
-        setActiveTab('dashboard');
-      } else {
-        setActiveTab(activeSection);
-      }
+    if (!targetSec) return;
+    if (targetSec === 'hostel' || targetSec === 'accommodation' || targetSec === 'infrastructure') {
+      setActiveTab('accommodation');
+    } else if (targetSec === 'staff' || targetSec === 'admissions') {
+      setActiveTab('admissions');
+    } else if (targetSec === 'inventory' || targetSec === 'procurement' || targetSec === 'assets') {
+      setActiveTab('inventory');
+    } else if (targetSec === 'vendors' || targetSec === 'visitors') {
+      setActiveTab('visitors');
+    } else if (targetSec === 'maintenance') {
+      setActiveTab('maintenance');
+    } else {
+      setActiveTab(targetSec);
     }
-  }, [activeSection]);
+  }, [targetSec]);
 
   // General Filter & Pagination States
   const [search, setSearch] = useState('');

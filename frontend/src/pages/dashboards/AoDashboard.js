@@ -183,7 +183,7 @@ const AoDashboard = ({ user, onLogout }) => {
           ) : activeTab === 'calendar' ? (
             <SchoolCalendarManagement />
           ) : (
-            <AoManagement activeTab={activeTab} />
+            <AoManagement activeSection={activeTab} activeTab={activeTab} />
           )}
         </div>
 
