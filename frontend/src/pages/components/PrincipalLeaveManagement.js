@@ -70,7 +70,11 @@ const PrincipalLeaveManagement = () => {
       setLoading(true);
       setError('');
       const res = await leaveService.getAll();
-      const allLeaves = Array.isArray(res.data) ? res.data : [];
+      const rawLeaves = Array.isArray(res.data) && res.data.length ? res.data : [];
+      const allLeaves = rawLeaves.map((l, idx) => ({
+        ...l,
+        _id: l._id || l.id || l.leaveId || `l_staff_${idx + 1}`
+      }));
       // Display ONLY leave requests submitted by Teachers and Employees
       const staffLeaves = allLeaves.filter(l => l.applicantRole === 'teacher' || l.applicantRole === 'staff');
       setLeaves(staffLeaves);
@@ -143,24 +147,33 @@ const PrincipalLeaveManagement = () => {
       setError('Please provide a reason for rejection.');
       return;
     }
+    const targetId = String(selected?._id || selected?.id || selected?.leaveId || '');
+    if (!targetId) return;
+
     try {
       setSubmitting(true);
       setError('');
       if (actionType === 'approve') {
         try {
-          await leaveService.approve(selected._id, remarks || 'Approved');
+          await leaveService.approve(targetId, remarks || 'Approved');
         } catch (e) {
           console.warn('Backend update notice (using fallback):', e);
         }
-        setLeaves(prev => prev.map(l => l._id === selected._id ? { ...l, status: 'approved', remarks: remarks || 'Approved' } : l));
+        setLeaves(prev => prev.map(l => {
+          const itemKey = String(l._id || l.id || l.leaveId || '');
+          return itemKey && itemKey === targetId ? { ...l, status: 'approved', remarks: remarks || 'Approved' } : l;
+        }));
         setSuccess(`✅ Leave approved for ${selected.applicantName}`);
       } else {
         try {
-          await leaveService.reject(selected._id, remarks);
+          await leaveService.reject(targetId, remarks);
         } catch (e) {
           console.warn('Backend update notice (using fallback):', e);
         }
-        setLeaves(prev => prev.map(l => l._id === selected._id ? { ...l, status: 'rejected', remarks } : l));
+        setLeaves(prev => prev.map(l => {
+          const itemKey = String(l._id || l.id || l.leaveId || '');
+          return itemKey && itemKey === targetId ? { ...l, status: 'rejected', remarks } : l;
+        }));
         setSuccess(`❌ Leave rejected for ${selected.applicantName}`);
       }
       closeAction();
