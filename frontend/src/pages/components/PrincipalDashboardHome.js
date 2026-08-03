@@ -165,32 +165,21 @@ const PrincipalDashboardHome = ({ stats, user }) => {
 
   // --- Auto-Scrolling Logic ---
   useEffect(() => {
-    let interval;
-    if (!isEventsHovered && eventsScrollRef.current) {
-      interval = setInterval(() => {
-        const scroller = eventsScrollRef.current;
-        if (!scroller) return;
-        const itemHeight = scroller.querySelector('.event-card')?.offsetHeight || 72;
-        scroller.scrollBy({ top: itemHeight, behavior: 'smooth' });
-      }, 3500);
-    }
+    const el = eventsScrollRef.current;
+    if (!el) return;
+
+    const interval = setInterval(() => {
+      if (!isEventsHovered && el) {
+        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 10) {
+          el.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          el.scrollBy({ top: 110, behavior: 'smooth' });
+        }
+      }
+    }, 2500);
+
     return () => clearInterval(interval);
   }, [isEventsHovered]);
-
-  const handleEventScroll = (e) => {
-    const scroller = e.target;
-    const itemHeight = scroller.querySelector('.event-card')?.offsetHeight || 72;
-    const originalHeight = upcomingEvents.length * itemHeight;
-
-    if (scroller.scrollTop >= originalHeight) {
-      scroller.scrollTop = scroller.scrollTop - originalHeight;
-    } else if (scroller.scrollTop === 0 && e.nativeEvent.deltaY < 0) {
-      scroller.scrollTop = originalHeight;
-    }
-    
-    const index = Math.round(scroller.scrollTop / itemHeight);
-    setActiveEventIndex(index % upcomingEvents.length);
-  };
 
   return (
     <div className="principal-dashboard-container">
@@ -322,7 +311,6 @@ const PrincipalDashboardHome = ({ stats, user }) => {
             ref={eventsScrollRef}
             onMouseEnter={() => setIsEventsHovered(true)}
             onMouseLeave={() => setIsEventsHovered(false)}
-            onScroll={handleEventScroll}
             style={{ flex: 1, overflowY: 'auto', paddingRight: '4px', display: 'flex', flexDirection: 'column', gap: '12px' }}
           >
             {scrollingEvents.map((evt, idx) => (
