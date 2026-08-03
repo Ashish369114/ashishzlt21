@@ -881,13 +881,13 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
       {/* TAB: FINE COLLECTION PORTAL */}
       {activeTab === 'fines' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ background: 'linear-gradient(135deg, #7c2d12 0%, #9a3412 100%)', borderRadius: '16px', padding: '24px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', borderRadius: '16px', padding: '24px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 4px 14px rgba(12, 74, 134, 0.15)' }}>
             <div>
               <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800' }}>💰 Fine Collection & Penalty Management</h2>
-              <p style={{ margin: '4px 0 0', color: '#fed7aa', fontSize: '0.88rem' }}>Track overdue borrowings, calculate daily penalties (₹50/day), collect fines and issue digital receipts.</p>
+              <p style={{ margin: '4px 0 0', color: 'rgba(255, 255, 255, 0.88)', fontSize: '0.88rem' }}>Track overdue borrowings, calculate daily penalties (₹50/day), collect fines and issue digital receipts.</p>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.75rem', color: '#ffedd5', textTransform: 'uppercase' }}>Total Fines Outstanding</div>
+              <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.8)', textTransform: 'uppercase', fontWeight: '700' }}>Total Fines Outstanding</div>
               <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#fff' }}>
                 ₹{finesList.filter(f => f.status === 'Unpaid').reduce((sum, f) => sum + f.amount, 0)}
               </div>
