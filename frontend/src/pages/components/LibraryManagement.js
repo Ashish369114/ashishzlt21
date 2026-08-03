@@ -733,10 +733,11 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
                 </tr>
               </thead>
               <tbody>
-                {filteredBooks.map((book) => {
+                {filteredBooks.map((book, idx) => {
+                  const bookKey = book._id || book.id || `bk_${idx}`;
                   const bStatus = getBorrowStatus(book);
                   return (
-                    <tr key={book._id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <tr key={bookKey} style={{ borderBottom: '1px solid #f1f5f9' }}>
                       <td style={{ padding: '14px 20px' }}>
                         <div style={{ fontWeight: '700', color: '#0f172a' }}>{book.title}</div>
                         <div style={{ fontSize: '0.8rem', color: '#64748b' }}>by {book.author}</div>
@@ -757,28 +758,31 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
                       <td style={{ padding: '14px 20px', textAlign: 'right' }} className="action-menu-container">
                         <div style={{ position: 'relative', display: 'inline-block' }}>
                           <button
-                            onClick={() => setActionMenuOpenFor(actionMenuOpenFor === book._id ? null : book._id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActionMenuOpenFor(prev => prev === bookKey ? null : bookKey);
+                            }}
                             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', borderRadius: '50%' }}
                           >
                             <MoreVertical size={18} color="#64748b" />
                           </button>
                           
-                          {actionMenuOpenFor === book._id && (
-                            <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: '4px', background: '#fff', borderRadius: '10px', boxShadow: '0 10px 25px rgba(0,0,0,0.12)', border: '1px solid #e2e8f0', width: '170px', zIndex: 10, overflow: 'hidden', textAlign: 'left' }}>
+                          {actionMenuOpenFor === bookKey && (
+                            <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: '4px', background: '#fff', borderRadius: '10px', boxShadow: '0 10px 25px rgba(0,0,0,0.12)', border: '1px solid #e2e8f0', width: '170px', zIndex: 100, overflow: 'hidden', textAlign: 'left' }}>
                               {book.availableCopies > 0 && (
-                                <button onClick={() => { setBorrowModalOpenFor(book); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#10b981', fontWeight: '600' }}>Borrow Book</button>
+                                <button onClick={(e) => { e.stopPropagation(); setBorrowModalOpenFor(book); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#10b981', fontWeight: '600' }}>Borrow Book</button>
                               )}
-                              <button onClick={() => { setReserveModalOpenFor(book); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#8b5cf6', fontWeight: '600' }}>Reserve Book</button>
+                              <button onClick={(e) => { e.stopPropagation(); setReserveModalOpenFor(book); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#8b5cf6', fontWeight: '600' }}>Reserve Book</button>
                               {book.availableCopies < book.totalCopies && (
                                 <>
-                                  <button onClick={() => { handleReturnBook(book._id); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#3b82f6', fontWeight: '600' }}>Return Book</button>
-                                  <button onClick={() => { handleRenewBook(book._id); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#f59e0b', fontWeight: '600' }}>Renew Book (+14d)</button>
+                                  <button onClick={(e) => { e.stopPropagation(); handleReturnBook(book._id || book.id); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#3b82f6', fontWeight: '600' }}>Return Book</button>
+                                  <button onClick={(e) => { e.stopPropagation(); handleRenewBook(book._id || book.id); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#f59e0b', fontWeight: '600' }}>Renew Book (+14d)</button>
                                 </>
                               )}
-                              <button onClick={() => { setHistoryModalOpenFor(book); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#475569', fontWeight: '600' }}>Reading History</button>
+                              <button onClick={(e) => { e.stopPropagation(); setHistoryModalOpenFor(book); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#475569', fontWeight: '600' }}>Reading History</button>
                               <div style={{ height: '1px', background: '#f1f5f9', margin: '4px 0' }}></div>
-                              <button onClick={() => { handleEditBook(book); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#1e293b' }}>Edit Book</button>
-                              <button onClick={() => { handleDeleteBook(book._id); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#ef4444' }}>Delete Book</button>
+                              <button onClick={(e) => { e.stopPropagation(); handleEditBook(book); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#1e293b' }}>Edit Book</button>
+                              <button onClick={(e) => { e.stopPropagation(); handleDeleteBook(book._id || book.id); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#ef4444' }}>Delete Book</button>
                             </div>
                           )}
                         </div>
