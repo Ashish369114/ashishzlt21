@@ -71,10 +71,14 @@ const PrincipalLeaveManagement = () => {
       setError('');
       const res = await leaveService.getAll();
       const rawLeaves = Array.isArray(res.data) && res.data.length ? res.data : [];
-      const allLeaves = rawLeaves.map((l, idx) => ({
-        ...l,
-        _id: l._id || l.id || l.leaveId || `l_staff_${idx + 1}`
-      }));
+      const allLeaves = rawLeaves.map((l, idx) => {
+        const uId = l._id || l.id || l.leaveId || `l_staff_${idx + 1}`;
+        return {
+          ...l,
+          _id: uId,
+          id: uId
+        };
+      });
       // Display ONLY leave requests submitted by Teachers and Employees
       const staffLeaves = allLeaves.filter(l => l.applicantRole === 'teacher' || l.applicantRole === 'staff');
       setLeaves(staffLeaves);
@@ -131,7 +135,8 @@ const PrincipalLeaveManagement = () => {
 
   // ── Action handlers ────────────────────────────────────────────────────────
   const openAction = (leave, type) => {
-    setSelected(leave);
+    const uId = leave._id || leave.id || leave.leaveId;
+    setSelected({ ...leave, _id: uId, id: uId });
     setActionType(type);
     setRemarks('');
   };
