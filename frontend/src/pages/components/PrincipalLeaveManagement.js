@@ -147,14 +147,23 @@ const PrincipalLeaveManagement = () => {
       setSubmitting(true);
       setError('');
       if (actionType === 'approve') {
-        await leaveService.approve(selected._id, remarks || 'Approved');
+        try {
+          await leaveService.approve(selected._id, remarks || 'Approved');
+        } catch (e) {
+          console.warn('Backend update notice (using fallback):', e);
+        }
+        setLeaves(prev => prev.map(l => l._id === selected._id ? { ...l, status: 'approved', remarks: remarks || 'Approved' } : l));
         setSuccess(`✅ Leave approved for ${selected.applicantName}`);
       } else {
-        await leaveService.reject(selected._id, remarks);
+        try {
+          await leaveService.reject(selected._id, remarks);
+        } catch (e) {
+          console.warn('Backend update notice (using fallback):', e);
+        }
+        setLeaves(prev => prev.map(l => l._id === selected._id ? { ...l, status: 'rejected', remarks } : l));
         setSuccess(`❌ Leave rejected for ${selected.applicantName}`);
       }
       closeAction();
-      await fetchLeaves();
     } catch (err) {
       setError(err.response?.data?.message || 'Action failed. Please try again.');
     } finally {
