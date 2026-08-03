@@ -166,6 +166,7 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
   const [ttFilterDay, setTtFilterDay] = useState('all');
   const [ttFilterGrade, setTtFilterGrade] = useState('all');
   const [ttFilterShift, setTtFilterShift] = useState('all');
+  const [ttViewMode, setTtViewMode] = useState('weekly'); // 'today' | 'weekly'
 
   const [ttModalOpen, setTtModalOpen] = useState(false);
   const [editingSlotId, setEditingSlotId] = useState(null);
@@ -1012,162 +1013,274 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
       {activeTab === 'timetable' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
-          {/* Timetable KPI Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-            <div style={{ background: '#fff', padding: '20px', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
-              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>📅 Total Weekly Sessions</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#0f172a', marginTop: '4px' }}>{timetable.length} Sessions</div>
-            </div>
-            <div style={{ background: '#fff', padding: '20px', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
-              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>🌅 Morning Slots (P1-P3)</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#1d4ed8', marginTop: '4px' }}>
-                {timetable.filter(t => t.slotType === 'Morning').length} Classes
+          {/* Header Banner Card matching Teacher Timetable */}
+          <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #BFDBFE', padding: '20px 24px', boxShadow: '0 2px 10px rgba(12, 74, 134, 0.05)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#EBF5FF', border: '1px solid #BFDBFE', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0C4A86' }}>
+                <Clock size={22} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: '800', color: '#0C4A86' }}>Library Class Timetable</h3>
+                <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: '600', color: '#64748b' }}>
+                  {ttViewMode === 'today' ? "Today's Active Library Period Schedule & Status" : "Complete Weekly Library Schedule Matrix (Mon - Sat)"}
+                </p>
               </div>
             </div>
-            <div style={{ background: '#fff', padding: '20px', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
-              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>☀️ Mid-Day & Afternoon (P4-P7)</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#047857', marginTop: '4px' }}>
-                {timetable.filter(t => t.slotType === 'Mid-Day' || t.slotType === 'Afternoon').length} Classes
-              </div>
-            </div>
-            <div style={{ background: '#fff', padding: '20px', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
-              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>🌆 Evening Slots (P8)</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#6d28d9', marginTop: '4px' }}>
-                {timetable.filter(t => t.slotType === 'Evening').length} Classes
-              </div>
-            </div>
-          </div>
 
-          {/* Filter Bar & Quick Actions */}
-          <div style={{ background: '#fff', padding: '16px 20px', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#475569' }}>Day:</span>
-                <select value={ttFilterDay} onChange={e => setTtFilterDay(e.target.value)} style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem' }}>
-                  <option value="all">All Days (Mon - Sat)</option>
-                  <option value="Monday">Monday</option>
-                  <option value="Tuesday">Tuesday</option>
-                  <option value="Wednesday">Wednesday</option>
-                  <option value="Thursday">Thursday</option>
-                  <option value="Friday">Friday</option>
-                  <option value="Saturday">Saturday</option>
-                </select>
-              </div>
+              {/* Dropdown Selector for Today vs Weekly Timetable matching Teacher Timetable */}
+              <select
+                value={ttViewMode}
+                onChange={e => setTtViewMode(e.target.value)}
+                style={{ padding: '9px 16px', borderRadius: '12px', border: '1px solid #BFDBFE', background: '#EBF5FF', color: '#0C4A86', fontWeight: '800', fontSize: '0.85rem', cursor: 'pointer', outline: 'none', boxShadow: '0 2px 6px rgba(12,74,134,0.06)' }}
+              >
+                <option value="today">📅 Today's Timetable</option>
+                <option value="weekly">🗓️ Weekly Timetable</option>
+              </select>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#475569' }}>Grade:</span>
-                <select value={ttFilterGrade} onChange={e => setTtFilterGrade(e.target.value)} style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem' }}>
-                  <option value="all">All Grades</option>
-                  {[1,2,3,4,5,6,7,8,9,10].map(g => <option key={g} value={`Grade ${g}`}>Grade {g}</option>)}
-                </select>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#475569' }}>Shift:</span>
-                <select value={ttFilterShift} onChange={e => setTtFilterShift(e.target.value)} style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem' }}>
-                  <option value="all">All Shifts</option>
-                  <option value="Morning">Morning Slots (P1 - P3)</option>
-                  <option value="Mid-Day">Mid-Day Slots (P4 - P5)</option>
-                  <option value="Afternoon">Afternoon Slots (P6 - P7)</option>
-                  <option value="Evening">Evening Slots (P8)</option>
-                </select>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <button 
                 onClick={() => window.print()}
-                style={{ padding: '8px 14px', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem', fontWeight: '600', color: '#334155', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                style={{ padding: '9px 16px', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '12px', fontSize: '0.85rem', fontWeight: '700', color: '#334155', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
               >
-                🖨️ Export / Print Schedule
+                🖨️ Export / Print
               </button>
+
               <button 
                 onClick={() => handleOpenAddSlot('Monday', periodOptions[0])}
-                style={{ padding: '8px 16px', background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                style={{ padding: '9px 18px', background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '0.85rem', fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 4px 12px rgba(12, 74, 134, 0.25)' }}
               >
                 <Plus size={16} /> Assign Library Period
               </button>
             </div>
           </div>
 
-          {/* Weekly Matrix Schedule View */}
-          <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1000px' }}>
-              <thead>
-                <tr style={{ background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', color: '#fff' }}>
-                  <th style={{ padding: '14px 16px', fontSize: '0.85rem', textTransform: 'uppercase', width: '120px', borderRight: '1px solid rgba(255,255,255,0.2)' }}>Day / Period</th>
-                  {periodOptions.map(p => (
-                    <th key={p.name} style={{ padding: '12px 10px', fontSize: '0.8rem', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.15)' }}>
-                      <div>{p.name}</div>
-                      <div style={{ fontSize: '0.7rem', fontWeight: 'normal', opacity: 0.85 }}>{p.time}</div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].filter(day => ttFilterDay === 'all' || ttFilterDay === day).map((day, dIdx) => (
-                  <tr key={day} style={{ borderBottom: '1px solid #e2e8f0', background: dIdx % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
-                    <td style={{ padding: '14px 16px', fontWeight: '800', color: '#0f172a', fontSize: '0.9rem', borderRight: '2px solid #cbd5e1', background: '#f1f5f9' }}>
-                      {day}
-                    </td>
-                    {periodOptions.map(period => {
-                      const matchedSlots = timetable.filter(t => {
-                        const mDay = t.day === day;
-                        const mPeriod = t.period === period.name || t.periodTime === period.time;
-                        const mGrade = ttFilterGrade === 'all' || t.grade === ttFilterGrade;
-                        const mShift = ttFilterShift === 'all' || t.slotType === period.type;
-                        return mDay && mPeriod && mGrade && mShift;
-                      });
-
-                      return (
-                        <td key={period.name} style={{ padding: '8px', borderRight: '1px solid #f1f5f9', verticalAlign: 'top', minWidth: '125px' }}>
-                          {matchedSlots.length > 0 ? (
-                            matchedSlots.map(slot => {
-                              const isMorning = slot.slotType === 'Morning';
-                              const isAfternoon = slot.slotType === 'Afternoon' || slot.slotType === 'Mid-Day';
-                              const bg = isMorning ? '#eff6ff' : isAfternoon ? '#ecfdf5' : '#f5f3ff';
-                              const border = isMorning ? '#bfdbfe' : isAfternoon ? '#a7f3d0' : '#ddd6fe';
-                              const badgeColor = isMorning ? '#1d4ed8' : isAfternoon ? '#047857' : '#6d28d9';
-
-                              return (
-                                <div key={slot.id} style={{ background: bg, border: `1px solid ${border}`, borderRadius: '8px', padding: '8px 10px', marginBottom: '6px', fontSize: '0.78rem', position: 'relative' }}>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                                    <span style={{ fontWeight: '800', color: badgeColor, fontSize: '0.82rem' }}>
-                                      {slot.grade} - {slot.section}
-                                    </span>
-                                    <button 
-                                      onClick={() => handleDeleteSlot(slot.id)}
-                                      title="Delete Slot"
-                                      style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0, fontSize: '0.9rem' }}
-                                    >
-                                      &times;
-                                    </button>
-                                  </div>
-                                  <div style={{ color: '#334155', fontWeight: '600', marginBottom: '2px' }}>
-                                    👩‍🏫 {slot.teacher}
-                                  </div>
-                                  <div style={{ color: '#64748b', fontSize: '0.72rem', fontStyle: 'italic' }}>
-                                    📖 {slot.topic}
-                                  </div>
-                                </div>
-                              );
-                            })
-                          ) : (
-                            <button 
-                              onClick={() => handleOpenAddSlot(day, period)}
-                              style={{ width: '100%', padding: '10px 4px', border: '1px dashed #cbd5e1', borderRadius: '6px', background: 'transparent', color: '#94a3b8', fontSize: '0.75rem', cursor: 'pointer', textAlign: 'center' }}
-                            >
-                              + Assign
-                            </button>
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {/* Timetable KPI Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+            <div style={{ background: '#fff', padding: '18px 20px', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>📅 Total Weekly Sessions</div>
+              <div style={{ fontSize: '1.7rem', fontWeight: '800', color: '#0f172a', marginTop: '4px' }}>{timetable.length} Sessions</div>
+            </div>
+            <div style={{ background: '#fff', padding: '18px 20px', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>🌅 Morning Slots (P1-P3)</div>
+              <div style={{ fontSize: '1.7rem', fontWeight: '800', color: '#1d4ed8', marginTop: '4px' }}>
+                {timetable.filter(t => t.slotType === 'Morning').length} Classes
+              </div>
+            </div>
+            <div style={{ background: '#fff', padding: '18px 20px', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>☀️ Mid-Day & Afternoon (P4-P7)</div>
+              <div style={{ fontSize: '1.7rem', fontWeight: '800', color: '#047857', marginTop: '4px' }}>
+                {timetable.filter(t => t.slotType === 'Mid-Day' || t.slotType === 'Afternoon').length} Classes
+              </div>
+            </div>
+            <div style={{ background: '#fff', padding: '18px 20px', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>🌆 Evening Slots (P8)</div>
+              <div style={{ fontSize: '1.7rem', fontWeight: '800', color: '#6d28d9', marginTop: '4px' }}>
+                {timetable.filter(t => t.slotType === 'Evening').length} Classes
+              </div>
+            </div>
           </div>
+
+          {/* Filter Controls Bar */}
+          <div style={{ background: '#fff', padding: '14px 20px', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#475569' }}>Filter Day:</span>
+              <select value={ttFilterDay} onChange={e => setTtFilterDay(e.target.value)} style={{ padding: '7px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem', background: '#fff', fontWeight: '600' }}>
+                <option value="all">All Days (Mon - Sat)</option>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#475569' }}>Filter Grade:</span>
+              <select value={ttFilterGrade} onChange={e => setTtFilterGrade(e.target.value)} style={{ padding: '7px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem', background: '#fff', fontWeight: '600' }}>
+                <option value="all">All Grades</option>
+                {[1,2,3,4,5,6,7,8,9,10].map(g => <option key={g} value={`Grade ${g}`}>Grade {g}</option>)}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#475569' }}>Filter Shift:</span>
+              <select value={ttFilterShift} onChange={e => setTtFilterShift(e.target.value)} style={{ padding: '7px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem', background: '#fff', fontWeight: '600' }}>
+                <option value="all">All Shifts</option>
+                <option value="Morning">Morning Slots (P1 - P3)</option>
+                <option value="Mid-Day">Mid-Day Slots (P4 - P5)</option>
+                <option value="Afternoon">Afternoon Slots (P6 - P7)</option>
+                <option value="Evening">Evening Slots (P8)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* MODE 1: TODAY'S SCHEDULE VIEW matching Teacher Timetable */}
+          {ttViewMode === 'today' ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {periodOptions.map((period, pIdx) => {
+                const todayDay = ttFilterDay !== 'all' ? ttFilterDay : 'Monday';
+                const matchedSlots = timetable.filter(t => t.day === todayDay && (t.period === period.name || t.periodTime === period.time));
+                const slot = matchedSlots[0];
+                const status = pIdx === 1 ? 'Ongoing' : pIdx < 1 ? 'Completed' : 'Upcoming';
+                const isOngoing = status === 'Ongoing';
+
+                return (
+                  <div
+                    key={period.name}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justify: 'space-between',
+                      borderRadius: '14px',
+                      padding: '16px 20px',
+                      border: isOngoing ? '1.5px solid #fcd34d' : '1px solid #BFDBFE',
+                      background: isOngoing ? '#fffbeb' : '#EBF5FF',
+                      boxShadow: isOngoing ? '0 4px 12px rgba(245, 158, 11, 0.12)' : 'none',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <span
+                        style={{
+                          fontSize: '0.8rem',
+                          fontWeight: '800',
+                          padding: '6px 12px',
+                          borderRadius: '8px',
+                          background: isOngoing ? '#d97706' : '#EFEAE4',
+                          color: isOngoing ? '#ffffff' : '#334155'
+                        }}
+                      >
+                        {period.name}
+                      </span>
+                      <div>
+                        {slot ? (
+                          <>
+                            <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: '800', color: '#0C4A86' }}>
+                              {slot.grade} — {slot.section}
+                            </p>
+                            <p style={{ margin: '2px 0 0', fontSize: '0.82rem', fontWeight: '600', color: '#64748b' }}>
+                              👩‍🏫 {slot.teacher} • <span style={{ color: '#0C4A86', fontStyle: 'italic' }}>📖 {slot.topic}</span>
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: '700', color: '#94a3b8' }}>
+                              Free Library Slot (No Class Assigned)
+                            </p>
+                            <button
+                              onClick={() => handleOpenAddSlot(todayDay, period)}
+                              style={{ margin: '4px 0 0', background: 'none', border: 'none', padding: 0, color: '#0C4A86', fontSize: '0.78rem', fontWeight: '800', cursor: 'pointer', textDecoration: 'underline' }}
+                            >
+                              + Assign Class Slot
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div style={{ textAlign: 'right' }}>
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          fontSize: '0.75rem',
+                          fontWeight: '800',
+                          padding: '4px 12px',
+                          borderRadius: '20px',
+                          background: isOngoing ? '#d1fae5' : status === 'Completed' ? '#e2e8f0' : '#fef3c7',
+                          color: isOngoing ? '#065f46' : status === 'Completed' ? '#334155' : '#92400e'
+                        }}
+                      >
+                        {status}
+                      </span>
+                      <p style={{ margin: '4px 0 0', fontSize: '0.78rem', fontWeight: '600', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+                        <Clock size={12} /> {period.time}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            /* MODE 2: WEEKLY MATRIX SCHEDULE VIEW matching Teacher Timetable */
+            <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #BFDBFE', boxShadow: '0 4px 12px rgba(12, 74, 134, 0.04)', overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1050px' }}>
+                <thead>
+                  <tr style={{ background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', color: '#fff' }}>
+                    <th style={{ padding: '14px 16px', fontSize: '0.85rem', textTransform: 'uppercase', width: '130px', borderRight: '1px solid rgba(255,255,255,0.2)' }}>Day / Period</th>
+                    {periodOptions.map(p => (
+                      <th key={p.name} style={{ padding: '12px 10px', fontSize: '0.8rem', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.15)' }}>
+                        <div style={{ fontWeight: '800' }}>{p.name}</div>
+                        <div style={{ fontSize: '0.7rem', fontWeight: '500', opacity: 0.9 }}>{p.time}</div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].filter(day => ttFilterDay === 'all' || ttFilterDay === day).map((day, dIdx) => (
+                    <tr key={day} style={{ borderBottom: '1px solid #BFDBFE', background: dIdx % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
+                      <td style={{ padding: '14px 16px', fontWeight: '800', color: '#0C4A86', fontSize: '0.88rem', borderRight: '2px solid #BFDBFE', background: '#EBF5FF' }}>
+                        {day}
+                      </td>
+                      {periodOptions.map(period => {
+                        const matchedSlots = timetable.filter(t => {
+                          const mDay = t.day === day;
+                          const mPeriod = t.period === period.name || t.periodTime === period.time;
+                          const mGrade = ttFilterGrade === 'all' || t.grade === ttFilterGrade;
+                          const mShift = ttFilterShift === 'all' || t.slotType === period.type;
+                          return mDay && mPeriod && mGrade && mShift;
+                        });
+
+                        return (
+                          <td key={period.name} style={{ padding: '8px', borderRight: '1px solid #e2e8f0', verticalAlign: 'top', minWidth: '135px' }}>
+                            {matchedSlots.length > 0 ? (
+                              matchedSlots.map(slot => {
+                                const isMorning = slot.slotType === 'Morning';
+                                const isAfternoon = slot.slotType === 'Afternoon' || slot.slotType === 'Mid-Day';
+                                const bg = isMorning ? '#EBF5FF' : isAfternoon ? '#ecfdf5' : '#f5f3ff';
+                                const border = isMorning ? '#BFDBFE' : isAfternoon ? '#a7f3d0' : '#ddd6fe';
+                                const badgeBg = isMorning ? '#0C4A86' : isAfternoon ? '#047857' : '#6d28d9';
+
+                                return (
+                                  <div key={slot.id} style={{ background: bg, border: `1px solid ${border}`, borderRadius: '12px', padding: '10px 12px', marginBottom: '6px', fontSize: '0.8rem', boxShadow: '0 2px 6px rgba(0,0,0,0.02)', position: 'relative' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                      <span style={{ fontWeight: '800', background: badgeBg, color: '#ffffff', fontSize: '0.75rem', padding: '3px 8px', borderRadius: '6px' }}>
+                                        {slot.grade} - {slot.section}
+                                      </span>
+                                      <button 
+                                        onClick={() => handleDeleteSlot(slot.id)}
+                                        title="Delete Slot"
+                                        style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '2px 4px', fontSize: '0.95rem', fontWeight: 'bold' }}
+                                      >
+                                        &times;
+                                      </button>
+                                    </div>
+                                    <div style={{ color: '#0C4A86', fontWeight: '800', fontSize: '0.82rem', marginBottom: '3px' }}>
+                                      👩‍🏫 {slot.teacher}
+                                    </div>
+                                    <div style={{ color: '#475569', fontSize: '0.74rem', fontWeight: '600', fontStyle: 'italic', background: 'rgba(255,255,255,0.7)', padding: '4px 6px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.05)' }}>
+                                      📖 {slot.topic}
+                                    </div>
+                                  </div>
+                                );
+                              })
+                            ) : (
+                              <button 
+                                onClick={() => handleOpenAddSlot(day, period)}
+                                style={{ width: '100%', padding: '12px 6px', border: '1.5px dashed #BFDBFE', borderRadius: '10px', background: '#EBF5FF/30', color: '#0C4A86', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s' }}
+                              >
+                                + Assign
+                              </button>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
         </div>
       )}
