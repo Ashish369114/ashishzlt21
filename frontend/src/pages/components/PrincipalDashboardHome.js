@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { leaveService } from '../../services/api';
 import TopBar from '../../components/dashboard/TopBar';
+import InteractiveGoogleCalendar from '../common/InteractiveGoogleCalendar';
 import { 
   Users, UserCheck, GraduationCap, Clock, 
   Calendar, FileText, Bell, CheckCircle, XCircle, 
@@ -247,16 +248,64 @@ const PrincipalDashboardHome = ({ stats, user }) => {
         </div>
       </div>
 
-      {/* 4. Main Grid: Charts & Events */}
+      {/* 4. 2-Column Calendar & Auto-Scrolling Upcoming Events Grid (Teacher Portal Style) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px', alignItems: 'stretch' }}>
+        {/* Monthly Calendar View */}
+        <div style={{ gridColumn: 'span 7', maxHeight: '560px', overflowY: 'auto', borderRadius: '24px', border: '1px solid #cbd5e1', background: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+          <InteractiveGoogleCalendar
+            hideCreateEvent={true}
+            hideViewToggle={true}
+            assignedClassesOnly={false}
+          />
+        </div>
+
+        {/* Auto-scrolling Upcoming Events Card */}
+        <div style={{ gridColumn: 'span 5', borderRadius: '24px', border: '1px solid #cbd5e1', background: '#fff', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', height: '560px' }}>
+          <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '12px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: '#0C4A86' }}>Upcoming Events</h3>
+              <p style={{ margin: '2px 0 0', fontSize: '0.78rem', fontWeight: '600', color: '#64748b' }}>Important school functions, exams & holidays</p>
+            </div>
+            <span style={{ fontSize: '0.7rem', fontWeight: '700', padding: '4px 8px', background: '#EBF5FF', color: '#0C4A86', borderRadius: '12px', border: '1px solid #BFDBFE' }}>
+              ⚡ Auto-Scrolling
+            </span>
+          </div>
+
+          <div 
+            className="events-scroller"
+            ref={eventsScrollRef}
+            onMouseEnter={() => setIsEventsHovered(true)}
+            onMouseLeave={() => setIsEventsHovered(false)}
+            onScroll={handleEventScroll}
+            style={{ flex: 1, overflowY: 'auto', paddingRight: '4px', display: 'flex', flexDirection: 'column', gap: '12px' }}
+          >
+            {scrollingEvents.map((event, idx) => (
+              <div key={`${event.id}-${idx}`} style={{ borderRadius: '16px', border: '1px solid #e2e8f0', background: '#f8fafc', padding: '14px', transition: 'all 0.2s ease' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '0.68rem', fontWeight: '800', background: '#0C4A86', color: '#fff' }}>
+                    {event.month} {event.day}
+                  </span>
+                  <span style={{ fontSize: '0.78rem', fontWeight: '700', color: '#0C4A86', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Clock size={12} /> {event.time}
+                  </span>
+                </div>
+
+                <h4 style={{ margin: '4px 0 2px', fontSize: '0.88rem', fontWeight: '800', color: '#0f172a' }}>{event.title}</h4>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 5. Main Grid: Leave Management, Notice Board & Recent Activity */}
       <div className="dashboard-grid-main">
         {/* Left Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-
           <div className="dashboard-card">
             <div className="card-header">
               <h3 className="card-title">Leave Management</h3>
-              <button className="card-action">View All</button>
+              <button className="card-action" onClick={() => navigate('/dashboard/leaves')}>View All</button>
             </div>
             <div className="card-body">
               <div className="leave-summary-grid">
@@ -300,6 +349,7 @@ const PrincipalDashboardHome = ({ stats, user }) => {
           <div className="dashboard-card">
             <div className="card-header">
               <h3 className="card-title">Notice Board</h3>
+              <button className="card-action" onClick={() => navigate('/dashboard/notices')}>Manage Notices</button>
             </div>
             <div className="card-body p-0">
               <ul className="list-group">
@@ -322,38 +372,6 @@ const PrincipalDashboardHome = ({ stats, user }) => {
 
         {/* Right Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          
-          <div className="dashboard-card">
-            <div className="card-header">
-              <h3 className="card-title"><Calendar size={18} color="#3b82f6" className="icon-pulse" /> Upcoming Events</h3>
-              <button className="card-action">View All</button>
-            </div>
-            <div className="card-body p-0 events-scroll-container">
-              <div className="fade-overlay-top"></div>
-              <div 
-                className="events-scroller"
-                ref={eventsScrollRef}
-                onMouseEnter={() => setIsEventsHovered(true)}
-                onMouseLeave={() => setIsEventsHovered(false)}
-                onScroll={handleEventScroll}
-              >
-                {scrollingEvents.map((event, idx) => (
-                  <div key={`${event.id}-${idx}`} className={`event-card ${idx % upcomingEvents.length === activeEventIndex ? 'active' : ''}`}>
-                    <div className="event-date-box">
-                      <span className="event-month">{event.month}</span>
-                      <span className="event-day">{event.day}</span>
-                    </div>
-                    <div className="event-details-compact">
-                      <h4>{event.title}</h4>
-                      <span className="event-time"><Clock size={12} /> {event.time}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="fade-overlay-bottom"></div>
-            </div>
-          </div>
-
           <div className="dashboard-card">
             <div className="card-header">
               <h3 className="card-title">Recent Activity</h3>
