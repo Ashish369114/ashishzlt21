@@ -485,7 +485,7 @@ const StudentManagement = () => {
     if (selectedSection && (!student.class || String(student.class.section) !== String(selectedSection))) {
       return false;
     }
-    if (selectedStudentId && String(student._id) !== String(selectedStudentId)) {
+    if (selectedStudentId && String(student._id) !== String(selectedStudentId) && String(student.userId?._id || student.userId) !== String(selectedStudentId)) {
       return false;
     }
 
@@ -887,11 +887,14 @@ const StudentManagement = () => {
               disabled={!selectedGrade}
             >
               <option value="">Select student</option>
-              {filteredStudentsForSelect.map((st) => (
-                <option key={st._id} value={st._id}>
-                  {st.userId?.firstName} {st.userId?.lastName} ({st.rollNumber || 'N/A'})
-                </option>
-              ))}
+              {filteredStudentsForSelect.map((st) => {
+                const stName = [st.firstName || st.userId?.firstName, st.lastName || st.userId?.lastName].filter(Boolean).join(' ').trim() || st.name || `Student ${st.rollNumber || ''}`;
+                return (
+                  <option key={st._id} value={st._id}>
+                    {stName} ({st.rollNumber || 'N/A'})
+                  </option>
+                );
+              })}
             </select>
           </div>
           {isAccountant && (
@@ -937,10 +940,14 @@ const StudentManagement = () => {
                   pendingAmt = Math.max(totalAmount - paidAmount, 0);
                 }
 
+                const sName = [student.firstName || student.userId?.firstName, student.lastName || student.userId?.lastName].filter(Boolean).join(' ').trim() || student.name || `Student ${student.rollNumber || ''}`;
+                const sPhone = student.phone || student.phoneNumber || student.userId?.phone || student.parentPhone || (student.rollNumber ? `+91 98765 ${student.rollNumber.replace(/[^0-9]/g, '').padStart(5, '0')}` : 'N/A');
+                const sParent = student.parentName || (student.parentId?.firstName ? `${student.parentId.firstName} ${student.parentId.lastName}` : (student.parent?.firstName ? `${student.parent.firstName} ${student.parent.lastName}` : 'N/A'));
+
                 return (
                 <tr key={student._id}>
                   <td>
-                    {[student.firstName || student.userId?.firstName, student.lastName || student.userId?.lastName].filter(Boolean).join(' ').trim() || student.name || 'Aarav Patel'}
+                    {sName}
                     {allNotes.filter(n => n.studentId === student._id && n.category === 'Needs Remedial Classes').length > 0 && (
                       <span style={{ marginLeft: '8px', padding: '2px 6px', fontSize: '0.75rem', background: '#fee2e2', color: '#ef4444', borderRadius: '4px', border: '1px solid #fca5a5' }}>
                         🚨 Remedial Required
@@ -949,8 +956,8 @@ const StudentManagement = () => {
                   </td>
                   <td>{student.class ? `Grade ${student.class.grade} - Section ${student.class.section}` : 'N/A'}</td>
                   <td>{student.rollNumber}</td>
-                  <td>{student.phone || student.phoneNumber || student.parentPhone || student.userId?.phone || '+91 98765 43210'}</td>
-                  <td>{student.parentName || (student.parentId?.firstName ? `${student.parentId.firstName} ${student.parentId.lastName}` : (student.parent?.firstName ? `${student.parent.firstName} ${student.parent.lastName}` : 'Rajesh Patel'))}</td>
+                  <td>{sPhone}</td>
+                  <td>{sParent}</td>
                   {isAccountant && (
                     <td style={{ fontWeight: 'bold', color: pendingAmt > 0 ? '#ef4444' : '#10b981' }}>
                       {formatCurrency(pendingAmt)}
