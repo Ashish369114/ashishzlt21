@@ -4,8 +4,9 @@ import LibraryManagement from '../components/LibraryManagement';
 import SchoolCalendarManagement from '../components/SchoolCalendarManagement';
 import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogleCalendar';
 import DailyInsightWidget from '../../components/DailyInsightWidget';
+import TopBar from '../../components/dashboard/TopBar';
 import { subscribeToDataChanges } from '../../services/syncService';
-import { LayoutDashboard, BookOpen, Repeat, DollarSign, CheckCircle2, FileText, LogOut, Calendar as CalendarIcon, Camera, Clock } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Repeat, DollarSign, CheckCircle2, FileText, LogOut, Calendar as CalendarIcon, Camera, Clock, MessageSquare } from 'lucide-react';
 
 const LibrarianDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -112,80 +113,64 @@ const LibrarianDashboard = ({ user, onLogout }) => {
       </div>
 
       {/* Main Content */}
-      <div className="main-content" style={{ flex: 1, background: '#FAF6F0', overflowY: 'auto' }}>
+      <div className="main-content" style={{ flex: 1, background: '#FAF6F0', overflowY: 'auto' }}>        {/* Top Global Header Bar */}
+        <div style={{ position: 'sticky', top: 0, zIndex: 20, padding: '16px 28px 0', background: '#FAF6F0' }}>
+          <TopBar
+            userName={user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Suresh Sharma'}
+            subject="Head Librarian"
+            user={user}
+          />
+        </div>
 
-        {/* Top Sticky Header */}
-        <div style={{
-          background: '#ffffff',
-          padding: '18px 32px',
-          borderBottom: '1px solid #BFDBFE',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          position: 'sticky',
-          top: 0,
-          zIndex: 10
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '7px 14px',
-                borderRadius: '50px',
-                background: '#EBF5FF',
-                color: '#0C4A86',
-                border: '1.5px solid #BFDBFE',
-                fontSize: '0.82rem',
-                fontWeight: '700',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              ← Back
-            </button>
-            <div>
-              <h1 style={{ margin: 0, fontSize: '1.35rem', fontWeight: '800', color: '#0C4A86' }}>
-                Good Morning, {user?.firstName ? `${user.firstName} ${user.lastName || ''}` : 'Suresh Sharma'} 👋
-              </h1>
-              <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: '#0C4A86' }}>
-                Library Management System & Digital Catalogue
-              </p>
+        {/* Welcome Header Banner */}
+        <div style={{ padding: '20px 28px 0' }}>
+          <div style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #BFDBFE', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '7px 14px',
+                  borderRadius: '50px',
+                  background: '#EBF5FF',
+                  color: '#0C4A86',
+                  border: '1.5px solid #BFDBFE',
+                  fontSize: '0.82rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                ← Back
+              </button>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <h1 style={{ margin: 0, fontSize: '1.35rem', fontWeight: '800', color: '#0C4A86' }}>
+                    Welcome Back, {user?.firstName ? `${user.firstName} ${user.lastName || ''}` : 'Suresh Sharma'} 👋
+                  </h1>
+                  <span style={{ padding: '3px 10px', borderRadius: '20px', background: '#dcfce7', color: '#166534', fontSize: '0.75rem', fontWeight: '800' }}>
+                    Librarian
+                  </span>
+                </div>
+                <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: '#64748b' }}>
+                  Library Management System & Digital Catalogue • Department of Library & Media Resources
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <button
+                onClick={() => setActiveTab('catalogue')}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 16px', background: '#0C4A86', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '0.82rem', fontWeight: '800', cursor: 'pointer' }}
+              >
+                <BookOpen size={16} /> Book Catalogue
+              </button>
             </div>
           </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            {/* Profile Avatar Upload Feature */}
-            <input type="file" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" className="hidden" style={{ display: 'none' }} />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              title="Click to upload profile photo"
-              style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#ffffff',
-                fontWeight: '700',
-                border: '2px solid #BFDBFE',
-                cursor: 'pointer',
-                overflow: 'hidden'
-              }}
-            >
-              {profileImage ? (
-                <img src={profileImage} alt="Librarian" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <span>{user?.firstName?.[0] || 'L'}</span>
-              )}
-            </button>
-          </div>
-        </div>
+        </div>   </div>
 
         {/* Dynamic Page Content */}
         <div style={{ padding: '28px' }}>

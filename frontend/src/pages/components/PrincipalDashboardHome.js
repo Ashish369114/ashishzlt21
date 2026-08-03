@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { leaveService } from '../../services/api';
+import TopBar from '../../components/dashboard/TopBar';
 import { 
   Users, UserCheck, GraduationCap, Clock, 
   Calendar, FileText, Bell, CheckCircle, XCircle, 
@@ -146,6 +147,13 @@ const PrincipalDashboardHome = ({ stats, user }) => {
 
   return (
     <div className="principal-dashboard-container">
+      <div style={{ position: 'sticky', top: 0, zIndex: 20, marginBottom: '20px' }}>
+        <TopBar
+          userName={[user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || 'Dr. Anita Roy'}
+          subject="School Principal"
+          user={user}
+        />
+      </div>
       
       <div className="hero-section">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>

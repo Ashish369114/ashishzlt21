@@ -4,6 +4,7 @@ import AoManagement from '../components/AoManagement';
 import SchoolCalendarManagement from '../components/SchoolCalendarManagement';
 import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogleCalendar';
 import DailyInsightWidget from '../../components/DailyInsightWidget';
+import TopBar from '../../components/dashboard/TopBar';
 import { subscribeToDataChanges } from '../../services/syncService';
 import { LayoutDashboard, Users, FileText, Settings, ShieldCheck, LogOut, Calendar as CalendarIcon, Camera } from 'lucide-react';
 
@@ -116,76 +117,62 @@ const AoDashboard = ({ user, onLogout }) => {
       {/* Main Content Body */}
       <div className="main-content" style={{ flex: 1, background: '#FAF6F0', overflowY: 'auto' }}>
         
-        {/* Top Header Bar */}
-        <div style={{
-          background: '#ffffff',
-          padding: '18px 32px',
-          borderBottom: '1px solid #BFDBFE',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          position: 'sticky',
-          top: 0,
-          zIndex: 10
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '7px 14px',
-                borderRadius: '50px',
-                background: '#EBF5FF',
-                color: '#0C4A86',
-                border: '1.5px solid #BFDBFE',
-                fontSize: '0.82rem',
-                fontWeight: '700',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              ← Back
-            </button>
-            <div>
-              <h1 style={{ margin: 0, fontSize: '1.35rem', fontWeight: '800', color: '#0C4A86' }}>
-                Good Morning, {user?.firstName ? `${user.firstName} ${user.lastName || ''}` : 'Ramesh Gupta'} 👋
-              </h1>
-              <p style={{ margin: '3px 0 0', fontSize: '0.85rem', color: '#0C4A86' }}>
-                Administrative Operations & School Infrastructure Overview
-              </p>
-            </div>
-          </div>
+        {/* Top Global Header Bar */}
+        <div style={{ position: 'sticky', top: 0, zIndex: 20, padding: '16px 28px 0', background: '#FAF6F0' }}>
+          <TopBar
+            userName={user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Ramesh Gupta'}
+            subject="Administrative Officer"
+            user={user}
+          />
+        </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            {/* Profile Avatar Upload Feature */}
-            <input type="file" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" className="hidden" style={{ display: 'none' }} />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              title="Click to upload profile photo"
-              style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#ffffff',
-                fontWeight: '700',
-                border: '2px solid #BFDBFE',
-                cursor: 'pointer',
-                overflow: 'hidden'
-              }}
-            >
-              {profileImage ? (
-                <img src={profileImage} alt="AO" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <span>{user?.firstName?.[0] || 'A'}</span>
-              )}
-            </button>
+        {/* Welcome Header Banner */}
+        <div style={{ padding: '20px 28px 0' }}>
+          <div style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #BFDBFE', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '7px 14px',
+                  borderRadius: '50px',
+                  background: '#EBF5FF',
+                  color: '#0C4A86',
+                  border: '1.5px solid #BFDBFE',
+                  fontSize: '0.82rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                ← Back
+              </button>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <h1 style={{ margin: 0, fontSize: '1.35rem', fontWeight: '800', color: '#0C4A86' }}>
+                    Welcome Back, {user?.firstName ? `${user.firstName} ${user.lastName || ''}` : 'Ramesh Gupta'} 👋
+                  </h1>
+                  <span style={{ padding: '3px 10px', borderRadius: '20px', background: '#e0f2fe', color: '#0369a1', fontSize: '0.75rem', fontWeight: '800' }}>
+                    AO In-Charge
+                  </span>
+                </div>
+                <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: '#64748b' }}>
+                  Administrative Operations & School Infrastructure Overview • General Operations Department
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <button
+                onClick={() => setActiveTab('assets')}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 16px', background: '#0C4A86', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '0.82rem', fontWeight: '800', cursor: 'pointer' }}
+              >
+                <ShieldCheck size={16} /> Asset Management
+              </button>
+            </div>
           </div>
         </div>
 

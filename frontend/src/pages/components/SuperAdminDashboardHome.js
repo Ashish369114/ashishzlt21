@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import TopBar from '../../components/dashboard/TopBar';
 import { 
   Users, UserCheck, Briefcase, GraduationCap, 
   CreditCard, AlertCircle, Clock, TrendingUp,
@@ -150,6 +151,13 @@ const SuperAdminDashboardHome = ({ stats }) => {
 
   return (
     <div className="saas-dashboard-container">
+      <div style={{ position: 'sticky', top: 0, zIndex: 20, marginBottom: '20px' }}>
+        <TopBar
+          userName="Super Administrator"
+          subject="System Control Panel"
+        />
+      </div>
+
       {/* 2. KPI Cards */}
       <div className="kpi-grid">
         {/* KPI Cards */}
