@@ -8,7 +8,7 @@ import {
   BarChart2, DollarSign, History, Sparkles, Check, RefreshCw, Plus, Layers, User
 } from 'lucide-react';
 
-const LibraryManagement = ({ activeSection }) => {
+const LibraryManagement = ({ activeSection, initialTab }) => {
   const [books, setBooks] = useState([]);
   const [availableBooks, setAvailableBooks] = useState(0);
   const [students, setStudents] = useState([]);
@@ -16,17 +16,19 @@ const LibraryManagement = ({ activeSection }) => {
   const [error, setError] = useState('');
   
   // Navigation & View Tabs
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'all_books' | 'digital_ebooks' | 'reservations' | 'fines' | 'availability' | 'reports'
+  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'all_books' | 'digital_ebooks' | 'reservations' | 'fines' | 'availability' | 'reports' | 'timetable'
 
+  const section = activeSection || initialTab;
   useEffect(() => {
-    if (activeSection === 'dashboard') setActiveTab('dashboard');
-    if (activeSection === 'catalogue') setActiveTab('all_books');
-    if (activeSection === 'timetable') setActiveTab('timetable');
-    if (activeSection === 'issue_return') setActiveTab('reservations');
-    if (activeSection === 'fines') setActiveTab('fines');
-    if (activeSection === 'availability') setActiveTab('availability');
-    if (activeSection === 'reports') setActiveTab('reports');
-  }, [activeSection]);
+    if (!section) return;
+    if (section === 'dashboard') setActiveTab('dashboard');
+    if (section === 'catalogue' || section === 'all_books') setActiveTab('all_books');
+    if (section === 'timetable') setActiveTab('timetable');
+    if (section === 'issue_return' || section === 'reservations') setActiveTab('reservations');
+    if (section === 'fines') setActiveTab('fines');
+    if (section === 'availability') setActiveTab('availability');
+    if (section === 'reports') setActiveTab('reports');
+  }, [section]);
   
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');

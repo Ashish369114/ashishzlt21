@@ -198,7 +198,7 @@ const LibrarianDashboard = ({ user, onLogout }) => {
           ) : activeTab === 'calendar' ? (
             <SchoolCalendarManagement />
           ) : (
-            <LibraryManagement initialTab={activeTab === 'dashboard' ? 'catalogue' : activeTab} />
+            <LibraryManagement activeSection={activeTab} initialTab={activeTab} />
           )}
         </div>
 
