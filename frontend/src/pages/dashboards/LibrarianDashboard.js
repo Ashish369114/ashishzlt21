@@ -174,7 +174,7 @@ const LibrarianDashboard = ({ user, onLogout }) => {
 
         {/* Dynamic Page Content */}
         <div style={{ padding: '28px' }}>
-          {activeTab === 'google_calendar' || activeTab === 'calendar' ? (
+          {activeTab === 'dashboard' || activeTab === 'google_calendar' || activeTab === 'calendar' ? (
             <LibrarianCalendarWithUpcomingEvents />
           ) : (
             <LibraryManagement activeSection={activeTab} initialTab={activeTab} />
