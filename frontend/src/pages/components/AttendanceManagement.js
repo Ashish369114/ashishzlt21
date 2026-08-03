@@ -631,13 +631,15 @@ const AttendanceManagement = () => {
                         <tbody>
                           {studentsToDisplay.map((student, sIdx) => {
                             const sId = String(student.userId?._id || student.userId || student._id || student.id);
+                            const realIdx = displayStudentsList.findIndex(s => getStudentKey(s) === getStudentKey(student));
+                            const indexForSeed = realIdx >= 0 ? realIdx : sIdx;
                             
                             const indianFirstNames = ['Aarav', 'Ananya', 'Vihaan', 'Diya', 'Aditya', 'Aadhya', 'Sai', 'Pari', 'Reyansh', 'Anika', 'Arjun', 'Navya', 'Vivaan', 'Avani', 'Ayaan', 'Myra', 'Ishaan', 'Kavya', 'Dhruv', 'Prisha', 'Kabir', 'Riya', 'Rohan', 'Shreya'];
                             const indianLastNames = ['Sharma', 'Verma', 'Gupta', 'Singh', 'Patel', 'Reddy', 'Joshi', 'Chawla', 'Mehta', 'Nair', 'Iyer', 'Kumar', 'Das', 'Mishra', 'Prasad', 'Kapoor'];
                             const gradeNum = parseInt(selectedGrade || '1', 10);
                             const secCode = (selectedSection || 'A').charCodeAt(0);
                             const seed = gradeNum * 37 + secCode * 13;
-                            const fallbackName = `${indianFirstNames[(seed + sIdx * 3) % indianFirstNames.length]} ${indianLastNames[(seed + sIdx * 5 + 1) % indianLastNames.length]}`;
+                            const fallbackName = `${indianFirstNames[(seed + indexForSeed * 3) % indianFirstNames.length]} ${indianLastNames[(seed + indexForSeed * 5 + 1) % indianLastNames.length]}`;
 
                             const rawName = [student.firstName || student.userId?.firstName || (student.name && !student.name.startsWith('Student G') ? student.name : ''), student.lastName || student.userId?.lastName].filter(Boolean).join(' ').trim();
                             const name = (rawName && !rawName.startsWith('Student G')) ? rawName : fallbackName;
@@ -700,7 +702,7 @@ const AttendanceManagement = () => {
                                   const monthNum = parseInt(selectedMonth || '3', 10);
                                   const secCode = (selectedSection || 'A').charCodeAt(0);
                                   const gradeNum = parseInt(selectedGrade || '1', 10);
-                                  const sSeed = gradeNum * 17 + secCode * 7 + (sIdx + 1) * 11 + monthNum * 13;
+                                  const sSeed = gradeNum * 17 + secCode * 7 + (indexForSeed + 1) * 11 + monthNum * 13;
                                   const targetAbsentDay1 = ((sSeed * 3) % (daysInMonth || 28)) + 1;
                                   const targetAbsentDay2 = ((sSeed * 7) % (daysInMonth || 28)) + 1;
                                   const maxAbsentCount = sSeed % 4;
