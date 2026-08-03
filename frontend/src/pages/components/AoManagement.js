@@ -6,6 +6,7 @@ import {
   Shirt, BookOpen, Home, Bell, Calendar, TrendingUp, Upload, ArrowUpDown, 
   CheckCircle, RefreshCw, ChevronLeft, ChevronRight, Layers, Tag
 } from 'lucide-react';
+import CalendarAndEventsSection from '../../components/common/CalendarAndEventsSection';
 
 // CBSE Subject Mapping by Class
 const CBSE_SUBJECTS_BY_GRADE = {
@@ -801,6 +802,9 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
               </button>
             </div>
           </div>
+
+          {/* 2-Column Calendar & Upcoming Events Section */}
+          <CalendarAndEventsSection />
 
           {/* 4 Key Summary Widgets */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '18px' }}>

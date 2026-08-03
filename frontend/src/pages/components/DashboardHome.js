@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import useRealtimeUpdates from '../../hooks/useRealtimeUpdates';
 import { eventService, feeService, expenseService } from '../../services/api';
 import PrincipalLeaveManagement from './PrincipalLeaveManagement';
+import CalendarAndEventsSection from '../../components/common/CalendarAndEventsSection';
 
 const DashboardHome = ({ stats, showEvents = true, user }) => {
   const userId = localStorage.getItem('userId');
@@ -186,6 +187,9 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
           }
         }
       `}</style>
+
+      {/* 2-Column Calendar & Upcoming Events Section */}
+      <CalendarAndEventsSection />
 
       {/* Quick Actions (Accountant Only) */}
       {(role === 'accountant' || role === 'accountant_admin') && (

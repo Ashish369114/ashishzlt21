@@ -5,6 +5,7 @@ import { demoExams, demoEmployees, demoClasses, demoStudents } from '../../utils
 import ExamManagement from '../components/ExamManagement';
 import SchoolCalendarManagement from '../components/SchoolCalendarManagement';
 import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogleCalendar';
+import CalendarAndEventsSection from '../../components/common/CalendarAndEventsSection';
 import { subscribeToDataChanges } from '../../services/syncService';
 import ZaynLeviLogo from '../../components/ZaynLeviLogo';
 import { exportToPDF } from '../../utils/exportUtils';
@@ -1387,6 +1388,9 @@ const ExaminerDashboard = ({ user, onLogout }) => {
                     </div>
                   </div>
                 </div>
+
+                {/* 2-Column Calendar & Upcoming Events Section */}
+                <CalendarAndEventsSection />
 
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
                   <div style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #e2e8f0', padding: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>

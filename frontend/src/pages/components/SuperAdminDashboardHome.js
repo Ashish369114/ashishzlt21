@@ -14,6 +14,7 @@ import {
   PieChart, Pie, Cell, AreaChart, Area
 } from 'recharts';
 import { formatCurrency } from '../../utils/currencyFormatter';
+import CalendarAndEventsSection from '../../components/common/CalendarAndEventsSection';
 import './SuperAdminPremium.css';
 
 const SuperAdminDashboardHome = ({ stats }) => {
@@ -177,7 +178,10 @@ const SuperAdminDashboardHome = ({ stats }) => {
         <Link to="/dashboard/hostel" className="action-card" style={{ textDecoration: 'none', color: 'inherit' }}><Home className="action-icon" size={20} /> Add Hostel</Link>
       </div>
 
-      {/* 6. Activity, Notices & Events Section */}
+      {/* 6. Calendar & Upcoming Events Section */}
+      <CalendarAndEventsSection />
+
+      {/* 7. Activity, Notices & Events Section */}
       <div className="dashboard-grid-2 mt-6 mb-8">
         
         {/* Left: Recent Activities */}
