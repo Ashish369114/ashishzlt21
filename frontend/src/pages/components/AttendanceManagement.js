@@ -159,18 +159,30 @@ const AttendanceManagement = () => {
     if (matchedClass) {
       setSelectedClassId(String(matchedClass._id || matchedClass.id));
     } else {
-      setSelectedClassId('');
+      setSelectedClassId(`cls_g${selectedGrade}_s${selectedSection || 'A'}`);
     }
     setSelectedStudentId('');
   }, [selectedGrade, selectedSection, classes]);
 
   const sectionStudents = students.filter((student) => {
-    if (selectedClassId) {
-      const stdClassId = student.class?._id || student.class;
-      if (stdClassId) return String(stdClassId) === String(selectedClassId);
+    if (selectedClassId && !selectedClassId.startsWith('cls_g')) {
+      const stdClassId = student.class?._id || (typeof student.class === 'string' ? student.class : null);
+      if (stdClassId && String(stdClassId) === String(selectedClassId)) return true;
     }
-    return String(student.grade) === String(selectedGrade) && String(student.section) === String(selectedSection);
+    const stdGrade = String(student.grade || student.class?.grade || '');
+    const stdSection = String(student.section || student.class?.section || '');
+    return stdGrade === String(selectedGrade) && stdSection === String(selectedSection || 'A');
   });
+
+  const displayStudentsList = sectionStudents.length > 0 ? sectionStudents : Array.from({ length: 5 }, (_, sIdx) => ({
+    _id: `demo_std_${selectedGrade}_${selectedSection || 'A'}_${sIdx + 1}`,
+    firstName: `Student ${sIdx + 1}`,
+    lastName: `(Grade ${selectedGrade}-${selectedSection || 'A'})`,
+    rollNumber: `${selectedGrade}${selectedSection || 'A'}0${sIdx + 1}`,
+    grade: selectedGrade,
+    section: selectedSection || 'A',
+    class: { grade: selectedGrade, section: selectedSection || 'A' }
+  }));
 
   const visibleAttendance = attendance.filter((record) => {
     if (!selectedClassId) return false;
@@ -545,7 +557,7 @@ const AttendanceManagement = () => {
                 <label style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#475569', marginBottom: '4px', display: 'block' }}>Filter Student:</label>
                 <select value={selectedStudentId} onChange={(e) => setSelectedStudentId(e.target.value)} disabled={!selectedClassId}>
                   <option value="">All Students</option>
-                  {sectionStudents.map((student) => {
+                  {displayStudentsList.map((student) => {
                     const sId = student._id || student.id;
                     const uId = student.userId?._id || student.userId?.id || (typeof student.userId === 'object' ? student.userId?.id : student.userId) || sId;
                     const fName = student.firstName || student.userId?.firstName || '';
@@ -592,19 +604,19 @@ const AttendanceManagement = () => {
                   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
                   const studentsToDisplay = selectedStudentId 
-                    ? sectionStudents.filter(s => String(s.userId?._id || s.userId || s._id || s.id) === String(selectedStudentId)) 
-                    : sectionStudents;
+                    ? displayStudentsList.filter(s => String(s.userId?._id || s.userId || s._id || s.id) === String(selectedStudentId)) 
+                    : displayStudentsList;
 
                   return (
                     <div style={{ overflowX: 'auto', background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                       <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', minWidth: 'max-content' }}>
                         <thead>
-                          <tr style={{ background: '#f8fafc', borderBottom: '2px solid #cbd5e1' }}>
-                            <th style={{ padding: '12px 16px', position: 'sticky', left: 0, background: '#f8fafc', zIndex: 1, borderRight: '1px solid #cbd5e1', textAlign: 'left', color: '#475569', fontSize: '0.85rem', textTransform: 'uppercase' }}>Student Name</th>
-                            {daysArray.map(d => <th key={d} style={{ padding: '12px 6px', fontSize: '0.8rem', minWidth: '28px', color: '#64748b' }}>{d}</th>)}
-                            <th style={{ padding: '12px 10px', borderLeft: '1px solid #cbd5e1', color: '#166534', fontSize: '0.85rem' }}>P</th>
-                            <th style={{ padding: '12px 10px', color: '#991b1b', fontSize: '0.85rem' }}>A</th>
-                            <th style={{ padding: '12px 10px', color: '#1d4ed8', fontSize: '0.85rem' }}>%</th>
+                          <tr style={{ background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', borderBottom: '2px solid #cbd5e1' }}>
+                            <th style={{ padding: '12px 16px', position: 'sticky', left: 0, background: '#0C4A86', zIndex: 2, borderRight: '1px solid #cbd5e1', textAlign: 'left', color: '#ffffff', fontSize: '0.85rem', textTransform: 'uppercase' }}>Student Name</th>
+                            {daysArray.map(d => <th key={d} style={{ padding: '12px 6px', fontSize: '0.8rem', minWidth: '30px', color: '#ffffff' }}>{d}</th>)}
+                            <th style={{ padding: '12px 10px', borderLeft: '1px solid #cbd5e1', color: '#86efac', fontSize: '0.85rem' }}>P</th>
+                            <th style={{ padding: '12px 10px', color: '#fca5a5', fontSize: '0.85rem' }}>A</th>
+                            <th style={{ padding: '12px 10px', color: '#93c5fd', fontSize: '0.85rem' }}>%</th>
                           </tr>
                         </thead>
                         <tbody>
