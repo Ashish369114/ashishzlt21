@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import api, { schoolService, classService, studentService, complaintService } from '../../services/api';
 import '../../styles/ManagementStyles.css';
@@ -6,6 +7,7 @@ import { formatCurrency } from '../../utils/currencyFormatter';
 import { demoEmployees, demoClasses } from '../../utils/demoData';
 
 const EmployeeManagement = () => {
+  const navigate = useNavigate();
   const [employees, setEmployees] = useState([]);
   const userRole = localStorage.getItem('role');
   const isPrincipal = userRole === 'principal';
@@ -294,7 +296,29 @@ const EmployeeManagement = () => {
 
   return (
     <div className="management-container">
-      <h1>Employee Management</h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
+        <button
+          onClick={() => navigate('/dashboard')}
+          style={{
+            padding: '8px 16px',
+            borderRadius: '12px',
+            border: '1px solid #cbd5e1',
+            background: '#ffffff',
+            color: '#0C4A86',
+            fontWeight: '700',
+            fontSize: '0.88rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          ← Back
+        </button>
+        <h1 style={{ margin: 0 }}>Employee Management</h1>
+      </div>
 
       <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #e5e7eb', paddingBottom: '10px' }}>
         {isPrincipal && (

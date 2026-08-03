@@ -122,11 +122,9 @@ const PrincipalDashboard = ({ user, onLogout }) => {
 
         <ul className="nav-menu">
           <li><Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><LayoutDashboard size={18} /> Dashboard</Link></li>
-          <li><Link to="/dashboard/calendar" className={isActive('/dashboard/calendar') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Calendar size={18} /> Calendar</Link></li>
           <li><Link to="/dashboard/communications" className={isActive('/dashboard/communications') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><MessageSquare size={18} /> Communications</Link></li>
           <li><Link to="/dashboard/school-calendar" className={isActive('/dashboard/school-calendar') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Calendar size={18} /> School Calendar</Link></li>
           <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><GraduationCap size={18} /> Student Management</Link></li>
-          <li><Link to="/dashboard/teachers" className={isActive('/dashboard/teachers') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Users size={18} /> Teacher Management</Link></li>
           <li><Link to="/dashboard/employees" className={isActive('/dashboard/employees') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Users size={18} /> Staff & Employees</Link></li>
           <li><Link to="/dashboard/leaves" className={isActive('/dashboard/leaves') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><CheckCircle2 size={18} /> Staff Leave Approvals</Link></li>
 
