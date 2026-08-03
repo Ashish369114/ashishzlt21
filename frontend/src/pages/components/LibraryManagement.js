@@ -57,6 +57,10 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
   const [showScannerModal, setShowScannerModal] = useState(false);
   const [borrowGrade, setBorrowGrade] = useState('Grade 6');
   const [borrowSection, setBorrowSection] = useState('Section A');
+  const [borrowUserId, setBorrowUserId] = useState('');
+  const [reserveDate, setReserveDate] = useState('');
+  const [actionMenuOpenFor, setActionMenuOpenFor] = useState(null);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Fine Collection State
   const [finesList, setFinesList] = useState([
