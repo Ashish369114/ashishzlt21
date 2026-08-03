@@ -55,10 +55,47 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
   const [historyModalOpenFor, setHistoryModalOpenFor] = useState(null);
   const [qrModalOpenFor, setQrModalOpenFor] = useState(null);
   const [showScannerModal, setShowScannerModal] = useState(false);
-  const [borrowUserId, setBorrowUserId] = useState('');
-  const [reserveDate, setReserveDate] = useState('');
-  const [actionMenuOpenFor, setActionMenuOpenFor] = useState(null);
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [borrowGrade, setBorrowGrade] = useState('Grade 6');
+  const [borrowSection, setBorrowSection] = useState('Section A');
+
+  // Fine Collection State
+  const [finesList, setFinesList] = useState([
+    { id: 1, title: 'The Great Gatsby', isbn: '9780743273565', student: 'Aarav Patel', gradeSec: 'Grade 5 - Section A', dueDate: '15 Jul 2026', daysOverdue: 7, amount: 350, status: 'Unpaid' },
+    { id: 2, title: 'Introduction to Algorithms', isbn: '9780262033848', student: 'Rahul Kumar', gradeSec: 'Grade 10 - Section A', dueDate: '20 Jul 2026', daysOverdue: 5, amount: 250, status: 'Unpaid' },
+    { id: 3, title: 'Advanced High School Physics', isbn: '9780133647181', student: 'Priya Sharma', gradeSec: 'Grade 9 - Section B', dueDate: '22 Jul 2026', daysOverdue: 3, amount: 150, status: 'Unpaid' },
+    { id: 4, title: 'A Brief History of Time', isbn: '9780553380163', student: 'Vihaan Gupta', gradeSec: 'Grade 8 - Section B', dueDate: '10 Jul 2026', daysOverdue: 12, amount: 600, status: 'Paid', paymentMethod: 'UPI', paidDate: '01 Aug 2026' }
+  ]);
+  const [collectFineModalFor, setCollectFineModalFor] = useState(null);
+  const [finePaymentMethod, setFinePaymentMethod] = useState('Cash');
+
+  const getBorrowStudentsList = () => {
+    const indianFirstNames = ['Aarav', 'Ananya', 'Vihaan', 'Diya', 'Aditya', 'Aadhya', 'Sai', 'Pari', 'Reyansh', 'Anika', 'Arjun', 'Navya', 'Vivaan', 'Avani', 'Ayaan', 'Myra', 'Ishaan', 'Kavya', 'Dhruv', 'Prisha', 'Kabir', 'Riya', 'Rohan', 'Shreya'];
+    const indianLastNames = ['Sharma', 'Verma', 'Gupta', 'Singh', 'Patel', 'Reddy', 'Joshi', 'Chawla', 'Mehta', 'Nair', 'Iyer', 'Kumar', 'Das', 'Mishra', 'Prasad', 'Kapoor'];
+    
+    const gradeNum = parseInt(borrowGrade.replace(/\D/g, '') || '1', 10);
+    const secCode = borrowSection.charCodeAt(borrowSection.length - 1) || 65;
+    const seed = gradeNum * 37 + secCode * 13;
+
+    return Array.from({ length: 8 }, (_, idx) => {
+      const fn = indianFirstNames[(seed + idx * 3) % indianFirstNames.length];
+      const ln = indianLastNames[(seed + idx * 5 + 1) % indianLastNames.length];
+      const roll = `${gradeNum}${borrowSection.slice(-1)}${String(idx + 1).padStart(2, '0')}`;
+      return {
+        id: `std_${gradeNum}_${secCode}_${idx}`,
+        name: `${fn} ${ln}`,
+        roll: roll
+      };
+    });
+  };
+
+  const handleConfirmCollectFine = (e) => {
+    e.preventDefault();
+    if (!collectFineModalFor) return;
+    const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    setFinesList(prev => prev.map(f => f.id === collectFineModalFor.id ? { ...f, status: 'Paid', paymentMethod: finePaymentMethod, paidDate: today } : f));
+    alert(`🎉 Fine ₹${collectFineModalFor.amount} collected via ${finePaymentMethod} for ${collectFineModalFor.student}! Digital receipt issued.`);
+    setCollectFineModalFor(null);
+  };
 
   // Digital eBooks State
   const [ebooks, setEbooks] = useState([
@@ -688,7 +725,6 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
                   <th style={{ padding: '14px 20px' }}>Publisher</th>
                   <th style={{ padding: '14px 20px' }}>Stock</th>
                   <th style={{ padding: '14px 20px' }}>Status</th>
-                  <th style={{ padding: '14px 20px', textAlign: 'center' }}>QR Code</th>
                   <th style={{ padding: '14px 20px', textAlign: 'right' }}>Actions</th>
                 </tr>
               </thead>
@@ -713,14 +749,6 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
                         <span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '700', background: bStatus.bg, color: bStatus.color }}>
                           {bStatus.icon} {bStatus.status}
                         </span>
-                      </td>
-                      <td style={{ padding: '14px 20px', textAlign: 'center' }}>
-                        <button 
-                          onClick={() => setQrModalOpenFor(book)}
-                          style={{ padding: '6px 12px', background: '#f5f3ff', color: '#6366f1', border: '1px solid #c7d2fe', borderRadius: '6px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                        >
-                          <QrCode size={14} /> View QR
-                        </button>
                       </td>
                       <td style={{ padding: '14px 20px', textAlign: 'right' }} className="action-menu-container">
                         <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -851,7 +879,9 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
             </div>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '0.75rem', color: '#ffedd5', textTransform: 'uppercase' }}>Total Fines Outstanding</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#fff' }}>₹{totalFinesCollected || 450}</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#fff' }}>
+                ₹{finesList.filter(f => f.status === 'Unpaid').reduce((sum, f) => sum + f.amount, 0)}
+              </div>
             </div>
           </div>
 
@@ -865,23 +895,39 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
                   <th style={{ padding: '12px' }}>Due Date</th>
                   <th style={{ padding: '12px' }}>Days Overdue</th>
                   <th style={{ padding: '12px' }}>Fine Amount</th>
-                  <th style={{ padding: '12px', textAlign: 'right' }}>Action</th>
+                  <th style={{ padding: '12px', textAlign: 'right' }}>Action / Status</th>
                 </tr>
               </thead>
               <tbody>
-                <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '12px' }}>
-                    <div style={{ fontWeight: '700' }}>The Great Gatsby</div>
-                    <div style={{ fontSize: '0.78rem', color: '#64748b', fontFamily: 'monospace' }}>ISBN: 9780743273565</div>
-                  </td>
-                  <td style={{ padding: '12px', fontWeight: '600' }}>Aarav Patel (Grade 5)</td>
-                  <td style={{ padding: '12px', color: '#ef4444', fontWeight: '700' }}>15 Jul 2026</td>
-                  <td style={{ padding: '12px', fontWeight: '700', color: '#ef4444' }}>7 Days</td>
-                  <td style={{ padding: '12px', fontWeight: '800', color: '#d97706' }}>₹350</td>
-                  <td style={{ padding: '12px', textAlign: 'right' }}>
-                    <button onClick={() => alert('Fine ₹350 collected successfully! Digital receipt issued.')} style={{ padding: '6px 14px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer' }}>Collect Fine</button>
-                  </td>
-                </tr>
+                {finesList.map(fine => (
+                  <tr key={fine.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '12px' }}>
+                      <div style={{ fontWeight: '700', color: '#0f172a' }}>{fine.title}</div>
+                      <div style={{ fontSize: '0.78rem', color: '#64748b', fontFamily: 'monospace' }}>ISBN: {fine.isbn}</div>
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <div style={{ fontWeight: '600', color: '#0f172a' }}>{fine.student}</div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{fine.gradeSec}</div>
+                    </td>
+                    <td style={{ padding: '12px', color: fine.status === 'Unpaid' ? '#ef4444' : '#64748b', fontWeight: '700' }}>{fine.dueDate}</td>
+                    <td style={{ padding: '12px', fontWeight: '700', color: fine.status === 'Unpaid' ? '#ef4444' : '#64748b' }}>{fine.daysOverdue} Days</td>
+                    <td style={{ padding: '12px', fontWeight: '800', color: '#d97706' }}>₹{fine.amount}</td>
+                    <td style={{ padding: '12px', textAlign: 'right' }}>
+                      {fine.status === 'Unpaid' ? (
+                        <button 
+                          onClick={() => setCollectFineModalFor(fine)} 
+                          style={{ padding: '6px 14px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer' }}
+                        >
+                          Collect Fine
+                        </button>
+                      ) : (
+                        <span style={{ padding: '4px 10px', background: '#dcfce7', color: '#166534', borderRadius: '20px', fontWeight: '700', fontSize: '0.78rem' }}>
+                          Paid ✅ ({fine.paymentMethod})
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -1278,21 +1324,104 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
       {/* BORROW BOOK MODAL */}
       {borrowModalOpenFor && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: '#fff', padding: '24px', borderRadius: '16px', width: '420px' }}>
-            <h3 style={{ marginTop: 0, color: '#0f172a', fontWeight: '800' }}>Borrow: {borrowModalOpenFor.title}</h3>
-            <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '16px' }}>Select student borrowing this book.</p>
-            <select value={borrowUserId} onChange={e => setBorrowUserId(e.target.value)} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px', marginBottom: '16px', fontSize: '0.88rem' }}>
-              <option value="">Select Student...</option>
-              {students.map(s => (
-                <option key={s._id} value={s.userId?._id || s.userId}>
-                  {s.userId?.firstName} {s.userId?.lastName} - Class {s.class?.grade} {s.class?.section}
-                </option>
-              ))}
-            </select>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-              <button onClick={() => { setBorrowModalOpenFor(null); setBorrowUserId(''); }} style={{ padding: '8px 16px', background: '#f1f5f9', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>Cancel</button>
-              <button onClick={handleBorrowBookSubmit} style={{ padding: '8px 16px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '700' }}>Confirm Borrow</button>
+          <div style={{ background: '#fff', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '440px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, color: '#0f172a', fontWeight: '800' }}>Borrow: {borrowModalOpenFor.title}</h3>
+              <button onClick={() => { setBorrowModalOpenFor(null); setBorrowUserId(''); }} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#64748b' }}>&times;</button>
             </div>
+            
+            <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '16px' }}>Select class grade, section, and student borrowing this book.</p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#475569', marginBottom: '4px', display: 'block' }}>Select Grade:</label>
+                <select value={borrowGrade} onChange={e => setBorrowGrade(e.target.value)} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem' }}>
+                  {[1,2,3,4,5,6,7,8,9,10].map(g => <option key={g} value={`Grade ${g}`}>Grade {g}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#475569', marginBottom: '4px', display: 'block' }}>Select Section:</label>
+                <select value={borrowSection} onChange={e => setBorrowSection(e.target.value)} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem' }}>
+                  <option value="Section A">Section A</option>
+                  <option value="Section B">Section B</option>
+                  <option value="Section C">Section C</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#475569', marginBottom: '4px', display: 'block' }}>Select Student:</label>
+              <select value={borrowUserId} onChange={e => setBorrowUserId(e.target.value)} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.88rem' }}>
+                <option value="">Select Student from {borrowGrade} ({borrowSection})...</option>
+                {getBorrowStudentsList().map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({s.roll})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <button onClick={() => { setBorrowModalOpenFor(null); setBorrowUserId(''); }} style={{ padding: '10px 18px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}>Cancel</button>
+              <button onClick={() => {
+                if (!borrowUserId) {
+                  alert('Please select a student');
+                  return;
+                }
+                const selectedStd = getBorrowStudentsList().find(s => s.id === borrowUserId);
+                const sName = selectedStd ? `${selectedStd.name} (${borrowGrade}-${borrowSection.slice(-1)})` : 'Selected Student';
+                alert(`🎉 Book "${borrowModalOpenFor.title}" borrowed successfully to ${sName}! Due date set to 14 days.`);
+                setBorrowModalOpenFor(null);
+                setBorrowUserId('');
+              }} style={{ padding: '10px 18px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' }}>Confirm Borrow</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* COLLECT FINE MODAL */}
+      {collectFineModalFor && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '440px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, color: '#0f172a', fontWeight: '800' }}>💰 Collect Overdue Fine</h3>
+              <button onClick={() => setCollectFineModalFor(null)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#64748b' }}>&times;</button>
+            </div>
+            
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px', marginBottom: '16px', fontSize: '0.88rem' }}>
+              <div style={{ fontWeight: '800', color: '#0f172a', fontSize: '1rem', marginBottom: '4px' }}>{collectFineModalFor.title}</div>
+              <div style={{ color: '#64748b', fontSize: '0.8rem', marginBottom: '8px' }}>ISBN: {collectFineModalFor.isbn}</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #cbd5e1', paddingTop: '8px' }}>
+                <span style={{ color: '#475569', fontWeight: '600' }}>Student:</span>
+                <span style={{ color: '#0f172a', fontWeight: '700' }}>{collectFineModalFor.student} ({collectFineModalFor.gradeSec})</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
+                <span style={{ color: '#475569', fontWeight: '600' }}>Days Overdue:</span>
+                <span style={{ color: '#ef4444', fontWeight: '700' }}>{collectFineModalFor.daysOverdue} Days</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', borderTop: '1px dashed #cbd5e1', paddingTop: '8px', fontSize: '1.1rem' }}>
+                <span style={{ color: '#0f172a', fontWeight: '800' }}>Fine Penalty:</span>
+                <span style={{ color: '#d97706', fontWeight: '800' }}>₹{collectFineModalFor.amount}</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleConfirmCollectFine}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ fontSize: '0.82rem', fontWeight: 'bold', color: '#475569', marginBottom: '6px', display: 'block' }}>Payment Method:</label>
+                <select value={finePaymentMethod} onChange={e => setFinePaymentMethod(e.target.value)} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.88rem' }}>
+                  <option value="Cash">💵 Cash Payment</option>
+                  <option value="UPI">📱 UPI / GPay / PhonePe</option>
+                  <option value="Card">💳 Credit / Debit Card</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                <button type="button" onClick={() => setCollectFineModalFor(null)} style={{ padding: '10px 16px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
+                <button type="submit" style={{ padding: '10px 18px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' }}>
+                  Confirm Collection & Issue Receipt
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
