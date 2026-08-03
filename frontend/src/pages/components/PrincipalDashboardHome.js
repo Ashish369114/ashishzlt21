@@ -307,11 +307,10 @@ const PrincipalDashboardHome = ({ stats, user }) => {
           </div>
 
           <div 
-            className="events-scroller"
             ref={eventsScrollRef}
             onMouseEnter={() => setIsEventsHovered(true)}
             onMouseLeave={() => setIsEventsHovered(false)}
-            style={{ flex: 1, overflowY: 'auto', paddingRight: '4px', display: 'flex', flexDirection: 'column', gap: '12px' }}
+            style={{ flex: 1, maxHeight: 'none', overflowY: 'auto', paddingRight: '4px', display: 'flex', flexDirection: 'column', gap: '12px' }}
           >
             {scrollingEvents.map((evt, idx) => (
               <div key={`${evt.id}-${idx}`} style={{ borderRadius: '16px', border: '1px solid #e2e8f0', background: '#f8fafc', padding: '14px', transition: 'all 0.2s ease' }}>
