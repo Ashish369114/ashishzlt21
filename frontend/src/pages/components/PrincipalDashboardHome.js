@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { leaveService } from '../../services/api';
 import TopBar from '../../components/dashboard/TopBar';
-import InteractiveGoogleCalendar from '../common/InteractiveGoogleCalendar';
+import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogleCalendar';
 import { 
   Users, UserCheck, GraduationCap, Clock, 
   Calendar, FileText, Bell, CheckCircle, XCircle, 
