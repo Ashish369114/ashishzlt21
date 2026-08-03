@@ -170,7 +170,7 @@ const LibrarianDashboard = ({ user, onLogout }) => {
               </button>
             </div>
           </div>
-        </div>   </div>
+        </div>
 
         {/* Dynamic Page Content */}
         <div style={{ padding: '28px' }}>
