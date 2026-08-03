@@ -485,8 +485,21 @@ const StudentManagement = () => {
     if (selectedSection && (!student.class || String(student.class.section) !== String(selectedSection))) {
       return false;
     }
-    if (selectedStudentId && String(student._id) !== String(selectedStudentId) && String(student.userId?._id || student.userId) !== String(selectedStudentId)) {
-      return false;
+    if (selectedStudentId) {
+      const targetStr = String(selectedStudentId);
+      const candidateIds = [
+        student._id,
+        student.id,
+        student.studentId,
+        student.rollNumber,
+        student.userId?._id,
+        student.userId?.id,
+        student.userId
+      ].filter(Boolean).map(String);
+
+      if (!candidateIds.includes(targetStr)) {
+        return false;
+      }
     }
 
     const isAcc = currentUser && (currentUser.role === 'accountant' || currentUser.role === 'accountant_admin');
@@ -962,8 +975,10 @@ const StudentManagement = () => {
                 const sParent = student.parentName 
                   || (student.parentId?.firstName ? `${student.parentId.firstName} ${student.parentId.lastName}` : (student.parent?.firstName ? `${student.parent.firstName} ${student.parent.lastName}` : `${defaultPFn} ${student.lastName || defaultLn}`));
 
+                const sUniqueKey = String(student._id || student.id || student.studentId || student.rollNumber || `std_${idx}`);
+
                 return (
-                <tr key={student._id}>
+                <tr key={sUniqueKey}>
                   <td>
                     {sName}
                     {allNotes.filter(n => n.studentId === student._id && n.category === 'Needs Remedial Classes').length > 0 && (
@@ -987,13 +1002,13 @@ const StudentManagement = () => {
                         className="action-menu-button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setActionMenuOpenFor(actionMenuOpenFor === student._id ? null : student._id);
+                          setActionMenuOpenFor(actionMenuOpenFor === sUniqueKey ? null : sUniqueKey);
                         }}
                       >
                         ⋮
                       </button>
                       
-                      {actionMenuOpenFor === student._id && (
+                      {actionMenuOpenFor === sUniqueKey && (
                         <>
                           <div className="action-menu-overlay" onClick={(e) => { e.stopPropagation(); setActionMenuOpenFor(null); }}></div>
                           <div className="action-menu-dropdown" onClick={(e) => e.stopPropagation()}>
