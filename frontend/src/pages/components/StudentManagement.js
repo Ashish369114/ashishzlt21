@@ -478,7 +478,7 @@ const StudentManagement = () => {
     return true;
   });
 
-  const visibleStudents = students.filter((student) => {
+  let visibleStudents = students.filter((student, idx) => {
     if (selectedGrade && (!student.class || String(student.class.grade) !== String(selectedGrade))) {
       return false;
     }
@@ -494,7 +494,8 @@ const StudentManagement = () => {
         student.rollNumber,
         student.userId?._id,
         student.userId?.id,
-        student.userId
+        student.userId,
+        `st_${idx}`
       ].filter(Boolean).map(String);
 
       if (!candidateIds.includes(targetStr)) {
@@ -518,6 +519,19 @@ const StudentManagement = () => {
 
     return true;
   });
+
+  if (selectedStudentId && visibleStudents.length === 0 && filteredStudentsForSelect.length > 0) {
+    const targetStr = String(selectedStudentId);
+    const matchedFromSelect = filteredStudentsForSelect.find((st, sIdx) => {
+      const cand = [st._id, st.id, st.studentId, st.rollNumber, st.userId?._id, st.userId, `st_${sIdx}`].filter(Boolean).map(String);
+      return cand.includes(targetStr);
+    });
+    if (matchedFromSelect) {
+      visibleStudents = [matchedFromSelect];
+    } else {
+      visibleStudents = [filteredStudentsForSelect[0]];
+    }
+  }
 
   const isAccountant = currentUser && (currentUser.role === 'accountant' || currentUser.role === 'accountant_admin');
 
@@ -907,8 +921,9 @@ const StudentManagement = () => {
                 const defaultFn = indianFirst[hash % indianFirst.length];
                 const defaultLn = indianLast[(hash + 2) % indianLast.length];
                 const stName = [st.firstName || st.userId?.firstName, st.lastName || st.userId?.lastName].filter(Boolean).join(' ').trim() || (st.name && st.name !== 'Aarav Patel' ? st.name : `${defaultFn} ${defaultLn}`);
+                const stVal = String(st._id || st.id || st.studentId || st.rollNumber || `st_${sIdx}`);
                 return (
-                  <option key={st._id} value={st._id}>
+                  <option key={stVal} value={stVal}>
                     {stName} ({st.rollNumber || 'N/A'})
                   </option>
                 );
