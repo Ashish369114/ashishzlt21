@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
-import { ChevronDown, ChevronRight, CheckCircle2, Camera } from 'lucide-react';
+import { 
+  ChevronDown, ChevronRight, CheckCircle2, Camera,
+  LayoutDashboard, Calendar, MessageSquare, GraduationCap, Users, 
+  FileText, BookOpen, Bell, FileSpreadsheet, BarChart2, LogOut, ShieldCheck
+} from 'lucide-react';
 import { studentService, teacherService, feeService, attendanceService, examService } from '../../services/api';
 import { subscribeToDataChanges } from '../../services/syncService';
 import StudentManagement from '../components/StudentManagement';
@@ -107,8 +111,8 @@ const PrincipalDashboard = ({ user, onLogout }) => {
       <div className="sidebar" style={{ overflowY: 'auto' }}>
         {/* Examiner-style clean brand header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingBottom: '20px', borderBottom: '1px solid #BFDBFE', marginBottom: '20px' }}>
-          <div style={{ width: '42px', height: '42px', background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', boxShadow: '0 4px 15px rgba(20, 158, 242, 0.25)', flexShrink: 0, fontSize: '1.3rem' }}>
-            👔
+          <div style={{ width: '42px', height: '42px', background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', boxShadow: '0 4px 15px rgba(20, 158, 242, 0.25)', flexShrink: 0 }}>
+            <GraduationCap size={22} />
           </div>
           <div>
             <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#0C4A86', letterSpacing: '-0.3px', lineHeight: 1.1 }}>Principal</div>
@@ -117,28 +121,28 @@ const PrincipalDashboard = ({ user, onLogout }) => {
         </div>
 
         <ul className="nav-menu">
-          <li><Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''}>📊 Dashboard</Link></li>
-          <li><Link to="/dashboard/calendar" className={isActive('/dashboard/calendar') ? 'active' : ''}>📅 Calendar</Link></li>
-          <li><Link to="/dashboard/communications" className={isActive('/dashboard/communications') ? 'active' : ''}>💬 Communications</Link></li>
-          <li><Link to="/dashboard/school-calendar" className={isActive('/dashboard/school-calendar') ? 'active' : ''}>📅 School Calendar</Link></li>
-          <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''}>👨‍🎓 Students</Link></li>
+          <li><Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><LayoutDashboard size={18} /> Dashboard</Link></li>
+          <li><Link to="/dashboard/calendar" className={isActive('/dashboard/calendar') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Calendar size={18} /> Calendar</Link></li>
+          <li><Link to="/dashboard/communications" className={isActive('/dashboard/communications') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><MessageSquare size={18} /> Communications</Link></li>
+          <li><Link to="/dashboard/school-calendar" className={isActive('/dashboard/school-calendar') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Calendar size={18} /> School Calendar</Link></li>
+          <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><GraduationCap size={18} /> Students</Link></li>
 
-          <li><Link to="/dashboard/employees" className={isActive('/dashboard/employees') ? 'active' : ''}>👨‍💼 Employees</Link></li>
+          <li><Link to="/dashboard/employees" className={isActive('/dashboard/employees') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Users size={18} /> Employees</Link></li>
 
-          <li><Link to="/dashboard/attendance" className={isActive('/dashboard/attendance') ? 'active' : ''}>✅ Attendance</Link></li>
-          <li><Link to="/dashboard/exams" className={isActive('/dashboard/exams') ? 'active' : ''}>📝 Exams</Link></li>
-          <li><Link to="/dashboard/lesson-plans" className={isActive('/dashboard/lesson-plans') ? 'active' : ''}>📖 Lesson Plans</Link></li>
-          <li><Link to="/dashboard/notices" className={isActive('/dashboard/notices') ? 'active' : ''}>📢 Circulars & Notices</Link></li>
-          <li><Link to="/dashboard/meeting-moms" className={isActive('/dashboard/meeting-moms') ? 'active' : ''}>📝 Meeting MOMs</Link></li>
-          <li><Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''}>📊 Reports</Link></li>
+          <li><Link to="/dashboard/attendance" className={isActive('/dashboard/attendance') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><CheckCircle2 size={18} /> Attendance</Link></li>
+          <li><Link to="/dashboard/exams" className={isActive('/dashboard/exams') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><FileText size={18} /> Exams</Link></li>
+          <li><Link to="/dashboard/lesson-plans" className={isActive('/dashboard/lesson-plans') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><BookOpen size={18} /> Lesson Plans</Link></li>
+          <li><Link to="/dashboard/notices" className={isActive('/dashboard/notices') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Bell size={18} /> Circulars & Notices</Link></li>
+          <li><Link to="/dashboard/meeting-moms" className={isActive('/dashboard/meeting-moms') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><FileSpreadsheet size={18} /> Meeting MOMs</Link></li>
+          <li><Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><BarChart2 size={18} /> Reports</Link></li>
 
           <li style={{ marginTop: '20px', padding: '0 4px' }}>
             <DailyInsightWidget />
           </li>
 
           <li style={{ marginTop: '10px' }}>
-            <button onClick={handleLogout} className="logout-btn">
-              🚪 Logout
+            <button onClick={handleLogout} className="logout-btn" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <LogOut size={16} /> Logout
             </button>
           </li>
         </ul>
