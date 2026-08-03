@@ -52,10 +52,10 @@ const LibrarianDashboard = ({ user, onLogout }) => {
   ];
 
   return (
-    <div className="dashboard-layout" style={{ background: '#F8FAFC', minHeight: '100vh', display: 'flex' }}>
-      
+    <div className="dashboard-layout" style={{ background: '#FAF6F0', minHeight: '100vh', display: 'flex' }}>
+
       {/* Sidebar */}
-      <div className="sidebar" style={{ width: '260px', background: '#FFFFFF', borderRight: '1px solid #E2E8F0', padding: '24px 20px', flexShrink: 0 }}>
+      <div className="sidebar" style={{ width: '260px', background: '#FAF6F0', borderRight: '1px solid #BFDBFE', padding: '24px 20px', flexShrink: 0 }}>
         <div className="sidebar-header" style={{ borderBottom: '1px solid #BFDBFE', paddingBottom: '20px' }}>
           <h2 style={{ color: '#0C4A86', fontSize: '1.2rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
             <div style={{ width: '36px', height: '36px', background: '#0C4A86', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
@@ -111,8 +111,8 @@ const LibrarianDashboard = ({ user, onLogout }) => {
       </div>
 
       {/* Main Content */}
-      <div className="main-content" style={{ flex: 1, background: '#F8FAFC', overflowY: 'auto' }}>
-        
+      <div className="main-content" style={{ flex: 1, background: '#FAF6F0', overflowY: 'auto' }}>
+
         {/* Top Sticky Header */}
         <div style={{
           background: '#ffffff',

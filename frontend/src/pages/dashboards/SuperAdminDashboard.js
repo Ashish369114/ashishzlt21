@@ -22,9 +22,9 @@ import InventoryManagement from '../components/InventoryManagement';
 import SuperAdminDashboardHome from '../components/SuperAdminDashboardHome';
 import UserManagement from '../components/UserManagement';
 import SchoolCalendarManagement from '../components/SchoolCalendarManagement';
-import { 
-  LayoutDashboard, Users, GraduationCap, ClipboardList, 
-  BookOpen, Bus, BedDouble, BarChart3, Settings, 
+import {
+  LayoutDashboard, Users, GraduationCap, ClipboardList,
+  BookOpen, Bus, BedDouble, BarChart3, Settings,
   Calendar as CalendarIcon, LogOut, Bell,
   ChevronDown, ChevronRight, Archive, Camera, ArrowLeft
 } from 'lucide-react';
@@ -90,9 +90,9 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
   };
 
   return (
-    <div className="dashboard-layout" style={{ background: '#F8FAFC', minHeight: '100vh' }}>
-      <div className="sidebar" style={{ background: '#FFFFFF', borderRight: '1px solid #E2E8F0' }}>
-        <div className="sidebar-header" style={{ borderBottom: '1px solid #E2E8F0', paddingBottom: '20px' }}>
+    <div className="dashboard-layout" style={{ background: '#FAF6F0', minHeight: '100vh' }}>
+      <div className="sidebar" style={{ background: '#FAF6F0', borderRight: '1px solid #BFDBFE' }}>
+        <div className="sidebar-header" style={{ borderBottom: '1px solid #BFDBFE', paddingBottom: '20px' }}>
           <h2 style={{ color: '#0C4A86', fontSize: '1.25rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{ width: '32px', height: '32px', background: '#0C4A86', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <span style={{ fontSize: '1.2rem' }}>🎓</span>
@@ -105,7 +105,7 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/calendar" className={isActive('/dashboard/calendar') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CalendarIcon size={20} /> Calendar</Link></li>
           <li><Link to="/dashboard/school-calendar" className={isActive('/dashboard/school-calendar') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CalendarIcon size={20} /> School Calendar</Link></li>
           <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><GraduationCap size={20} /> Students</Link></li>
-          
+
           <li><Link to="/dashboard/employees" className={isActive('/dashboard/employees') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Users size={20} /> Employees</Link></li>
 
           <li><Link to="/dashboard/attendance" className={isActive('/dashboard/attendance') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><ClipboardList size={20} /> Attendance</Link></li>
@@ -132,7 +132,7 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
         </ul>
       </div>
 
-      <div className="main-content" style={{ background: '#F8FAFC', padding: 0 }}>
+      <div className="main-content" style={{ background: '#FAF6F0', padding: 0 }}>
         {/* Top Header */}
         <div style={{
           background: '#ffffff',

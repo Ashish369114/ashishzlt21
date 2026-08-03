@@ -122,7 +122,8 @@ table thead tr th {
   border-bottom: none !important;
 }
 
-table th, table thead th {
+table th,
+table thead th {
   background: linear-gradient(135deg, #0C4A86 0%, #0096DA 100%) !important;
   padding: 14px 16px !important;
   text-align: left !important;
@@ -223,18 +224,18 @@ table tr:hover td {
   display: flex;
   min-height: 100vh;
   width: 100%;
-  background: #F8FAFC;
+  background: linear-gradient(180deg, #F6F0E8 0%, #FAF6F0 50%, #F6F0E8 100%);
   font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
 }
 
 .sidebar {
   width: 260px;
   min-width: 260px;
-  background: #FFFFFF;
+  background: #FAF6F0;
   padding: 24px 16px;
   display: flex;
   flex-direction: column;
-  border-right: 1.5px solid #E2E8F0;
+  border-right: 1.5px solid #E0F2FE;
   box-shadow: 0 0 20px rgba(12, 74, 134, 0.04);
 }
 
@@ -336,7 +337,9 @@ table tr:hover td {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ── Responsive ── */
