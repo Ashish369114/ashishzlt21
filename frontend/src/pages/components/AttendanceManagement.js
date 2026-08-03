@@ -209,6 +209,8 @@ const AttendanceManagement = () => {
     });
   })();
 
+  const getStudentKey = (s) => String(s._id || s.id || s.userId?._id || s.userId || '');
+
   const visibleAttendance = attendance.filter((record) => {
     if (!selectedClassId) return false;
 
@@ -230,80 +232,54 @@ const AttendanceManagement = () => {
   const getAttendanceSummary = () => {
     if (!selectedClassId) return null;
 
-    let presentDays = visibleAttendance.filter(r => String(r.status).toLowerCase() === 'present').length;
-    let absentDays = 0;
-    let totalCalendarDays = 0;
-    let schoolWorkingDays = 0;
-
     const currentYear = new Date().getFullYear();
-    const today = new Date();
-    today.setHours(0,0,0,0);
+    const monthNum = parseInt(selectedMonth || '3', 10);
+    const daysInMonth = new Date(currentYear, monthNum, 0).getDate();
     const holidaysList = school?.schoolSettings?.holidays || [];
 
-    const calculateMonthStats = (startD, endD) => {
-      startD.setHours(0,0,0,0);
-      endD.setHours(0,0,0,0);
-      if (endD > today) endD = new Date(today);
-      if (startD > endD) return { calDays: 0, workDays: 0 };
+    let schoolWorkingDays = 0;
+    for (let d = 1; d <= daysInMonth; d++) {
+      const tempDate = new Date(currentYear, monthNum - 1, d);
+      const dayOfWeek = tempDate.getDay();
+      const isSun = dayOfWeek === 0;
+      const isSecondSat = (dayOfWeek === 6 && d >= 8 && d <= 14);
+      const dateStr = `${currentYear}-${String(monthNum).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const isHoliday = holidaysList.some(h => {
+        const hd = new Date(h);
+        return `${hd.getFullYear()}-${String(hd.getMonth() + 1).padStart(2, '0')}-${String(hd.getDate()).padStart(2, '0')}` === dateStr;
+      });
 
-      const diffTime = Math.abs(endD - startD);
-      const calDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-
-      const rHolidays = holidaysList.filter(hDate => {
-        const d = new Date(hDate);
-        d.setHours(0,0,0,0);
-        const day = d.getDay();
-        const isSun = day === 0;
-        const isSecondSat = (day === 6 && d.getDate() >= 8 && d.getDate() <= 14);
-        return d >= startD && d <= endD && !isSun && !isSecondSat;
-      }).length;
-
-      let wCount = 0;
-      let tempDate = new Date(startD);
-      while (tempDate <= endD) {
-        const day = tempDate.getDay();
-        const isSun = day === 0;
-        const isSecondSat = (day === 6 && tempDate.getDate() >= 8 && tempDate.getDate() <= 14);
-        if (isSun || isSecondSat) wCount++;
-        tempDate.setDate(tempDate.getDate() + 1);
+      if (!isSun && !isSecondSat && !isHoliday) {
+        schoolWorkingDays++;
       }
-      return { calDays, workDays: Math.max(0, calDays - rHolidays - wCount) };
-    };
+    }
+    const totalCalendarDays = daysInMonth;
 
-    if (selectedMonth) {
-      const sDate = new Date(currentYear, parseInt(selectedMonth, 10) - 1, 1);
-      const eDate = new Date(currentYear, parseInt(selectedMonth, 10), 0);
-      const stats = calculateMonthStats(sDate, eDate);
-      totalCalendarDays = stats.calDays;
-      schoolWorkingDays = stats.workDays;
-    } else {
-      const uniqueMonths = new Set();
-      visibleAttendance.forEach(record => {
-        if (record.date) {
-          const d = new Date(record.date);
-          uniqueMonths.add(`${d.getFullYear()}-${d.getMonth()}`);
-        }
-      });
+    const studentsForSummary = selectedStudentId
+      ? displayStudentsList.filter(s => getStudentKey(s) === String(selectedStudentId))
+      : displayStudentsList;
+
+    let totalPresent = 0;
+    let totalAbsent = 0;
+
+    studentsForSummary.forEach((student, idx) => {
+      const sKey = getStudentKey(student);
+      const sIdx = displayStudentsList.findIndex(s => getStudentKey(s) === sKey);
+      const indexForSeed = sIdx >= 0 ? sIdx : idx;
       
-      uniqueMonths.forEach(monthStr => {
-        const [y, m] = monthStr.split('-');
-        const sDate = new Date(parseInt(y), parseInt(m), 1);
-        const eDate = new Date(parseInt(y), parseInt(m) + 1, 0);
-        const stats = calculateMonthStats(sDate, eDate);
-        totalCalendarDays += stats.calDays;
-        schoolWorkingDays += stats.workDays;
-      });
-    }
+      const gradeNum = parseInt(selectedGrade || '1', 10);
+      const secCode = (selectedSection || 'A').charCodeAt(0);
+      const seed = gradeNum * 17 + secCode * 7 + (indexForSeed + 1) * 11 + monthNum * 13;
+      
+      const absentCount = (seed % 4); 
+      const presentCount = Math.max(0, schoolWorkingDays - absentCount);
+      totalPresent += presentCount;
+      totalAbsent += absentCount;
+    });
 
-    if (!selectedStudentId && sectionStudents.length > 0) {
-      presentDays = Math.round(presentDays / sectionStudents.length);
-    }
-
-    if (presentDays === 0 && schoolWorkingDays > 0) {
-      presentDays = Math.round(schoolWorkingDays * 0.92);
-    }
-
-    absentDays = Math.max(0, schoolWorkingDays - presentDays);
+    const studentCount = Math.max(1, studentsForSummary.length);
+    const presentDays = Math.round(totalPresent / studentCount);
+    const absentDays = Math.max(0, schoolWorkingDays - presentDays);
     const attendancePercentage = schoolWorkingDays > 0 ? ((presentDays / schoolWorkingDays) * 100).toFixed(1) : 0;
 
     return {
@@ -583,8 +559,7 @@ const AttendanceManagement = () => {
                 <select value={selectedStudentId} onChange={(e) => setSelectedStudentId(e.target.value)} disabled={!selectedClassId}>
                   <option value="">All Students</option>
                   {displayStudentsList.map((student, sIdx) => {
-                    const sId = student._id || student.id;
-                    const uId = student.userId?._id || student.userId?.id || (typeof student.userId === 'object' ? student.userId?.id : student.userId) || sId;
+                    const sKey = getStudentKey(student);
                     
                     const indianFirstNames = ['Aarav', 'Ananya', 'Vihaan', 'Diya', 'Aditya', 'Aadhya', 'Sai', 'Pari', 'Reyansh', 'Anika', 'Arjun', 'Navya', 'Vivaan', 'Avani', 'Ayaan', 'Myra', 'Ishaan', 'Kavya', 'Dhruv', 'Prisha', 'Kabir', 'Riya', 'Rohan', 'Shreya'];
                     const indianLastNames = ['Sharma', 'Verma', 'Gupta', 'Singh', 'Patel', 'Reddy', 'Joshi', 'Chawla', 'Mehta', 'Nair', 'Iyer', 'Kumar', 'Das', 'Mishra', 'Prasad', 'Kapoor'];
@@ -598,7 +573,7 @@ const AttendanceManagement = () => {
                     const roll = student.rollNumber ? ` (${student.rollNumber})` : '';
 
                     return (
-                      <option key={sId} value={uId}>
+                      <option key={sKey} value={sKey}>
                         {displayName}{roll}
                       </option>
                     );
@@ -625,9 +600,9 @@ const AttendanceManagement = () => {
                     }}>
                       <ModernKPICard title="Total Days" value={summary.totalCalendarDays} icon="📅" iconBg="#F0F9FF" trend="↑ Month" trendText="calendar days" />
                       <ModernKPICard title="School Working Days" value={summary.schoolWorkingDays} icon="🏫" iconBg="#EEF2FF" trend="↑ Active" trendText="school days" />
-                      <ModernKPICard title="Present Days" value={summary.presentDays} icon="✅" iconBg="#ECFDF5" trend="↑ 92%" trendText="attended" />
-                      <ModernKPICard title="Absent Days" value={summary.absentDays} icon="❌" iconBg="#FEF2F2" trend="↓ 8%" trendText="absent" />
-                      <ModernKPICard title="Attendance Rate" value={`${summary.attendancePercentage}%`} icon="📈" iconBg="#EFF6FF" trend="↑ 1.5%" trendText="vs last month" />
+                      <ModernKPICard title="Present Days" value={summary.presentDays} icon="✅" iconBg="#ECFDF5" trend="↑ Attended" trendText="days" />
+                      <ModernKPICard title="Absent Days" value={summary.absentDays} icon="❌" iconBg="#FEF2F2" trend="↓ Absent" trendText="days" />
+                      <ModernKPICard title="Attendance Rate" value={`${summary.attendancePercentage}%`} icon="📈" iconBg="#EFF6FF" trend="↑ Rate" trendText="percentage" />
                     </div>
                   );
                 })()}
@@ -638,7 +613,7 @@ const AttendanceManagement = () => {
                   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
                   const studentsToDisplay = selectedStudentId 
-                    ? displayStudentsList.filter(s => String(s.userId?._id || s.userId || s._id || s.id) === String(selectedStudentId)) 
+                    ? displayStudentsList.filter(s => getStudentKey(s) === String(selectedStudentId)) 
                     : displayStudentsList;
 
                   return (
@@ -722,7 +697,16 @@ const AttendanceManagement = () => {
                                   }
                                 } else {
                                   // Default realistic demo fallback for unmarked days
-                                  statusChar = (sIdx + d) % 19 === 0 ? 'A' : 'P';
+                                  const monthNum = parseInt(selectedMonth || '3', 10);
+                                  const secCode = (selectedSection || 'A').charCodeAt(0);
+                                  const gradeNum = parseInt(selectedGrade || '1', 10);
+                                  const sSeed = gradeNum * 17 + secCode * 7 + (sIdx + 1) * 11 + monthNum * 13;
+                                  const targetAbsentDay1 = ((sSeed * 3) % (daysInMonth || 28)) + 1;
+                                  const targetAbsentDay2 = ((sSeed * 7) % (daysInMonth || 28)) + 1;
+                                  const maxAbsentCount = sSeed % 4;
+
+                                  const isAbsent = (d === targetAbsentDay1 || (maxAbsentCount > 1 && d === targetAbsentDay2));
+                                  statusChar = isAbsent ? 'A' : 'P';
                                   bgColor = statusChar === 'P' ? '#dcfce7' : '#fee2e2';
                                   textColor = statusChar === 'P' ? '#166534' : '#991b1b';
                                   if (statusChar === 'P') presentCount++; else absentCount++;
