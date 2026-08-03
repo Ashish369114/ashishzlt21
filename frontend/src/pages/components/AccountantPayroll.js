@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Users, Wallet, CheckCircle2, Hourglass } from 'lucide-react';
 import { employeeService } from '../../services/api';
 import { formatCurrency } from '../../utils/currencyFormatter';
 
@@ -165,18 +166,18 @@ const AccountantPayroll = () => {
       {/* Summary Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
         {[
-          { title: 'Total Employees', value: payroll.length, icon: '👥', color: '#3b82f6' },
-          { title: 'Total Payroll', value: formatCurrency(totalPayroll), icon: '💰', color: '#8b5cf6' },
-          { title: 'Paid This Month', value: formatCurrency(paidThisMonth), icon: '✅', color: '#10b981' },
-          { title: 'Pending Salaries', value: formatCurrency(pendingSalaries), icon: '⏳', color: '#f59e0b' },
+          { title: 'Total Employees', value: payroll.length, icon: <Users size={24} color="#2563eb" />, bg: '#eff6ff', border: '#bfdbfe' },
+          { title: 'Total Payroll', value: formatCurrency(totalPayroll), icon: <Wallet size={24} color="#7c3aed" />, bg: '#f5f3ff', border: '#ddd6fe' },
+          { title: 'Paid This Month', value: formatCurrency(paidThisMonth), icon: <CheckCircle2 size={24} color="#059669" />, bg: '#ecfdf5', border: '#a7f3d0' },
+          { title: 'Pending Salaries', value: formatCurrency(pendingSalaries), icon: <Hourglass size={24} color="#d97706" />, bg: '#fffbeb', border: '#fde68a' },
         ].map((stat, idx) => (
-          <div key={idx} style={{ background: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: `${stat.color}15`, color: stat.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px' }}>
+          <div key={idx} style={{ background: '#fff', padding: '20px', borderRadius: '14px', border: `1px solid ${stat.border}`, boxShadow: '0 2px 10px rgba(0,0,0,0.03)', display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ width: '50px', height: '50px', borderRadius: '14px', background: stat.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {stat.icon}
             </div>
             <div>
-              <p style={{ margin: 0, color: '#6b7280', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.title}</p>
-              <h3 style={{ margin: '6px 0 0', color: '#111827', fontSize: '24px', fontWeight: '800' }}>{stat.value}</h3>
+              <p style={{ margin: 0, color: '#64748b', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.title}</p>
+              <h3 style={{ margin: '4px 0 0', color: '#0f172a', fontSize: '24px', fontWeight: '800' }}>{stat.value}</h3>
             </div>
           </div>
         ))}

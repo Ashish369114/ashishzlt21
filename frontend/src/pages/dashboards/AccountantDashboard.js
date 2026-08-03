@@ -305,8 +305,6 @@ const AccountantDashboard = ({ user, onLogout }) => {
 
         <ul className="nav-menu">
           <li><Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''}>Dashboard</Link></li>
-          <li><Link to="/dashboard/calendar" className={isActive('/dashboard/calendar') ? 'active' : ''}>📅 Calendar</Link></li>
-          <li><Link to="/dashboard/school-calendar" className={isActive('/dashboard/school-calendar') ? 'active' : ''}>📅 School Calendar</Link></li>
           <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''}>Students</Link></li>
 
           <li>

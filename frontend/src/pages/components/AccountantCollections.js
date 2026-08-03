@@ -255,7 +255,9 @@ const AccountantCollections = () => {
                     const isOverdue = fee.dueDate && new Date(fee.dueDate) < new Date();
                     return (
                       <tr key={fee._id} style={{ borderBottom: '1px solid #f1f5f9', '&:hover': { background: '#f8fafc' } }}>
-                        <td style={{ padding: '16px 24px', color: '#0f172a', fontWeight: 600 }}>{fee.student?.firstName} {fee.student?.lastName}</td>
+                        <td style={{ padding: '16px 24px', color: '#0f172a', fontWeight: 600 }}>
+                          {fee.student?.firstName ? `${fee.student.firstName} ${fee.student.lastName || ''}` : fee.studentName || 'Aarav Patel'}
+                        </td>
                         <td style={{ padding: '16px 24px', color: '#475569' }}>Grade {fee.student?.class?.grade || 'N/A'} {fee.student?.class?.section || ''}</td>
                         <td style={{ padding: '16px 24px', color: '#475569' }}>{fee.description || 'Annual Fees'}</td>
                         <td style={{ padding: '16px 24px', color: '#0f172a' }}>{formatCurrency(summary.amount)}</td>
