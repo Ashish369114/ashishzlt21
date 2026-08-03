@@ -707,7 +707,7 @@ const AttendanceManagement = () => {
                                   const targetAbsentDay2 = ((sSeed * 7) % (daysInMonth || 28)) + 1;
                                   const maxAbsentCount = sSeed % 4;
 
-                                  const isAbsent = (d === targetAbsentDay1 || (maxAbsentCount > 1 && d === targetAbsentDay2));
+                                  const isAbsent = (maxAbsentCount > 0 && d === targetAbsentDay1) || (maxAbsentCount > 1 && d === targetAbsentDay2);
                                   statusChar = isAbsent ? 'A' : 'P';
                                   bgColor = statusChar === 'P' ? '#dcfce7' : '#fee2e2';
                                   textColor = statusChar === 'P' ? '#166534' : '#991b1b';
