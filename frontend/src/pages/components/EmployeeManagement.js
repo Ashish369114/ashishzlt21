@@ -284,13 +284,18 @@ const EmployeeManagement = () => {
 
   // Payroll save handlers
   const handleSaveSalary = async (employeeId, salaryData) => {
+    if (!employeeId) return;
     try {
       await api.put(`/employees/${employeeId}/salary`, salaryData);
       fetchEmployees();
       alert('Salary updated successfully!');
     } catch (error) {
       console.warn('Backend salary update notice (using fallback):', error);
-      setEmployees(prev => prev.map(emp => emp._id === employeeId ? { ...emp, salary: salaryData } : emp));
+      setEmployees(prev => prev.map(emp => {
+        const empKey = String(emp._id || emp.id || emp.employeeId || '');
+        const targetKey = String(employeeId);
+        return (empKey && empKey === targetKey) ? { ...emp, salary: salaryData } : emp;
+      }));
       alert('Salary updated successfully!');
     }
   };
@@ -967,7 +972,7 @@ const EmployeeManagement = () => {
                         return rest;
                       })()}</td>
                       <td>{getYearsWorked(teacher.dateOfJoining)} yrs</td>
-                      <td>{formatCurrency(teacher.salary?.baseSalary || 0)}</td>
+                      <td>{formatCurrency(typeof teacher.salary === 'object' && teacher.salary !== null ? (teacher.salary?.baseSalary || 0) : (Number(teacher.salary) || 45000))}</td>
                       <td style={{ textAlign: 'center' }}>
                         <button
                           onClick={() => setEditingTeacher(teacher)}
@@ -1002,7 +1007,7 @@ const EmployeeManagement = () => {
                       <td>{emp.designation}</td>
                       <td>{getYearsWorked(emp.dateOfJoining)} yrs</td>
                       <td>{formatJoiningDate(emp.dateOfJoining)}</td>
-                      <td>{formatCurrency(emp.salary?.baseSalary || 0)}</td>
+                      <td>{formatCurrency(typeof emp.salary === 'object' && emp.salary !== null ? (emp.salary?.baseSalary || 0) : (Number(emp.salary) || 35000))}</td>
                       <td style={{ textAlign: 'center' }}>
                         <button
                           onClick={() => setEditingEmployeePayroll(emp)}
@@ -1026,7 +1031,7 @@ const EmployeeManagement = () => {
           employee={editingTeacher}
           onClose={() => setEditingTeacher(null)}
           onSave={(salaryData) => {
-            handleSaveSalary(editingTeacher._id, salaryData);
+            handleSaveSalary(editingTeacher._id || editingTeacher.id || editingTeacher.employeeId, salaryData);
             setEditingTeacher(null);
           }}
         />
@@ -1037,7 +1042,7 @@ const EmployeeManagement = () => {
           employee={editingEmployeePayroll}
           onClose={() => setEditingEmployeePayroll(null)}
           onSave={(salaryData) => {
-            handleSaveSalary(editingEmployeePayroll._id, salaryData);
+            handleSaveSalary(editingEmployeePayroll._id || editingEmployeePayroll.id || editingEmployeePayroll.employeeId, salaryData);
             setEditingEmployeePayroll(null);
           }}
         />
@@ -1048,7 +1053,10 @@ const EmployeeManagement = () => {
 
 // Internal reusable Salary Modal
 const SalaryModal = ({ employee, onClose, onSave }) => {
-  const [baseSalary, setBaseSalary] = useState(employee.salary?.baseSalary || 0);
+  const initialBase = typeof employee.salary === 'object' && employee.salary !== null
+    ? (employee.salary?.baseSalary || 0)
+    : (Number(employee.salary) || 45000);
+  const [baseSalary, setBaseSalary] = useState(initialBase);
   const [allowanceName, setAllowanceName] = useState('');
   const [allowanceVal, setAllowanceVal] = useState(0);
   const [allowances, setAllowances] = useState(employee.salary?.allowances || {});
