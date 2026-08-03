@@ -2,9 +2,28 @@ import React, { useState, useRef } from 'react';
 import { MessageCircleMore, Search, User, Camera } from 'lucide-react';
 import NotificationDrawer from '../common/NotificationDrawer';
 
+const roleAvatars = {
+  superadmin: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256',
+  super_admin: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256',
+  principal: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=256',
+  accountant: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=256',
+  examiner: 'https://images.unsplash.com/photo-1580894732413-80f2d9c18db1?auto=format&fit=crop&q=80&w=256',
+  administrative_officer: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=256',
+  ao: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=256',
+  teacher: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=256',
+  student: 'https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?auto=format&fit=crop&q=80&w=256',
+  parent: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=256',
+};
+
 const TopBar = ({ userName = 'Ramesh Sharma', subject = 'Mathematics', onOpenMessages, user }) => {
+  const roleSlug = (user?.role || subject || userName || 'user').toLowerCase().replace(/[^a-z0-9]/g, '_');
+  const userSlug = (user?._id || user?.id || userName || 'user').toString().toLowerCase().replace(/[^a-z0-9]/g, '_');
+  const storageKey = `profileImage_${roleSlug}_${userSlug}`;
+
+  const defaultAvatar = roleAvatars[roleSlug] || roleAvatars[user?.role] || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=256';
+
   const [profileImage, setProfileImage] = useState(
-    localStorage.getItem('teacherProfileImage') || ''
+    () => localStorage.getItem(storageKey) || localStorage.getItem(`profileImage_${roleSlug}`) || ''
   );
   const fileInputRef = useRef(null);
 
@@ -21,7 +40,8 @@ const TopBar = ({ userName = 'Ramesh Sharma', subject = 'Mathematics', onOpenMes
       reader.onloadend = () => {
         const base64Url = reader.result;
         setProfileImage(base64Url);
-        localStorage.setItem('teacherProfileImage', base64Url);
+        localStorage.setItem(storageKey, base64Url);
+        localStorage.setItem(`profileImage_${roleSlug}`, base64Url);
       };
       reader.readAsDataURL(file);
     }
@@ -64,11 +84,7 @@ const TopBar = ({ userName = 'Ramesh Sharma', subject = 'Mathematics', onOpenMes
             className="relative group flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#0C4A86] to-[#0096DA] text-white font-bold transition hover:opacity-90"
             title="Click to upload or change profile image"
           >
-            {profileImage ? (
-              <img src={profileImage} alt="Profile" className="h-full w-full object-cover" />
-            ) : (
-              <User className="h-5 w-5 text-white" />
-            )}
+            <img src={profileImage || defaultAvatar} alt="Profile" className="h-full w-full object-cover" />
             <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
               <Camera className="h-4 w-4 text-white" />
             </div>
