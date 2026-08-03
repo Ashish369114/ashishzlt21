@@ -7,6 +7,8 @@ import {
   CheckCircle, RefreshCw, ChevronLeft, ChevronRight, Layers, Tag
 } from 'lucide-react';
 import CalendarAndEventsSection from '../../components/common/CalendarAndEventsSection';
+import { studentService } from '../../services/api';
+import { demoStudents } from '../../utils/demoData';
 
 // CBSE Subject Mapping by Class
 const CBSE_SUBJECTS_BY_GRADE = {
@@ -63,16 +65,85 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
   const [bookRuleFilter, setBookRuleFilter] = useState('all'); // 'all' | 'Ruled' | 'Plain' | 'One Side Ruled & One Side Plain' | 'Graph'
   const [shortBookCatFilter, setShortBookCatFilter] = useState('all'); // 'all' | 'Mathematics' | 'English' | ...
 
+  // Helper to format full fallback student list covering Grades 1-10 and Sections A-C
+  const fullStudentsList = (() => {
+    const loaded = (demoStudents && demoStudents.length) ? demoStudents : [];
+    if (loaded.length > 0) {
+      return loaded.map((s, idx) => {
+        const fn = s.firstName || s.userId?.firstName || '';
+        const ln = s.lastName || s.userId?.lastName || '';
+        const rawName = (fn || ln) ? `${fn} ${ln}`.trim() : (s.name || `Student ${idx + 1}`);
+        let g = String(s.grade || s.class?.grade || '1');
+        if (!g.toLowerCase().startsWith('grade')) g = `Grade ${g}`;
+        let sec = String(s.section || s.class?.section || 'A');
+        if (!sec.toLowerCase().startsWith('section')) sec = `Section ${sec}`;
+        return {
+          id: s._id || s.id || s.studentId || `STU-${1000 + idx}`,
+          name: rawName,
+          grade: g,
+          section: sec,
+          rollNo: s.rollNumber || s.rollNo || `G${g}-${idx + 1}`
+        };
+      });
+    }
+
+    const indianFirst = ['Aarav', 'Ananya', 'Rohan', 'Priya', 'Kabir', 'Diya', 'Vihaan', 'Ishita', 'Arjun', 'Sanya', 'Aditya', 'Meera', 'Dev', 'Kavya', 'Vivaan', 'Anushka', 'Reyansh', 'Riya', 'Ayaan', 'Tara'];
+    const indianLast = ['Sharma', 'Verma', 'Gupta', 'Singh', 'Patel', 'Reddy', 'Joshi', 'Chawla', 'Mehta', 'Nair', 'Iyer', 'Kumar', 'Das', 'Mishra', 'Choudhury'];
+    const list = [];
+    let count = 1001;
+    for (let g = 1; g <= 10; g++) {
+      for (const secCode of ['A', 'B', 'C']) {
+        const seed = g * 37 + secCode.charCodeAt(0) * 13;
+        for (let sIdx = 1; sIdx <= 4; sIdx++) {
+          const fn = indianFirst[(seed + sIdx * 3) % indianFirst.length];
+          const ln = indianLast[(seed + sIdx * 5 + 1) % indianLast.length];
+          list.push({
+            id: `STU-${count++}`,
+            name: `${fn} ${ln}`,
+            grade: `Grade ${g}`,
+            section: `Section ${secCode}`,
+            rollNo: `G${g}-${String(sIdx).padStart(3, '0')}`
+          });
+        }
+      }
+    }
+    return list;
+  })();
+
   // Students List for Issuance & Sales
-  const [studentsList, setStudentsList] = useState([
-    { id: 'STU-1001', name: 'Aarav Patel', grade: 'Grade 5', section: 'Section A', rollNo: 'G5-001' },
-    { id: 'STU-1002', name: 'Diya Sharma', grade: 'Grade 1', section: 'Section B', rollNo: 'G1-014' },
-    { id: 'STU-1003', name: 'Rohan Verma', grade: 'Grade 9', section: 'Section A', rollNo: 'G9-022' },
-    { id: 'STU-1004', name: 'Ananya Reddy', grade: 'Grade 6', section: 'Section C', rollNo: 'G6-008' },
-    { id: 'STU-1005', name: 'Kabir Mehta', grade: 'Grade 11', section: 'Section A', rollNo: 'G11-005' },
-    { id: 'STU-1006', name: 'Karthik Rao', grade: 'Grade 11', section: 'Section B', rollNo: 'G11-019' },
-    { id: 'STU-1007', name: 'Nisha Gupta', grade: 'Grade 12', section: 'Section A', rollNo: 'G12-003' }
-  ]);
+  const [studentsList, setStudentsList] = useState(fullStudentsList);
+
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  const fetchStudents = async () => {
+    try {
+      const response = await studentService.getAll().catch(() => ({ data: [] }));
+      const loaded = (response?.data && response.data.length) ? response.data : demoStudents;
+      if (loaded && loaded.length > 0) {
+        const mapped = loaded.map((s, idx) => {
+          const fn = s.firstName || s.userId?.firstName || '';
+          const ln = s.lastName || s.userId?.lastName || '';
+          const rawName = (fn || ln) ? `${fn} ${ln}`.trim() : (s.name || `Student ${idx + 1}`);
+          let g = String(s.grade || s.class?.grade || '1');
+          if (!g.toLowerCase().startsWith('grade')) g = `Grade ${g}`;
+          let sec = String(s.section || s.class?.section || 'A');
+          if (!sec.toLowerCase().startsWith('section')) sec = `Section ${sec}`;
+          return {
+            id: s._id || s.id || s.studentId || `STU-${1000 + idx}`,
+            name: rawName,
+            grade: g,
+            section: sec,
+            rollNo: s.rollNumber || s.rollNo || `G${g}-${idx + 1}`
+          };
+        });
+        setStudentsList(mapped);
+      }
+    } catch (err) {
+      console.warn('Student load fallback:', err);
+    }
+  };
 
   // Student Sales & Issuance Register
   const [issuedItemsLog, setIssuedItemsLog] = useState([
@@ -87,15 +158,15 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
 
   const [sellForm, setSellForm] = useState({
-    studentId: 'STU-1001',
-    selectedSize: '30',
+    studentId: fullStudentsList[0]?.id || 'STU-1001',
+    selectedSize: 'M',
     quantity: 1,
     paymentMode: 'Paid (Cash)'
   });
 
   // 🛒 Shopping Cart / Multi-Item Student Bill State
   const [cartItems, setCartItems] = useState([]);
-  const [cartStudentId, setCartStudentId] = useState('STU-1001');
+  const [cartStudentId, setCartStudentId] = useState(fullStudentsList[0]?.id || 'STU-1001');
   const [cartPaymentMode, setCartPaymentMode] = useState('Paid (Cash)');
 
   // Track selected size per uniform item
