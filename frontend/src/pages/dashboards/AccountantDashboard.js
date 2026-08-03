@@ -16,6 +16,7 @@ import ConcessionManagement from '../components/ConcessionManagement';
 import PlanUpgradeRequired from '../components/PlanUpgradeRequired';
 import SchoolCalendarManagement from '../components/SchoolCalendarManagement';
 import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogleCalendar';
+import SettingsManagement from '../components/SettingsManagement';
 
 // Shows a locked feature banner WITHIN a page (not a full block)
 const FeatureLockBanner = ({ featureName, requiredPlan = 'Gold' }) => (
@@ -429,6 +430,7 @@ const AccountantDashboard = ({ user, onLogout }) => {
           <Route path="concessions" element={<ConcessionManagement />} />
           <Route path="reports" element={<AccountantReports isPremiumFeatureAllowed={isPremiumFeatureAllowed} />} />
           <Route path="expenses" element={<AccountantExpenses />} />
+          <Route path="settings" element={<SettingsManagement />} />
           <Route path="*" element={<DashboardHome stats={stats} user={user} />} />
         </Routes>
       </div>
