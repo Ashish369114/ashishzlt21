@@ -754,36 +754,6 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
 
   return (
     <div style={{ padding: '24px 32px', maxWidth: '1360px', margin: '0 auto', fontFamily: 'Inter, sans-serif' }}>
-      
-      {/* Module Top Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: '800', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Building size={28} color="#3b82f6" /> Administrative Officer Portal
-          </h1>
-          <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.88rem' }}>
-            Centralized management for school inventory (uniforms & books), admissions, accommodation, maintenance, visitors, & transport.
-          </p>
-        </div>
-
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <button onClick={() => setShowAddModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', fontSize: '0.88rem', boxShadow: '0 4px 12px rgba(59,130,246,0.25)' }}>
-            <Plus size={18} /> New Record
-          </button>
-          <button onClick={() => setShowImportModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', background: '#f8fafc', color: '#0284c7', border: '1px solid #bae6fd', borderRadius: '10px', fontWeight: '600', cursor: 'pointer', fontSize: '0.85rem' }}>
-            <Upload size={16} /> Import Excel
-          </button>
-          <button onClick={() => handleExportExcel(activeTab)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', background: '#f8fafc', color: '#15803d', border: '1px solid #bbf7d0', borderRadius: '10px', fontWeight: '600', cursor: 'pointer', fontSize: '0.85rem' }}>
-            <FileSpreadsheet size={16} /> Export Excel
-          </button>
-          <button onClick={() => handleExportPDF(activeTab)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', background: '#f8fafc', color: '#b91c1c', border: '1px solid #fecaca', borderRadius: '10px', fontWeight: '600', cursor: 'pointer', fontSize: '0.85rem' }}>
-            <FileText size={16} /> PDF
-          </button>
-          <button onClick={handlePrint} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 14px', background: '#f8fafc', color: '#475569', border: '1px solid #cbd5e1', borderRadius: '10px', fontWeight: '600', cursor: 'pointer', fontSize: '0.85rem' }}>
-            <Printer size={16} /> Print
-          </button>
-        </div>
-      </div>
 
       {/* Global Toolbar: Search & Advanced Filters */}
       <div style={{ background: '#fff', padding: '14px 20px', borderRadius: '14px', border: '1px solid #e2e8f0', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
