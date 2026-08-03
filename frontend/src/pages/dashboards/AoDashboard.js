@@ -42,7 +42,7 @@ const AoDashboard = ({ user, onLogout }) => {
   const planLabel = plan.includes('ocr') ? '⭐ PLATINUM + OCR' : '⭐ PLATINUM';
 
   const navItems = [
-    { id: 'dashboard', label: 'AO Dashboard', icon: LayoutDashboard },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'google_calendar', label: 'Calendar', icon: CalendarIcon },
     { id: 'calendar', label: 'School Calendar', icon: CalendarIcon },
     { id: 'staff', label: 'Staff Management', icon: Users },
