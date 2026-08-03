@@ -19,18 +19,18 @@
 .premium-kpi-card {
   background: #ffffff;
   border: 1px solid #BFDBFE;
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 24px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 18px rgba(12, 74, 134, 0.05);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
 
 .premium-kpi-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-  border-color: #0C4A86;
+  box-shadow: 0 12px 28px rgba(12, 74, 134, 0.12);
+  border-color: #0096DA;
 }
 
 .kpi-header {
@@ -41,14 +41,16 @@
 }
 
 .kpi-title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #6B5B54;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #64748b;
   margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .kpi-value {
-  font-size: 1.75rem;
+  font-size: 1.8rem;
   font-weight: 800;
   color: #0C4A86;
   margin: 0;
@@ -56,19 +58,21 @@
 }
 
 .kpi-icon-wrapper {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: transform 0.3s ease;
-  background-color: #FAF6F0 !important;
+  background: linear-gradient(135deg, #EBF5FF 0%, #D0E7FF 100%) !important;
+  border: 1px solid #BFDBFE !important;
   color: #0C4A86 !important;
+  box-shadow: 0 4px 14px rgba(12, 74, 134, 0.08);
 }
 
 .premium-kpi-card:hover .kpi-icon-wrapper {
-  transform: scale(1.1);
+  transform: scale(1.08);
 }
 
 .kpi-footer {
@@ -124,35 +128,36 @@
 .action-card {
   background: #ffffff;
   border: 1px solid #BFDBFE;
-  border-radius: 14px;
-  padding: 16px;
+  border-radius: 16px;
+  padding: 16px 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  font-weight: 600;
+  gap: 12px;
+  font-weight: 700;
   font-size: 0.9rem;
   color: #0C4A86;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(12, 74, 134, 0.04);
+  transition: all 0.2s ease-in-out;
 }
 
 .action-card:hover {
-  background: #FAF6F0;
-  border-color: #0C4A86;
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, #EBF5FF 0%, #D0E7FF 100%);
+  border-color: #0096DA;
+  transform: translateY(-3px);
   color: #0C4A86;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 22px rgba(12, 74, 134, 0.12);
 }
 
 .action-icon {
-  color: #6B5B54;
-  transition: color 0.2s ease;
+  color: #0096DA;
+  transition: transform 0.2s ease;
 }
 
 .action-card:hover .action-icon {
   color: #0C4A86;
+  transform: scale(1.15);
 }
 
 /* Charts Grid */

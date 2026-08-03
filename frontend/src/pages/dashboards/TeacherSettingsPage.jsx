@@ -6,23 +6,128 @@ const TeacherSettingsPage = ({ user }) => {
   const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'password'
 
+  const userRole = user?.role || localStorage.getItem('role') || 'teacher';
+
+  const getRoleConfig = (r) => {
+    switch (r) {
+      case 'principal':
+        return {
+          badgeText: 'Principal Account & Executive Security Settings',
+          roleTitle: 'Principal / Head of Institution',
+          field1Label: 'Department / Designation',
+          field1Default: 'Executive Leadership & Administration',
+          field2Label: 'Assigned Supervision & Duties',
+          field2Default: 'All Academic Faculties & School Operations',
+          bioDefault: 'School Principal & Chief Administrative Officer overseeing academic excellence and institutional growth.',
+          defaultName: { first: 'Dr. Rajesh', last: 'Sharma' },
+          defaultEmail: 'principal@school.edu',
+          defaultPhone: '+91 98765 00001',
+          photoKey: 'principalProfileImage'
+        };
+      case 'super_admin':
+        return {
+          badgeText: 'Super Admin Account & Master Governance Settings',
+          roleTitle: 'Super Administrator',
+          field1Label: 'System Access Level',
+          field1Default: 'Full System Control & Root Privileges',
+          field2Label: 'Administrative Domain',
+          field2Default: 'Multi-Branch Network & Platform Infrastructure',
+          bioDefault: 'Master System Administrator responsible for global configurations, security compliance, and user roles.',
+          defaultName: { first: 'Vikram', last: 'Aditya' },
+          defaultEmail: 'admin@zaynlevi.edu',
+          defaultPhone: '+91 98765 99999',
+          photoKey: 'adminProfileImage'
+        };
+      case 'accountant':
+      case 'accountant_admin':
+        return {
+          badgeText: 'Accountant Account & Financial Security Settings',
+          roleTitle: 'Chief Accountant & Finance Manager',
+          field1Label: 'Department / Specialization',
+          field1Default: 'Finance, Payroll & Fee Collections',
+          field2Label: 'Assigned Duties',
+          field2Default: 'Fee Auditing, Expense Tracking & Ledger Management',
+          bioDefault: 'Senior Accountant managing school finances, fee structures, payroll generation, and financial compliance.',
+          defaultName: { first: 'Vikram', last: 'Malhotra' },
+          defaultEmail: 'accountant@school.edu',
+          defaultPhone: '+91 98765 44321',
+          photoKey: 'accountantProfileImage'
+        };
+      case 'examiner':
+        return {
+          badgeText: 'Examiner Account & Assessment Security Settings',
+          roleTitle: 'Head Examiner & Assessment In-Charge',
+          field1Label: 'Specialization / Department',
+          field1Default: 'Examination & Curriculum Evaluation',
+          field2Label: 'Assigned Duties',
+          field2Default: 'Question Bank Setup, Grading & Result Moderation',
+          bioDefault: 'Lead Examination Controller overseeing mid-term/final evaluations and grade sheet generation.',
+          defaultName: { first: 'Dr. Sunita', last: 'Deshmukh' },
+          defaultEmail: 'examiner@school.edu',
+          defaultPhone: '+91 98765 55432',
+          photoKey: 'examinerProfileImage'
+        };
+      case 'librarian':
+        return {
+          badgeText: 'Librarian Account & Catalog Management Settings',
+          roleTitle: 'Chief Librarian & Information Specialist',
+          field1Label: 'Specialization / Department',
+          field1Default: 'Library Sciences & Resource Archiving',
+          field2Label: 'Assigned Duties',
+          field2Default: 'Cataloging, Issue/Return Portal & Periodicals',
+          bioDefault: 'Head Librarian managing physical and digital library collections, barcode cataloging, and reading programs.',
+          defaultName: { first: 'Mr. Anand', last: 'Kulkarni' },
+          defaultEmail: 'librarian@school.edu',
+          defaultPhone: '+91 98765 66543',
+          photoKey: 'librarianProfileImage'
+        };
+      case 'student':
+        return {
+          badgeText: 'Student Account & Learning Settings',
+          roleTitle: 'Enrolled Student',
+          field1Label: 'Current Class & Section',
+          field1Default: 'Grade 10 - Section A',
+          field2Label: 'Roll Number & Admission ID',
+          field2Default: 'Roll No: 12 • ADM-2026-104',
+          bioDefault: 'Enthusiastic high school student focused on STEM subjects, mathematics, and extracurricular activities.',
+          defaultName: { first: 'Aarav', last: 'Patel' },
+          defaultEmail: 'aarav.patel@student.school.edu',
+          defaultPhone: '+91 98765 11223',
+          photoKey: 'studentProfileImage'
+        };
+      default:
+        return {
+          badgeText: 'Teacher Account & Security Settings',
+          roleTitle: 'Senior Teacher',
+          field1Label: 'Subject / Specialization',
+          field1Default: 'Mathematics & Statistics',
+          field2Label: 'Assigned Classes',
+          field2Default: 'Grade 9-A, 10-B',
+          bioDefault: 'Senior Mathematics Faculty focused on algebra and analytical problem solving.',
+          defaultName: { first: 'Ramesh', last: 'Sharma' },
+          defaultEmail: 'ramesh.sharma@school.edu',
+          defaultPhone: '+91 98765 43210',
+          photoKey: 'teacherProfileImage'
+        };
+    }
+  };
+
+  const roleConfig = getRoleConfig(userRole);
+
   // Profile Form state
   const [profileForm, setProfileForm] = useState({
-    firstName: user?.firstName || 'Ramesh',
-    lastName: user?.lastName || 'Sharma',
-    email: user?.email || 'ramesh.sharma@school.edu',
-    phone: user?.phone || '+91 98765 43210',
-    subject: user?.subject || 'Mathematics & Statistics',
-    assignedClasses: 'Grade 9-A, 10-B',
-    employeeId: 'TCH-2026-88',
-    qualification: 'M.Sc. Mathematics, B.Ed',
-    experience: '8 Years Teaching Experience',
-    bio: 'Senior Mathematics Faculty focused on algebra and analytical problem solving.',
-    address: 'Faculty Quarters B-12, School Campus, Main Road',
+    firstName: user?.firstName || roleConfig.defaultName.first,
+    lastName: user?.lastName || roleConfig.defaultName.last,
+    email: user?.email || roleConfig.defaultEmail,
+    phone: user?.phone || roleConfig.defaultPhone,
+    field1: user?.subject || roleConfig.field1Default,
+    field2: user?.assignedClasses || roleConfig.field2Default,
+    bio: user?.bio || roleConfig.bioDefault,
+    address: user?.address || 'Faculty Quarters B-12, School Campus, Main Road',
   });
 
   const [profilePhoto, setProfilePhoto] = useState(
-    localStorage.getItem('teacherProfileImage') || ''
+    localStorage.getItem(roleConfig.photoKey) || localStorage.getItem('userProfileImage') || ''
   );
   const [profileSuccessMsg, setProfileSuccessMsg] = useState('');
 
@@ -52,7 +157,8 @@ const TeacherSettingsPage = ({ user }) => {
       reader.onloadend = () => {
         const base64Url = reader.result;
         setProfilePhoto(base64Url);
-        localStorage.setItem('teacherProfileImage', base64Url);
+        localStorage.setItem(roleConfig.photoKey, base64Url);
+        localStorage.setItem('userProfileImage', base64Url);
         setProfileSuccessMsg('Profile photo updated successfully!');
         setTimeout(() => setProfileSuccessMsg(''), 3000);
       };
@@ -96,11 +202,11 @@ const TeacherSettingsPage = ({ user }) => {
       <div className="rounded-3xl border border-[#BFDBFE] bg-white p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="inline-flex items-center gap-2 rounded-full bg-[#EBF5FF] px-3.5 py-1 text-xs font-bold text-[#0C4A86] border border-[#BFDBFE] mb-2">
-            <User className="h-3.5 w-3.5 text-[#0096DA]" /> Teacher Account & Security Settings
+            <User className="h-3.5 w-3.5 text-[#0096DA]" /> {roleConfig.badgeText}
           </div>
           <h1 className="text-2xl font-black text-[#0C4A86]">Settings & Profile</h1>
           <p className="text-xs font-semibold text-slate-600">
-            Manage your personal profile info, profile avatar, and account security.
+            Manage your personal profile info, avatar, and account security credentials.
           </p>
         </div>
 
