@@ -41,10 +41,56 @@ const PrincipalDashboardHome = ({ stats, user }) => {
   ];
 
   const upcomingEvents = [
-    { id: 1, title: 'Annual Sports Meet', date: 'Oct 15', time: '09:00 AM', month: 'OCT', day: '15' },
-    { id: 2, title: 'Parent-Teacher Meeting', date: 'Oct 20', time: '10:30 AM', month: 'OCT', day: '20' },
-    { id: 3, title: 'Board Exam Commences', date: 'Nov 02', time: '08:00 AM', month: 'NOV', day: '02' },
-    { id: 4, title: 'Diwali Holidays Begin', date: 'Nov 12', time: 'All Day', month: 'NOV', day: '12' },
+    {
+      id: 1,
+      title: 'Annual Mathematics Olympiad & Speed Quiz',
+      date: 'August 5, 2026',
+      time: '09:30 AM - 12:30 PM',
+      category: 'Annual Day',
+      location: 'Main Auditorium',
+      badgeColor: 'bg-[#0C4A86] text-white',
+      description: 'Inter-house mathematics competition for Grade 8 to 10.'
+    },
+    {
+      id: 2,
+      title: 'Parent-Teacher Meeting (PTM)',
+      date: 'August 12, 2026',
+      time: '10:00 AM - 01:00 PM',
+      category: 'Parent-Teacher Meetings',
+      location: 'School Classrooms',
+      badgeColor: 'bg-[#0096DA] text-white',
+      description: 'Academic progress discussion between teachers & parents.'
+    },
+    {
+      id: 3,
+      title: 'Independence Day Holiday & Cultural Fest',
+      date: 'August 15, 2026',
+      time: '08:30 AM - 11:30 AM',
+      category: 'Holidays',
+      location: 'Flag Hoisting Ground',
+      badgeColor: 'bg-purple-600 text-white',
+      description: 'Flag hoisting ceremony & student patriotic performances.'
+    },
+    {
+      id: 4,
+      title: 'Inter-School Sports Track Championship',
+      date: 'August 18, 2026',
+      time: '08:00 AM - 04:00 PM',
+      category: 'School Events',
+      location: 'Sports Grounds',
+      badgeColor: 'bg-emerald-600 text-white',
+      description: 'Track and field events including 100m sprint, relay & long jump.'
+    },
+    {
+      id: 5,
+      title: 'Mid-Term Half Yearly Examinations',
+      date: 'August 25, 2026',
+      time: '09:00 AM - 12:00 PM',
+      category: 'Exams',
+      location: 'Exam Halls 1-4',
+      badgeColor: 'bg-rose-600 text-white',
+      description: 'Mid-Term 1 Evaluation for Grade 9 & 10 students.'
+    }
   ];
   const scrollingEvents = [...upcomingEvents, ...upcomingEvents];
 
@@ -279,18 +325,28 @@ const PrincipalDashboardHome = ({ stats, user }) => {
             onScroll={handleEventScroll}
             style={{ flex: 1, overflowY: 'auto', paddingRight: '4px', display: 'flex', flexDirection: 'column', gap: '12px' }}
           >
-            {scrollingEvents.map((event, idx) => (
-              <div key={`${event.id}-${idx}`} style={{ borderRadius: '16px', border: '1px solid #e2e8f0', background: '#f8fafc', padding: '14px', transition: 'all 0.2s ease' }}>
+            {scrollingEvents.map((evt, idx) => (
+              <div key={`${evt.id}-${idx}`} style={{ borderRadius: '16px', border: '1px solid #e2e8f0', background: '#f8fafc', padding: '14px', transition: 'all 0.2s ease' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '0.68rem', fontWeight: '800', background: '#0C4A86', color: '#fff' }}>
-                    {event.month} {event.day}
+                  <span className={evt.badgeColor || 'bg-[#0C4A86] text-white'} style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '0.68rem', fontWeight: '800' }}>
+                    {evt.category}
                   </span>
                   <span style={{ fontSize: '0.78rem', fontWeight: '700', color: '#0C4A86', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Clock size={12} /> {event.time}
+                    <Calendar size={13} /> {evt.date}
                   </span>
                 </div>
 
-                <h4 style={{ margin: '4px 0 2px', fontSize: '0.88rem', fontWeight: '800', color: '#0f172a' }}>{event.title}</h4>
+                <h4 style={{ margin: '4px 0 2px', fontSize: '0.88rem', fontWeight: '800', color: '#0f172a' }}>{evt.title}</h4>
+                <p style={{ margin: '0 0 8px', fontSize: '0.78rem', color: '#64748b', lineHeight: '1.4' }}>{evt.description}</p>
+
+                <div style={{ paddingTop: '8px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', fontWeight: '600', color: '#64748b' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Clock size={12} color="#0096DA" /> {evt.time}
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#047857', fontWeight: '700' }}>
+                    📍 {evt.location}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
