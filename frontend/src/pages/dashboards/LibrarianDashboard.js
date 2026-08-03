@@ -45,6 +45,7 @@ const LibrarianDashboard = ({ user, onLogout }) => {
     { id: 'google_calendar', label: 'Calendar', icon: CalendarIcon },
     { id: 'calendar', label: 'School Calendar', icon: CalendarIcon },
     { id: 'catalogue', label: 'Book Catalogue', icon: BookOpen },
+    { id: 'timetable', label: 'Library Timetable', icon: Clock },
     { id: 'issue_return', label: 'Issue & Return', icon: Repeat },
     { id: 'fines', label: 'Fine Collection', icon: DollarSign },
     { id: 'availability', label: 'Book Availability', icon: CheckCircle2 },

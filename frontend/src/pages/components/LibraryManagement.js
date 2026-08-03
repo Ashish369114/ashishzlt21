@@ -21,6 +21,7 @@ const LibraryManagement = ({ activeSection }) => {
   useEffect(() => {
     if (activeSection === 'dashboard') setActiveTab('dashboard');
     if (activeSection === 'catalogue') setActiveTab('all_books');
+    if (activeSection === 'timetable') setActiveTab('timetable');
     if (activeSection === 'issue_return') setActiveTab('reservations');
     if (activeSection === 'fines') setActiveTab('fines');
     if (activeSection === 'availability') setActiveTab('availability');
@@ -76,6 +77,115 @@ const LibraryManagement = ({ activeSection }) => {
     { id: 2, type: 'due_today', message: 'Advanced Physics is due today.', user: 'Student: Priya Sharma' },
     { id: 3, type: 'upcoming', message: 'World History is due in 3 days.', user: 'Student: Amit Patel' },
   ]);
+
+  // Library Timetable State & Scenario Data
+  const defaultTimetable = [
+    // Monday
+    { id: 'tt_1', day: 'Monday', period: 'Period 1', periodTime: '08:30 AM - 09:15 AM', slotType: 'Morning', grade: 'Grade 6', section: 'Section A', teacher: 'Mrs. Sunita Sharma', topic: 'Book Reservation & Silent Reading' },
+    { id: 'tt_2', day: 'Monday', period: 'Period 2', periodTime: '09:15 AM - 10:00 AM', slotType: 'Morning', grade: 'Grade 10', section: 'Section B', teacher: 'Mr. Ramesh Gupta', topic: 'Reference Work & Encyclopedia' },
+    { id: 'tt_3', day: 'Monday', period: 'Period 6', periodTime: '01:15 PM - 02:00 PM', slotType: 'Afternoon', grade: 'Grade 8', section: 'Section A', teacher: 'Mrs. Anjali Verma', topic: 'eBook Reader & Digital Catalog' },
+    { id: 'tt_4', day: 'Monday', period: 'Period 8', periodTime: '02:45 PM - 03:30 PM', slotType: 'Evening', grade: 'Grade 4', section: 'Section B', teacher: 'Mr. Vikram Patel', topic: 'Story Telling & Journal Reading' },
+    
+    // Tuesday
+    { id: 'tt_5', day: 'Tuesday', period: 'Period 1', periodTime: '08:30 AM - 09:15 AM', slotType: 'Morning', grade: 'Grade 7', section: 'Section B', teacher: 'Mrs. Neha Singh', topic: 'Literature & Fiction Discovery' },
+    { id: 'tt_6', day: 'Tuesday', period: 'Period 3', periodTime: '10:15 AM - 11:00 AM', slotType: 'Morning', grade: 'Grade 5', section: 'Section A', teacher: 'Mr. Amit Kumar', topic: 'General Knowledge & Magazines' },
+    { id: 'tt_7', day: 'Tuesday', period: 'Period 5', periodTime: '12:30 PM - 01:15 PM', slotType: 'Mid-Day', grade: 'Grade 9', section: 'Section A', teacher: 'Mrs. Priya Joshi', topic: 'Science Research & Papers' },
+    { id: 'tt_8', day: 'Tuesday', period: 'Period 7', periodTime: '02:00 PM - 02:45 PM', slotType: 'Afternoon', grade: 'Grade 3', section: 'Section B', teacher: 'Mr. Rajesh Nair', topic: 'Comic & Picture Books' },
+
+    // Wednesday
+    { id: 'tt_9', day: 'Wednesday', period: 'Period 2', periodTime: '09:15 AM - 10:00 AM', slotType: 'Morning', grade: 'Grade 1', section: 'Section A', teacher: 'Mrs. Pooja Chawla', topic: 'Phonics & Early Readers' },
+    { id: 'tt_10', day: 'Wednesday', period: 'Period 3', periodTime: '10:15 AM - 11:00 AM', slotType: 'Morning', grade: 'Grade 3', section: 'Section B', teacher: 'Mr. Suresh Iyer', topic: 'Folk Tales & Fables' },
+    { id: 'tt_11', day: 'Wednesday', period: 'Period 6', periodTime: '01:15 PM - 02:00 PM', slotType: 'Afternoon', grade: 'Grade 10', section: 'Section A', teacher: 'Mrs. Meenakshi Das', topic: 'Board Exam Reference Study' },
+    { id: 'tt_12', day: 'Wednesday', period: 'Period 8', periodTime: '02:45 PM - 03:30 PM', slotType: 'Evening', grade: 'Grade 6', section: 'Section B', teacher: 'Mr. Deepak Bose', topic: 'Book Return & Renewal Slot' },
+
+    // Thursday
+    { id: 'tt_13', day: 'Thursday', period: 'Period 1', periodTime: '08:30 AM - 09:15 AM', slotType: 'Morning', grade: 'Grade 2', section: 'Section A', teacher: 'Mrs. Kavita Prasad', topic: 'Rhymes & Illustrated Classics' },
+    { id: 'tt_14', day: 'Thursday', period: 'Period 4', periodTime: '11:00 AM - 11:45 AM', slotType: 'Mid-Day', grade: 'Grade 8', section: 'Section B', teacher: 'Mr. Anand Malhotra', topic: 'History & Biographies' },
+    { id: 'tt_15', day: 'Thursday', period: 'Period 6', periodTime: '01:15 PM - 02:00 PM', slotType: 'Afternoon', grade: 'Grade 6', section: 'Section B', teacher: 'Mrs. Shalini Roy', topic: 'Science Fiction & Fantasy' },
+    { id: 'tt_16', day: 'Thursday', period: 'Period 7', periodTime: '02:00 PM - 02:45 PM', slotType: 'Evening', grade: 'Grade 7', section: 'Section A', teacher: 'Mr. Alok Deshmukh', topic: 'Geography Atlases & Maps' },
+
+    // Friday
+    { id: 'tt_17', day: 'Friday', period: 'Period 2', periodTime: '09:15 AM - 10:00 AM', slotType: 'Morning', grade: 'Grade 9', section: 'Section B', teacher: 'Mrs. Ritu Kapoor', topic: 'Current Affairs & Periodicals' },
+    { id: 'tt_18', day: 'Friday', period: 'Period 4', periodTime: '11:00 AM - 11:45 AM', slotType: 'Mid-Day', grade: 'Grade 7', section: 'Section A', teacher: 'Mr. Sandeep Gill', topic: 'Poetry & Creative Writing' },
+    { id: 'tt_19', day: 'Friday', period: 'Period 5', periodTime: '12:30 PM - 01:15 PM', slotType: 'Afternoon', grade: 'Grade 5', section: 'Section B', teacher: 'Mrs. Archana Jadhav', topic: 'Nature & Environment' },
+    { id: 'tt_20', day: 'Friday', period: 'Period 8', periodTime: '02:45 PM - 03:30 PM', slotType: 'Evening', grade: 'Grade 10', section: 'Section B', teacher: 'Mr. Manoj Kulkarni', topic: 'Competitive Exam Preparation' },
+
+    // Saturday
+    { id: 'tt_21', day: 'Saturday', period: 'Period 1', periodTime: '08:30 AM - 09:15 AM', slotType: 'Morning', grade: 'Grade 4', section: 'Section A', teacher: 'Mrs. Vineeta Saxena', topic: 'Open Book Quiz & Activity' },
+    { id: 'tt_22', day: 'Saturday', period: 'Period 2', periodTime: '09:15 AM - 10:00 AM', slotType: 'Morning', grade: 'Grade 3', section: 'Section A', teacher: 'Mr. Pankaj Pandey', topic: 'Library Orientation & Etiquette' },
+  ];
+
+  const [timetable, setTimetable] = useState(() => {
+    const saved = localStorage.getItem('library_timetable');
+    return saved ? JSON.parse(saved) : defaultTimetable;
+  });
+
+  const [ttFilterDay, setTtFilterDay] = useState('all');
+  const [ttFilterGrade, setTtFilterGrade] = useState('all');
+  const [ttFilterShift, setTtFilterShift] = useState('all');
+
+  const [ttModalOpen, setTtModalOpen] = useState(false);
+  const [editingSlotId, setEditingSlotId] = useState(null);
+  const [slotForm, setSlotForm] = useState({
+    day: 'Monday',
+    period: 'Period 1',
+    periodTime: '08:30 AM - 09:15 AM',
+    slotType: 'Morning',
+    grade: 'Grade 6',
+    section: 'Section A',
+    teacher: 'Mrs. Sunita Sharma',
+    topic: 'Silent Reading & Book Return'
+  });
+
+  const periodOptions = [
+    { label: 'Period 1 (08:30 AM - 09:15 AM)', name: 'Period 1', time: '08:30 AM - 09:15 AM', type: 'Morning' },
+    { label: 'Period 2 (09:15 AM - 10:00 AM)', name: 'Period 2', time: '09:15 AM - 10:00 AM', type: 'Morning' },
+    { label: 'Period 3 (10:15 AM - 11:00 AM)', name: 'Period 3', time: '10:15 AM - 11:00 AM', type: 'Morning' },
+    { label: 'Period 4 (11:00 AM - 11:45 AM)', name: 'Period 4', time: '11:00 AM - 11:45 AM', type: 'Mid-Day' },
+    { label: 'Period 5 (12:30 PM - 01:15 PM)', name: 'Period 5', time: '12:30 PM - 01:15 PM', type: 'Mid-Day' },
+    { label: 'Period 6 (01:15 PM - 02:00 PM)', name: 'Period 6', time: '01:15 PM - 02:00 PM', type: 'Afternoon' },
+    { label: 'Period 7 (02:00 PM - 02:45 PM)', name: 'Period 7', time: '02:00 PM - 02:45 PM', type: 'Afternoon' },
+    { label: 'Period 8 (02:45 PM - 03:30 PM)', name: 'Period 8', time: '02:45 PM - 03:30 PM', type: 'Evening' },
+  ];
+
+  const handleSaveSlot = (e) => {
+    e.preventDefault();
+    let updated;
+    if (editingSlotId) {
+      updated = timetable.map(item => item.id === editingSlotId ? { ...item, ...slotForm } : item);
+    } else {
+      const newSlot = { ...slotForm, id: `tt_${Date.now()}` };
+      updated = [...timetable, newSlot];
+    }
+    setTimetable(updated);
+    localStorage.setItem('library_timetable', JSON.stringify(updated));
+    setTtModalOpen(false);
+    setEditingSlotId(null);
+    alert('Library timetable slot saved successfully!');
+  };
+
+  const handleDeleteSlot = (id) => {
+    if (window.confirm('Are you sure you want to delete this library period slot?')) {
+      const updated = timetable.filter(t => t.id !== id);
+      setTimetable(updated);
+      localStorage.setItem('library_timetable', JSON.stringify(updated));
+    }
+  };
+
+  const handleOpenAddSlot = (day, periodObj) => {
+    setEditingSlotId(null);
+    setSlotForm({
+      day: day || 'Monday',
+      period: periodObj ? periodObj.name : 'Period 1',
+      periodTime: periodObj ? periodObj.time : '08:30 AM - 09:15 AM',
+      slotType: periodObj ? periodObj.type : 'Morning',
+      grade: 'Grade 6',
+      section: 'Section A',
+      teacher: 'Mrs. Sunita Sharma',
+      topic: 'Library Period & Reading'
+    });
+    setTtModalOpen(true);
+  };
 
   useEffect(() => {
     fetchBooks();
@@ -413,7 +523,24 @@ const LibraryManagement = ({ activeSection }) => {
         </div>
       </div>
 
-
+      {/* Top Navigation Tab Bar */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        marginBottom: '24px',
+        borderBottom: '1px solid #e2e8f0',
+        paddingBottom: '14px',
+        overflowX: 'auto'
+      }}>
+        <button onClick={() => setActiveTab('dashboard')} style={{ padding: '8px 16px', borderRadius: '20px', border: 'none', background: activeTab === 'dashboard' ? 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)' : '#f1f5f9', color: activeTab === 'dashboard' ? '#fff' : '#475569', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer' }}>📊 Dashboard</button>
+        <button onClick={() => setActiveTab('all_books')} style={{ padding: '8px 16px', borderRadius: '20px', border: 'none', background: activeTab === 'all_books' ? 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)' : '#f1f5f9', color: activeTab === 'all_books' ? '#fff' : '#475569', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer' }}>📚 Book Catalogue</button>
+        <button onClick={() => setActiveTab('timetable')} style={{ padding: '8px 16px', borderRadius: '20px', border: 'none', background: activeTab === 'timetable' ? 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)' : '#f1f5f9', color: activeTab === 'timetable' ? '#fff' : '#475569', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer' }}>🕒 Library Timetable</button>
+        <button onClick={() => setActiveTab('reservations')} style={{ padding: '8px 16px', borderRadius: '20px', border: 'none', background: activeTab === 'reservations' ? 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)' : '#f1f5f9', color: activeTab === 'reservations' ? '#fff' : '#475569', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer' }}>🔄 Issue & Return</button>
+        <button onClick={() => setActiveTab('fines')} style={{ padding: '8px 16px', borderRadius: '20px', border: 'none', background: activeTab === 'fines' ? 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)' : '#f1f5f9', color: activeTab === 'fines' ? '#fff' : '#475569', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer' }}>💰 Fine Collection</button>
+        <button onClick={() => setActiveTab('availability')} style={{ padding: '8px 16px', borderRadius: '20px', border: 'none', background: activeTab === 'availability' ? 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)' : '#f1f5f9', color: activeTab === 'availability' ? '#fff' : '#475569', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer' }}>✅ Availability</button>
+        <button onClick={() => setActiveTab('reports')} style={{ padding: '8px 16px', borderRadius: '20px', border: 'none', background: activeTab === 'reports' ? 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)' : '#f1f5f9', color: activeTab === 'reports' ? '#fff' : '#475569', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer' }}>📄 Reports</button>
+      </div>
 
       {/* TAB 0: DASHBOARD OVERVIEW */}
       {activeTab === 'dashboard' && (
@@ -821,6 +948,261 @@ const LibraryManagement = ({ activeSection }) => {
               <li><strong>Active Borrowings:</strong> {borrowedBooksCount}</li>
               <li><strong>Fines Outstanding:</strong> ₹{totalFinesCollected || 450}</li>
             </ul>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: LIBRARY TIMETABLE */}
+      {activeTab === 'timetable' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          
+          {/* Timetable KPI Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+            <div style={{ background: '#fff', padding: '20px', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>📅 Total Weekly Sessions</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#0f172a', marginTop: '4px' }}>{timetable.length} Sessions</div>
+            </div>
+            <div style={{ background: '#fff', padding: '20px', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>🌅 Morning Slots (P1-P3)</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#1d4ed8', marginTop: '4px' }}>
+                {timetable.filter(t => t.slotType === 'Morning').length} Classes
+              </div>
+            </div>
+            <div style={{ background: '#fff', padding: '20px', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>☀️ Mid-Day & Afternoon (P4-P7)</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#047857', marginTop: '4px' }}>
+                {timetable.filter(t => t.slotType === 'Mid-Day' || t.slotType === 'Afternoon').length} Classes
+              </div>
+            </div>
+            <div style={{ background: '#fff', padding: '20px', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>🌆 Evening Slots (P8)</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#6d28d9', marginTop: '4px' }}>
+                {timetable.filter(t => t.slotType === 'Evening').length} Classes
+              </div>
+            </div>
+          </div>
+
+          {/* Filter Bar & Quick Actions */}
+          <div style={{ background: '#fff', padding: '16px 20px', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#475569' }}>Day:</span>
+                <select value={ttFilterDay} onChange={e => setTtFilterDay(e.target.value)} style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem' }}>
+                  <option value="all">All Days (Mon - Sat)</option>
+                  <option value="Monday">Monday</option>
+                  <option value="Tuesday">Tuesday</option>
+                  <option value="Wednesday">Wednesday</option>
+                  <option value="Thursday">Thursday</option>
+                  <option value="Friday">Friday</option>
+                  <option value="Saturday">Saturday</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#475569' }}>Grade:</span>
+                <select value={ttFilterGrade} onChange={e => setTtFilterGrade(e.target.value)} style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem' }}>
+                  <option value="all">All Grades</option>
+                  {[1,2,3,4,5,6,7,8,9,10].map(g => <option key={g} value={`Grade ${g}`}>Grade {g}</option>)}
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#475569' }}>Shift:</span>
+                <select value={ttFilterShift} onChange={e => setTtFilterShift(e.target.value)} style={{ padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem' }}>
+                  <option value="all">All Shifts</option>
+                  <option value="Morning">Morning Slots (P1 - P3)</option>
+                  <option value="Mid-Day">Mid-Day Slots (P4 - P5)</option>
+                  <option value="Afternoon">Afternoon Slots (P6 - P7)</option>
+                  <option value="Evening">Evening Slots (P8)</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <button 
+                onClick={() => window.print()}
+                style={{ padding: '8px 14px', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem', fontWeight: '600', color: '#334155', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                🖨️ Export / Print Schedule
+              </button>
+              <button 
+                onClick={() => handleOpenAddSlot('Monday', periodOptions[0])}
+                style={{ padding: '8px 16px', background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Plus size={16} /> Assign Library Period
+              </button>
+            </div>
+          </div>
+
+          {/* Weekly Matrix Schedule View */}
+          <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1000px' }}>
+              <thead>
+                <tr style={{ background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', color: '#fff' }}>
+                  <th style={{ padding: '14px 16px', fontSize: '0.85rem', textTransform: 'uppercase', width: '120px', borderRight: '1px solid rgba(255,255,255,0.2)' }}>Day / Period</th>
+                  {periodOptions.map(p => (
+                    <th key={p.name} style={{ padding: '12px 10px', fontSize: '0.8rem', textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.15)' }}>
+                      <div>{p.name}</div>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 'normal', opacity: 0.85 }}>{p.time}</div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].filter(day => ttFilterDay === 'all' || ttFilterDay === day).map((day, dIdx) => (
+                  <tr key={day} style={{ borderBottom: '1px solid #e2e8f0', background: dIdx % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
+                    <td style={{ padding: '14px 16px', fontWeight: '800', color: '#0f172a', fontSize: '0.9rem', borderRight: '2px solid #cbd5e1', background: '#f1f5f9' }}>
+                      {day}
+                    </td>
+                    {periodOptions.map(period => {
+                      const matchedSlots = timetable.filter(t => {
+                        const mDay = t.day === day;
+                        const mPeriod = t.period === period.name || t.periodTime === period.time;
+                        const mGrade = ttFilterGrade === 'all' || t.grade === ttFilterGrade;
+                        const mShift = ttFilterShift === 'all' || t.slotType === period.type;
+                        return mDay && mPeriod && mGrade && mShift;
+                      });
+
+                      return (
+                        <td key={period.name} style={{ padding: '8px', borderRight: '1px solid #f1f5f9', verticalAlign: 'top', minWidth: '125px' }}>
+                          {matchedSlots.length > 0 ? (
+                            matchedSlots.map(slot => {
+                              const isMorning = slot.slotType === 'Morning';
+                              const isAfternoon = slot.slotType === 'Afternoon' || slot.slotType === 'Mid-Day';
+                              const bg = isMorning ? '#eff6ff' : isAfternoon ? '#ecfdf5' : '#f5f3ff';
+                              const border = isMorning ? '#bfdbfe' : isAfternoon ? '#a7f3d0' : '#ddd6fe';
+                              const badgeColor = isMorning ? '#1d4ed8' : isAfternoon ? '#047857' : '#6d28d9';
+
+                              return (
+                                <div key={slot.id} style={{ background: bg, border: `1px solid ${border}`, borderRadius: '8px', padding: '8px 10px', marginBottom: '6px', fontSize: '0.78rem', position: 'relative' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                    <span style={{ fontWeight: '800', color: badgeColor, fontSize: '0.82rem' }}>
+                                      {slot.grade} - {slot.section}
+                                    </span>
+                                    <button 
+                                      onClick={() => handleDeleteSlot(slot.id)}
+                                      title="Delete Slot"
+                                      style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0, fontSize: '0.9rem' }}
+                                    >
+                                      &times;
+                                    </button>
+                                  </div>
+                                  <div style={{ color: '#334155', fontWeight: '600', marginBottom: '2px' }}>
+                                    👩‍🏫 {slot.teacher}
+                                  </div>
+                                  <div style={{ color: '#64748b', fontSize: '0.72rem', fontStyle: 'italic' }}>
+                                    📖 {slot.topic}
+                                  </div>
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <button 
+                              onClick={() => handleOpenAddSlot(day, period)}
+                              style={{ width: '100%', padding: '10px 4px', border: '1px dashed #cbd5e1', borderRadius: '6px', background: 'transparent', color: '#94a3b8', fontSize: '0.75rem', cursor: 'pointer', textAlign: 'center' }}
+                            >
+                              + Assign
+                            </button>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      )}
+
+      {/* ASSIGN / EDIT TIMETABLE SLOT MODAL */}
+      {ttModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '500px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, color: '#0f172a', fontWeight: '800' }}>
+                {editingSlotId ? 'Edit Library Period Slot' : 'Assign Library Period Slot'}
+              </h3>
+              <button onClick={() => setTtModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#64748b' }}>&times;</button>
+            </div>
+            <form onSubmit={handleSaveSlot} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#475569', marginBottom: '4px', display: 'block' }}>Day of Week:</label>
+                <select value={slotForm.day} onChange={e => setSlotForm({ ...slotForm, day: e.target.value })} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px' }}>
+                  <option value="Monday">Monday</option>
+                  <option value="Tuesday">Tuesday</option>
+                  <option value="Wednesday">Wednesday</option>
+                  <option value="Thursday">Thursday</option>
+                  <option value="Friday">Friday</option>
+                  <option value="Saturday">Saturday</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#475569', marginBottom: '4px', display: 'block' }}>Period Slot & Time:</label>
+                <select 
+                  value={slotForm.period} 
+                  onChange={e => {
+                    const sel = periodOptions.find(p => p.name === e.target.value);
+                    if (sel) {
+                      setSlotForm({ ...slotForm, period: sel.name, periodTime: sel.time, slotType: sel.type });
+                    }
+                  }} 
+                  style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px' }}
+                >
+                  {periodOptions.map(p => <option key={p.name} value={p.name}>{p.label}</option>)}
+                </select>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#475569', marginBottom: '4px', display: 'block' }}>Grade:</label>
+                  <select value={slotForm.grade} onChange={e => setSlotForm({ ...slotForm, grade: e.target.value })} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px' }}>
+                    {[1,2,3,4,5,6,7,8,9,10].map(g => <option key={g} value={`Grade ${g}`}>Grade {g}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#475569', marginBottom: '4px', display: 'block' }}>Section:</label>
+                  <select value={slotForm.section} onChange={e => setSlotForm({ ...slotForm, section: e.target.value })} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px' }}>
+                    <option value="Section A">Section A</option>
+                    <option value="Section B">Section B</option>
+                    <option value="Section C">Section C</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#475569', marginBottom: '4px', display: 'block' }}>In-Charge Teacher:</label>
+                <input 
+                  type="text" 
+                  value={slotForm.teacher} 
+                  onChange={e => setSlotForm({ ...slotForm, teacher: e.target.value })} 
+                  placeholder="e.g. Mrs. Sunita Sharma"
+                  required 
+                  style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px' }} 
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#475569', marginBottom: '4px', display: 'block' }}>Period Activity / Topic:</label>
+                <input 
+                  type="text" 
+                  value={slotForm.topic} 
+                  onChange={e => setSlotForm({ ...slotForm, topic: e.target.value })} 
+                  placeholder="e.g. Silent Reading, Book Return, Reference Work"
+                  required 
+                  style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px' }} 
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
+                <button type="button" onClick={() => setTtModalOpen(false)} style={{ padding: '10px 18px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
+                <button type="submit" style={{ padding: '10px 18px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' }}>
+                  {editingSlotId ? 'Update Slot' : 'Save Slot'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
