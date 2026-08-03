@@ -5,7 +5,7 @@ import SchoolCalendarManagement from '../components/SchoolCalendarManagement';
 import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogleCalendar';
 import DailyInsightWidget from '../../components/DailyInsightWidget';
 import { subscribeToDataChanges } from '../../services/syncService';
-import { LayoutDashboard, BookOpen, Repeat, DollarSign, CheckCircle2, FileText, LogOut, Calendar as CalendarIcon, Camera } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Repeat, DollarSign, CheckCircle2, FileText, LogOut, Calendar as CalendarIcon, Camera, Clock } from 'lucide-react';
 
 const LibrarianDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
