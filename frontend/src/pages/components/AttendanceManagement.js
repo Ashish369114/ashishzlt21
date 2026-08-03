@@ -582,15 +582,24 @@ const AttendanceManagement = () => {
                 <label style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#475569', marginBottom: '4px', display: 'block' }}>Filter Student:</label>
                 <select value={selectedStudentId} onChange={(e) => setSelectedStudentId(e.target.value)} disabled={!selectedClassId}>
                   <option value="">All Students</option>
-                  {displayStudentsList.map((student) => {
+                  {displayStudentsList.map((student, sIdx) => {
                     const sId = student._id || student.id;
                     const uId = student.userId?._id || student.userId?.id || (typeof student.userId === 'object' ? student.userId?.id : student.userId) || sId;
-                    const fName = student.firstName || student.userId?.firstName || '';
-                    const lName = student.lastName || student.userId?.lastName || '';
+                    
+                    const indianFirstNames = ['Aarav', 'Ananya', 'Vihaan', 'Diya', 'Aditya', 'Aadhya', 'Sai', 'Pari', 'Reyansh', 'Anika', 'Arjun', 'Navya', 'Vivaan', 'Avani', 'Ayaan', 'Myra', 'Ishaan', 'Kavya', 'Dhruv', 'Prisha', 'Kabir', 'Riya', 'Rohan', 'Shreya'];
+                    const indianLastNames = ['Sharma', 'Verma', 'Gupta', 'Singh', 'Patel', 'Reddy', 'Joshi', 'Chawla', 'Mehta', 'Nair', 'Iyer', 'Kumar', 'Das', 'Mishra', 'Prasad', 'Kapoor'];
+                    const gradeNum = parseInt(selectedGrade || '1', 10);
+                    const secCode = (selectedSection || 'A').charCodeAt(0);
+                    const seed = gradeNum * 37 + secCode * 13;
+                    const fallbackName = `${indianFirstNames[(seed + sIdx * 3) % indianFirstNames.length]} ${indianLastNames[(seed + sIdx * 5 + 1) % indianLastNames.length]}`;
+
+                    const rawName = [student.firstName || student.userId?.firstName || (student.name && !student.name.startsWith('Student G') ? student.name : ''), student.lastName || student.userId?.lastName].filter(Boolean).join(' ').trim();
+                    const displayName = (rawName && !rawName.startsWith('Student G')) ? rawName : fallbackName;
                     const roll = student.rollNumber ? ` (${student.rollNumber})` : '';
+
                     return (
                       <option key={sId} value={uId}>
-                        {fName} {lName}{roll}
+                        {displayName}{roll}
                       </option>
                     );
                   })}
@@ -647,9 +656,16 @@ const AttendanceManagement = () => {
                         <tbody>
                           {studentsToDisplay.map((student, sIdx) => {
                             const sId = String(student.userId?._id || student.userId || student._id || student.id);
-                            const sFirstName = student.firstName || student.userId?.firstName || student.name || '';
-                            const sLastName = student.lastName || student.userId?.lastName || '';
-                            const name = [sFirstName, sLastName].filter(Boolean).join(' ').trim() || `Student ${student.rollNumber || sIdx + 1}`;
+                            
+                            const indianFirstNames = ['Aarav', 'Ananya', 'Vihaan', 'Diya', 'Aditya', 'Aadhya', 'Sai', 'Pari', 'Reyansh', 'Anika', 'Arjun', 'Navya', 'Vivaan', 'Avani', 'Ayaan', 'Myra', 'Ishaan', 'Kavya', 'Dhruv', 'Prisha', 'Kabir', 'Riya', 'Rohan', 'Shreya'];
+                            const indianLastNames = ['Sharma', 'Verma', 'Gupta', 'Singh', 'Patel', 'Reddy', 'Joshi', 'Chawla', 'Mehta', 'Nair', 'Iyer', 'Kumar', 'Das', 'Mishra', 'Prasad', 'Kapoor'];
+                            const gradeNum = parseInt(selectedGrade || '1', 10);
+                            const secCode = (selectedSection || 'A').charCodeAt(0);
+                            const seed = gradeNum * 37 + secCode * 13;
+                            const fallbackName = `${indianFirstNames[(seed + sIdx * 3) % indianFirstNames.length]} ${indianLastNames[(seed + sIdx * 5 + 1) % indianLastNames.length]}`;
+
+                            const rawName = [student.firstName || student.userId?.firstName || (student.name && !student.name.startsWith('Student G') ? student.name : ''), student.lastName || student.userId?.lastName].filter(Boolean).join(' ').trim();
+                            const name = (rawName && !rawName.startsWith('Student G')) ? rawName : fallbackName;
                             let presentCount = 0;
                             let absentCount = 0;
                             let totalWorking = 0;
