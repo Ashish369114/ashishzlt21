@@ -9,7 +9,7 @@ import { studentService, teacherService, feeService, attendanceService, examServ
 import { subscribeToDataChanges } from '../../services/syncService';
 import StudentManagement from '../components/StudentManagement';
 import PrincipalDashboardHome from '../components/PrincipalDashboardHome';
-import PrincipalAttendance from '../components/PrincipalAttendance';
+import AttendanceManagement from '../components/AttendanceManagement';
 import PrincipalPerformance from '../components/PrincipalPerformance';
 import PrincipalExamManagement from '../components/PrincipalExamManagement';
 import EmployeeManagement from '../components/EmployeeManagement';
@@ -157,7 +157,7 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           <Route path="employees" element={<EmployeeManagement />} />
           <Route path="teachers" element={<EmployeeManagement />} />
           <Route path="exams" element={<PrincipalExamManagement />} />
-          <Route path="attendance" element={<PrincipalAttendance />} />
+          <Route path="attendance" element={<AttendanceManagement />} />
           <Route path="finance" element={<PrincipalFinanceAndFees isPlatinum={true} />} />
           <Route path="reports" element={<ReportManagement />} />
           <Route path="leaves" element={<PrincipalLeaveManagement />} />
