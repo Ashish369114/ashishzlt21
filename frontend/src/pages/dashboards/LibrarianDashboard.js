@@ -43,8 +43,6 @@ const LibrarianDashboard = ({ user, onLogout }) => {
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'google_calendar', label: 'Calendar', icon: CalendarIcon },
-    { id: 'calendar', label: 'School Calendar', icon: CalendarIcon },
     { id: 'catalogue', label: 'Book Catalogue', icon: BookOpen },
     { id: 'timetable', label: 'Library Timetable', icon: Clock },
     { id: 'issue_return', label: 'Issue & Return', icon: Repeat },
