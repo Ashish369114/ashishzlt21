@@ -6,7 +6,7 @@
 
 body {
   font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #FAF6F0;
+  background: #F8FAFC;
   color: #0C4A86;
   min-height: 100vh;
 }
@@ -23,7 +23,7 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #FAF6F0 0%, #FAF6F0 100%);
+  background: linear-gradient(135deg, #F8FAFC 0%, #F8FAFC 100%);
 }
 
 .login-box {
@@ -62,7 +62,7 @@ body {
   border: 1px solid #BFDBFE;
   border-radius: 8px;
   font-size: 14px;
-  background: #FAF6F0;
+  background: #F8FAFC;
   color: #0C4A86;
   transition: border-color 0.3s;
 }
@@ -99,13 +99,13 @@ body {
 }
 
 .btn-secondary {
-  background: #FAF6F0;
+  background: #F8FAFC;
   color: #0C4A86;
   border: 1px solid #BFDBFE;
 }
 
 .btn-secondary:hover {
-  background: #E5DFD7;
+  background: #E2E8F0;
 }
 
 .btn-danger {
@@ -131,16 +131,16 @@ body {
   font-size: 12px;
 }
 
-/* Dashboard Layout - OPTION 5 - LUXE IVORY THEME */
+/* Dashboard Layout */
 .dashboard-layout {
   display: grid;
   grid-template-columns: 270px 1fr;
   min-height: 100vh;
-  background: #FAF6F0;
+  background: #F8FAFC;
 }
 
 .sidebar {
-  background: #FAF6F0;
+  background: #FFFFFF;
   color: #0C4A86;
   padding: 24px 20px;
   position: sticky;
@@ -150,7 +150,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  border-right: 1px solid #BFDBFE;
+  border-right: 1px solid #E2E8F0;
   box-shadow: 2px 0 12px rgba(50, 32, 41, 0.03);
 }
 
