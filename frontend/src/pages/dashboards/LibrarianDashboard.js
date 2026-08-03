@@ -172,8 +172,8 @@ const LibrarianDashboard = ({ user, onLogout }) => {
 
         {/* Dynamic Page Content */}
         <div style={{ padding: '28px' }}>
-          {activeTab === 'dashboard' || activeTab === 'google_calendar' || activeTab === 'calendar' ? (
-            <LibrarianCalendarWithUpcomingEvents />
+          {activeTab === 'dashboard' ? (
+            <LibrarianDashboardHome onNavigate={(tab) => setActiveTab(tab)} />
           ) : (
             <LibraryManagement activeSection={activeTab} initialTab={activeTab} />
           )}
@@ -247,7 +247,7 @@ const upcomingEventsList = [
   }
 ];
 
-const LibrarianCalendarWithUpcomingEvents = () => {
+const LibrarianDashboardHome = ({ onNavigate }) => {
   const eventsScrollRef = useRef(null);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -268,61 +268,173 @@ const LibrarianCalendarWithUpcomingEvents = () => {
     return () => clearInterval(interval);
   }, [isPaused]);
 
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px', alignItems: 'stretch' }}>
-      {/* Monthly Calendar View */}
-      <div style={{ gridColumn: 'span 7', maxHeight: '560px', overflowY: 'auto', borderRadius: '24px', border: '1px solid #cbd5e1', background: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
-        <InteractiveGoogleCalendar
-          hideCreateEvent={true}
-          hideViewToggle={true}
-          assignedClassesOnly={false}
-        />
-      </div>
+  const recentLibraryActivities = [
+    { id: 1, title: 'Grade 6-A Silent Reading & Book Reservation', grade: 'Grade 6 - Section A', date: 'Today, 08:30 AM', teacher: 'Mrs. Sunita Sharma', status: 'Completed' },
+    { id: 2, title: 'Grade 10-B Encyclopedia & Reference Research', grade: 'Grade 10 - Section B', date: 'Today, 09:15 AM', teacher: 'Mr. Ramesh Gupta', status: 'In Progress' },
+    { id: 3, title: 'Grade 8-A Digital eBook Reader Session', grade: 'Grade 8 - Section A', date: 'Today, 01:15 PM', teacher: 'Mrs. Anjali Verma', status: 'Scheduled' },
+  ];
 
-      {/* Auto-scrolling Upcoming Events Card */}
-      <div style={{ gridColumn: 'span 5', borderRadius: '24px', border: '1px solid #cbd5e1', background: '#fff', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', height: '560px' }}>
-        <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '12px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: '#0C4A86' }}>Upcoming Events</h3>
-            <p style={{ margin: '2px 0 0', fontSize: '0.78rem', fontWeight: '600', color: '#64748b' }}>Important school functions, exams & holidays</p>
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      
+      {/* 1. Overview Metric KPI Cards (Teacher Dashboard Style) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+        <div 
+          onClick={() => onNavigate('catalogue')}
+          style={{ background: '#fff', borderRadius: '20px', border: '1px solid #BFDBFE', padding: '20px', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#64748b' }}>Total Catalog Books</span>
+            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#EBF5FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0C4A86' }}>
+              <BookOpen size={18} />
+            </div>
           </div>
-          <span style={{ fontSize: '0.7rem', fontWeight: '700', padding: '4px 8px', background: '#EBF5FF', color: '#0C4A86', borderRadius: '12px', border: '1px solid #BFDBFE' }}>
-            ⚡ Auto-Scrolling
+          <div style={{ fontSize: '1.7rem', fontWeight: '800', color: '#0C4A86', marginBottom: '4px' }}>1,245</div>
+          <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#166534', background: '#dcfce7', padding: '3px 8px', borderRadius: '12px' }}>
+            +24 New Additions
           </span>
         </div>
 
         <div 
-          ref={eventsScrollRef}
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-          style={{ flex: 1, overflowY: 'auto', paddingRight: '4px', display: 'flex', flexDirection: 'column', gap: '12px' }}
+          onClick={() => onNavigate('issue_return')}
+          style={{ background: '#fff', borderRadius: '20px', border: '1px solid #BFDBFE', padding: '20px', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}
         >
-          {upcomingEventsList.map((evt) => (
-            <div key={evt.id} style={{ borderRadius: '16px', border: '1px solid #e2e8f0', background: '#f8fafc', padding: '14px', transition: 'all 0.2s ease' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <span className={evt.badgeColor} style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '0.68rem', fontWeight: '800' }}>
-                  {evt.category}
-                </span>
-                <span style={{ fontSize: '0.78rem', fontWeight: '700', color: '#0C4A86', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <CalendarIcon size={13} /> {evt.date}
-                </span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#64748b' }}>Active Borrowed Books</span>
+            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#e0f2fe', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0284c7' }}>
+              <Repeat size={18} />
+            </div>
+          </div>
+          <div style={{ fontSize: '1.7rem', fontWeight: '800', color: '#0C4A86', marginBottom: '4px' }}>312</div>
+          <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#0369a1', background: '#e0f2fe', padding: '3px 8px', borderRadius: '12px' }}>
+            25% Active Circulation
+          </span>
+        </div>
+
+        <div 
+          onClick={() => onNavigate('fines')}
+          style={{ background: '#fff', borderRadius: '20px', border: '1px solid #BFDBFE', padding: '20px', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#64748b' }}>Overdue & Fines</span>
+            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#d97706' }}>
+              <DollarSign size={18} />
+            </div>
+          </div>
+          <div style={{ fontSize: '1.7rem', fontWeight: '800', color: '#d97706', marginBottom: '4px' }}>14 Books</div>
+          <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#92400e', background: '#fef3c7', padding: '3px 8px', borderRadius: '12px' }}>
+            ₹1,850 Fines Pending
+          </span>
+        </div>
+
+        <div 
+          onClick={() => onNavigate('availability')}
+          style={{ background: '#fff', borderRadius: '20px', border: '1px solid #BFDBFE', padding: '20px', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#64748b' }}>Digital eBooks Library</span>
+            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#f3e8ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9333ea' }}>
+              <FileText size={18} />
+            </div>
+          </div>
+          <div style={{ fontSize: '1.7rem', fontWeight: '800', color: '#0C4A86', marginBottom: '4px' }}>45 eBooks</div>
+          <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#6b21a8', background: '#f3e8ff', padding: '3px 8px', borderRadius: '12px' }}>
+            1,420 Reads Month
+          </span>
+        </div>
+      </div>
+
+      {/* 2. Main Dashboard Grid: Calendar & Upcoming Events (Equal Box Size & Auto-Scroll) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px', alignItems: 'stretch' }}>
+        {/* Monthly Calendar View */}
+        <div style={{ gridColumn: 'span 7', maxHeight: '560px', overflowY: 'auto', borderRadius: '24px', border: '1px solid #cbd5e1', background: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+          <InteractiveGoogleCalendar
+            hideCreateEvent={true}
+            hideViewToggle={true}
+            assignedClassesOnly={false}
+          />
+        </div>
+
+        {/* Auto-scrolling Upcoming Events Card */}
+        <div style={{ gridColumn: 'span 5', borderRadius: '24px', border: '1px solid #cbd5e1', background: '#fff', padding: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', height: '560px' }}>
+          <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '12px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: '#0C4A86' }}>Upcoming Events</h3>
+              <p style={{ margin: '2px 0 0', fontSize: '0.78rem', fontWeight: '600', color: '#64748b' }}>Important school functions, exams & holidays</p>
+            </div>
+            <span style={{ fontSize: '0.7rem', fontWeight: '700', padding: '4px 8px', background: '#EBF5FF', color: '#0C4A86', borderRadius: '12px', border: '1px solid #BFDBFE' }}>
+              ⚡ Auto-Scrolling
+            </span>
+          </div>
+
+          <div 
+            ref={eventsScrollRef}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            style={{ flex: 1, overflowY: 'auto', paddingRight: '4px', display: 'flex', flexDirection: 'column', gap: '12px' }}
+          >
+            {upcomingEventsList.map((evt) => (
+              <div key={evt.id} style={{ borderRadius: '16px', border: '1px solid #e2e8f0', background: '#f8fafc', padding: '14px', transition: 'all 0.2s ease' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <span className={evt.badgeColor} style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '0.68rem', fontWeight: '800' }}>
+                    {evt.category}
+                  </span>
+                  <span style={{ fontSize: '0.78rem', fontWeight: '700', color: '#0C4A86', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <CalendarIcon size={13} /> {evt.date}
+                  </span>
+                </div>
+
+                <h4 style={{ margin: '4px 0 2px', fontSize: '0.88rem', fontWeight: '800', color: '#0f172a' }}>{evt.title}</h4>
+                <p style={{ margin: '0 0 8px', fontSize: '0.78rem', color: '#64748b', lineHeight: '1.4' }}>{evt.description}</p>
+
+                <div style={{ paddingTop: '8px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', fontWeight: '600', color: '#64748b' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Clock size={12} color="#0096DA" /> {evt.time}
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#047857', fontWeight: '700' }}>
+                    📍 {evt.location}
+                  </span>
+                </div>
               </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
-              <h4 style={{ margin: '4px 0 2px', fontSize: '0.88rem', fontWeight: '800', color: '#0f172a' }}>{evt.title}</h4>
-              <p style={{ margin: '0 0 8px', fontSize: '0.78rem', color: '#64748b', lineHeight: '1.4' }}>{evt.description}</p>
+      {/* 3. Recent Library Activities & Class Sessions (Teacher Style) */}
+      <div style={{ background: '#fff', borderRadius: '24px', border: '1px solid #cbd5e1', padding: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px' }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '800', color: '#0C4A86' }}>Daily Library Activities & Scheduled Classes</h3>
+            <p style={{ margin: '2px 0 0', fontSize: '0.78rem', fontWeight: '600', color: '#64748b' }}>Classroom library visits and silent reading sessions for today</p>
+          </div>
+          <button 
+            onClick={() => onNavigate('timetable')}
+            style={{ padding: '8px 14px', background: '#EBF5FF', color: '#0C4A86', border: '1px solid #BFDBFE', borderRadius: '12px', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer' }}
+          >
+            View Full Timetable →
+          </button>
+        </div>
 
-              <div style={{ paddingTop: '8px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', fontWeight: '600', color: '#64748b' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Clock size={12} color="#0096DA" /> {evt.time}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+          {recentLibraryActivities.map((act) => (
+            <div key={act.id} style={{ borderRadius: '16px', border: '1px solid #e2e8f0', background: '#f8fafc', padding: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ padding: '3px 10px', borderRadius: '20px', background: '#0C4A86', color: '#fff', fontSize: '0.72rem', fontWeight: '800' }}>
+                  {act.grade}
                 </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#047857', fontWeight: '700' }}>
-                  📍 {evt.location}
-                </span>
+                <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b' }}>{act.date}</span>
+              </div>
+              <h4 style={{ margin: '6px 0 4px', fontSize: '0.88rem', fontWeight: '800', color: '#0f172a' }}>{act.title}</h4>
+              <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '8px', borderTop: '1px solid #e2e8f0', paddingTop: '8px', display: 'flex', justifyContent: 'space-between' }}>
+                <span>Teacher: <strong>{act.teacher}</strong></span>
+                <span style={{ color: act.status === 'Completed' ? '#166534' : '#0369a1', fontWeight: '700' }}>{act.status}</span>
               </div>
             </div>
           ))}
         </div>
       </div>
+
     </div>
   );
 };
