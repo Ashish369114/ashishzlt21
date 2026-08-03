@@ -278,7 +278,7 @@ const LibrarianDashboardHome = ({ onNavigate }) => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
       {/* 1. Overview Metric KPI Cards (Teacher Dashboard Style) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
         <div 
           onClick={() => onNavigate('catalogue')}
           style={{ background: '#fff', borderRadius: '20px', border: '1px solid #BFDBFE', padding: '20px', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}
@@ -324,22 +324,6 @@ const LibrarianDashboardHome = ({ onNavigate }) => {
           <div style={{ fontSize: '1.7rem', fontWeight: '800', color: '#d97706', marginBottom: '4px' }}>14 Books</div>
           <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#92400e', background: '#fef3c7', padding: '3px 8px', borderRadius: '12px' }}>
             ₹1,850 Fines Pending
-          </span>
-        </div>
-
-        <div 
-          onClick={() => onNavigate('availability')}
-          style={{ background: '#fff', borderRadius: '20px', border: '1px solid #BFDBFE', padding: '20px', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#64748b' }}>Digital eBooks Library</span>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#f3e8ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9333ea' }}>
-              <FileText size={18} />
-            </div>
-          </div>
-          <div style={{ fontSize: '1.7rem', fontWeight: '800', color: '#0C4A86', marginBottom: '4px' }}>45 eBooks</div>
-          <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#6b21a8', background: '#f3e8ff', padding: '3px 8px', borderRadius: '12px' }}>
-            1,420 Reads Month
           </span>
         </div>
       </div>
