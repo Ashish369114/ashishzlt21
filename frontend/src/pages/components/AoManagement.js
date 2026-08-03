@@ -103,9 +103,16 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
 
   // Add Item to Cart Handler
   const handleAddToCart = (item, type, chosenSizeSpec) => {
-    const spec = chosenSizeSpec || (type === 'uniform' 
-      ? (selectedUniformSizes[item.id] || item.sizes?.[0]?.size || '30')
-      : (item.bookType === 'Long Book' ? `${item.pageOption} (${item.ruleType})` : item.shortBookCategory));
+    let spec = chosenSizeSpec;
+    if (!spec) {
+      if (type === 'uniform') {
+        const sz = selectedUniformSizes[item.id] || item.sizes?.[0]?.size || 'M';
+        const houseColor = item.name === 'Sports T-Shirt' ? (sportsHouseColors[item.id] || 'Yellow (Yellow House)') : '';
+        spec = houseColor ? `Size ${sz} • Color: ${houseColor}` : `Size ${sz}`;
+      } else {
+        spec = item.bookType === 'Long Book' ? `${item.pageOption} (${item.ruleType})` : item.shortBookCategory;
+      }
+    }
 
     const cartKey = `${item.id}-${spec}`;
     const existingIndex = cartItems.findIndex(c => c.cartKey === cartKey);
@@ -213,6 +220,12 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importFile, setImportFile] = useState(null);
 
+  const [sportsHouseColors, setSportsHouseColors] = useState({});
+  const [sellGradeFilter, setSellGradeFilter] = useState('');
+  const [sellSectionFilter, setSellSectionFilter] = useState('');
+  const [cartGradeFilter, setCartGradeFilter] = useState('');
+  const [cartSectionFilter, setCartSectionFilter] = useState('');
+
   // ----------------------------------------------------
   // DATA STATES
   // ----------------------------------------------------
@@ -231,13 +244,11 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
       vendor: 'Raymond School Apparel',
       purchaseDate: '2026-05-10',
       sizes: [
-        { size: '28', stock: 45 },
-        { size: '30', stock: 60 },
-        { size: '32', stock: 18 },
-        { size: '34', stock: 4 },
-        { size: '36', stock: 25 },
-        { size: '38', stock: 30 },
-        { size: '40', stock: 15 }
+        { size: 'XS', stock: 35 },
+        { size: 'S', stock: 45 },
+        { size: 'M', stock: 60 },
+        { size: 'L', stock: 42 },
+        { size: 'XL', stock: 15 }
       ]
     },
     {
@@ -250,11 +261,11 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
       vendor: 'Raymond School Apparel',
       purchaseDate: '2026-05-10',
       sizes: [
-        { size: '28', stock: 30 },
-        { size: '30', stock: 42 },
-        { size: '32', stock: 5 },
-        { size: '34', stock: 20 },
-        { size: '36', stock: 15 }
+        { size: 'XS', stock: 25 },
+        { size: 'S', stock: 30 },
+        { size: 'M', stock: 42 },
+        { size: 'L', stock: 20 },
+        { size: 'XL', stock: 15 }
       ]
     },
     {
@@ -276,28 +287,30 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
       id: 'UNIF-104',
       name: 'Sports T-Shirt',
       category: 'Sports Uniform',
-      colour: 'Vibrant Orange / White',
+      colour: 'Yellow / Blue / Green / Red',
       purchasePrice: 250,
       sellingPrice: 400,
       vendor: 'Apex Athletic Gear',
       purchaseDate: '2026-06-01',
       sizes: [
+        { size: 'XS', stock: 30 },
         { size: 'S', stock: 40 },
         { size: 'M', stock: 55 },
-        { size: 'L', stock: 8 },
-        { size: 'XL', stock: 2 }
+        { size: 'L', stock: 20 },
+        { size: 'XL', stock: 10 }
       ]
     },
     {
       id: 'UNIF-105',
       name: 'Sports Trouser',
       category: 'Sports Uniform',
-      colour: 'Black with Orange Side Stripe',
+      colour: 'Black with Side Stripe',
       purchasePrice: 320,
       sellingPrice: 500,
       vendor: 'Apex Athletic Gear',
       purchaseDate: '2026-06-01',
       sizes: [
+        { size: 'XS', stock: 20 },
         { size: 'S', stock: 35 },
         { size: 'M', stock: 48 },
         { size: 'L', stock: 22 },
@@ -1163,7 +1176,24 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
                             {u.category}
                           </span>
                         </td>
-                        <td style={{ padding: '14px 20px', color: '#334155' }}>{u.colour}</td>
+                        <td style={{ padding: '14px 20px', color: '#334155' }}>
+                          {u.name === 'Sports T-Shirt' ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              <select
+                                value={sportsHouseColors[u.id] || 'Yellow (Yellow House)'}
+                                onChange={e => setSportsHouseColors({ ...sportsHouseColors, [u.id]: e.target.value })}
+                                style={{ padding: '5px 8px', borderRadius: '6px', border: '1px solid #fdba74', fontSize: '0.78rem', fontWeight: '700', color: '#c2410c', background: '#fff7ed', outline: 'none' }}
+                              >
+                                <option value="Yellow (Yellow House)">🟨 Yellow (Yellow House)</option>
+                                <option value="Blue (Blue House)">🟦 Blue (Blue House)</option>
+                                <option value="Green (Green House)">🟩 Green (Green House)</option>
+                                <option value="Red (Red House)">🟥 Red (Red House)</option>
+                              </select>
+                            </div>
+                          ) : (
+                            u.colour
+                          )}
+                        </td>
                         <td style={{ padding: '14px 20px', fontWeight: '800', color: '#059669' }}>
                           ₹{u.sellingPrice} <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 'normal' }}>(Cost: ₹{u.purchasePrice})</span>
                         </td>
@@ -1504,15 +1534,41 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
                 {/* Checkout Bar */}
                 <div style={{ background: '#f8fafc', padding: '18px 24px', borderRadius: '12px', border: '1px solid #cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
                   
-                  <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', color: '#475569', marginBottom: '3px' }}>Select Student to Bill *</label>
-                      <select value={cartStudentId} onChange={e => setCartStudentId(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', background: '#fff' }}>
-                        {studentsList.map(s => (
-                          <option key={s.id} value={s.id}>
-                            {s.name} — {s.grade} ({s.section})
-                          </option>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', color: '#475569', marginBottom: '3px' }}>Filter Grade</label>
+                      <select value={cartGradeFilter} onChange={e => setCartGradeFilter(e.target.value)} style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem', background: '#fff' }}>
+                        <option value="">All Grades</option>
+                        {Array.from({ length: 10 }, (_, i) => `Grade ${i + 1}`).map(g => (
+                          <option key={g} value={g}>{g}</option>
                         ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', color: '#475569', marginBottom: '3px' }}>Filter Section</label>
+                      <select value={cartSectionFilter} onChange={e => setCartSectionFilter(e.target.value)} style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem', background: '#fff' }}>
+                        <option value="">All Sections</option>
+                        <option value="Sec A">Section A</option>
+                        <option value="Sec B">Section B</option>
+                        <option value="Sec C">Section C</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', color: '#475569', marginBottom: '3px' }}>Select Student to Bill *</label>
+                      <select value={cartStudentId} onChange={e => setCartStudentId(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', background: '#fff' }}>
+                        {studentsList
+                          .filter(s => {
+                            if (cartGradeFilter && s.grade !== cartGradeFilter) return false;
+                            if (cartSectionFilter && s.section !== cartSectionFilter) return false;
+                            return true;
+                          })
+                          .map(s => (
+                            <option key={s.id} value={s.id}>
+                              {s.name} — {s.grade} ({s.section})
+                            </option>
+                          ))}
                       </select>
                     </div>
 
@@ -2098,6 +2154,28 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
 
             <form onSubmit={handleConfirmSale} style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '0.85rem' }}>
               
+              {/* Grade and Section Filters for Student Selection */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Filter Grade</label>
+                  <select value={sellGradeFilter} onChange={e => setSellGradeFilter(e.target.value)} style={{ width: '100%', padding: '9px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}>
+                    <option value="">All Grades</option>
+                    {Array.from({ length: 10 }, (_, i) => `Grade ${i + 1}`).map(g => (
+                      <option key={g} value={g}>{g}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Filter Section</label>
+                  <select value={sellSectionFilter} onChange={e => setSellSectionFilter(e.target.value)} style={{ width: '100%', padding: '9px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}>
+                    <option value="">All Sections</option>
+                    <option value="Sec A">Section A</option>
+                    <option value="Sec B">Section B</option>
+                    <option value="Sec C">Section C</option>
+                  </select>
+                </div>
+              </div>
+
               {/* Dropdown 1: Select Student */}
               <div>
                 <label style={{ display: 'block', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>
@@ -2109,11 +2187,17 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
                   style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem', background: '#fff', fontWeight: '600', color: '#0f172a' }}
                   required
                 >
-                  {studentsList.map(s => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} — {s.grade} ({s.section}) • Roll: {s.rollNo}
-                    </option>
-                  ))}
+                  {studentsList
+                    .filter(s => {
+                      if (sellGradeFilter && s.grade !== sellGradeFilter) return false;
+                      if (sellSectionFilter && s.section !== sellSectionFilter) return false;
+                      return true;
+                    })
+                    .map(s => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} — {s.grade} ({s.section}) • Roll: {s.rollNo}
+                      </option>
+                    ))}
                 </select>
               </div>
 
