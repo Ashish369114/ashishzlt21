@@ -65,18 +65,30 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
   const [bookRuleFilter, setBookRuleFilter] = useState('all'); // 'all' | 'Ruled' | 'Plain' | 'One Side Ruled & One Side Plain' | 'Graph'
   const [shortBookCatFilter, setShortBookCatFilter] = useState('all'); // 'all' | 'Mathematics' | 'English' | ...
 
-  // Helper to format full fallback student list covering Grades 1-10 and Sections A-C
+  // Helper to format full student list with authentic names covering Grades 1-10 and Sections A-C
   const fullStudentsList = (() => {
-    const loaded = (demoStudents && demoStudents.length) ? demoStudents : [];
+    const rawLoaded = (demoStudents && demoStudents.length) ? demoStudents : [];
+    const loaded = Array.isArray(rawLoaded[0]) ? rawLoaded.flat() : rawLoaded;
     if (loaded.length > 0) {
+      const indianFirst = ['Aarav', 'Ananya', 'Rohan', 'Priya', 'Kabir', 'Diya', 'Vihaan', 'Ishita', 'Arjun', 'Sanya', 'Aditya', 'Meera', 'Dev', 'Kavya', 'Vivaan', 'Anushka', 'Reyansh', 'Riya', 'Ayaan', 'Tara', 'Ishaan', 'Nisha', 'Karthik', 'Pooja', 'Rahul'];
+      const indianLast = ['Patel', 'Sharma', 'Verma', 'Reddy', 'Mehta', 'Rao', 'Gupta', 'Singh', 'Joshi', 'Chawla', 'Nair', 'Iyer', 'Kumar', 'Das', 'Mishra'];
+
       return loaded.map((s, idx) => {
         const fn = s.firstName || s.userId?.firstName || '';
         const ln = s.lastName || s.userId?.lastName || '';
-        const rawName = (fn || ln) ? `${fn} ${ln}`.trim() : (s.name || `Student ${idx + 1}`);
+        let rawName = [fn, ln].filter(Boolean).join(' ').trim();
+        if (!rawName) rawName = s.name || s.studentName || '';
+
+        if (!rawName || rawName.startsWith('Student')) {
+          const nameSeed = idx * 17 + (s.rollNumber ? s.rollNumber.charCodeAt(0) : 5);
+          rawName = `${indianFirst[nameSeed % indianFirst.length]} ${indianLast[(nameSeed * 3 + 1) % indianLast.length]}`;
+        }
+
         let g = String(s.grade || s.class?.grade || '1');
         if (!g.toLowerCase().startsWith('grade')) g = `Grade ${g}`;
         let sec = String(s.section || s.class?.section || 'A');
         if (!sec.toLowerCase().startsWith('section')) sec = `Section ${sec}`;
+
         return {
           id: s._id || s.id || s.studentId || `STU-${1000 + idx}`,
           name: rawName,
@@ -120,12 +132,23 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
   const fetchStudents = async () => {
     try {
       const response = await studentService.getAll().catch(() => ({ data: [] }));
-      const loaded = (response?.data && response.data.length) ? response.data : demoStudents;
+      const rawLoaded = (response?.data && response.data.length) ? response.data : demoStudents;
+      const loaded = Array.isArray(rawLoaded[0]) ? rawLoaded.flat() : rawLoaded;
       if (loaded && loaded.length > 0) {
+        const indianFirst = ['Aarav', 'Ananya', 'Rohan', 'Priya', 'Kabir', 'Diya', 'Vihaan', 'Ishita', 'Arjun', 'Sanya', 'Aditya', 'Meera', 'Dev', 'Kavya', 'Vivaan', 'Anushka', 'Reyansh', 'Riya', 'Ayaan', 'Tara', 'Ishaan', 'Nisha', 'Karthik', 'Pooja', 'Rahul'];
+        const indianLast = ['Patel', 'Sharma', 'Verma', 'Reddy', 'Mehta', 'Rao', 'Gupta', 'Singh', 'Joshi', 'Chawla', 'Nair', 'Iyer', 'Kumar', 'Das', 'Mishra'];
+
         const mapped = loaded.map((s, idx) => {
           const fn = s.firstName || s.userId?.firstName || '';
           const ln = s.lastName || s.userId?.lastName || '';
-          const rawName = (fn || ln) ? `${fn} ${ln}`.trim() : (s.name || `Student ${idx + 1}`);
+          let rawName = [fn, ln].filter(Boolean).join(' ').trim();
+          if (!rawName) rawName = s.name || s.studentName || '';
+
+          if (!rawName || rawName.startsWith('Student')) {
+            const nameSeed = idx * 17 + (s.rollNumber ? s.rollNumber.charCodeAt(0) : 5);
+            rawName = `${indianFirst[nameSeed % indianFirst.length]} ${indianLast[(nameSeed * 3 + 1) % indianLast.length]}`;
+          }
+
           let g = String(s.grade || s.class?.grade || '1');
           if (!g.toLowerCase().startsWith('grade')) g = `Grade ${g}`;
           let sec = String(s.section || s.class?.section || 'A');
