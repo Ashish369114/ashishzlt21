@@ -174,15 +174,40 @@ const AttendanceManagement = () => {
     return stdGrade === String(selectedGrade) && stdSection === String(selectedSection || 'A');
   });
 
-  const displayStudentsList = sectionStudents.length > 0 ? sectionStudents : Array.from({ length: 5 }, (_, sIdx) => ({
-    _id: `demo_std_${selectedGrade}_${selectedSection || 'A'}_${sIdx + 1}`,
-    firstName: `Student ${sIdx + 1}`,
-    lastName: `(Grade ${selectedGrade}-${selectedSection || 'A'})`,
-    rollNumber: `${selectedGrade}${selectedSection || 'A'}0${sIdx + 1}`,
-    grade: selectedGrade,
-    section: selectedSection || 'A',
-    class: { grade: selectedGrade, section: selectedSection || 'A' }
-  }));
+  const displayStudentsList = sectionStudents.length > 0 ? sectionStudents : (() => {
+    const indianFirstNames = [
+      'Aarav', 'Ananya', 'Vihaan', 'Diya', 'Aditya', 'Aadhya', 'Sai', 'Pari',
+      'Reyansh', 'Anika', 'Arjun', 'Navya', 'Vivaan', 'Avani', 'Ayaan', 'Myra',
+      'Ishaan', 'Kavya', 'Dhruv', 'Prisha', 'Kabir', 'Riya', 'Rohan', 'Shreya',
+      'Tanvi', 'Kiara', 'Yash', 'Meera', 'Dev', 'Isha'
+    ];
+    const indianLastNames = [
+      'Sharma', 'Verma', 'Gupta', 'Singh', 'Patel', 'Reddy', 'Joshi', 'Chawla',
+      'Mehta', 'Nair', 'Iyer', 'Kumar', 'Das', 'Mishra', 'Prasad', 'Kapoor',
+      'Gill', 'Malhotra', 'Roy', 'Jadhav', 'Kulkarni', 'Deshmukh'
+    ];
+
+    const gradeNum = parseInt(selectedGrade || '1', 10);
+    const secCode = (selectedSection || 'A').charCodeAt(0);
+    const seed = gradeNum * 37 + secCode * 13;
+
+    return Array.from({ length: 8 }, (_, sIdx) => {
+      const fn = indianFirstNames[(seed + sIdx * 3) % indianFirstNames.length];
+      const ln = indianLastNames[(seed + sIdx * 5 + 1) % indianLastNames.length];
+      const rollNum = sIdx + 1;
+      const rollStr = `${selectedGrade}${selectedSection || 'A'}${String(rollNum).padStart(2, '0')}`;
+
+      return {
+        _id: `demo_std_g${selectedGrade}_s${selectedSection || 'A'}_${rollNum}`,
+        firstName: fn,
+        lastName: ln,
+        rollNumber: rollStr,
+        grade: selectedGrade,
+        section: selectedSection || 'A',
+        class: { grade: selectedGrade, section: selectedSection || 'A' }
+      };
+    });
+  })();
 
   const visibleAttendance = attendance.filter((record) => {
     if (!selectedClassId) return false;
