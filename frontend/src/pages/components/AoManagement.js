@@ -1620,27 +1620,45 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
                       <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', color: '#475569', marginBottom: '3px' }}>Filter Section</label>
                       <select value={cartSectionFilter} onChange={e => setCartSectionFilter(e.target.value)} style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem', background: '#fff' }}>
                         <option value="">All Sections</option>
-                        <option value="Sec A">Section A</option>
-                        <option value="Sec B">Section B</option>
-                        <option value="Sec C">Section C</option>
+                        <option value="Section A">Section A</option>
+                        <option value="Section B">Section B</option>
+                        <option value="Section C">Section C</option>
+                        <option value="Section D">Section D</option>
                       </select>
                     </div>
 
                     <div>
                       <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', color: '#475569', marginBottom: '3px' }}>Select Student to Bill *</label>
-                      <select value={cartStudentId} onChange={e => setCartStudentId(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', background: '#fff' }}>
-                        {studentsList
-                          .filter(s => {
-                            if (cartGradeFilter && s.grade !== cartGradeFilter) return false;
-                            if (cartSectionFilter && s.section !== cartSectionFilter) return false;
-                            return true;
-                          })
-                          .map(s => (
-                            <option key={s.id} value={s.id}>
-                              {s.name} — {s.grade} ({s.section})
-                            </option>
-                          ))}
-                      </select>
+                      {(() => {
+                        const normG = (str) => String(str || '').toLowerCase().replace(/[^0-9]/g, '');
+                        const normS = (str) => String(str || '').toUpperCase().replace(/[^A-Z]/g, '');
+                        const targetG = normG(cartGradeFilter);
+                        const targetS = normS(cartSectionFilter);
+
+                        const filtered = (studentsList || []).filter(s => {
+                          if (targetG && normG(s.grade) !== targetG) return false;
+                          if (targetS && normS(s.section) !== targetS) return false;
+                          return true;
+                        });
+
+                        const displayList = filtered.length > 0 
+                          ? filtered 
+                          : (targetG && (studentsList || []).filter(s => normG(s.grade) === targetG).length > 0
+                              ? (studentsList || []).filter(s => normG(s.grade) === targetG)
+                              : studentsList);
+
+                        const currentVal = displayList.some(s => s.id === cartStudentId) ? cartStudentId : (displayList[0]?.id || '');
+
+                        return (
+                          <select value={currentVal} onChange={e => setCartStudentId(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem', fontWeight: '700', color: '#0f172a', background: '#fff' }}>
+                            {displayList.map(s => (
+                              <option key={s.id} value={s.id}>
+                                {s.name} — {s.grade} ({s.section})
+                              </option>
+                            ))}
+                          </select>
+                        );
+                      })()}
                     </div>
 
                     <div>
@@ -2240,9 +2258,10 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
                   <label style={{ display: 'block', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>Filter Section</label>
                   <select value={sellSectionFilter} onChange={e => setSellSectionFilter(e.target.value)} style={{ width: '100%', padding: '9px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}>
                     <option value="">All Sections</option>
-                    <option value="Sec A">Section A</option>
-                    <option value="Sec B">Section B</option>
-                    <option value="Sec C">Section C</option>
+                    <option value="Section A">Section A</option>
+                    <option value="Section B">Section B</option>
+                    <option value="Section C">Section C</option>
+                    <option value="Section D">Section D</option>
                   </select>
                 </div>
               </div>
@@ -2252,24 +2271,41 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
                 <label style={{ display: 'block', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>
                   Select Student *
                 </label>
-                <select
-                  value={sellForm.studentId}
-                  onChange={e => setSellForm({ ...sellForm, studentId: e.target.value })}
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem', background: '#fff', fontWeight: '600', color: '#0f172a' }}
-                  required
-                >
-                  {studentsList
-                    .filter(s => {
-                      if (sellGradeFilter && s.grade !== sellGradeFilter) return false;
-                      if (sellSectionFilter && s.section !== sellSectionFilter) return false;
-                      return true;
-                    })
-                    .map(s => (
-                      <option key={s.id} value={s.id}>
-                        {s.name} — {s.grade} ({s.section}) • Roll: {s.rollNo}
-                      </option>
-                    ))}
-                </select>
+                {(() => {
+                  const normG = (str) => String(str || '').toLowerCase().replace(/[^0-9]/g, '');
+                  const normS = (str) => String(str || '').toUpperCase().replace(/[^A-Z]/g, '');
+                  const targetG = normG(sellGradeFilter);
+                  const targetS = normS(sellSectionFilter);
+
+                  const filtered = (studentsList || []).filter(s => {
+                    if (targetG && normG(s.grade) !== targetG) return false;
+                    if (targetS && normS(s.section) !== targetS) return false;
+                    return true;
+                  });
+
+                  const displayList = filtered.length > 0 
+                    ? filtered 
+                    : (targetG && (studentsList || []).filter(s => normG(s.grade) === targetG).length > 0
+                        ? (studentsList || []).filter(s => normG(s.grade) === targetG)
+                        : studentsList);
+
+                  const currentVal = displayList.some(s => s.id === sellForm.studentId) ? sellForm.studentId : (displayList[0]?.id || '');
+
+                  return (
+                    <select
+                      value={currentVal}
+                      onChange={e => setSellForm({ ...sellForm, studentId: e.target.value })}
+                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem', background: '#fff', fontWeight: '600', color: '#0f172a' }}
+                      required
+                    >
+                      {displayList.map(s => (
+                        <option key={s.id} value={s.id}>
+                          {s.name} — {s.grade} ({s.section}) • Roll: {s.rollNo}
+                        </option>
+                      ))}
+                    </select>
+                  );
+                })()}
               </div>
 
               {/* Dropdown 2: Size / Spec Dropdown */}
