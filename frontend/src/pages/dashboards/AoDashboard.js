@@ -43,12 +43,9 @@ const AoDashboard = ({ user, onLogout }) => {
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'google_calendar', label: 'Calendar', icon: CalendarIcon },
-    { id: 'calendar', label: 'School Calendar', icon: CalendarIcon },
     { id: 'staff', label: 'Staff Management', icon: Users },
     { id: 'infrastructure', label: 'Infrastructure', icon: ShieldCheck },
     { id: 'inventory', label: 'Inventory & Assets', icon: FileText },
-    { id: 'procurement', label: 'Procurement', icon: FileText },
     { id: 'vendors', label: 'Vendors & Contracts', icon: Users },
     { id: 'maintenance', label: 'Maintenance Requests', icon: Settings },
   ];
