@@ -125,16 +125,17 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/calendar" className={isActive('/dashboard/calendar') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Calendar size={18} /> Calendar</Link></li>
           <li><Link to="/dashboard/communications" className={isActive('/dashboard/communications') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><MessageSquare size={18} /> Communications</Link></li>
           <li><Link to="/dashboard/school-calendar" className={isActive('/dashboard/school-calendar') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Calendar size={18} /> School Calendar</Link></li>
-          <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><GraduationCap size={18} /> Students</Link></li>
-
-          <li><Link to="/dashboard/employees" className={isActive('/dashboard/employees') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Users size={18} /> Employees</Link></li>
+          <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><GraduationCap size={18} /> Student Management</Link></li>
+          <li><Link to="/dashboard/teachers" className={isActive('/dashboard/teachers') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Users size={18} /> Teacher Management</Link></li>
+          <li><Link to="/dashboard/employees" className={isActive('/dashboard/employees') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Users size={18} /> Staff & Employees</Link></li>
+          <li><Link to="/dashboard/leaves" className={isActive('/dashboard/leaves') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><CheckCircle2 size={18} /> Staff Leave Approvals</Link></li>
 
           <li><Link to="/dashboard/attendance" className={isActive('/dashboard/attendance') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><CheckCircle2 size={18} /> Attendance</Link></li>
-          <li><Link to="/dashboard/exams" className={isActive('/dashboard/exams') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><FileText size={18} /> Exams</Link></li>
+          <li><Link to="/dashboard/exams" className={isActive('/dashboard/exams') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><FileText size={18} /> Exams & Marks</Link></li>
           <li><Link to="/dashboard/lesson-plans" className={isActive('/dashboard/lesson-plans') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><BookOpen size={18} /> Lesson Plans</Link></li>
           <li><Link to="/dashboard/notices" className={isActive('/dashboard/notices') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Bell size={18} /> Circulars & Notices</Link></li>
           <li><Link to="/dashboard/meeting-moms" className={isActive('/dashboard/meeting-moms') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><FileSpreadsheet size={18} /> Meeting MOMs</Link></li>
-          <li><Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><BarChart2 size={18} /> Reports</Link></li>
+          <li><Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><BarChart2 size={18} /> Executive Reports</Link></li>
 
           <li style={{ marginTop: '20px', padding: '0 4px' }}>
             <DailyInsightWidget />
