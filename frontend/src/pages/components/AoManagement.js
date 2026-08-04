@@ -21,9 +21,7 @@ const CBSE_SUBJECTS_BY_GRADE = {
   'Grade 7': ['English', 'Mathematics', 'Science', 'Social Science', 'Hindi', 'Computer'],
   'Grade 8': ['English', 'Mathematics', 'Science', 'Social Science', 'Hindi', 'Computer'],
   'Grade 9': ['English', 'Mathematics', 'Science', 'Social Science', 'Hindi', 'Computer Science'],
-  'Grade 10': ['English', 'Mathematics', 'Science', 'Social Science', 'Hindi', 'Computer Science'],
-  'Grade 11': ['English', 'Physics', 'Chemistry', 'Mathematics', 'Biology', 'Computer Science', 'Accountancy', 'Business Studies', 'Economics'],
-  'Grade 12': ['English', 'Physics', 'Chemistry', 'Mathematics', 'Biology', 'Computer Science', 'Accountancy', 'Business Studies', 'Economics']
+  'Grade 10': ['English', 'Mathematics', 'Science', 'Social Science', 'Hindi', 'Computer Science']
 };
 
 const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
@@ -523,7 +521,7 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
     { id: 'ADM-2026-02', studentName: 'Diya Sharma', grade: 'Grade 1', parentName: 'Anita Sharma', phone: '9876543211', docVerified: false, status: 'Pending Approval', appliedDate: '2026-07-12' },
     { id: 'ADM-2026-03', studentName: 'Rohan Verma', grade: 'Grade 9', parentName: 'Karan Verma', phone: '9876543212', docVerified: true, status: 'Document Verified', appliedDate: '2026-07-14' },
     { id: 'ADM-2026-04', studentName: 'Ananya Reddy', grade: 'Grade 6', parentName: 'Prakash Reddy', phone: '9876543215', docVerified: true, status: 'Pending Approval', appliedDate: '2026-07-18' },
-    { id: 'ADM-2026-05', studentName: 'Kabir Mehta', grade: 'Grade 11', parentName: 'Siddharth Mehta', phone: '9876543219', docVerified: true, status: 'Approved', appliedDate: '2026-07-20' }
+    { id: 'ADM-2026-05', studentName: 'Kabir Mehta', grade: 'Grade 10', parentName: 'Siddharth Mehta', phone: '9876543219', docVerified: true, status: 'Approved', appliedDate: '2026-07-20' }
   ]);
 
   // 4. Accommodation Management (Renamed from Hostel Allocation)
@@ -538,7 +536,7 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
       bedNo: 'Bed A1',
       occupantName: 'Karthik Rao',
       occupantRole: 'Student',
-      grade: 'Grade 11',
+      grade: 'Grade 10',
       availability: 'Occupied',
       occupancyStatus: 'Full',
       maintenanceStatus: 'Good'
@@ -551,7 +549,7 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
       bedNo: 'Bed B2',
       occupantName: 'Nisha Gupta',
       occupantRole: 'Student',
-      grade: 'Grade 12',
+      grade: 'Grade 9',
       availability: 'Occupied',
       occupancyStatus: 'Full',
       maintenanceStatus: 'Good'

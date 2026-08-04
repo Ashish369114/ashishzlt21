@@ -256,7 +256,7 @@ const AccountantCollections = () => {
                   const summary = getFeeSummary(fee);
                   const isOverdue = fee.dueDate && new Date(fee.dueDate) < new Date();
                   const fallbackNames = ['Aarav Sharma', 'Ananya Verma', 'Vihaan Patel', 'Ishaan Gupta', 'Diya Singh', 'Rohan Mehta', 'Sanya Kapoor', 'Aditya Kumar'];
-                  const fallbackClasses = ['Grade 10-A', 'Grade 9-B', 'Grade 8-A', 'Grade 11-Science', 'Grade 7-C', 'Grade 12-Commerce'];
+                  const fallbackClasses = ['Grade 10-A', 'Grade 9-B', 'Grade 8-A', 'Grade 7-A', 'Grade 6-B', 'Grade 5-A', 'Grade 4-B', 'Grade 3-A'];
                   const studentName = fee.student?.firstName ? `${fee.student.firstName} ${fee.student.lastName || ''}` : fallbackNames[idx % fallbackNames.length];
                   const studentClass = fee.student?.class?.grade ? `Grade ${fee.student.class.grade} ${fee.student.class.section || ''}` : fallbackClasses[idx % fallbackClasses.length];
                   return (
