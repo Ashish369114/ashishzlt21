@@ -295,86 +295,9 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
             })}
           </div>
         </div>
-
-        {/* Right Side: Upcoming Events Box — only shown when showEvents=true */}
-        {showEvents && (
-          <div>
-            {events.length > 0 ? (
-              <div className="card" style={{ height: '100%', margin: 0, display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
-                <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 20px', borderBottom: '1px solid #f1f5f9' }}>
-                  <h2 style={{ margin: 0, fontSize: '1.1rem' }}>📅 Upcoming Events</h2>
-                </div>
-                <div
-                  ref={scrollRef}
-                  onMouseEnter={() => { scrollPaused.current = true; }}
-                  onMouseLeave={() => { scrollPaused.current = false; }}
-                  style={{
-                    padding: '15px 20px',
-                    maxHeight: '220px',
-                    overflowY: 'auto',
-                    scrollbarWidth: 'thin',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '10px',
-                    flex: 1
-                  }}
-                >
-                  {events.map((e) => {
-                    const eventDateStr = e.eventDate ? new Date(e.eventDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—';
-                    const getEventIcon = (title = '', type = '') => {
-                      const combined = `${title} ${type}`.toLowerCase();
-                      if (combined.includes('exam') || combined.includes('test')) return '📝';
-                      if (combined.includes('cca') || combined.includes('activity')) return '🎨';
-                      if (combined.includes('ptm') || combined.includes('parent')) return '👨‍👩‍👧‍👦';
-                      if (combined.includes('sports') || combined.includes('game') || combined.includes('athletic')) return '🏆';
-                      if (combined.includes('meeting') || combined.includes('conference')) return '🤝';
-                      if (combined.includes('holiday')) return '🏖️';
-                      return '🎉';
-                    };
-                    return (
-                      <div
-                        key={e._id}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '10px 12px',
-                          background: '#f8fafc',
-                          borderRadius: '8px',
-                          border: '1px solid #e2e8f0',
-                          fontSize: '0.85rem'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <span style={{ fontSize: '1.3rem' }}>{getEventIcon(e.title, e.eventType || e.type)}</span>
-                          <div>
-                            <h4 style={{ margin: 0, fontSize: '0.85rem', color: '#0f172a', fontWeight: 600 }}>{e.title}</h4>
-                          </div>
-                        </div>
-                        <div style={{
-                          padding: '3px 8px',
-                          background: '#e0e7ff',
-                          color: '#4338ca',
-                          borderRadius: '12px',
-                          fontSize: '0.72rem',
-                          fontWeight: 700,
-                          whiteSpace: 'nowrap'
-                        }}>
-                          {eventDateStr}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : (
-              <div className="card" style={{ height: '100%', margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', background: '#fff', border: '1px solid #f1f5f9', borderRadius: '12px' }}>
-                No upcoming events
-              </div>
-            )}
-          </div>
-        )}
       </div>
+
+
 
       {/* Quick Actions (Accountant Only) */}
       {(role === 'accountant' || role === 'accountant_admin') && (
