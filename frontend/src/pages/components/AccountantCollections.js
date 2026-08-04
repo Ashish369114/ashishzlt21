@@ -346,61 +346,7 @@ const AccountantCollections = ({ defaultTab = 'collections' }) => {
         <>
           {error && <div style={{ background: '#fef2f2', color: '#991b1b', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}><AlertCircle size={20} /> {error}</div>}
 
-      {/* Top-Level Filter Bar */}
-      <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #BFDBFE', padding: '14px 24px', marginBottom: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-end', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-        <div style={{ flex: '1 1 180px' }}>
-          <label style={{ fontSize: '0.78rem', fontWeight: '800', color: '#0C4A86', display: 'block', marginBottom: '4px' }}>Select Grade</label>
-          <select
-            value={selectedGrade}
-            onChange={(e) => { setSelectedGrade(e.target.value); setSelectedSection(''); setSelectedStudent(''); }}
-            style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #BFDBFE', background: '#ffffff', color: '#0C4A86', fontWeight: '700', fontSize: '0.88rem' }}
-          >
-            <option value="">All Grades (1-10)</option>
-            {[1,2,3,4,5,6,7,8,9,10].map(g => <option key={g} value={String(g)}>Grade {g}</option>)}
-          </select>
-        </div>
-        <div style={{ flex: '1 1 180px' }}>
-          <label style={{ fontSize: '0.78rem', fontWeight: '800', color: '#0C4A86', display: 'block', marginBottom: '4px' }}>Select Section</label>
-          <select
-            value={selectedSection}
-            onChange={(e) => { setSelectedSection(e.target.value); setSelectedStudent(''); }}
-            disabled={!selectedGrade}
-            style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #BFDBFE', background: selectedGrade ? '#ffffff' : '#f8fafc', color: '#0C4A86', fontWeight: '700', fontSize: '0.88rem' }}
-          >
-            <option value="">All Sections (A-C)</option>
-            {['A','B','C'].map(sec => <option key={sec} value={sec}>Section {sec}</option>)}
-          </select>
-        </div>
-        <div style={{ flex: '1 1 240px' }}>
-          <label style={{ fontSize: '0.78rem', fontWeight: '800', color: '#0C4A86', display: 'block', marginBottom: '4px' }}>Select Student</label>
-          <select
-            value={selectedStudent}
-            onChange={(e) => setSelectedStudent(e.target.value)}
-            disabled={!selectedGrade}
-            style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #BFDBFE', background: selectedGrade ? '#ffffff' : '#f8fafc', color: '#0C4A86', fontWeight: '700', fontSize: '0.88rem' }}
-          >
-            <option value="">All Students</option>
-            {Array.from(new Set(
-              pendingFees
-                .filter((fee, idx) => {
-                  const studentClass = resolveStudentClass(fee, idx);
-                  if (selectedGrade) {
-                    const gradeRegex = new RegExp(`\\bGrade\\s*${selectedGrade}\\b`, 'i');
-                    if (!gradeRegex.test(studentClass)) return false;
-                  }
-                  if (selectedSection) {
-                    const secRegex = new RegExp(`[\\-\\s]${selectedSection}\\b`, 'i');
-                    if (!secRegex.test(studentClass)) return false;
-                  }
-                  return true;
-                })
-                .map((fee, idx) => resolveStudentNameHelper(fee, idx))
-            )).map((name, idx) => (
-              <option key={idx} value={name}>{name}</option>
-            ))}
-          </select>
-        </div>
-      </div>
+
 
       {/* KPI Cards Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '30px' }}>
