@@ -356,7 +356,7 @@ const AccountantDashboard = ({ user, onLogout }) => {
           </li>
           <li>
             <Link to="/dashboard/settings" className={isActive('/dashboard/settings') ? 'active' : ''}>
-              <Settings size={18} /> <span>Settings</span>
+              <Settings size={18} /> <span>Settings & Profile</span>
             </Link>
           </li>
           
