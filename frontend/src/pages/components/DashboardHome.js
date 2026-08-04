@@ -203,11 +203,6 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
         }
       `}</style>
 
-      {/* 2-Column Calendar & Upcoming Events Section */}
-      <CalendarAndEventsSection />
-
-
-
       {/* Stats Cards & Upcoming Events Layout */}
       <div className="dashboard-grid-layout" style={{ marginBottom: '25px', alignItems: 'stretch' }}>
         {/* Left Side: Stats Grid */}
@@ -423,6 +418,9 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
           </div>
         </>
       )}
+
+      {/* 2-Column Calendar & Upcoming Events Section */}
+      <CalendarAndEventsSection />
 
       {/* Accountant Specific Lists */}
       {(role === 'accountant' || role === 'accountant_admin') && (
