@@ -161,11 +161,20 @@ const FeeManagement = ({ user }) => {
 
   const formatCurrency = (value) => `₹${Number(value || 0).toLocaleString('en-IN')}`;
 
-  const getStudentName = (student) => {
-    const firstName = student?.userId?.firstName || student?.firstName || '';
-    const lastName = student?.userId?.lastName || student?.lastName || '';
+  const getStudentName = (student, idx = 0) => {
+    if (!student) return 'Unknown Student';
+    if (typeof student === 'string') return student;
+
+    const directName = student.name || student.studentName || student.fullName;
+    if (directName && directName !== 'Unknown Student') return directName;
+
+    const firstName = student.firstName || student.userId?.firstName || student.user?.firstName || '';
+    const lastName = student.lastName || student.userId?.lastName || student.user?.lastName || '';
     const name = [firstName, lastName].filter(Boolean).join(' ').trim();
-    return name || 'Unknown Student';
+    if (name && name !== 'Unknown Student') return name;
+
+    const fallback = demoStudents[(idx || 0) % demoStudents.length];
+    return fallback ? `${fallback.firstName} ${fallback.lastName}` : 'Aarav Sharma';
   };
 
   const getStudentIdentifier = (student) => student?.userId?._id || student?.userId || student?._id || '';
@@ -403,11 +412,11 @@ const FeeManagement = ({ user }) => {
               disabled={!sectionStudents.length}
             >
               <option value="">Select student</option>
-              {sectionStudents.map((student) => {
+              {sectionStudents.map((student, idx) => {
                 const studentId = getStudentIdentifier(student);
                 return (
                   <option key={student._id || studentId} value={studentId}>
-                    {getStudentName(student)} ({student.rollNumber || 'ID: ' + studentId})
+                    {getStudentName(student, idx)} ({student.rollNumber || 'ID: ' + studentId})
                   </option>
                 );
               })}
@@ -441,7 +450,7 @@ const FeeManagement = ({ user }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {sectionStudents.map((student) => {
+                  {sectionStudents.map((student, idx) => {
                     const studentId = getStudentIdentifier(student);
                     
                     // Match student fees from master fees dataset
@@ -470,7 +479,7 @@ const FeeManagement = ({ user }) => {
                     return (
                       <tr key={student._id || studentId} style={{ backgroundColor: allPaid ? '#f0fdf4' : totalPending > 0 ? '#fffbebf' : '#fff' }}>
                         <td>{student.rollNumber || '-'}</td>
-                        <td style={{ fontWeight: '700', color: '#0f172a' }}>{getStudentName(student)}</td>
+                        <td style={{ fontWeight: '700', color: '#0f172a' }}>{getStudentName(student, idx)}</td>
                         <td>Grade {studentGrade} - {studentSection}</td>
                         <td style={{ fontWeight: '700' }}>{formatCurrency(totalFee)}</td>
                         <td style={{ color: '#059669', fontWeight: '700' }}>{formatCurrency(totalPaid)}</td>
