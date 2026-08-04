@@ -931,16 +931,7 @@ const StudentManagement = () => {
               })}
             </select>
           </div>
-          {isAccountant && (
-            <div className="form-group" style={{ flex: '1', minWidth: '150px' }}>
-              <select value={selectedFeeStatus} onChange={(e) => setSelectedFeeStatus(e.target.value)}>
-                <option value="All">Fee Status: All</option>
-                <option value="Paid">Paid</option>
-                <option value="Partial">Partial</option>
-                <option value="Pending">Pending</option>
-              </select>
-            </div>
-          )}
+
         </div>
       </div>
 
