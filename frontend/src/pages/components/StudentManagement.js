@@ -876,63 +876,69 @@ const StudentManagement = () => {
       )}
 
       {/* Filter Dropdowns */}
-      <div className="form-container" style={{ marginBottom: '20px', padding: '15px' }}>
-        <div className="form-row" style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-          <div className="form-group" style={{ flex: '1', minWidth: '150px' }}>
-            <select
-              value={selectedGrade}
-              onChange={(e) => {
-                setSelectedGrade(e.target.value);
-                setSelectedSection('');
-                setSelectedStudentId('');
-              }}
-            >
-              <option value="">Select grade</option>
-              {gradeOptions.map((grade) => (
-                <option key={grade} value={grade}>Grade {grade}</option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group" style={{ flex: '1', minWidth: '150px' }}>
-            <select
-              value={selectedSection}
-              onChange={(e) => {
-                setSelectedSection(e.target.value);
-                setSelectedStudentId('');
-              }}
-              disabled={!selectedGrade}
-            >
-              <option value="">Select section</option>
-              {sectionsForGrade.map((sec) => (
-                <option key={sec} value={sec}>Section {sec}</option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group" style={{ flex: '1', minWidth: '200px' }}>
-            <select
-              value={selectedStudentId}
-              onChange={(e) => setSelectedStudentId(e.target.value)}
-              disabled={!selectedGrade}
-            >
-              <option value="">Select student</option>
-              {filteredStudentsForSelect.map((st, sIdx) => {
-                const indianFirst = ['Aarav', 'Ananya', 'Rohan', 'Priya', 'Kabir', 'Diya', 'Vihaan', 'Ishita', 'Arjun', 'Sanya', 'Aditya', 'Meera', 'Dev', 'Kavya', 'Vivaan', 'Anushka', 'Reyansh', 'Riya', 'Ayaan', 'Tara'];
-                const indianLast = ['Sharma', 'Verma', 'Gupta', 'Singh', 'Patel', 'Reddy', 'Joshi', 'Chawla', 'Mehta', 'Nair', 'Iyer', 'Kumar', 'Das', 'Mishra', 'Choudhury'];
-                const hash = (st.rollNumber || st._id || String(sIdx)).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-                const defaultFn = indianFirst[hash % indianFirst.length];
-                const defaultLn = indianLast[(hash + 2) % indianLast.length];
-                const stName = [st.firstName || st.userId?.firstName, st.lastName || st.userId?.lastName].filter(Boolean).join(' ').trim() || (st.name && st.name !== 'Aarav Patel' ? st.name : `${defaultFn} ${defaultLn}`);
-                const stVal = String(st._id || st.id || st.studentId || st.rollNumber || `st_${sIdx}`);
-                return (
-                  <option key={stVal} value={stVal}>
-                    {stName} ({st.rollNumber || 'N/A'})
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-
+      <div style={{ padding: '14px 24px', background: '#FAF6F0', borderBottom: '1px solid #EBF5FF', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '0' }}>
+        <div style={{ flex: '1 1 180px' }}>
+          <label style={{ fontSize: '0.78rem', fontWeight: '800', color: '#0C4A86', display: 'block', marginBottom: '4px' }}>Select Grade</label>
+          <select
+            value={selectedGrade}
+            onChange={(e) => {
+              setSelectedGrade(e.target.value);
+              setSelectedSection('');
+              setSelectedStudentId('');
+            }}
+            style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #BFDBFE', background: '#ffffff', color: '#0C4A86', fontWeight: '700', fontSize: '0.88rem' }}
+          >
+            <option value="">All Grades (1-10)</option>
+            {gradeOptions.map((grade) => (
+              <option key={grade} value={grade}>Grade {grade}</option>
+            ))}
+          </select>
         </div>
+
+        <div style={{ flex: '1 1 180px' }}>
+          <label style={{ fontSize: '0.78rem', fontWeight: '800', color: '#0C4A86', display: 'block', marginBottom: '4px' }}>Select Section</label>
+          <select
+            value={selectedSection}
+            onChange={(e) => {
+              setSelectedSection(e.target.value);
+              setSelectedStudentId('');
+            }}
+            disabled={!selectedGrade}
+            style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #BFDBFE', background: selectedGrade ? '#ffffff' : '#f8fafc', color: '#0C4A86', fontWeight: '700', fontSize: '0.88rem' }}
+          >
+            <option value="">All Sections (A-C)</option>
+            {sectionsForGrade.map((sec) => (
+              <option key={sec} value={sec}>Section {sec}</option>
+            ))}
+          </select>
+        </div>
+
+        <div style={{ flex: '1 1 240px' }}>
+          <label style={{ fontSize: '0.78rem', fontWeight: '800', color: '#0C4A86', display: 'block', marginBottom: '4px' }}>Select Student</label>
+          <select
+            value={selectedStudentId}
+            onChange={(e) => setSelectedStudentId(e.target.value)}
+            disabled={!selectedGrade}
+            style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #BFDBFE', background: selectedGrade ? '#ffffff' : '#f8fafc', color: '#0C4A86', fontWeight: '700', fontSize: '0.88rem' }}
+          >
+            <option value="">All Students</option>
+            {filteredStudentsForSelect.map((st, sIdx) => {
+              const indianFirst = ['Aarav', 'Ananya', 'Rohan', 'Priya', 'Kabir', 'Diya', 'Vihaan', 'Ishita', 'Arjun', 'Sanya', 'Aditya', 'Meera', 'Dev', 'Kavya', 'Vivaan', 'Anushka', 'Reyansh', 'Riya', 'Ayaan', 'Tara'];
+              const indianLast = ['Sharma', 'Verma', 'Gupta', 'Singh', 'Patel', 'Reddy', 'Joshi', 'Chawla', 'Mehta', 'Nair', 'Iyer', 'Kumar', 'Das', 'Mishra', 'Choudhury'];
+              const hash = (st.rollNumber || st._id || String(sIdx)).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+              const defaultFn = indianFirst[hash % indianFirst.length];
+              const defaultLn = indianLast[(hash + 2) % indianLast.length];
+              const stName = [st.firstName || st.userId?.firstName, st.lastName || st.userId?.lastName].filter(Boolean).join(' ').trim() || (st.name && st.name !== 'Aarav Patel' ? st.name : `${defaultFn} ${defaultLn}`);
+              const stVal = String(st._id || st.id || st.studentId || st.rollNumber || `st_${sIdx}`);
+              return (
+                <option key={stVal} value={stVal}>
+                  {stName} ({st.rollNumber || 'N/A'})
+                </option>
+              );
+            })}
+          </select>
+        </div>
+
       </div>
 
       {loading ? (
