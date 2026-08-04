@@ -320,21 +320,39 @@ const AccountantCollections = () => {
               </tr>
             </thead>
             <tbody>
-              {pendingFees.length === 0 ? (
-                <tr><td colSpan="8" style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>No pending fees found.</td></tr>
-              ) : (
-                pendingFees.filter((fee, idx) => {
+              {(() => {
+                const filteredList = pendingFees.filter((fee, idx) => {
                   const fallbackNames = ['Aarav Sharma', 'Ananya Verma', 'Vihaan Patel', 'Ishaan Gupta', 'Diya Singh', 'Rohan Mehta', 'Sanya Kapoor', 'Aditya Kumar'];
                   const fallbackClasses = ['Grade 10-A', 'Grade 9-B', 'Grade 8-A', 'Grade 7-A', 'Grade 6-B', 'Grade 5-A', 'Grade 4-B', 'Grade 3-A'];
                   const studentName = fee.student?.firstName ? `${fee.student.firstName} ${fee.student.lastName || ''}` : fallbackNames[idx % fallbackNames.length];
                   const studentClass = fee.student?.class?.grade ? `Grade ${fee.student.class.grade} ${fee.student.class.section || ''}` : fallbackClasses[idx % fallbackClasses.length];
                   
-                  if (selectedGrade && !studentClass.includes(`Grade ${selectedGrade}`)) return false;
-                  if (selectedSection && !studentClass.includes(`Section ${selectedSection}`) && !studentClass.includes(`-${selectedSection}`)) return false;
+                  if (selectedGrade) {
+                    const gradeRegex = new RegExp(`\\bGrade\\s*${selectedGrade}\\b`, 'i');
+                    if (!gradeRegex.test(studentClass)) return false;
+                  }
+
+                  if (selectedSection) {
+                    const secRegex = new RegExp(`[\\-\\s]${selectedSection}\\b`, 'i');
+                    if (!secRegex.test(studentClass)) return false;
+                  }
+
                   if (selectedStudent && studentName !== selectedStudent) return false;
                   
                   return true;
-                }).map((fee, idx) => {
+                });
+
+                if (filteredList.length === 0) {
+                  return (
+                    <tr>
+                      <td colSpan="8" style={{ padding: '40px', textAlign: 'center', color: '#0C4A86', fontWeight: '700', fontSize: '0.95rem' }}>
+                        No pending fee collection records match the selected filter criteria.
+                      </td>
+                    </tr>
+                  );
+                }
+
+                return filteredList.map((fee, idx) => {
                   const summary = getFeeSummary(fee);
                   const isOverdue = fee.dueDate && new Date(fee.dueDate) < new Date();
                   const fallbackNames = ['Aarav Sharma', 'Ananya Verma', 'Vihaan Patel', 'Ishaan Gupta', 'Diya Singh', 'Rohan Mehta', 'Sanya Kapoor', 'Aditya Kumar'];
@@ -364,8 +382,8 @@ const AccountantCollections = () => {
                       </td>
                     </tr>
                   );
-                })
-              )}
+                });
+              })()}
             </tbody>
           </table>
         </div>
