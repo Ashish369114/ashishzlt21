@@ -308,7 +308,6 @@ const AccountantDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''}>Students</Link></li>
 
           <li><Link to="/dashboard/fees" className={isActive('/dashboard/fees') ? 'active' : ''}>Fees Overview</Link></li>
-          <li><Link to="/dashboard/payments" className={isActive('/dashboard/payments') ? 'active' : ''}>Collect Payment</Link></li>
           <li><Link to="/dashboard/pending" className={isActive('/dashboard/pending') ? 'active' : ''}>Pending Dues</Link></li>
           <li><Link to="/dashboard/collections" className={isActive('/dashboard/collections') ? 'active' : ''}>Collections</Link></li>
           {isGoldOrBetter && (
