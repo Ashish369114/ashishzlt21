@@ -7,6 +7,8 @@ import DailyInsightWidget from '../../components/DailyInsightWidget';
 import TopBar from '../../components/dashboard/TopBar';
 import { subscribeToDataChanges } from '../../services/syncService';
 import { LayoutDashboard, Users, FileText, Settings, ShieldCheck, LogOut, Calendar as CalendarIcon, Camera } from 'lucide-react';
+import TeacherSettingsPage from './TeacherSettingsPage';
+
 
 const AoDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -48,6 +50,7 @@ const AoDashboard = ({ user, onLogout }) => {
     { id: 'inventory', label: 'Inventory & Assets', icon: FileText },
     { id: 'vendors', label: 'Vendors & Contracts', icon: Users },
     { id: 'maintenance', label: 'Maintenance Requests', icon: Settings },
+    { id: 'settings', label: 'Settings & Profile', icon: Settings },
   ];
 
   return (
@@ -175,6 +178,8 @@ const AoDashboard = ({ user, onLogout }) => {
             <InteractiveGoogleCalendar />
           ) : activeTab === 'calendar' ? (
             <SchoolCalendarManagement />
+          ) : activeTab === 'settings' ? (
+            <TeacherSettingsPage user={user} />
           ) : (
             <AoManagement activeSection={activeTab} activeTab={activeTab} />
           )}

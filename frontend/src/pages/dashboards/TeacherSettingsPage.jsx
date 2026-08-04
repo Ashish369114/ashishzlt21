@@ -95,6 +95,22 @@ const TeacherSettingsPage = ({ user }) => {
           defaultPhone: '+91 98765 11223',
           photoKey: 'studentProfileImage'
         };
+      case 'ao':
+      case 'admin_officer':
+      case 'administrative_officer':
+        return {
+          badgeText: 'Administrative Officer Account & Infrastructure Settings',
+          roleTitle: 'Administrative Officer (AO In-Charge)',
+          field1Label: 'Department / Designation',
+          field1Default: 'School Infrastructure & Operations Management',
+          field2Label: 'Assigned Duties',
+          field2Default: 'Staff Coordination, Vendor Contracts & Maintenance Orders',
+          bioDefault: 'Senior Administrative Officer overseeing school infrastructure, asset management, vendor contracts, and day-to-day operations.',
+          defaultName: { first: 'Vikram', last: 'Rathore' },
+          defaultEmail: 'ao@school.edu',
+          defaultPhone: '+91 98765 33210',
+          photoKey: 'aoProfileImage'
+        };
       default:
         return {
           badgeText: 'Teacher Account & Security Settings',
