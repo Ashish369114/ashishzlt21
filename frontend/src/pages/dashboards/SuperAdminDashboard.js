@@ -92,42 +92,50 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
 
   return (
     <div className="dashboard-layout" style={{ background: '#FAF6F0', minHeight: '100vh' }}>
-      <div className="sidebar" style={{ background: '#FAF6F0', borderRight: '1px solid #BFDBFE' }}>
-        {/* Examiner-style clean brand header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingBottom: '20px', borderBottom: '1px solid #BFDBFE', marginBottom: '20px' }}>
-          <div style={{ width: '42px', height: '42px', background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', boxShadow: '0 4px 15px rgba(20, 158, 242, 0.25)', flexShrink: 0 }}>
+      <div className="sidebar">
+        {/* Brand Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingBottom: '16px', borderBottom: '1px solid #BFDBFE' }}>
+          <div style={{ width: '44px', height: '44px', borderRadius: '16px', background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', boxShadow: '0 4px 12px rgba(12, 74, 134, 0.2)', flexShrink: 0 }}>
             <GraduationCap size={22} />
           </div>
           <div>
-            <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#0C4A86', letterSpacing: '-0.3px', lineHeight: 1.1 }}>Super Admin</div>
-            <div style={{ fontSize: '10px', fontWeight: '800', color: '#0096DA', textTransform: 'uppercase', letterSpacing: '0.6px', marginTop: '3px' }}>PORTAL DASHBOARD</div>
+            <div style={{ fontSize: '1rem', fontWeight: '800', color: '#0C4A86', lineHeight: 1.2 }}>ABC International</div>
+            <div style={{ fontSize: '11px', fontWeight: '700', color: '#0096DA' }}>Super Admin Portal</div>
           </div>
         </div>
-        <ul className="nav-menu" style={{ marginTop: '20px' }}>
-          <li><Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><LayoutDashboard size={20} /> Dashboard</Link></li>
-          <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><GraduationCap size={20} /> Students</Link></li>
 
-          <li><Link to="/dashboard/employees" className={isActive('/dashboard/employees') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Users size={20} /> Employees</Link></li>
+        {/* Section Header */}
+        <div style={{ marginTop: '16px', marginBottom: '8px', padding: '0 4px' }}>
+          <span style={{ fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#0C4A86' }}>
+            NAVIGATION MENU
+          </span>
+        </div>
 
-          <li><Link to="/dashboard/attendance" className={isActive('/dashboard/attendance') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><ClipboardList size={20} /> Attendance</Link></li>
-          <li><Link to="/dashboard/exams" className={isActive('/dashboard/exams') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><ClipboardList size={20} /> Exams</Link></li>
-          <li><Link to="/dashboard/library" className={isActive('/dashboard/library') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><BookOpen size={20} /> Library</Link></li>
-          <li><Link to="/dashboard/inventory" className={isActive('/dashboard/inventory') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Archive size={20} /> Inventory</Link></li>
-          <li><Link to="/dashboard/hostel" className={isActive('/dashboard/hostel') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><BedDouble size={20} /> Hostel</Link></li>
-          <li><Link to="/dashboard/notices" className={isActive('/dashboard/notices') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Bell size={20} /> Circulars & Notices</Link></li>
-          <li><Link to="/dashboard/meeting-moms" className={isActive('/dashboard/meeting-moms') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><ClipboardList size={20} /> Meeting MOMs</Link></li>
-          <li><Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><BarChart3 size={20} /> Reports</Link></li>
-          <li><Link to="/dashboard/audit-logs" className={isActive('/dashboard/audit-logs') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Settings size={20} /> Audit Logs</Link></li>
-          <li><Link to="/dashboard/backup-restore" className={isActive('/dashboard/backup-restore') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Archive size={20} /> Backup & Restore</Link></li>
-          <li><Link to="/dashboard/settings" className={isActive('/dashboard/settings') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Settings size={20} /> Settings & Profile</Link></li>
+        <ul className="nav-menu">
+          <li><Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''}><LayoutDashboard size={18} /> <span>Dashboard</span></Link></li>
+          <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''}><GraduationCap size={18} /> <span>Students</span></Link></li>
 
-          <li style={{ marginTop: '20px', padding: '0 4px' }}>
+          <li><Link to="/dashboard/employees" className={isActive('/dashboard/employees') ? 'active' : ''}><Users size={18} /> <span>Employees</span></Link></li>
+
+          <li><Link to="/dashboard/attendance" className={isActive('/dashboard/attendance') ? 'active' : ''}><ClipboardList size={18} /> <span>Attendance</span></Link></li>
+          <li><Link to="/dashboard/exams" className={isActive('/dashboard/exams') ? 'active' : ''}><ClipboardList size={18} /> <span>Exams</span></Link></li>
+          <li><Link to="/dashboard/library" className={isActive('/dashboard/library') ? 'active' : ''}><BookOpen size={18} /> <span>Library</span></Link></li>
+          <li><Link to="/dashboard/inventory" className={isActive('/dashboard/inventory') ? 'active' : ''}><Archive size={18} /> <span>Inventory</span></Link></li>
+          <li><Link to="/dashboard/hostel" className={isActive('/dashboard/hostel') ? 'active' : ''}><BedDouble size={18} /> <span>Hostel</span></Link></li>
+          <li><Link to="/dashboard/notices" className={isActive('/dashboard/notices') ? 'active' : ''}><Bell size={18} /> <span>Circulars & Notices</span></Link></li>
+          <li><Link to="/dashboard/meeting-moms" className={isActive('/dashboard/meeting-moms') ? 'active' : ''}><ClipboardList size={18} /> <span>Meeting MOMs</span></Link></li>
+          <li><Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''}><BarChart3 size={18} /> <span>Reports</span></Link></li>
+          <li><Link to="/dashboard/audit-logs" className={isActive('/dashboard/audit-logs') ? 'active' : ''}><Settings size={18} /> <span>Audit Logs</span></Link></li>
+          <li><Link to="/dashboard/backup-restore" className={isActive('/dashboard/backup-restore') ? 'active' : ''}><Archive size={18} /> <span>Backup & Restore</span></Link></li>
+          <li><Link to="/dashboard/settings" className={isActive('/dashboard/settings') ? 'active' : ''}><Settings size={18} /> <span>Settings & Profile</span></Link></li>
+
+          <li style={{ marginTop: '16px', padding: '0 4px' }}>
             <DailyInsightWidget />
           </li>
 
-          <li style={{ marginTop: '10px', borderTop: '1px solid #BFDBFE', paddingTop: '16px' }}>
-            <button onClick={handleLogout} className="logout-btn" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '50px', padding: '10px' }}>
-              <LogOut size={18} /> Logout
+          <li style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #BFDBFE' }}>
+            <button onClick={handleLogout} className="logout-btn">
+              <LogOut size={18} /> <span>Logout</span>
             </button>
           </li>
         </ul>

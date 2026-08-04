@@ -55,22 +55,31 @@ const LibrarianDashboard = ({ user, onLogout }) => {
     <div className="dashboard-layout" style={{ background: '#FAF6F0', minHeight: '100vh', display: 'flex' }}>
 
       {/* Sidebar */}
-      <div className="sidebar" style={{ width: '260px', background: '#FAF6F0', borderRight: '1px solid #BFDBFE', padding: '24px 20px', flexShrink: 0 }}>
-        <div className="sidebar-header" style={{ borderBottom: '1px solid #BFDBFE', paddingBottom: '20px' }}>
-          <h2 style={{ color: '#0C4A86', fontSize: '1.2rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
-            <div style={{ width: '36px', height: '36px', background: '#0C4A86', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-              <BookOpen size={20} />
-            </div>
-            Librarian
-          </h2>
+      <div className="sidebar">
+        {/* Brand Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingBottom: '16px', borderBottom: '1px solid #BFDBFE' }}>
+          <div style={{ width: '44px', height: '44px', borderRadius: '16px', background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', boxShadow: '0 4px 12px rgba(12, 74, 134, 0.2)', flexShrink: 0 }}>
+            <BookOpen size={22} />
+          </div>
+          <div>
+            <div style={{ fontSize: '1rem', fontWeight: '800', color: '#0C4A86', lineHeight: 1.2 }}>ABC International</div>
+            <div style={{ fontSize: '11px', fontWeight: '700', color: '#0096DA' }}>Librarian Portal</div>
+          </div>
         </div>
 
-        <ul className="nav-menu" style={{ marginTop: '24px', listStyle: 'none', padding: 0 }}>
+        {/* Section Header */}
+        <div style={{ marginTop: '16px', marginBottom: '8px', padding: '0 4px' }}>
+          <span style={{ fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#0C4A86' }}>
+            NAVIGATION MENU
+          </span>
+        </div>
+
+        <ul className="nav-menu">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (
-              <li key={item.id} style={{ marginBottom: '8px' }}>
+              <li key={item.id}>
                 <a
                   href="#"
                   onClick={(e) => {
@@ -78,33 +87,20 @@ const LibrarianDashboard = ({ user, onLogout }) => {
                     setActiveTab(item.id);
                   }}
                   className={isActive ? 'active' : ''}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    color: isActive ? '#ffffff' : '#0C4A86',
-                    background: isActive ? '#0C4A86' : 'transparent',
-                    padding: '12px 16px',
-                    borderRadius: '10px',
-                    textDecoration: 'none',
-                    fontWeight: '600',
-                    fontSize: '0.9rem',
-                    transition: 'all 0.2s'
-                  }}
                 >
-                  <Icon size={18} color={isActive ? '#ffffff' : '#0C4A86'} /> {item.label}
+                  <Icon size={18} /> <span>{item.label}</span>
                 </a>
               </li>
             );
           })}
 
-          <li style={{ marginTop: '20px', padding: '0 4px' }}>
+          <li style={{ marginTop: '16px', padding: '0 4px' }}>
             <DailyInsightWidget />
           </li>
 
-          <li style={{ marginTop: '10px', borderTop: '1px solid #BFDBFE', paddingTop: '16px' }}>
-            <button onClick={handleLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444', padding: '10px', borderRadius: '50px', fontWeight: '700', cursor: 'pointer', fontSize: '0.88rem' }}>
-              <LogOut size={16} /> Logout
+          <li style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #BFDBFE' }}>
+            <button onClick={handleLogout} className="logout-btn">
+              <LogOut size={18} /> <span>Logout</span>
             </button>
           </li>
         </ul>

@@ -297,95 +297,80 @@ const AccountantDashboard = ({ user, onLogout }) => {
           }
         }
       `}</style>
-      <div className="sidebar" style={{ background: '#FAF6F0', borderRight: '1px solid #BFDBFE' }}>
-        {/* Examiner-style clean brand header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingBottom: '20px', borderBottom: '1px solid #BFDBFE', marginBottom: '20px' }}>
-          <div style={{ width: '42px', height: '42px', background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', boxShadow: '0 4px 15px rgba(20, 158, 242, 0.25)', flexShrink: 0 }}>
+      <div className="sidebar">
+        {/* Brand Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingBottom: '16px', borderBottom: '1px solid #BFDBFE' }}>
+          <div style={{ width: '44px', height: '44px', borderRadius: '16px', background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', boxShadow: '0 4px 12px rgba(12, 74, 134, 0.2)', flexShrink: 0 }}>
             <Wallet size={22} />
           </div>
           <div>
-            <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#0C4A86', letterSpacing: '-0.3px', lineHeight: 1.1 }}>
-              {user?.role === 'super_admin' ? 'Super Admin' : user?.role === 'principal' ? 'Principal' : 'Accountant'}
-            </div>
-            <div style={{ fontSize: '10px', fontWeight: '800', color: '#0096DA', textTransform: 'uppercase', letterSpacing: '0.6px', marginTop: '3px' }}>
-              FINANCE & ACCOUNTS
-            </div>
+            <div style={{ fontSize: '1rem', fontWeight: '800', color: '#0C4A86', lineHeight: 1.2 }}>ABC International</div>
+            <div style={{ fontSize: '11px', fontWeight: '700', color: '#0096DA' }}>Accountant Portal</div>
           </div>
         </div>
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
-          {[
-            { path: '/dashboard', label: 'Dashboard', sub: 'FINANCE OVERVIEW', icon: LayoutDashboard },
-            { path: '/dashboard/students', label: 'Students', sub: 'FEE LEDGERS', icon: GraduationCap },
-            { path: '/dashboard/pending', label: 'Pending Dues', sub: 'ACTION REQUIRED', icon: Clock },
-            { path: '/dashboard/collections', label: 'Collections', sub: 'PAYMENT RECORDS', icon: CreditCard },
-            ...(isGoldOrBetter ? [{ path: '/dashboard/concessions', label: 'Concessions', sub: 'DISCOUNTS & SCHOLARSHIPS', icon: Gift }] : []),
-            { path: '/dashboard/payroll', label: 'Payroll', sub: 'STAFF SALARIES', icon: DollarSign },
-            { path: '/dashboard/expenses', label: 'Expenses', sub: 'OUTFLOW AUDIT', icon: TrendingDown },
-            { path: '/dashboard/reports', label: 'Reports', sub: 'EXECUTIVE STATEMENTS', icon: BarChart3 },
-            { path: '/dashboard/settings', label: 'Settings', sub: 'PREFERENCES', icon: Settings },
-          ].map((item) => {
-            const active = isActive(item.path);
-            const IconComp = item.icon;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                style={{
-                  width: '100%',
-                  textAlign: 'left',
-                  padding: '12px 16px',
-                  borderRadius: '16px',
-                  border: active ? '1.5px solid #0096DA' : '1.5px solid #E2E8F0',
-                  textDecoration: 'none',
-                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  background: active ? '#EBF5FF' : '#FFFFFF',
-                  boxShadow: active ? '0 4px 14px rgba(12, 74, 134, 0.08)' : '0 2px 6px rgba(0,0,0,0.02)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  boxSizing: 'border-box'
-                }}
-              >
-                <span style={{ color: active ? '#0096DA' : '#64748B', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <IconComp size={20} />
-                </span>
-                <div style={{ overflow: 'hidden' }}>
-                  <div style={{ color: active ? '#0C4A86' : '#0F172A', fontWeight: '700', fontSize: '0.9rem', lineHeight: 1.2, whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                    {item.label}
-                  </div>
-                  <div style={{ fontSize: '10px', color: active ? '#0096DA' : '#64748B', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.5px', marginTop: '2px', whiteSpace: 'nowrap' }}>
-                    {item.sub}
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+        {/* Section Header */}
+        <div style={{ marginTop: '16px', marginBottom: '8px', padding: '0 4px' }}>
+          <span style={{ fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#0C4A86' }}>
+            NAVIGATION MENU
+          </span>
+        </div>
 
-          <div style={{ marginTop: '20px', borderTop: '1px solid #BFDBFE', paddingTop: '16px' }}>
-            <button
-              onClick={handleLogout}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '10px',
-                background: '#FAF6F0',
-                color: '#DC2626',
-                border: '1.5px solid #FECACA',
-                borderRadius: '50px',
-                padding: '10px',
-                fontWeight: '700',
-                fontSize: '0.88rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <LogOut size={18} /> Logout
+        <ul className="nav-menu">
+          <li>
+            <Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''}>
+              <LayoutDashboard size={18} /> <span>Dashboard</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''}>
+              <GraduationCap size={18} /> <span>Students</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/dashboard/pending" className={isActive('/dashboard/pending') ? 'active' : ''}>
+              <Clock size={18} /> <span>Pending Dues</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/dashboard/collections" className={isActive('/dashboard/collections') ? 'active' : ''}>
+              <CreditCard size={18} /> <span>Collections</span>
+            </Link>
+          </li>
+          {isGoldOrBetter && (
+            <li>
+              <Link to="/dashboard/concessions" className={isActive('/dashboard/concessions') ? 'active' : ''}>
+                <Gift size={18} /> <span>Concessions</span>
+              </Link>
+            </li>
+          )}
+          <li>
+            <Link to="/dashboard/payroll" className={isActive('/dashboard/payroll') ? 'active' : ''}>
+              <DollarSign size={18} /> <span>Payroll</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/dashboard/expenses" className={isActive('/dashboard/expenses') ? 'active' : ''}>
+              <TrendingDown size={18} /> <span>Expenses</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''}>
+              <BarChart3 size={18} /> <span>Reports</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/dashboard/settings" className={isActive('/dashboard/settings') ? 'active' : ''}>
+              <Settings size={18} /> <span>Settings</span>
+            </Link>
+          </li>
+          
+          <li style={{ marginTop: 'auto', paddingTop: '20px' }}>
+            <button onClick={handleLogout} className="logout-btn">
+              <LogOut size={18} /> <span>Logout</span>
             </button>
-          </div>
-        </nav>
+          </li>
+        </ul>
       </div>
 
       <div className="main-content">
