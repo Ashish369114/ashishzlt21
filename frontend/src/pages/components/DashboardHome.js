@@ -212,25 +212,25 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
               const getCardMeta = (label) => {
                 switch (label) {
                   case "Today's Collection":
-                    return { icon: DollarSign, color: '#3B82F6', pillText: '🟢 Live Today', pillBg: '#DCFCE7', pillColor: '#15803D', link: '/dashboard/collections', progress: 95 };
+                    return { icon: DollarSign, color: '#0096DA', pillText: '🟢 Live Today', pillBg: '#DCFCE7', pillColor: '#15803D', link: '/dashboard/collections', progress: 95, actionText: 'View Today Ledger' };
                   case 'Monthly Collection':
-                    return { icon: TrendingDown, color: '#8B5CF6', pillText: 'Target ₹5L', pillBg: '#F3E8FF', pillColor: '#7E22CE', link: '/dashboard/collections', progress: 85 };
+                    return { icon: TrendingDown, color: '#7C3AED', pillText: '📊 Target ₹5L', pillBg: '#F3E8FF', pillColor: '#6D28D9', link: '/dashboard/collections', progress: 85, actionText: 'View Monthly Ledger' };
                   case 'Fees Pending':
-                    return { icon: AlertCircle, color: '#EF4444', pillText: 'Action Req', pillBg: '#FEE2E2', pillColor: '#B91C1C', link: '/dashboard/collections', progress: 65 };
+                    return { icon: AlertCircle, color: '#EF4444', pillText: '⚠️ Action Req', pillBg: '#FEE2E2', pillColor: '#B91C1C', link: '/dashboard/collections', progress: 65, actionText: 'Collect Pending Dues' };
                   case 'Total Collected (Year)':
-                    return { icon: FileSpreadsheet, color: '#10B981', pillText: 'Yearly Total', pillBg: '#DCFCE7', pillColor: '#15803D', link: '/dashboard/collections', progress: 88 };
+                    return { icon: FileSpreadsheet, color: '#10B981', pillText: '📈 Yearly Total', pillBg: '#DCFCE7', pillColor: '#15803D', link: '/dashboard/collections', progress: 88, actionText: 'View Annual Reports' };
                   case 'Scholarships / Discounts':
-                    return { icon: Gift, color: '#F59E0B', pillText: '12 Beneficiaries', pillBg: '#FEF3C7', pillColor: '#B45309', link: '/dashboard/concessions', progress: 75 };
+                    return { icon: Gift, color: '#F59E0B', pillText: '🎁 12 Beneficiaries', pillBg: '#FEF3C7', pillColor: '#B45309', link: '/dashboard/concessions', progress: 75, actionText: 'Manage Concessions' };
                   case 'Caution Deposits':
-                    return { icon: ShieldAlert, color: '#64748B', pillText: 'Refunds Pending', pillBg: '#F1F5F9', pillColor: '#334155', link: '/dashboard/collections', progress: 50 };
+                    return { icon: ShieldAlert, color: '#0C4A86', pillText: '🛡️ Refunds Pending', pillBg: '#EBF5FF', pillColor: '#0C4A86', link: '/dashboard/collections', progress: 50, actionText: 'Manage Deposits' };
                   case 'Total Students':
-                    return { icon: Users, color: '#0096DA', pillText: 'Enrolled', pillBg: '#EBF5FF', pillColor: '#0C4A86', link: '/dashboard/students', progress: 90 };
+                    return { icon: Users, color: '#0096DA', pillText: 'Enrolled', pillBg: '#EBF5FF', pillColor: '#0C4A86', link: '/dashboard/students', progress: 90, actionText: 'View Student Roster' };
                   case 'Total Teachers':
-                    return { icon: UserCheck, color: '#1E293B', pillText: 'Faculty', pillBg: '#F1F5F9', pillColor: '#334155', link: '/dashboard/teachers', progress: 100 };
+                    return { icon: UserCheck, color: '#1E293B', pillText: 'Faculty', pillBg: '#F1F5F9', pillColor: '#334155', link: '/dashboard/teachers', progress: 100, actionText: 'View Staff List' };
                   case 'Total Classes':
-                    return { icon: BookOpen, color: '#0C4A86', pillText: 'Active', pillBg: '#EBF5FF', pillColor: '#0C4A86', link: '/dashboard/classes', progress: 80 };
+                    return { icon: BookOpen, color: '#0C4A86', pillText: 'Active', pillBg: '#EBF5FF', pillColor: '#0C4A86', link: '/dashboard/classes', progress: 80, actionText: 'View Classes' };
                   default:
-                    return { icon: CreditCard, color: '#0C4A86', pillText: 'Overview', pillBg: '#EBF5FF', pillColor: '#0C4A86', link: '/dashboard', progress: 75 };
+                    return { icon: CreditCard, color: '#0C4A86', pillText: 'Overview', pillBg: '#EBF5FF', pillColor: '#0C4A86', link: '/dashboard', progress: 75, actionText: 'View Details' };
                 }
               };
               const meta = getCardMeta(card.label);
@@ -240,10 +240,10 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
                   <div style={{
                     background: '#ffffff',
                     borderRadius: '20px',
-                    border: '1px solid #BFDBFE',
+                    border: '1.5px solid #BFDBFE',
                     borderTop: `4px solid ${meta.color}`,
-                    padding: '20px',
-                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.04)',
+                    padding: '22px 24px',
+                    boxShadow: '0 4px 16px rgba(12, 74, 134, 0.05)',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
@@ -254,22 +254,22 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                         <div style={{
-                          width: '42px',
-                          height: '42px',
-                          borderRadius: '12px',
+                          width: '44px',
+                          height: '44px',
+                          borderRadius: '14px',
                           background: meta.color,
                           color: '#ffffff',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          boxShadow: `0 4px 12px ${meta.color}40`
+                          boxShadow: `0 4px 12px ${meta.color}35`
                         }}>
                           <IconComp size={22} strokeWidth={2.2} />
                         </div>
                         <span style={{
-                          fontSize: '0.72rem',
-                          fontWeight: '700',
-                          padding: '4px 10px',
+                          fontSize: '0.74rem',
+                          fontWeight: '800',
+                          padding: '5px 12px',
                           borderRadius: '50px',
                           background: meta.pillBg,
                           color: meta.pillColor,
@@ -279,17 +279,17 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
                         </span>
                       </div>
 
-                      <p style={{ fontSize: '0.75rem', fontWeight: '800', color: '#6B5B54', textTransform: 'uppercase', letterSpacing: '0.6px', margin: '0 0 6px 0' }}>{card.label}</p>
-                      <h3 style={{ fontSize: '1.5rem', fontWeight: '900', color: '#0C4A86', margin: '0 0 12px 0', lineHeight: 1.1 }}>{card.value}</h3>
+                      <p style={{ fontSize: '0.74rem', fontWeight: '800', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 6px 0' }}>{card.label}</p>
+                      <h3 style={{ fontSize: '1.65rem', fontWeight: '900', color: '#0C4A86', margin: '0 0 12px 0', lineHeight: 1.1 }}>{card.value}</h3>
                     </div>
 
                     <div>
-                      <div style={{ width: '100%', height: '4px', background: '#EBF5FF', borderRadius: '10px', overflow: 'hidden', marginBottom: '12px' }}>
+                      <div style={{ width: '100%', height: '4px', background: '#E2E8F0', borderRadius: '10px', overflow: 'hidden', marginBottom: '12px' }}>
                         <div style={{ width: `${meta.progress}%`, height: '100%', background: meta.color, borderRadius: '10px' }} />
                       </div>
 
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', fontWeight: '700', color: meta.color }}>
-                        <span>View Ledger</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem', fontWeight: '700', color: meta.color }}>
+                        <span>{meta.actionText}</span>
                         <span>→</span>
                       </div>
                     </div>
