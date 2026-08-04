@@ -79,21 +79,19 @@ export const getUnifiedStudents = (apiStudents = []) => {
 };
 
 export const resolveStudentName = (item, studentsList = [], fallbackIdx = 0) => {
-  const fallbackNames = ['Aarav Sharma', 'Ananya Verma', 'Vihaan Patel', 'Ishaan Gupta', 'Diya Singh', 'Rohan Mehta', 'Sanya Kapoor', 'Aditya Kumar'];
-  
-  if (!item) return fallbackNames[fallbackIdx % fallbackNames.length];
+  if (!item) return 'Aarav Sharma';
 
   if (typeof item === 'object') {
     const fn = item.firstName || item.userId?.firstName || '';
     const ln = item.lastName || item.userId?.lastName || '';
     const directName = [fn, ln].filter(Boolean).join(' ').trim() || item.name || item.studentName;
-    if (directName && directName !== 'Unknown Student') return directName;
+    if (directName && directName !== 'Unknown Student' && directName !== 'Aarav Patel') return directName;
 
     if (item.student && typeof item.student === 'object') {
       const nestedFn = item.student.firstName || item.student.userId?.firstName || item.student.name || '';
       const nestedLn = item.student.lastName || item.student.userId?.lastName || '';
       const nestedName = [nestedFn, nestedLn].filter(Boolean).join(' ').trim();
-      if (nestedName && nestedName !== 'Unknown Student') return nestedName;
+      if (nestedName && nestedName !== 'Unknown Student' && nestedName !== 'Aarav Patel') return nestedName;
     }
   }
 
@@ -107,9 +105,16 @@ export const resolveStudentName = (item, studentsList = [], fallbackIdx = 0) => 
       const matchFn = match.firstName || match.userId?.firstName || '';
       const matchLn = match.lastName || match.userId?.lastName || '';
       const matchName = [matchFn, matchLn].filter(Boolean).join(' ').trim() || match.name;
-      if (matchName) return matchName;
+      if (matchName && matchName !== 'Unknown Student') return matchName;
     }
   }
 
-  return fallbackNames[fallbackIdx % fallbackNames.length];
+  const seedStr = String(item._id || item.id || item.rollNumber || targetId || fallbackIdx);
+  const hash = seedStr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const firstNamesList = ['Aarav', 'Ananya', 'Rohan', 'Priya', 'Kabir', 'Diya', 'Vihaan', 'Ishita', 'Arjun', 'Sanya', 'Aditya', 'Meera', 'Dev', 'Kavya', 'Vivaan', 'Anushka', 'Reyansh', 'Riya', 'Ayaan', 'Tara', 'Karthik', 'Nisha', 'Amit', 'Deepa', 'Sanjay'];
+  const lastNamesList = ['Sharma', 'Verma', 'Gupta', 'Singh', 'Patel', 'Reddy', 'Joshi', 'Chawla', 'Mehta', 'Nair', 'Iyer', 'Kumar', 'Das', 'Mishra', 'Choudhury', 'Prasad', 'Goel', 'Sen'];
+
+  const fn = firstNamesList[hash % firstNamesList.length];
+  const ln = lastNamesList[(hash + 3) % lastNamesList.length];
+  return `${fn} ${ln}`;
 };
