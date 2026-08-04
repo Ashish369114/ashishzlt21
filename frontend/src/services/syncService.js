@@ -62,14 +62,25 @@ export const getUnifiedStudents = (apiStudents = []) => {
     const localSaved = JSON.parse(localStorage.getItem('school_students') || '[]');
     const combinedMap = new Map();
 
+    // Load canonical (api/demo) students first — these have proper firstName/lastName
     apiStudents.forEach((s) => {
       const id = s._id || s.id;
       if (id) combinedMap.set(String(id), s);
     });
 
+    // Merge localStorage data — but ONLY update if the canonical record doesn't already have a name
     localSaved.forEach((s) => {
       const id = s._id || s.id;
-      if (id) combinedMap.set(String(id), s);
+      if (!id) return;
+      const key = String(id);
+      const existing = combinedMap.get(key);
+      if (existing) {
+        // Existing canonical record — merge only non-name fields from local to avoid clobbering names
+        const hasName = (existing.firstName || existing.userId?.firstName);
+        combinedMap.set(key, hasName ? { ...s, ...existing } : { ...existing, ...s });
+      } else {
+        combinedMap.set(key, s);
+      }
     });
 
     return Array.from(combinedMap.values());
