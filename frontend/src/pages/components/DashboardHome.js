@@ -205,9 +205,9 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
         }
       `}</style>
 
-      {/* Stats Cards Layout (Full Width) */}
+      {/* Stats Cards Layout (Full Width 3x2 Grid) */}
       <div style={{ width: '100%', marginBottom: '25px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', width: '100%' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: cards.length === 6 ? 'repeat(3, 1fr)' : 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px', width: '100%' }}>
             {cards.map((card) => {
               const getCardMeta = (label) => {
                 switch (label) {
