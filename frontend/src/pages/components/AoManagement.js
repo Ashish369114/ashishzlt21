@@ -1242,16 +1242,16 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
                 ℹ️ <strong>Pricing Policy:</strong> All sizes of the same uniform item maintain the <strong>SAME Selling Price</strong>. Stock quantity is tracked independently per size.
               </div>
 
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
                 <thead>
-                  <tr style={{ background: '#ffffff', borderBottom: '2px solid #e2e8f0', color: '#475569', fontSize: '0.78rem', textTransform: 'uppercase' }}>
-                    <th style={{ padding: '14px 20px' }}>Item Code & Name</th>
-                    <th style={{ padding: '14px 20px' }}>Category</th>
-                    <th style={{ padding: '14px 20px' }}>Colour / Specs</th>
-                    <th style={{ padding: '14px 20px' }}>Selling Price (All Sizes)</th>
-                    <th style={{ padding: '14px 20px' }}>Size Dropdown & Stock Qty</th>
-                    <th style={{ padding: '14px 20px' }}>Vendor & Date</th>
-                    <th style={{ padding: '14px 20px', textAlign: 'right' }}>Action</th>
+                  <tr style={{ background: '#0096DA', color: '#ffffff', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+                    <th style={{ padding: '12px 14px', fontWeight: '800', letterSpacing: '0.5px' }}>Item Code & Name</th>
+                    <th style={{ padding: '12px 14px', fontWeight: '800', letterSpacing: '0.5px' }}>Category</th>
+                    <th style={{ padding: '12px 14px', fontWeight: '800', letterSpacing: '0.5px' }}>Colour / Specs</th>
+                    <th style={{ padding: '12px 14px', fontWeight: '800', letterSpacing: '0.5px' }}>Selling Price</th>
+                    <th style={{ padding: '12px 14px', fontWeight: '800', letterSpacing: '0.5px' }}>Size & Stock Qty</th>
+                    <th style={{ padding: '12px 14px', fontWeight: '800', letterSpacing: '0.5px' }}>Vendor & Date</th>
+                    <th style={{ padding: '12px 14px', fontWeight: '800', letterSpacing: '0.5px', textAlign: 'right' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1259,22 +1259,22 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
                     .filter(u => uniformCategoryFilter === 'all' || u.category === uniformCategoryFilter)
                     .map(u => (
                       <tr key={u.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '14px 20px' }}>
+                        <td style={{ padding: '10px 14px' }}>
                           <div style={{ fontWeight: '700', color: '#0f172a' }}>{u.name}</div>
-                          <div style={{ fontSize: '0.78rem', color: '#64748b', fontFamily: 'monospace' }}>{u.id}</div>
+                          <div style={{ fontSize: '0.74rem', color: '#64748b', fontFamily: 'monospace' }}>{u.id}</div>
                         </td>
-                        <td style={{ padding: '14px 20px' }}>
-                          <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700', background: u.category.includes('Sports') ? '#ffedd5' : '#e0f2fe', color: u.category.includes('Sports') ? '#c2410c' : '#0369a1' }}>
+                        <td style={{ padding: '10px 14px' }}>
+                          <span style={{ padding: '3px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '700', background: u.category.includes('Sports') ? '#ffedd5' : '#e0f2fe', color: u.category.includes('Sports') ? '#c2410c' : '#0369a1', display: 'inline-block' }}>
                             {u.category}
                           </span>
                         </td>
-                        <td style={{ padding: '14px 20px', color: '#334155' }}>
+                        <td style={{ padding: '10px 14px', color: '#334155', fontWeight: '600' }}>
                           {u.name === 'Sports T-Shirt' ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                               <select
                                 value={sportsHouseColors[u.id] || 'Yellow (Yellow House)'}
                                 onChange={e => setSportsHouseColors({ ...sportsHouseColors, [u.id]: e.target.value })}
-                                style={{ padding: '5px 8px', borderRadius: '6px', border: '1px solid #fdba74', fontSize: '0.78rem', fontWeight: '700', color: '#c2410c', background: '#fff7ed', outline: 'none' }}
+                                style={{ padding: '4px 6px', borderRadius: '6px', border: '1px solid #fdba74', fontSize: '0.75rem', fontWeight: '700', color: '#c2410c', background: '#fff7ed', outline: 'none' }}
                               >
                                 <option value="Yellow (Yellow House)">🟨 Yellow (Yellow House)</option>
                                 <option value="Blue (Blue House)">🟦 Blue (Blue House)</option>
@@ -1286,41 +1286,47 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
                             u.colour
                           )}
                         </td>
-                        <td style={{ padding: '14px 20px', fontWeight: '800', color: '#059669' }}>
-                          ₹{u.sellingPrice} <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 'normal' }}>(Cost: ₹{u.purchasePrice})</span>
+                        <td style={{ padding: '10px 14px' }}>
+                          <div style={{ fontWeight: '800', color: '#059669', fontSize: '0.9rem' }}>₹{u.sellingPrice}</div>
+                          <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Cost: ₹{u.purchasePrice}</div>
                         </td>
-                        <td style={{ padding: '14px 20px' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <td style={{ padding: '10px 14px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                             <select
                               value={selectedUniformSizes[u.id] || u.sizes?.[0]?.size || '30'}
                               onChange={e => setSelectedUniformSizes({ ...selectedUniformSizes, [u.id]: e.target.value })}
-                              style={{ padding: '4px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }}
+                              style={{ padding: '4px 6px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.76rem', background: '#fff' }}
                             >
                               {u.sizes.map(s => (
                                 <option key={s.size} value={s.size}>
-                                  Size {s.size} — Stock: {s.stock} pcs {s.stock < 10 ? '⚠️ Low' : ''}
+                                  Size {s.size} (Stock: {s.stock})
                                 </option>
                               ))}
                             </select>
-                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                            <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
                               Total Stock: <strong>{getTotalUniformStock(u)} pcs</strong>
                             </div>
                           </div>
                         </td>
-                        <td style={{ padding: '14px 20px' }}>
-                          <div style={{ fontWeight: '600' }}>{u.vendor}</div>
-                          <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{u.purchaseDate}</div>
+                        <td style={{ padding: '10px 14px' }}>
+                          <div style={{ fontWeight: '600', fontSize: '0.8rem', color: '#0f172a' }}>{u.vendor}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{u.purchaseDate}</div>
                         </td>
-                        <td style={{ padding: '14px 20px', textAlign: 'right' }}>
-                          <button
-                            onClick={() => handleAddToCart(u, 'uniform')}
-                            style={{ padding: '6px 12px', background: '#0284c7', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', marginRight: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                          >
-                            + Add to Bill
-                          </button>
-                          <button onClick={() => handleOpenSellModal(u, 'uniform')} style={{ padding: '6px 12px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer' }}>
-                            🛒 Buy Single
-                          </button>
+                        <td style={{ padding: '10px 14px', textAlign: 'right' }}>
+                          <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                            <button
+                              onClick={() => handleAddToCart(u, 'uniform')}
+                              style={{ padding: '5px 10px', background: '#0096DA', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                            >
+                              + Add to Bill
+                            </button>
+                            <button 
+                              onClick={() => handleOpenSellModal(u, 'uniform')} 
+                              style={{ padding: '5px 10px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                            >
+                              🛒 Buy Single
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -1393,17 +1399,17 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
                 </div>
               </div>
 
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
                 <thead>
-                  <tr style={{ background: '#ffffff', borderBottom: '2px solid #e2e8f0', color: '#475569', fontSize: '0.78rem', textTransform: 'uppercase' }}>
-                    <th style={{ padding: '14px 20px' }}>Book Title & Type</th>
-                    <th style={{ padding: '14px 20px' }}>Class / Section</th>
-                    <th style={{ padding: '14px 20px' }}>CBSE Subject</th>
-                    <th style={{ padding: '14px 20px' }}>Type Specifications & Dropdown</th>
-                    <th style={{ padding: '14px 20px' }}>Qty Available</th>
-                    <th style={{ padding: '14px 20px' }}>Selling Price</th>
-                    <th style={{ padding: '14px 20px' }}>Publisher</th>
-                    <th style={{ padding: '14px 20px', textAlign: 'right' }}>Action</th>
+                  <tr style={{ background: '#0096DA', color: '#ffffff', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+                    <th style={{ padding: '12px 14px', fontWeight: '800', letterSpacing: '0.5px' }}>Book Title & Type</th>
+                    <th style={{ padding: '12px 14px', fontWeight: '800', letterSpacing: '0.5px' }}>Class / Section</th>
+                    <th style={{ padding: '12px 14px', fontWeight: '800', letterSpacing: '0.5px' }}>CBSE Subject</th>
+                    <th style={{ padding: '12px 14px', fontWeight: '800', letterSpacing: '0.5px' }}>Specs & Options</th>
+                    <th style={{ padding: '12px 14px', fontWeight: '800', letterSpacing: '0.5px' }}>Qty Available</th>
+                    <th style={{ padding: '12px 14px', fontWeight: '800', letterSpacing: '0.5px' }}>Selling Price</th>
+                    <th style={{ padding: '12px 14px', fontWeight: '800', letterSpacing: '0.5px' }}>Publisher</th>
+                    <th style={{ padding: '12px 14px', fontWeight: '800', letterSpacing: '0.5px', textAlign: 'right' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1417,27 +1423,27 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
                     })
                     .map(b => (
                       <tr key={b.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '14px 20px' }}>
+                        <td style={{ padding: '10px 14px' }}>
                           <div style={{ fontWeight: '700', color: '#0f172a' }}>{b.title}</div>
-                          <span style={{ fontSize: '0.72rem', background: b.bookType === 'Long Book' ? '#e0f2fe' : '#fef3c7', color: b.bookType === 'Long Book' ? '#0369a1' : '#b45309', padding: '2px 6px', borderRadius: '4px', fontWeight: '700' }}>
+                          <span style={{ fontSize: '0.72rem', background: b.bookType === 'Long Book' ? '#e0f2fe' : '#fef3c7', color: b.bookType === 'Long Book' ? '#0369a1' : '#b45309', padding: '2px 8px', borderRadius: '12px', fontWeight: '700', display: 'inline-block' }}>
                             {b.bookType}
                           </span>
                         </td>
-                        <td style={{ padding: '14px 20px', fontWeight: '600' }}>{b.classGrade} ({b.section})</td>
-                        <td style={{ padding: '14px 20px' }}>
-                          <span style={{ background: '#f1f5f9', color: '#334155', padding: '3px 8px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: '700' }}>
+                        <td style={{ padding: '10px 14px', fontWeight: '600' }}>{b.classGrade} ({b.section})</td>
+                        <td style={{ padding: '10px 14px' }}>
+                          <span style={{ background: '#f1f5f9', color: '#334155', padding: '3px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '700', display: 'inline-block' }}>
                             {b.subject}
                           </span>
                         </td>
-                        <td style={{ padding: '14px 20px' }}>
+                        <td style={{ padding: '10px 14px' }}>
                           {b.bookType === 'Long Book' ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                              <select defaultValue={b.pageOption} onChange={e => alert(`Updated page option for ${b.title} to ${e.target.value}`)} style={{ padding: '3px 6px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.76rem', background: '#f8fafc' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                              <select defaultValue={b.pageOption} onChange={e => alert(`Updated page option for ${b.title} to ${e.target.value}`)} style={{ padding: '3px 6px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.75rem', background: '#f8fafc' }}>
                                 <option value="100 Pages">100 Pages</option>
                                 <option value="200 Pages">200 Pages</option>
                                 <option value="300 Pages">300 Pages</option>
                               </select>
-                              <select defaultValue={b.ruleType} onChange={e => alert(`Updated rule type for ${b.title} to ${e.target.value}`)} style={{ padding: '3px 6px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.76rem', background: '#f8fafc' }}>
+                              <select defaultValue={b.ruleType} onChange={e => alert(`Updated rule type for ${b.title} to ${e.target.value}`)} style={{ padding: '3px 6px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.75rem', background: '#f8fafc' }}>
                                 <option value="Ruled">Ruled</option>
                                 <option value="Plain">Plain</option>
                                 <option value="One Side Ruled & One Side Plain">One Side Ruled & One Side Plain</option>
@@ -1445,7 +1451,7 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
                               </select>
                             </div>
                           ) : (
-                            <select defaultValue={b.shortBookCategory} onChange={e => alert(`Updated category for ${b.title} to ${e.target.value}`)} style={{ padding: '4px 8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.76rem', background: '#f8fafc' }}>
+                            <select defaultValue={b.shortBookCategory} onChange={e => alert(`Updated category for ${b.title} to ${e.target.value}`)} style={{ padding: '4px 6px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.75rem', background: '#f8fafc' }}>
                               <option value="Mathematics">Mathematics</option>
                               <option value="English">English</option>
                               <option value="Broad Rule">Broad Rule</option>
@@ -1457,23 +1463,29 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
                             </select>
                           )}
                         </td>
-                        <td style={{ padding: '14px 20px', fontWeight: '800', color: b.quantity < 10 ? '#ef4444' : '#10b981' }}>
+                        <td style={{ padding: '10px 14px', fontWeight: '800', color: b.quantity < 10 ? '#ef4444' : '#10b981' }}>
                           {b.quantity} copies {b.quantity < 10 && <span style={{ fontSize: '0.72rem', background: '#fee2e2', color: '#b91c1c', padding: '2px 6px', borderRadius: '4px' }}>Low Stock</span>}
                         </td>
-                        <td style={{ padding: '14px 20px', fontWeight: '800', color: '#059669' }}>
-                          ₹{b.sellingPrice} <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 'normal' }}>(Cost: ₹{b.purchasePrice})</span>
+                        <td style={{ padding: '10px 14px' }}>
+                          <div style={{ fontWeight: '800', color: '#059669', fontSize: '0.9rem' }}>₹{b.sellingPrice}</div>
+                          <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Cost: ₹{b.purchasePrice}</div>
                         </td>
-                        <td style={{ padding: '14px 20px', color: '#334155' }}>{b.publisher}</td>
-                        <td style={{ padding: '14px 20px', textAlign: 'right' }}>
-                          <button
-                            onClick={() => handleAddToCart(b, 'book')}
-                            style={{ padding: '6px 12px', background: '#0284c7', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', marginRight: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                          >
-                            + Add to Bill
-                          </button>
-                          <button onClick={() => handleOpenSellModal(b, 'book')} style={{ padding: '6px 12px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer' }}>
-                            🛒 Buy Single
-                          </button>
+                        <td style={{ padding: '10px 14px', color: '#334155', fontWeight: '600' }}>{b.publisher}</td>
+                        <td style={{ padding: '10px 14px', textAlign: 'right' }}>
+                          <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                            <button
+                              onClick={() => handleAddToCart(b, 'book')}
+                              style={{ padding: '5px 10px', background: '#0096DA', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                            >
+                              + Add to Bill
+                            </button>
+                            <button 
+                              onClick={() => handleOpenSellModal(b, 'book')} 
+                              style={{ padding: '5px 10px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                            >
+                              🛒 Buy Single
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
