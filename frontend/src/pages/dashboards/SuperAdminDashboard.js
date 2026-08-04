@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import AcademicManagement from '../components/AcademicManagement';
 import SettingsManagement from '../components/SettingsManagement';
+import TeacherSettingsPage from './TeacherSettingsPage';
 import PlanUpgradeRequired from '../components/PlanUpgradeRequired';
 import AuditLogsManagement from '../components/AuditLogsManagement';
 import MeetingMomManagement from '../components/MeetingMomManagement';
@@ -116,7 +117,7 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><BarChart3 size={20} /> Reports</Link></li>
           <li><Link to="/dashboard/audit-logs" className={isActive('/dashboard/audit-logs') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Settings size={20} /> Audit Logs</Link></li>
           <li><Link to="/dashboard/backup-restore" className={isActive('/dashboard/backup-restore') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Archive size={20} /> Backup & Restore</Link></li>
-          <li><Link to="/dashboard/settings" className={isActive('/dashboard/settings') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Settings size={20} /> Settings</Link></li>
+          <li><Link to="/dashboard/settings" className={isActive('/dashboard/settings') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Settings size={20} /> Settings & Profile</Link></li>
 
           <li style={{ marginTop: '20px', padding: '0 4px' }}>
             <DailyInsightWidget />
@@ -230,7 +231,7 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
           <Route path="transport" element={<TransportManagement />} />
           <Route path="hostel" element={<HostelManagement />} />
           <Route path="reports" element={<ReportManagement />} />
-          <Route path="settings" element={<SettingsManagement />} />
+          <Route path="settings" element={<TeacherSettingsPage user={{ role: 'super_admin', ...user }} />} />
           <Route path="notices" element={<NoticeManagement />} />
           <Route path="meeting-moms" element={<MeetingMomManagement />} />
           <Route path="audit-logs" element={<AuditLogsManagement />} />
