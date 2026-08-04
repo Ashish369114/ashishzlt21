@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { User, Camera, Lock, Save, KeyRound, ShieldCheck } from 'lucide-react';
+import { User, Camera, Lock, Save, KeyRound, ShieldCheck, Trash2 } from 'lucide-react';
 import SectionCard from '../../components/dashboard/SectionCard';
 
 const TeacherSettingsPage = ({ user }) => {
@@ -166,6 +166,15 @@ const TeacherSettingsPage = ({ user }) => {
     }
   };
 
+  const handleRemovePhoto = () => {
+    setProfilePhoto('');
+    localStorage.removeItem(roleConfig.photoKey);
+    localStorage.removeItem('userProfileImage');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    setProfileSuccessMsg('Profile photo removed successfully!');
+    setTimeout(() => setProfileSuccessMsg(''), 3000);
+  };
+
   const handleSaveProfile = (e) => {
     e.preventDefault();
     localStorage.setItem('user', JSON.stringify({ ...user, ...profileForm }));
@@ -269,13 +278,24 @@ const TeacherSettingsPage = ({ user }) => {
                 className="hidden"
               />
 
-              <button
-                type="button"
-                onClick={() => fileInputRef.current && fileInputRef.current.click()}
-                className="mt-4 rounded-xl border border-[#BFDBFE] bg-white px-3.5 py-2 text-xs font-bold text-[#0C4A86] hover:bg-[#EBF5FF]"
-              >
-                Upload New Photo
-              </button>
+              <div className="mt-4 flex flex-wrap gap-2 justify-center">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                  className="rounded-xl border border-[#BFDBFE] bg-white px-3.5 py-2 text-xs font-bold text-[#0C4A86] hover:bg-[#EBF5FF] transition"
+                >
+                  Upload New Photo
+                </button>
+                {profilePhoto && (
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 transition"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Remove Photo
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Right Profile Form */}
