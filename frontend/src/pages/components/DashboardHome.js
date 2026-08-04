@@ -334,8 +334,13 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '25px' }}>
           
           {/* Recent Fee Collections */}
-          <div className="list-card">
-            <div className="list-header">💰 Recent Fee Collections</div>
+          <div className="list-card" style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #BFDBFE', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.04)', overflow: 'hidden' }}>
+            <div className="list-header" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#ffffff', padding: '16px 20px', borderBottom: '1px solid #EBF5FF', fontWeight: '800', color: '#0C4A86', fontSize: '0.95rem' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#0096DA', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,150,218,0.25)' }}>
+                <CreditCard size={16} />
+              </div>
+              Recent Fee Collections
+            </div>
             <div>
               {recentCollections.length === 0 ? (
                 <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>No recent collections found.</div>
@@ -345,12 +350,12 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
                     ? `${fee.student.firstName} ${fee.student.lastName || ''}`.trim() 
                     : 'Unknown Student';
                   return (
-                    <div key={fee._id || idx} className="list-item">
+                    <div key={fee._id || idx} className="list-item" style={{ padding: '12px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
-                        <div style={{ fontWeight: '600', color: '#0f172a' }}>{studentName}</div>
-                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{new Date(fee.paymentDate).toLocaleDateString('en-IN')}</div>
+                        <div style={{ fontWeight: '700', color: '#0C4A86', fontSize: '0.88rem' }}>{studentName}</div>
+                        <div style={{ fontSize: '0.78rem', color: '#6B5B54', fontWeight: '500' }}>{new Date(fee.paymentDate).toLocaleDateString('en-IN')}</div>
                       </div>
-                      <div style={{ fontWeight: '700', color: '#10b981' }}>+{formatCurrency(fee.paidAmount)}</div>
+                      <div style={{ fontWeight: '800', color: '#10b981', fontSize: '0.92rem' }}>+{formatCurrency(fee.paidAmount)}</div>
                     </div>
                   );
                 })
@@ -359,8 +364,13 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
           </div>
 
           {/* Students with Pending Fees */}
-          <div className="list-card">
-            <div className="list-header">⏳ Students with Pending Fees</div>
+          <div className="list-card" style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #BFDBFE', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.04)', overflow: 'hidden' }}>
+            <div className="list-header" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#ffffff', padding: '16px 20px', borderBottom: '1px solid #EBF5FF', fontWeight: '800', color: '#0C4A86', fontSize: '0.95rem' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#F59E0B', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(245,158,11,0.25)' }}>
+                <Clock size={16} />
+              </div>
+              Students with Pending Fees
+            </div>
             <div>
               {pendingStudents.length === 0 ? (
                 <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>No pending fees found.</div>
@@ -371,12 +381,12 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
                     : 'Unknown Student';
                   const pendingAmt = Number(fee.amount || 0) - Number(fee.paidAmount || 0);
                   return (
-                    <div key={fee._id || idx} className="list-item">
+                    <div key={fee._id || idx} className="list-item" style={{ padding: '12px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
-                        <div style={{ fontWeight: '600', color: '#0f172a' }}>{studentName}</div>
-                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Due Date: {new Date(fee.dueDate).toLocaleDateString('en-IN')}</div>
+                        <div style={{ fontWeight: '700', color: '#0C4A86', fontSize: '0.88rem' }}>{studentName}</div>
+                        <div style={{ fontSize: '0.78rem', color: '#6B5B54', fontWeight: '500' }}>Due Date: {new Date(fee.dueDate).toLocaleDateString('en-IN')}</div>
                       </div>
-                      <div style={{ fontWeight: '700', color: '#ef4444' }}>{formatCurrency(pendingAmt)}</div>
+                      <div style={{ fontWeight: '800', color: '#ef4444', fontSize: '0.92rem' }}>{formatCurrency(pendingAmt)}</div>
                     </div>
                   );
                 })
@@ -385,19 +395,24 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
           </div>
 
           {/* Recent Expenses */}
-          <div className="list-card">
-            <div className="list-header">📉 Recent Expenses</div>
+          <div className="list-card" style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #BFDBFE', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.04)', overflow: 'hidden' }}>
+            <div className="list-header" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#ffffff', padding: '16px 20px', borderBottom: '1px solid #EBF5FF', fontWeight: '800', color: '#0C4A86', fontSize: '0.95rem' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#EF4444', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(239,68,68,0.25)' }}>
+                <TrendingDown size={16} />
+              </div>
+              Recent Expenses
+            </div>
             <div>
               {recentExpenses.length === 0 ? (
                 <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>No recent expenses found.</div>
               ) : (
                 recentExpenses.map((exp, idx) => (
-                  <div key={exp._id || idx} className="list-item">
+                  <div key={exp._id || idx} className="list-item" style={{ padding: '12px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <div style={{ fontWeight: '600', color: '#0f172a' }}>{exp.category || exp.title || 'Expense'}</div>
-                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{new Date(exp.date).toLocaleDateString('en-IN')}</div>
+                      <div style={{ fontWeight: '700', color: '#0C4A86', fontSize: '0.88rem' }}>{exp.category || exp.title || 'Expense'}</div>
+                      <div style={{ fontSize: '0.78rem', color: '#6B5B54', fontWeight: '500' }}>{new Date(exp.date).toLocaleDateString('en-IN')}</div>
                     </div>
-                    <div style={{ fontWeight: '700', color: '#ef4444' }}>-{formatCurrency(exp.amount)}</div>
+                    <div style={{ fontWeight: '800', color: '#ef4444', fontSize: '0.92rem' }}>-{formatCurrency(exp.amount)}</div>
                   </div>
                 ))
               )}
