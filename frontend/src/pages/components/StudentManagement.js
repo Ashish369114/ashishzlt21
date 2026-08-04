@@ -14,7 +14,6 @@ const StudentManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
-  
   const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
   const [selectedClassId, setSelectedClassId] = useState('');
@@ -534,7 +533,8 @@ const StudentManagement = () => {
     }
   }
 
-  const isAccountant = (currentUser && (currentUser.role === 'accountant' || currentUser.role === 'accountant_admin')) || window.location.pathname.includes('/dashboard/students');
+  const activeRole = (currentUser?.role || localStorage.getItem('role') || '').toLowerCase();
+  const isAccountant = activeRole === 'accountant' || activeRole === 'accountant_admin';
 
   return (
     <>
