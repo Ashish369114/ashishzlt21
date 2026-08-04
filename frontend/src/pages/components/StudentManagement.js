@@ -923,12 +923,7 @@ const StudentManagement = () => {
           >
             <option value="">All Students</option>
             {filteredStudentsForSelect.map((st, sIdx) => {
-              const indianFirst = ['Aarav', 'Ananya', 'Rohan', 'Priya', 'Kabir', 'Diya', 'Vihaan', 'Ishita', 'Arjun', 'Sanya', 'Aditya', 'Meera', 'Dev', 'Kavya', 'Vivaan', 'Anushka', 'Reyansh', 'Riya', 'Ayaan', 'Tara'];
-              const indianLast = ['Sharma', 'Verma', 'Gupta', 'Singh', 'Patel', 'Reddy', 'Joshi', 'Chawla', 'Mehta', 'Nair', 'Iyer', 'Kumar', 'Das', 'Mishra', 'Choudhury'];
-              const hash = (st.rollNumber || st._id || String(sIdx)).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-              const defaultFn = indianFirst[hash % indianFirst.length];
-              const defaultLn = indianLast[(hash + 2) % indianLast.length];
-              const stName = [st.firstName || st.userId?.firstName, st.lastName || st.userId?.lastName].filter(Boolean).join(' ').trim() || (st.name && st.name !== 'Aarav Patel' ? st.name : `${defaultFn} ${defaultLn}`);
+              const stName = resolveStudentName(st, students, sIdx);
               const stVal = String(st._id || st.id || st.studentId || st.rollNumber || `st_${sIdx}`);
               return (
                 <option key={stVal} value={stVal}>

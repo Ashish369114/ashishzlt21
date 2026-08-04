@@ -9,6 +9,8 @@ import {
 import CalendarAndEventsSection from '../../components/common/CalendarAndEventsSection';
 import { studentService } from '../../services/api';
 import { demoStudents } from '../../utils/demoData';
+import { resolveStudentName } from '../../services/syncService';
+
 
 // CBSE Subject Mapping by Class
 const CBSE_SUBJECTS_BY_GRADE = {
@@ -68,25 +70,12 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
     const rawLoaded = (demoStudents && demoStudents.length) ? demoStudents : [];
     const loaded = Array.isArray(rawLoaded[0]) ? rawLoaded.flat() : rawLoaded;
     if (loaded.length > 0) {
-      const indianFirst = ['Aarav', 'Ananya', 'Rohan', 'Priya', 'Kabir', 'Diya', 'Vihaan', 'Ishita', 'Arjun', 'Sanya', 'Aditya', 'Meera', 'Dev', 'Kavya', 'Vivaan', 'Anushka', 'Reyansh', 'Riya', 'Ayaan', 'Tara', 'Ishaan', 'Nisha', 'Karthik', 'Pooja', 'Rahul'];
-      const indianLast = ['Patel', 'Sharma', 'Verma', 'Reddy', 'Mehta', 'Rao', 'Gupta', 'Singh', 'Joshi', 'Chawla', 'Nair', 'Iyer', 'Kumar', 'Das', 'Mishra'];
-
       return loaded.map((s, idx) => {
-        const fn = s.firstName || s.userId?.firstName || '';
-        const ln = s.lastName || s.userId?.lastName || '';
-        let rawName = [fn, ln].filter(Boolean).join(' ').trim();
-        if (!rawName) rawName = s.name || s.studentName || '';
-
-        if (!rawName || rawName.startsWith('Student')) {
-          const nameSeed = idx * 17 + (s.rollNumber ? s.rollNumber.charCodeAt(0) : 5);
-          rawName = `${indianFirst[nameSeed % indianFirst.length]} ${indianLast[(nameSeed * 3 + 1) % indianLast.length]}`;
-        }
-
+        const rawName = resolveStudentName(s, loaded, idx);
         let g = String(s.grade || s.class?.grade || '1');
         if (!g.toLowerCase().startsWith('grade')) g = `Grade ${g}`;
         let sec = String(s.section || s.class?.section || 'A');
         if (!sec.toLowerCase().startsWith('section')) sec = `Section ${sec}`;
-
         return {
           id: s._id || s.id || s.studentId || `STU-${1000 + idx}`,
           name: rawName,
@@ -97,19 +86,24 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
       });
     }
 
-    const indianFirst = ['Aarav', 'Ananya', 'Rohan', 'Priya', 'Kabir', 'Diya', 'Vihaan', 'Ishita', 'Arjun', 'Sanya', 'Aditya', 'Meera', 'Dev', 'Kavya', 'Vivaan', 'Anushka', 'Reyansh', 'Riya', 'Ayaan', 'Tara'];
-    const indianLast = ['Sharma', 'Verma', 'Gupta', 'Singh', 'Patel', 'Reddy', 'Joshi', 'Chawla', 'Mehta', 'Nair', 'Iyer', 'Kumar', 'Das', 'Mishra', 'Choudhury'];
+    // Fallback: generate structured student list
+    const fallbackNames = [
+      'Aarav Sharma', 'Ananya Verma', 'Rohan Gupta', 'Priya Singh', 'Kabir Patel',
+      'Diya Reddy', 'Vihaan Joshi', 'Ishita Chawla', 'Arjun Mehta', 'Sanya Nair',
+      'Aditya Iyer', 'Meera Kumar', 'Dev Das', 'Kavya Mishra', 'Vivaan Choudhury',
+      'Anushka Prasad', 'Reyansh Goel', 'Riya Sen', 'Ayaan Tripathi', 'Tara Dubey'
+    ];
     const list = [];
     let count = 1001;
+    let nameIdx = 0;
     for (let g = 1; g <= 10; g++) {
       for (const secCode of ['A', 'B', 'C']) {
-        const seed = g * 37 + secCode.charCodeAt(0) * 13;
         for (let sIdx = 1; sIdx <= 4; sIdx++) {
-          const fn = indianFirst[(seed + sIdx * 3) % indianFirst.length];
-          const ln = indianLast[(seed + sIdx * 5 + 1) % indianLast.length];
+          const name = fallbackNames[nameIdx % fallbackNames.length];
+          nameIdx++;
           list.push({
             id: `STU-${count++}`,
-            name: `${fn} ${ln}`,
+            name,
             grade: `Grade ${g}`,
             section: `Section ${secCode}`,
             rollNo: `G${g}-${String(sIdx).padStart(3, '0')}`
@@ -133,19 +127,8 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
       const rawLoaded = (response?.data && response.data.length) ? response.data : demoStudents;
       const loaded = Array.isArray(rawLoaded[0]) ? rawLoaded.flat() : rawLoaded;
       if (loaded && loaded.length > 0) {
-        const indianFirst = ['Aarav', 'Ananya', 'Rohan', 'Priya', 'Kabir', 'Diya', 'Vihaan', 'Ishita', 'Arjun', 'Sanya', 'Aditya', 'Meera', 'Dev', 'Kavya', 'Vivaan', 'Anushka', 'Reyansh', 'Riya', 'Ayaan', 'Tara', 'Ishaan', 'Nisha', 'Karthik', 'Pooja', 'Rahul'];
-        const indianLast = ['Patel', 'Sharma', 'Verma', 'Reddy', 'Mehta', 'Rao', 'Gupta', 'Singh', 'Joshi', 'Chawla', 'Nair', 'Iyer', 'Kumar', 'Das', 'Mishra'];
-
         const mapped = loaded.map((s, idx) => {
-          const fn = s.firstName || s.userId?.firstName || '';
-          const ln = s.lastName || s.userId?.lastName || '';
-          let rawName = [fn, ln].filter(Boolean).join(' ').trim();
-          if (!rawName) rawName = s.name || s.studentName || '';
-
-          if (!rawName || rawName.startsWith('Student')) {
-            const nameSeed = idx * 17 + (s.rollNumber ? s.rollNumber.charCodeAt(0) : 5);
-            rawName = `${indianFirst[nameSeed % indianFirst.length]} ${indianLast[(nameSeed * 3 + 1) % indianLast.length]}`;
-          }
+          const rawName = resolveStudentName(s, loaded, idx);
 
           let g = String(s.grade || s.class?.grade || '1');
           if (!g.toLowerCase().startsWith('grade')) g = `Grade ${g}`;
@@ -162,7 +145,7 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
         setStudentsList(mapped);
       }
     } catch (err) {
-      console.warn('Student load fallback:', err);
+      console.error('Failed to load students for AO:', err);
     }
   };
 
