@@ -3,7 +3,7 @@ import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
 import { 
   ChevronDown, ChevronRight, CheckCircle2, Camera,
   LayoutDashboard, Calendar, MessageSquare, GraduationCap, Users, 
-  FileText, BookOpen, Bell, FileSpreadsheet, BarChart2, LogOut, ShieldCheck
+  FileText, BookOpen, Bell, FileSpreadsheet, BarChart2, LogOut, ShieldCheck, Settings
 } from 'lucide-react';
 import { studentService, teacherService, feeService, attendanceService, examService } from '../../services/api';
 import { subscribeToDataChanges } from '../../services/syncService';
@@ -31,6 +31,7 @@ import MeetingMomManagement from '../components/MeetingMomManagement';
 import SchoolCalendarManagement from '../components/SchoolCalendarManagement';
 import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogleCalendar';
 import MultiRoleMessagingSystem from '../../components/common/MultiRoleMessagingSystem';
+import TeacherSettingsPage from './TeacherSettingsPage';
 
 const PrincipalDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -133,6 +134,7 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/notices" className={isActive('/dashboard/notices') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Bell size={18} /> Circulars & Notices</Link></li>
           <li><Link to="/dashboard/meeting-moms" className={isActive('/dashboard/meeting-moms') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><FileSpreadsheet size={18} /> Meeting MOMs</Link></li>
           <li><Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><BarChart2 size={18} /> Executive Reports</Link></li>
+          <li><Link to="/dashboard/settings" className={isActive('/dashboard/settings') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><Settings size={18} /> Settings & Profile</Link></li>
 
           <li style={{ marginTop: '20px', padding: '0 4px' }}>
             <DailyInsightWidget />
@@ -164,6 +166,7 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           <Route path="notices" element={<NoticeManagement />} />
           <Route path="meeting-moms" element={<MeetingMomManagement />} />
           <Route path="complaints" element={<PrincipalTeacherComplaints />} />
+          <Route path="settings" element={<TeacherSettingsPage user={{ role: 'principal', ...user }} />} />
           <Route path="*" element={<PrincipalDashboardHome stats={stats} user={user} />} />
         </Routes>
       </div>

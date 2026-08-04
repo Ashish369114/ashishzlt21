@@ -328,21 +328,21 @@ const TeacherSettingsPage = ({ user }) => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-bold text-[#0C4A86]">Subject / Specialization</label>
+                  <label className="text-xs font-bold text-[#0C4A86]">{roleConfig.field1Label}</label>
                   <input
                     type="text"
-                    name="subject"
-                    value={profileForm.subject}
+                    name="field1"
+                    value={profileForm.field1}
                     onChange={handleProfileChange}
                     className="mt-1 w-full rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] p-2.5 text-xs font-bold text-[#0C4A86] focus:border-[#0096DA] focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-[#0C4A86]">Assigned Classes</label>
+                  <label className="text-xs font-bold text-[#0C4A86]">{roleConfig.field2Label}</label>
                   <input
                     type="text"
-                    name="assignedClasses"
-                    value={profileForm.assignedClasses}
+                    name="field2"
+                    value={profileForm.field2}
                     onChange={handleProfileChange}
                     className="mt-1 w-full rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] p-2.5 text-xs font-bold text-[#0C4A86] focus:border-[#0096DA] focus:outline-none"
                   />
