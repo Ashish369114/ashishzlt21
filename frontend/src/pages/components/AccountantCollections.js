@@ -348,70 +348,7 @@ const AccountantCollections = ({ defaultTab = 'collections' }) => {
 
 
 
-      {/* KPI Cards Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '30px' }}>
 
-        <div style={{ ...kpiCardStyle, borderTop: '4px solid #3b82f6' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
-            Today's Collection <IndianRupee size={18} />
-          </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#0f172a' }}>{formatCurrency(displayTodayTotal)}</div>
-          <div style={{ fontSize: '0.85rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <CheckCircle2 size={14} /> {displayTodayCount} payments received
-          </div>
-        </div>
-
-        <div style={{ ...kpiCardStyle, borderTop: '4px solid #8b5cf6' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
-            Monthly Collection <TrendingUp size={18} />
-          </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#0f172a' }}>{formatCurrency(displayMonthTotal)}</div>
-          <div style={{ width: '100%', background: '#f1f5f9', height: '6px', borderRadius: '4px', marginTop: '4px', overflow: 'hidden' }}>
-            <div style={{ width: `${Math.min((displayMonthTotal / (stats?.monthlyTarget || 500000)) * 100, 100)}%`, background: '#8b5cf6', height: '100%' }}></div>
-          </div>
-          <div style={{ fontSize: '0.8rem', color: '#64748b', textAlign: 'right', marginTop: '2px' }}>Target: {formatCurrency(stats?.monthlyTarget || 500000)}</div>
-        </div>
-
-        <div style={{ ...kpiCardStyle, borderTop: '4px solid #ef4444' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
-            Fees Pending <AlertCircle size={18} />
-          </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#0f172a' }}>{formatCurrency(displayPendingAmount)}</div>
-          <div style={{ fontSize: '0.85rem', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <UsersIcon size={14} /> {displayPendingCount} students with dues
-          </div>
-        </div>
-
-        <div style={{ ...kpiCardStyle, borderTop: '4px solid #10b981' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
-            Total Collected (Year) <FileSpreadsheet size={18} />
-          </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#0f172a' }}>{formatCurrency(displayTotalCollected)}</div>
-          <div style={{ fontSize: '0.85rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-            <TrendingUp size={14} /> {displayCollectionPercentage}% collected overall
-          </div>
-        </div>
-
-        <div style={{ ...kpiCardStyle, borderTop: '4px solid #f59e0b' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
-            Scholarships / Discounts <Gift size={18} />
-          </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#0f172a' }}>{formatCurrency(stats.discountProvided)}</div>
-          <div style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <CheckCircle2 size={14} color="#f59e0b" /> {stats.discountBeneficiaries} beneficiaries
-          </div>
-        </div>
-
-        <div style={{ ...kpiCardStyle, borderTop: '4px solid #64748b' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
-            Caution Deposits <ShieldAlert size={18} />
-          </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#0f172a' }}>{formatCurrency(stats.cautionDeposits)}</div>
-          <div style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <AlertCircle size={14} color="#ef4444" /> {stats.refundsPending} refunds pending
-          </div>
-        </div>
-      </div>
 
       {/* Pending Fee Collections Table (Full Width) */}
       <div style={{ background: '#ffffff', borderRadius: '20px', boxShadow: '0 4px 15px rgba(0,0,0,0.04)', border: '1px solid #BFDBFE', overflow: 'hidden', width: '100%' }}>

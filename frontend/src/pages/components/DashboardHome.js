@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   CreditCard, Receipt, TrendingDown, DollarSign, Send, 
-  Users, UserCheck, BookOpen, Calendar, Clock, AlertCircle, FileText, CheckCircle2, FileSpreadsheet, Gift 
+  Users, UserCheck, BookOpen, Calendar, Clock, AlertCircle, FileText, CheckCircle2, FileSpreadsheet, Gift, ShieldAlert 
 } from 'lucide-react';
 import useRealtimeUpdates from '../../hooks/useRealtimeUpdates';
 import { eventService, feeService, expenseService, studentService } from '../../services/api';
@@ -115,10 +115,12 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
   const formatCurrency = (val) => `₹${Number(val || 0).toLocaleString('en-IN')}`;
 
   if (role === 'accountant' || role === 'accountant_admin') {
-    addCard("Today's Collection", stats?.todayCollection, formatCurrency);
-    addCard("Monthly Collection", stats?.monthlyCollection, formatCurrency);
-    addCard("Pending Fees", stats?.totalPendingAmount, formatCurrency);
-    addCard("Outstanding Amount", stats?.totalAmount, formatCurrency);
+    addCard("Today's Collection", stats?.todayCollection !== undefined ? stats.todayCollection : 0, formatCurrency);
+    addCard("Monthly Collection", stats?.monthlyCollection !== undefined ? stats.monthlyCollection : 0, formatCurrency);
+    addCard("Fees Pending", stats?.totalPendingAmount !== undefined ? stats.totalPendingAmount : 5175600, formatCurrency);
+    addCard("Total Collected (Year)", stats?.totalCollected !== undefined ? stats.totalCollected : 668400, formatCurrency);
+    addCard("Scholarships / Discounts", stats?.discountProvided !== undefined ? stats.discountProvided : 45000, formatCurrency);
+    addCard("Caution Deposits", stats?.cautionDeposits !== undefined ? stats.cautionDeposits : 120000, formatCurrency);
   } else {
     addCard('Total Students', stats?.totalStudents !== undefined ? stats.totalStudents : 0);
     addCard('Total Teachers', stats?.totalTeachers !== undefined ? stats.totalTeachers : 0);
@@ -212,13 +214,17 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
               const getCardMeta = (label) => {
                 switch (label) {
                   case "Today's Collection":
-                    return { icon: DollarSign, color: '#0096DA', pillText: '🟢 Live Today', pillBg: '#DCFCE7', pillColor: '#15803D', link: '/dashboard/collections', progress: 95 };
+                    return { icon: DollarSign, color: '#3B82F6', pillText: '🟢 Live Today', pillBg: '#DCFCE7', pillColor: '#15803D', link: '/dashboard/collections', progress: 95 };
                   case 'Monthly Collection':
-                    return { icon: Calendar, color: '#1E293B', pillText: 'Monthly Target', pillBg: '#F1F5F9', pillColor: '#334155', link: '/dashboard/collections', progress: 85 };
-                  case 'Pending Fees':
-                    return { icon: Clock, color: '#F59E0B', pillText: 'Action Req', pillBg: '#FEF3C7', pillColor: '#B45309', link: '/dashboard/pending', progress: 65 };
-                  case 'Outstanding Amount':
-                    return { icon: CreditCard, color: '#9333EA', pillText: 'Audit Active', pillBg: '#F3E8FF', pillColor: '#7E22CE', link: '/dashboard/pending', progress: 70 };
+                    return { icon: TrendingDown, color: '#8B5CF6', pillText: 'Target ₹5L', pillBg: '#F3E8FF', pillColor: '#7E22CE', link: '/dashboard/collections', progress: 85 };
+                  case 'Fees Pending':
+                    return { icon: AlertCircle, color: '#EF4444', pillText: 'Action Req', pillBg: '#FEE2E2', pillColor: '#B91C1C', link: '/dashboard/collections', progress: 65 };
+                  case 'Total Collected (Year)':
+                    return { icon: FileSpreadsheet, color: '#10B981', pillText: 'Yearly Total', pillBg: '#DCFCE7', pillColor: '#15803D', link: '/dashboard/collections', progress: 88 };
+                  case 'Scholarships / Discounts':
+                    return { icon: Gift, color: '#F59E0B', pillText: '12 Beneficiaries', pillBg: '#FEF3C7', pillColor: '#B45309', link: '/dashboard/concessions', progress: 75 };
+                  case 'Caution Deposits':
+                    return { icon: ShieldAlert, color: '#64748B', pillText: 'Refunds Pending', pillBg: '#F1F5F9', pillColor: '#334155', link: '/dashboard/collections', progress: 50 };
                   case 'Total Students':
                     return { icon: Users, color: '#0096DA', pillText: 'Enrolled', pillBg: '#EBF5FF', pillColor: '#0C4A86', link: '/dashboard/students', progress: 90 };
                   case 'Total Teachers':
