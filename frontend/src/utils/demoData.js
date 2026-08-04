@@ -234,3 +234,59 @@ export const demoHostels = [
   { _id: 'hst_2', blockName: 'Sarojini Girls Hostel (Block B)', wardenName: 'Ms. Kamala Devi', totalRooms: 50, occupiedRooms: 40, monthlyFee: 6500 },
   { _id: 'hst_3', blockName: 'Kalam Junior Hostel (Block C)', wardenName: 'Mr. Rajesh Nair', totalRooms: 40, occupiedRooms: 32, monthlyFee: 6000 }
 ];
+
+// 15. Fee Collections Receipts (Recent & Historical)
+export const demoFeeCollections = [
+  { _id: 'fc_1', receiptNumber: 'REC-2026-8801', studentName: 'Aarav Sharma', gradeSec: 'Grade 10 - Section A', feeType: 'Tuition Fee (Q2)', paidAmount: 47200, paymentMethod: 'UPI / Online', paymentDate: '2026-08-04', status: 'Completed' },
+  { _id: 'fc_2', receiptNumber: 'REC-2026-8802', studentName: 'Ananya Verma', gradeSec: 'Grade 9 - Section B', feeType: 'Tuition & Lab Fee', paidAmount: 52400, paymentMethod: 'Card / POS', paymentDate: '2026-08-04', status: 'Completed' },
+  { _id: 'fc_3', receiptNumber: 'REC-2026-8803', studentName: 'Vihaan Patel', gradeSec: 'Grade 8 - Section A', feeType: 'Transport Fee', paidAmount: 8500, paymentMethod: 'Cash', paymentDate: '2026-08-03', status: 'Completed' },
+  { _id: 'fc_4', receiptNumber: 'REC-2026-8804', studentName: 'Diya Gupta', gradeSec: 'Grade 7 - Section C', feeType: 'Tuition Fee (Q2)', paidAmount: 47200, paymentMethod: 'Net Banking', paymentDate: '2026-08-03', status: 'Completed' },
+  { _id: 'fc_5', receiptNumber: 'REC-2026-8805', studentName: 'Ishaan Singh', gradeSec: 'Grade 6 - Section B', feeType: 'Annual Sports & Activity Fee', paidAmount: 12500, paymentMethod: 'UPI', paymentDate: '2026-08-02', status: 'Completed' }
+];
+
+// 16. Pending Fee Dues
+export const demoPendingDues = [
+  { _id: 'pd_1', studentName: 'Kabir Chawla', gradeSec: 'Grade 10 - Section B', feeType: 'Tuition Fee (Q2)', amount: 47200, paidAmount: 0, dueDate: '2026-08-15', status: 'Unpaid' },
+  { _id: 'pd_2', studentName: 'Sanya Kapoor', gradeSec: 'Grade 9 - Section A', feeType: 'Lab & Computer Fee', amount: 15400, paidAmount: 5000, dueDate: '2026-08-15', status: 'Partial' },
+  { _id: 'pd_3', studentName: 'Aditya Rao', gradeSec: 'Grade 8 - Section C', feeType: 'Transport Fee (Q2)', amount: 8500, paidAmount: 0, dueDate: '2026-08-20', status: 'Unpaid' },
+  { _id: 'pd_4', studentName: 'Meera Nair', gradeSec: 'Grade 7 - Section A', feeType: 'Tuition Fee (Q2)', amount: 47200, paidAmount: 18880, dueDate: '2026-08-15', status: 'Partial' },
+  { _id: 'pd_5', studentName: 'Dev Iyer', gradeSec: 'Grade 6 - Section C', feeType: 'Hostel Fee (Q2)', amount: 19500, paidAmount: 0, dueDate: '2026-08-10', status: 'Unpaid' }
+];
+
+// 17. School Expenses
+export const demoExpenses = [
+  { _id: 'exp_1', title: 'Science Lab Equipment & Reagents Purchase', category: 'Lab Supplies', amount: 85000, date: '2026-08-03', paidTo: 'Precision Scientific Ltd', status: 'Approved' },
+  { _id: 'exp_2', title: 'Campus High-Speed Internet & Lease Line Bill', category: 'Utilities', amount: 32000, date: '2026-08-01', paidTo: 'Airtel Broadband Ltd', status: 'Paid' },
+  { _id: 'exp_3', title: 'Library Books & Encyclopedia Subscription', category: 'Library Stock', amount: 45000, date: '2026-07-28', paidTo: 'Oxford University Press', status: 'Approved' },
+  { _id: 'exp_4', title: 'Annual Sports Day Equipment & Medals', category: 'Sports', amount: 62000, date: '2026-07-25', paidTo: 'Decathlon Sports India', status: 'Paid' }
+];
+
+// 18. Staff Monthly Payroll
+export const demoPayroll = [
+  { _id: 'pr_1', staffName: 'Sunita Sharma', role: 'Class Teacher (Grade 10-A)', month: 'July 2026', basicSalary: 55000, allowances: 8000, deductions: 2500, netSalary: 60500, status: 'Disbursed' },
+  { _id: 'pr_2', staffName: 'Ramesh Gupta', role: 'Senior Physics Faculty', month: 'July 2026', basicSalary: 62000, allowances: 9500, deductions: 3000, netSalary: 68500, status: 'Disbursed' },
+  { _id: 'pr_3', staffName: 'Anjali Verma', role: 'Mathematics Teacher', month: 'July 2026', basicSalary: 52000, allowances: 7500, deductions: 2200, netSalary: 57300, status: 'Disbursed' },
+  { _id: 'pr_4', staffName: 'Vikram Rathore', role: 'Administrative Officer', month: 'July 2026', basicSalary: 58000, allowances: 8500, deductions: 2800, netSalary: 63700, status: 'Disbursed' }
+];
+
+// 19. Principal & Teacher Leave Requests
+export const demoLeaveRequests = [
+  { _id: 'lv_1', applicantName: 'Mrs. Sunita Sharma', role: 'Teacher (Grade 10-A)', leaveType: 'Casual Leave', startDate: '2026-08-08', endDate: '2026-08-09', totalDays: 2, reason: 'Attending family function', status: 'Pending' },
+  { _id: 'lv_2', applicantName: 'Mr. Ramesh Gupta', role: 'Senior Physics Faculty', leaveType: 'Medical Leave', startDate: '2026-08-05', endDate: '2026-08-06', totalDays: 2, reason: 'Doctor appointment & viral recovery', status: 'Approved' },
+  { _id: 'lv_3', applicantName: 'Mrs. Anjali Verma', role: 'Teacher (Grade 8-B)', leaveType: 'Earned Leave', startDate: '2026-08-12', endDate: '2026-08-14', totalDays: 3, reason: 'Personal work', status: 'Pending' }
+];
+
+// 20. Vendors & Contracts
+export const demoVendors = [
+  { _id: 'ven_1', vendorName: 'Raymond School Apparel', serviceType: 'Uniform Supplies', contactPerson: 'Rajesh Malhotra', phone: '9820011223', email: 'sales@raymondapparel.com', contractExpiry: '2027-03-31', status: 'Active' },
+  { _id: 'ven_2', vendorName: 'S Chand Publishing', serviceType: 'Textbooks & Workbooks', contactPerson: 'Sanjay Goel', phone: '9810033445', email: 'orders@schand.com', contractExpiry: '2027-05-31', status: 'Active' },
+  { _id: 'ven_3', vendorName: 'Apex Security & Transport Services', serviceType: 'Campus Guard & Bus Drivers', contactPerson: 'Vikram Guard', phone: '9833055667', email: 'info@apexsecurity.com', contractExpiry: '2026-12-31', status: 'Active' }
+];
+
+// 21. Infrastructure Maintenance Requests
+export const demoMaintenanceRequests = [
+  { _id: 'mnt_1', issueTitle: 'Physics Lab Projector Lamp Replacement', location: 'Science Block Room 204', priority: 'High', reportedBy: 'Mr. Ramesh Gupta', reportDate: '2026-08-03', status: 'In Progress' },
+  { _id: 'mnt_2', issueTitle: 'Basketball Court Light Fixture Repair', location: 'Outdoor Sports Area', priority: 'Medium', reportedBy: 'Mr. Vikram Singh', reportDate: '2026-08-02', status: 'Open' },
+  { _id: 'mnt_3', issueTitle: 'Auditorium Air Conditioning Filter Cleaning', location: 'Main Auditorium', priority: 'Low', reportedBy: 'Mrs. Pooja Sharma', reportDate: '2026-07-30', status: 'Completed' }
+];
+
