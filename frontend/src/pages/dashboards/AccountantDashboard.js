@@ -307,26 +307,13 @@ const AccountantDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''}>Dashboard</Link></li>
           <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''}>Students</Link></li>
 
-          <li>
-            <div 
-              onClick={() => setFeesDropdownOpen(!feesDropdownOpen)}
-              style={{ padding: '12px 16px', color: '#0C4A86', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: feesDropdownOpen || isActive(['/dashboard/fees', '/dashboard/payments', '/dashboard/pending', '/dashboard/collections', '/dashboard/concessions']) ? '#FAF6F0' : 'transparent', borderRadius: '8px', fontSize: '14px', fontWeight: '600', transition: 'all 0.2s ease' }}
-            >
-              <span>Fees</span>
-              <span style={{ fontSize: '10px', opacity: 0.7 }}>{feesDropdownOpen ? '▲' : '▼'}</span>
-            </div>
-            {feesDropdownOpen && (
-              <ul style={{ listStyle: 'none', padding: '8px 0 0 16px', margin: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <li><Link to="/dashboard/fees" className={isActive('/dashboard/fees') ? 'active' : ''} style={{ fontSize: '13px', padding: '8px 12px' }}>Fees Overview</Link></li>
-                <li><Link to="/dashboard/payments" className={isActive('/dashboard/payments') ? 'active' : ''} style={{ fontSize: '13px', padding: '8px 12px' }}>Collect Payment</Link></li>
-                <li><Link to="/dashboard/pending" className={isActive('/dashboard/pending') ? 'active' : ''} style={{ fontSize: '13px', padding: '8px 12px' }}>Pending Dues</Link></li>
-                <li><Link to="/dashboard/collections" className={isActive('/dashboard/collections') ? 'active' : ''} style={{ fontSize: '13px', padding: '8px 12px' }}>Collections</Link></li>
-                {isGoldOrBetter && (
-                  <li><Link to="/dashboard/concessions" className={isActive('/dashboard/concessions') ? 'active' : ''} style={{ fontSize: '13px', padding: '8px 12px' }}>Concessions</Link></li>
-                )}
-              </ul>
-            )}
-          </li>
+          <li><Link to="/dashboard/fees" className={isActive('/dashboard/fees') ? 'active' : ''}>Fees Overview</Link></li>
+          <li><Link to="/dashboard/payments" className={isActive('/dashboard/payments') ? 'active' : ''}>Collect Payment</Link></li>
+          <li><Link to="/dashboard/pending" className={isActive('/dashboard/pending') ? 'active' : ''}>Pending Dues</Link></li>
+          <li><Link to="/dashboard/collections" className={isActive('/dashboard/collections') ? 'active' : ''}>Collections</Link></li>
+          {isGoldOrBetter && (
+            <li><Link to="/dashboard/concessions" className={isActive('/dashboard/concessions') ? 'active' : ''}>Concessions</Link></li>
+          )}
           <li><Link to="/dashboard/payroll" className={isActive('/dashboard/payroll') ? 'active' : ''}>Payroll</Link></li>
           <li><Link to="/dashboard/expenses" className={isActive('/dashboard/expenses') ? 'active' : ''}>Expenses</Link></li>
           <li><Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''}>Reports</Link></li>
