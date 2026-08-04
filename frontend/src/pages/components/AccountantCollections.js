@@ -4,7 +4,7 @@ import { demoStudents } from '../../utils/demoData';
 import AccountantPendingFees from './AccountantPendingFees';
 import { 
   IndianRupee, CreditCard, TrendingUp, AlertCircle, 
-  Wallet, FileText, Send, CheckCircle2, FileSpreadsheet, X, Gift, ShieldAlert, Clock
+  Wallet, FileText, Send, CheckCircle2, FileSpreadsheet, X, Gift, ShieldAlert, Clock, Filter
 } from 'lucide-react';
 
 const AccountantCollections = ({ defaultTab = 'collections' }) => {
@@ -521,6 +521,30 @@ const AccountantCollections = ({ defaultTab = 'collections' }) => {
             </thead>
             <tbody>
               {(() => {
+                const hasSelectedFilter = Boolean(selectedGrade || selectedSection || selectedStudent);
+
+                if (!hasSelectedFilter) {
+                  return (
+                    <tr>
+                      <td colSpan="8" style={{ padding: '48px 20px', textAlign: 'center', background: '#ffffff' }}>
+                        <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '56px', height: '56px', borderRadius: '18px', background: '#EBF5FF', border: '1px solid #BFDBFE', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0096DA' }}>
+                            <Filter size={28} />
+                          </div>
+                          <div>
+                            <h4 style={{ margin: '0 0 4px', fontSize: '1.05rem', fontWeight: '800', color: '#0C4A86' }}>
+                              Select Dropdown Filters to View Fee Records
+                            </h4>
+                            <p style={{ margin: 0, fontSize: '0.88rem', color: '#64748B', fontWeight: '600' }}>
+                              Please select Grade, Section, or Student from the dropdown filters above to load collection records.
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                }
+
                 const filteredList = pendingFees.filter((fee, idx) => {
                   const studentName = resolveStudentNameHelper(fee, idx);
                   const studentClass = resolveStudentClass(fee, idx);
