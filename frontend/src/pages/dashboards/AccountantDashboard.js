@@ -313,61 +313,79 @@ const AccountantDashboard = ({ user, onLogout }) => {
           </div>
         </div>
 
-        <ul className="nav-menu" style={{ marginTop: '20px' }}>
-          <li>
-            <Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <LayoutDashboard size={18} /> Dashboard
-            </Link>
-          </li>
-          <li>
-            <Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <GraduationCap size={18} /> Students
-            </Link>
-          </li>
-          <li>
-            <Link to="/dashboard/pending" className={isActive('/dashboard/pending') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <Clock size={18} /> Pending Dues
-            </Link>
-          </li>
-          <li>
-            <Link to="/dashboard/collections" className={isActive('/dashboard/collections') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <CreditCard size={18} /> Collections
-            </Link>
-          </li>
-          {isGoldOrBetter && (
-            <li>
-              <Link to="/dashboard/concessions" className={isActive('/dashboard/concessions') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <Gift size={18} /> Concessions
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
+          {[
+            { path: '/dashboard', label: 'Dashboard', sub: 'FINANCE OVERVIEW', icon: LayoutDashboard },
+            { path: '/dashboard/students', label: 'Students', sub: 'FEE LEDGERS', icon: GraduationCap },
+            { path: '/dashboard/pending', label: 'Pending Dues', sub: 'ACTION REQUIRED', icon: Clock },
+            { path: '/dashboard/collections', label: 'Collections', sub: 'PAYMENT RECORDS', icon: CreditCard },
+            ...(isGoldOrBetter ? [{ path: '/dashboard/concessions', label: 'Concessions', sub: 'DISCOUNTS & SCHOLARSHIPS', icon: Gift }] : []),
+            { path: '/dashboard/payroll', label: 'Payroll', sub: 'STAFF SALARIES', icon: DollarSign },
+            { path: '/dashboard/expenses', label: 'Expenses', sub: 'OUTFLOW AUDIT', icon: TrendingDown },
+            { path: '/dashboard/reports', label: 'Reports', sub: 'EXECUTIVE STATEMENTS', icon: BarChart3 },
+            { path: '/dashboard/settings', label: 'Settings', sub: 'PREFERENCES', icon: Settings },
+          ].map((item) => {
+            const active = isActive(item.path);
+            const IconComp = item.icon;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                style={{
+                  width: '100%',
+                  textAlign: 'left',
+                  padding: '12px 16px',
+                  borderRadius: '16px',
+                  border: active ? '1.5px solid #0096DA' : '1.5px solid #E2E8F0',
+                  textDecoration: 'none',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  background: active ? '#EBF5FF' : '#FFFFFF',
+                  boxShadow: active ? '0 4px 14px rgba(12, 74, 134, 0.08)' : '0 2px 6px rgba(0,0,0,0.02)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  boxSizing: 'border-box'
+                }}
+              >
+                <span style={{ color: active ? '#0096DA' : '#64748B', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <IconComp size={20} />
+                </span>
+                <div style={{ overflow: 'hidden' }}>
+                  <div style={{ color: active ? '#0C4A86' : '#0F172A', fontWeight: '700', fontSize: '0.9rem', lineHeight: 1.2, whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                    {item.label}
+                  </div>
+                  <div style={{ fontSize: '10px', color: active ? '#0096DA' : '#64748B', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.5px', marginTop: '2px', whiteSpace: 'nowrap' }}>
+                    {item.sub}
+                  </div>
+                </div>
               </Link>
-            </li>
-          )}
-          <li>
-            <Link to="/dashboard/payroll" className={isActive('/dashboard/payroll') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <DollarSign size={18} /> Payroll
-            </Link>
-          </li>
-          <li>
-            <Link to="/dashboard/expenses" className={isActive('/dashboard/expenses') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <TrendingDown size={18} /> Expenses
-            </Link>
-          </li>
-          <li>
-            <Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <BarChart3 size={18} /> Reports
-            </Link>
-          </li>
-          <li>
-            <Link to="/dashboard/settings" className={isActive('/dashboard/settings') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <Settings size={18} /> Settings
-            </Link>
-          </li>
-          
-          <li style={{ marginTop: '25px', borderTop: '1px solid #BFDBFE', paddingTop: '16px' }}>
-            <button onClick={handleLogout} className="logout-btn" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '50px', padding: '10px' }}>
+            );
+          })}
+
+          <div style={{ marginTop: '20px', borderTop: '1px solid #BFDBFE', paddingTop: '16px' }}>
+            <button
+              onClick={handleLogout}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px',
+                background: '#FAF6F0',
+                color: '#DC2626',
+                border: '1.5px solid #FECACA',
+                borderRadius: '50px',
+                padding: '10px',
+                fontWeight: '700',
+                fontSize: '0.88rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
               <LogOut size={18} /> Logout
             </button>
-          </li>
-        </ul>
+          </div>
+        </nav>
       </div>
 
       <div className="main-content">
