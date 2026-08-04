@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   CreditCard, Receipt, TrendingDown, DollarSign, Send, 
-  Users, UserCheck, BookOpen, Calendar, Clock, AlertCircle, FileText, CheckCircle2 
+  Users, UserCheck, BookOpen, Calendar, Clock, AlertCircle, FileText, CheckCircle2, FileSpreadsheet, Gift 
 } from 'lucide-react';
 import useRealtimeUpdates from '../../hooks/useRealtimeUpdates';
 import { eventService, feeService, expenseService, studentService } from '../../services/api';
@@ -522,6 +522,38 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
                   </div>
                 ))
               )}
+            </div>
+          </div>
+
+          {/* Today's Activity */}
+          <div className="list-card" style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #BFDBFE', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.04)', padding: '20px', overflow: 'hidden' }}>
+            <h3 style={{ margin: '0 0 16px', color: '#0C4A86', fontWeight: '800', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#9333EA', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(147,51,234,0.25)' }}>
+                <TrendingDown size={16} />
+              </div>
+              Today's Activity
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '10px', borderBottom: '1px solid #EBF5FF' }}>
+                <span style={{ color: '#0C4A86', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', fontSize: '0.85rem' }}><CheckCircle2 size={16} color="#10b981" /> Payments Collected</span>
+                <strong style={{ color: '#0C4A86', fontSize: '0.95rem' }}>{recentCollections.length || 0}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '10px', borderBottom: '1px solid #EBF5FF' }}>
+                <span style={{ color: '#0C4A86', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', fontSize: '0.85rem' }}><Send size={16} color="#ef4444" /> Overdue Notices Sent</span>
+                <strong style={{ color: '#0C4A86', fontSize: '0.95rem' }}>5</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '10px', borderBottom: '1px solid #EBF5FF' }}>
+                <span style={{ color: '#0C4A86', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', fontSize: '0.85rem' }}><FileText size={16} color="#0096DA" /> Receipts Generated</span>
+                <strong style={{ color: '#0C4A86', fontSize: '0.95rem' }}>2</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '10px', borderBottom: '1px solid #EBF5FF' }}>
+                <span style={{ color: '#0C4A86', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', fontSize: '0.85rem' }}><FileSpreadsheet size={16} color="#f59e0b" /> Refunds Processed</span>
+                <strong style={{ color: '#0C4A86', fontSize: '0.95rem' }}>1</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#0C4A86', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', fontSize: '0.85rem' }}><Gift size={16} color="#9333ea" /> Scholarships Approved</span>
+                <strong style={{ color: '#0C4A86', fontSize: '0.95rem' }}>0</strong>
+              </div>
             </div>
           </div>
 
