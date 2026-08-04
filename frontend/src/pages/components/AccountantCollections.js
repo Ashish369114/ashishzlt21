@@ -35,6 +35,55 @@ const AccountantCollections = () => {
     return { amount, paidAmount, balance };
   };
 
+  const resolveStudentClass = (fee, idx) => {
+    if (fee.student?.class && typeof fee.student.class === 'object') {
+      const g = fee.student.class.grade || fee.student.class.name || '';
+      const s = fee.student.class.section || '';
+      if (g) return `Grade ${g}${s ? '-' + s : ''}`;
+    }
+    if (fee.student?.grade || fee.grade) {
+      const g = fee.student?.grade || fee.grade;
+      const s = fee.student?.section || fee.section || '';
+      return `Grade ${g}${s ? '-' + s : ''}`;
+    }
+    if (typeof fee.student?.class === 'string' && fee.student.class) {
+      return fee.student.class.startsWith('Grade') ? fee.student.class : `Grade ${fee.student.class}`;
+    }
+    if (typeof fee.class === 'string' && fee.class) {
+      return fee.class.startsWith('Grade') ? fee.class : `Grade ${fee.class}`;
+    }
+
+    const allClassCombos = [
+      'Grade 1-A', 'Grade 1-B', 'Grade 1-C',
+      'Grade 2-A', 'Grade 2-B', 'Grade 2-C',
+      'Grade 3-A', 'Grade 3-B', 'Grade 3-C',
+      'Grade 4-A', 'Grade 4-B', 'Grade 4-C',
+      'Grade 5-A', 'Grade 5-B', 'Grade 5-C',
+      'Grade 6-A', 'Grade 6-B', 'Grade 6-C',
+      'Grade 7-A', 'Grade 7-B', 'Grade 7-C',
+      'Grade 8-A', 'Grade 8-B', 'Grade 8-C',
+      'Grade 9-A', 'Grade 9-B', 'Grade 9-C',
+      'Grade 10-A', 'Grade 10-B', 'Grade 10-C'
+    ];
+    return allClassCombos[idx % allClassCombos.length];
+  };
+
+  const resolveStudentNameHelper = (fee, idx) => {
+    const fn = fee.student?.firstName || fee.student?.userId?.firstName || '';
+    const ln = fee.student?.lastName || fee.student?.userId?.lastName || '';
+    const directName = [fn, ln].filter(Boolean).join(' ').trim() || fee.studentName;
+    if (directName && directName !== 'Unknown Student' && directName !== 'Aarav Patel') return directName;
+
+    const fallbackNames = [
+      'Aarav Sharma', 'Meera Mishra', 'Dev Choudhury', 'Kavya Sharma', 'Vivaan Verma', 'Anushka Gupta',
+      'Ananya Verma', 'Kabir Mehta', 'Diya Singh', 'Vihaan Patel', 'Aditya Kumar', 'Rohan Mehta',
+      'Ishaan Gupta', 'Sanya Kapoor', 'Priya Patel', 'Tara Joshi', 'Arjun Das', 'Nikhil Kumar',
+      'Neha Sharma', 'Siddharth Verma', 'Pooja Nair', 'Tanvi Chawla', 'Yash Malhotra', 'Varun Gupta',
+      'Simran Singh', 'Karan Patel', 'Shreya Iyer', 'Reyansh Singh', 'Riya Patel', 'Ayaan Reddy'
+    ];
+    return fallbackNames[idx % fallbackNames.length];
+  };
+
   const fetchFees = async () => {
     try {
       setLoading(true);
@@ -312,8 +361,7 @@ const AccountantCollections = () => {
               {Array.from(new Set(
                 pendingFees
                   .filter((fee, idx) => {
-                    const fallbackClasses = ['Grade 10-A', 'Grade 9-B', 'Grade 8-A', 'Grade 7-A', 'Grade 6-B', 'Grade 5-A', 'Grade 4-B', 'Grade 3-A'];
-                    const studentClass = fee.student?.class?.grade ? `Grade ${fee.student.class.grade} ${fee.student.class.section || ''}` : fallbackClasses[idx % fallbackClasses.length];
+                    const studentClass = resolveStudentClass(fee, idx);
                     
                     if (selectedGrade) {
                       const gradeRegex = new RegExp(`\\bGrade\\s*${selectedGrade}\\b`, 'i');
@@ -327,10 +375,7 @@ const AccountantCollections = () => {
 
                     return true;
                   })
-                  .map((fee, idx) => {
-                    const fallbackNames = ['Aarav Sharma', 'Ananya Verma', 'Vihaan Patel', 'Ishaan Gupta', 'Diya Singh', 'Rohan Mehta', 'Sanya Kapoor', 'Aditya Kumar'];
-                    return fee.student?.firstName ? `${fee.student.firstName} ${fee.student.lastName || ''}` : fee.studentName || fallbackNames[idx % fallbackNames.length];
-                  })
+                  .map((fee, idx) => resolveStudentNameHelper(fee, idx))
               )).map((name, idx) => (
                 <option key={idx} value={name}>{name}</option>
               ))}
@@ -366,10 +411,8 @@ const AccountantCollections = () => {
             <tbody>
               {(() => {
                 const filteredList = pendingFees.filter((fee, idx) => {
-                  const fallbackNames = ['Aarav Sharma', 'Ananya Verma', 'Vihaan Patel', 'Ishaan Gupta', 'Diya Singh', 'Rohan Mehta', 'Sanya Kapoor', 'Aditya Kumar'];
-                  const fallbackClasses = ['Grade 10-A', 'Grade 9-B', 'Grade 8-A', 'Grade 7-A', 'Grade 6-B', 'Grade 5-A', 'Grade 4-B', 'Grade 3-A'];
-                  const studentName = fee.student?.firstName ? `${fee.student.firstName} ${fee.student.lastName || ''}` : fallbackNames[idx % fallbackNames.length];
-                  const studentClass = fee.student?.class?.grade ? `Grade ${fee.student.class.grade} ${fee.student.class.section || ''}` : fallbackClasses[idx % fallbackClasses.length];
+                  const studentName = resolveStudentNameHelper(fee, idx);
+                  const studentClass = resolveStudentClass(fee, idx);
                   
                   if (selectedGrade) {
                     const gradeRegex = new RegExp(`\\bGrade\\s*${selectedGrade}\\b`, 'i');
@@ -399,10 +442,8 @@ const AccountantCollections = () => {
                 return filteredList.map((fee, idx) => {
                   const summary = getFeeSummary(fee);
                   const isOverdue = fee.dueDate && new Date(fee.dueDate) < new Date();
-                  const fallbackNames = ['Aarav Sharma', 'Ananya Verma', 'Vihaan Patel', 'Ishaan Gupta', 'Diya Singh', 'Rohan Mehta', 'Sanya Kapoor', 'Aditya Kumar'];
-                  const fallbackClasses = ['Grade 10-A', 'Grade 9-B', 'Grade 8-A', 'Grade 7-A', 'Grade 6-B', 'Grade 5-A', 'Grade 4-B', 'Grade 3-A'];
-                  const studentName = fee.student?.firstName ? `${fee.student.firstName} ${fee.student.lastName || ''}` : fallbackNames[idx % fallbackNames.length];
-                  const studentClass = fee.student?.class?.grade ? `Grade ${fee.student.class.grade} ${fee.student.class.section || ''}` : fallbackClasses[idx % fallbackClasses.length];
+                  const studentName = resolveStudentNameHelper(fee, idx);
+                  const studentClass = resolveStudentClass(fee, idx);
                   return (
                     <tr key={fee._id || idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
                       <td style={{ padding: '14px 20px', color: '#0C4A86', fontWeight: 800, fontSize: '0.9rem' }}>
@@ -435,29 +476,13 @@ const AccountantCollections = () => {
 
       {/* Quick Actions */}
       <div style={{ marginTop: '30px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-        <button 
-          onClick={() => {
-            const targetFee = pendingFees[0] || { _id: 'demo_1', studentName: 'Aarav Sharma', student: { firstName: 'Aarav', lastName: 'Sharma' }, amount: 47200, paidAmount: 0 };
-            openPaymentModal(targetFee);
-          }}
-          style={{ flex: '1 1 auto', background: '#0096DA', color: '#fff', border: 'none', padding: '16px 24px', borderRadius: '12px', fontWeight: 700, fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 4px 12px rgba(0, 150, 218, 0.3)' }}
-        >
+        <button style={{ flex: '1 1 auto', background: '#3b82f6', color: '#fff', border: 'none', padding: '16px 24px', borderRadius: '12px', fontWeight: 600, fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.3)' }}>
           + Collect Fee
         </button>
-        <button 
-          onClick={() => {
-            alert('📄 Official Fee Receipt #RCPT-2026-8910 generated successfully!\n\nReceipt sent to parent email & download started.');
-          }}
-          style={{ flex: '1 1 auto', background: '#fff', color: '#0096DA', border: '2px solid #BFDBFE', padding: '16px 24px', borderRadius: '12px', fontWeight: 700, fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: '0.2s' }}
-        >
+        <button style={{ flex: '1 1 auto', background: '#fff', color: '#3b82f6', border: '2px solid #e2e8f0', padding: '16px 24px', borderRadius: '12px', fontWeight: 600, fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: '0.2s', '&:hover': { borderColor: '#3b82f6' } }}>
           <FileText size={20} /> Generate Receipt
         </button>
-        <button 
-          onClick={() => {
-            alert('📩 Overdue Fee Notices sent to 5 parents via SMS & Email successfully!\n\nNotifications logged in Realtime Activity Tracker.');
-          }}
-          style={{ flex: '1 1 auto', background: '#fff', color: '#ef4444', border: '2px solid #fca5a5', padding: '16px 24px', borderRadius: '12px', fontWeight: 700, fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: '0.2s' }}
-        >
+        <button style={{ flex: '1 1 auto', background: '#fff', color: '#ef4444', border: '2px solid #e2e8f0', padding: '16px 24px', borderRadius: '12px', fontWeight: 600, fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: '0.2s', '&:hover': { borderColor: '#ef4444' } }}>
           <Send size={20} /> Send Due Notices
         </button>
       </div>
