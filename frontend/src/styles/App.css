@@ -218,23 +218,41 @@ body {
 
 .nav-menu a {
   color: #334155 !important;
-  text-decoration: none;
-  padding: 11px 16px;
-  border: 1.5px solid #BFDBFE;
-  font-size: 0.9rem;
-  font-weight: 600;
-  width: 100%;
-  box-sizing: border-box;
+  text-decoration: none !important;
+  padding: 10px 14px !important;
+  border-radius: 14px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  transition: all 0.2s ease;
+  background: transparent !important;
+  border: 1.5px solid transparent !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+  white-space: nowrap !important;
 }
 
 .nav-menu a svg {
-  color: #0C4A86 !important;
+  color: #475569 !important;
+  flex-shrink: 0 !important;
+  display: inline-block !important;
+}
+
+.nav-menu a span {
+  display: inline-block !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
 }
 
 .nav-menu a:hover {
-  background: #DBEAFE !important;
+  background: #F0F9FF !important;
   color: #0C4A86 !important;
-  border-color: #93C5FD !important;
+  border-color: transparent !important;
 }
 
 .nav-menu a:hover svg {
@@ -242,11 +260,15 @@ body {
 }
 
 .nav-menu a.active {
-  background: #0C4A86 !important;
-  color: #ffffff !important;
-  border-color: #0C4A86 !important;
-  box-shadow: 0 4px 12px rgba(12, 74, 134, 0.2) !important;
-  font-weight: 700 !important;
+  background: #EBF5FF !important;
+  color: #0C4A86 !important;
+  border: 1.5px solid #0096DA !important;
+  box-shadow: 0 2px 8px rgba(0, 150, 218, 0.12) !important;
+  font-weight: 800 !important;
+}
+
+.nav-menu a.active svg {
+  color: #0096DA !important;
 }
 
 .nav-menu a.active svg {
