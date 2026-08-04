@@ -206,45 +206,7 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
       {/* 2-Column Calendar & Upcoming Events Section */}
       <CalendarAndEventsSection />
 
-      {/* Quick Actions (Accountant Only) */}
-      {(role === 'accountant' || role === 'accountant_admin') && (
-        <div className="quick-actions-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', marginBottom: '24px' }}>
-          <Link to="/dashboard/fees" className="quick-action-btn" style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #BFDBFE', borderTop: '3px solid #0096DA', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', transition: 'all 0.2s ease' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#0096DA', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(0,150,218,0.25)' }}>
-              <CreditCard size={20} />
-            </div>
-            <span style={{ fontWeight: '800', color: '#0C4A86', fontSize: '0.92rem' }}>Collect Fee</span>
-          </Link>
 
-          <Link to="/dashboard/collections" className="quick-action-btn" style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #BFDBFE', borderTop: '3px solid #10B981', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', transition: 'all 0.2s ease' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#10B981', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(16,185,129,0.25)' }}>
-              <Receipt size={20} />
-            </div>
-            <span style={{ fontWeight: '800', color: '#0C4A86', fontSize: '0.92rem' }}>Generate Receipt</span>
-          </Link>
-
-          <Link to="/dashboard/expenses" className="quick-action-btn" style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #BFDBFE', borderTop: '3px solid #EF4444', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', transition: 'all 0.2s ease' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#EF4444', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(239,68,68,0.25)' }}>
-              <TrendingDown size={20} />
-            </div>
-            <span style={{ fontWeight: '800', color: '#0C4A86', fontSize: '0.92rem' }}>Record Expense</span>
-          </Link>
-
-          <Link to="/dashboard/payroll" className="quick-action-btn" style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #BFDBFE', borderTop: '3px solid #9333EA', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', transition: 'all 0.2s ease' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#9333EA', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(147,51,234,0.25)' }}>
-              <DollarSign size={20} />
-            </div>
-            <span style={{ fontWeight: '800', color: '#0C4A86', fontSize: '0.92rem' }}>Generate Payroll</span>
-          </Link>
-
-          <Link to="/dashboard/pending" className="quick-action-btn" style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #BFDBFE', borderTop: '3px solid #F59E0B', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', transition: 'all 0.2s ease' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#F59E0B', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(245,158,11,0.25)' }}>
-              <Send size={20} />
-            </div>
-            <span style={{ fontWeight: '800', color: '#0C4A86', fontSize: '0.92rem' }}>Send Due Notice</span>
-          </Link>
-        </div>
-      )}
 
       {/* Stats Cards & Upcoming Events Layout */}
       <div className="dashboard-grid-layout" style={{ marginBottom: '25px', alignItems: 'stretch' }}>
@@ -418,6 +380,49 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
           </div>
         )}
       </div>
+
+      {/* Quick Actions (Accountant Only) */}
+      {(role === 'accountant' || role === 'accountant_admin') && (
+        <>
+          <div style={{ color: '#0C4A86', fontSize: '1.1rem', fontWeight: '700', margin: '24px 0 16px' }}>Quick Actions</div>
+          <div className="quick-actions-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', marginBottom: '24px' }}>
+            <Link to="/dashboard/fees" className="quick-action-btn" style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #BFDBFE', borderTop: '3px solid #0096DA', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', transition: 'all 0.2s ease' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#0096DA', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(0,150,218,0.25)' }}>
+                <CreditCard size={20} />
+              </div>
+              <span style={{ fontWeight: '800', color: '#0C4A86', fontSize: '0.92rem' }}>Collect Fee</span>
+            </Link>
+
+            <Link to="/dashboard/collections" className="quick-action-btn" style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #BFDBFE', borderTop: '3px solid #10B981', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', transition: 'all 0.2s ease' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#10B981', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(16,185,129,0.25)' }}>
+                <Receipt size={20} />
+              </div>
+              <span style={{ fontWeight: '800', color: '#0C4A86', fontSize: '0.92rem' }}>Generate Receipt</span>
+            </Link>
+
+            <Link to="/dashboard/expenses" className="quick-action-btn" style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #BFDBFE', borderTop: '3px solid #EF4444', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', transition: 'all 0.2s ease' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#EF4444', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(239,68,68,0.25)' }}>
+                <TrendingDown size={20} />
+              </div>
+              <span style={{ fontWeight: '800', color: '#0C4A86', fontSize: '0.92rem' }}>Record Expense</span>
+            </Link>
+
+            <Link to="/dashboard/payroll" className="quick-action-btn" style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #BFDBFE', borderTop: '3px solid #9333EA', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', transition: 'all 0.2s ease' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#9333EA', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(147,51,234,0.25)' }}>
+                <DollarSign size={20} />
+              </div>
+              <span style={{ fontWeight: '800', color: '#0C4A86', fontSize: '0.92rem' }}>Generate Payroll</span>
+            </Link>
+
+            <Link to="/dashboard/pending" className="quick-action-btn" style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #BFDBFE', borderTop: '3px solid #F59E0B', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', transition: 'all 0.2s ease' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#F59E0B', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(245,158,11,0.25)' }}>
+                <Send size={20} />
+              </div>
+              <span style={{ fontWeight: '800', color: '#0C4A86', fontSize: '0.92rem' }}>Send Due Notice</span>
+            </Link>
+          </div>
+        </>
+      )}
 
       {/* Accountant Specific Lists */}
       {(role === 'accountant' || role === 'accountant_admin') && (
