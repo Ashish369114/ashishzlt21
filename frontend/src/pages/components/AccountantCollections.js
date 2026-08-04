@@ -106,7 +106,25 @@ const AccountantCollections = () => {
         dueDate: '2026-08-15'
       }));
 
-      const pendingFeesToUse = pending.length > 0 ? pending : defaultPendingFeesList;
+      const rawPendingList = pending.length > 0 ? pending : defaultPendingFeesList;
+      const pendingFeesToUse = rawPendingList.map((fee, idx) => {
+        const std = demoStudents[idx % demoStudents.length];
+        const rawName = fee.studentName || (typeof fee.student === 'object' && fee.student?.firstName ? `${fee.student.firstName} ${fee.student.lastName || ''}`.trim() : '');
+        const name = (rawName && !rawName.startsWith('Student ') && rawName !== 'Unknown Student') ? rawName : `${std.firstName} ${std.lastName}`;
+        
+        const g = String(fee.grade || (typeof fee.student === 'object' && fee.student?.grade) || (typeof fee.student === 'object' && fee.student?.class?.grade) || std.grade);
+        const s = String(fee.section || (typeof fee.student === 'object' && fee.student?.section) || (typeof fee.student === 'object' && fee.student?.class?.section) || std.section);
+        const cls = `Grade ${g}-${s}`;
+
+        return {
+          ...fee,
+          studentName: name,
+          studentClass: cls,
+          grade: g,
+          section: s,
+          student: { firstName: name.split(' ')[0], lastName: name.split(' ')[1] || '', grade: g, section: s }
+        };
+      });
 
       setPendingFees(pendingFeesToUse);
       setPaidFees(paid);
