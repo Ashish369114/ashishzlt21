@@ -205,11 +205,9 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
         }
       `}</style>
 
-      {/* Stats Cards & Upcoming Events Layout */}
-      <div className="dashboard-grid-layout" style={{ marginBottom: '25px', alignItems: 'stretch' }}>
-        {/* Left Side: Stats Grid */}
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', alignItems: 'stretch', flex: 1 }}>
+      {/* Stats Cards Layout (Full Width) */}
+      <div style={{ width: '100%', marginBottom: '25px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', width: '100%' }}>
             {cards.map((card) => {
               const getCardMeta = (label) => {
                 switch (label) {
@@ -300,7 +298,6 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
               );
             })}
           </div>
-        </div>
       </div>
 
 
