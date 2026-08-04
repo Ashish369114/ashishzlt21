@@ -308,8 +308,43 @@ const AccountantDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''}>Students</Link></li>
 
 
-          <li><Link to="/dashboard/pending" className={isActive('/dashboard/pending') ? 'active' : ''}>Pending Dues</Link></li>
-          <li><Link to="/dashboard/collections" className={isActive('/dashboard/collections') ? 'active' : ''}>Collections</Link></li>
+          <li style={{ display: 'flex', flexDirection: 'column', borderRadius: '12px', overflow: 'hidden', border: '1.5px solid #BFDBFE' }}>
+            <Link
+              to="/dashboard/pending"
+              style={{
+                color: isActive('/dashboard/pending') ? '#ffffff' : '#0C4A86',
+                textDecoration: 'none',
+                padding: '9px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                background: isActive('/dashboard/pending') ? '#0C4A86' : '#EBF5FF',
+                fontWeight: isActive('/dashboard/pending') ? '700' : '600',
+                fontSize: '0.88rem',
+                borderBottom: '1px solid #BFDBFE',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <span style={{ fontSize: '0.75rem' }}>⏳</span> Pending Dues
+            </Link>
+            <Link
+              to="/dashboard/collections"
+              style={{
+                color: isActive('/dashboard/collections') ? '#ffffff' : '#0C4A86',
+                textDecoration: 'none',
+                padding: '9px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                background: isActive('/dashboard/collections') ? '#0C4A86' : '#EBF5FF',
+                fontWeight: isActive('/dashboard/collections') ? '700' : '600',
+                fontSize: '0.88rem',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <span style={{ fontSize: '0.75rem' }}>💳</span> Collections
+            </Link>
+          </li>
           {isGoldOrBetter && (
             <li><Link to="/dashboard/concessions" className={isActive('/dashboard/concessions') ? 'active' : ''}>Concessions</Link></li>
           )}
