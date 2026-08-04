@@ -201,16 +201,15 @@ export const demoMarks = demoStudents.map((s, idx) => ({
   remarks: idx % 5 === 0 ? 'Outstanding' : idx % 4 === 0 ? 'Excellent' : 'Good Performance'
 }));
 
-// 11. Library Books (20 Items)
+// 11. Library Books (8 Items)
 export const demoLibraryBooks = [
-  { _id: 'bk_1', title: 'Concepts of Physics (Vol 1)', author: 'H.C. Verma', category: 'Science', isbn: '978-8177091877', availableCopies: 12, totalCopies: 15, location: 'Shelf A-4' },
-  { _id: 'bk_2', title: 'Concepts of Physics (Vol 2)', author: 'H.C. Verma', category: 'Science', isbn: '978-8177092003', availableCopies: 10, totalCopies: 12, location: 'Shelf A-5' },
-  { _id: 'bk_3', title: 'Higher Algebra', author: 'Hall & Knight', category: 'Mathematics', isbn: '978-9351449584', availableCopies: 8, totalCopies: 10, location: 'Shelf B-2' },
-  { _id: 'bk_4', title: 'Problems in General Physics', author: 'I.E. Irodov', category: 'Science', isbn: '978-8123903866', availableCopies: 6, totalCopies: 8, location: 'Shelf A-6' },
-  { _id: 'bk_5', title: 'To Kill a Mockingbird', author: 'Harper Lee', category: 'Fiction', isbn: '978-0061120084', availableCopies: 5, totalCopies: 6, location: 'Shelf C-1' },
-  { _id: 'bk_6', title: 'Introduction to Algorithms (CLRS)', author: 'Cormen, Leiserson, Rivest', category: 'Computer Science', isbn: '978-0262033848', availableCopies: 4, totalCopies: 5, location: 'Shelf D-3' },
-  { _id: 'bk_7', title: 'A Brief History of Time', author: 'Stephen Hawking', category: 'Science', isbn: '978-0553380163', availableCopies: 7, totalCopies: 9, location: 'Shelf A-1' },
-  { _id: 'bk_8', title: 'Organic Chemistry', author: 'Morrison & Boyd', category: 'Science', isbn: '978-8131704813', availableCopies: 9, totalCopies: 11, location: 'Shelf A-7' }
+  { _id: 'bk_1', title: 'Introduction to Algorithms', author: 'Thomas H. Cormen', category: 'Textbook', publisher: 'MIT Press', isbn: '9780262033848', availableCopies: 8, totalCopies: 10, location: 'Shelf D-3' },
+  { _id: 'bk_2', title: 'To Kill a Mockingbird', author: 'Harper Lee', category: 'Fiction', publisher: 'Grand Central Publishing', isbn: '9780446310789', availableCopies: 3, totalCopies: 5, location: 'Shelf C-1' },
+  { _id: 'bk_3', title: 'A Brief History of Time', author: 'Stephen Hawking', category: 'Non-Fiction', publisher: 'Bantam Books', isbn: '9780553380163', availableCopies: 7, totalCopies: 7, location: 'Shelf A-1' },
+  { _id: 'bk_4', title: 'Concepts of Physics (Vol 1)', author: 'H.C. Verma', category: 'Science', publisher: 'Bharati Bhawan', isbn: '9788177091877', availableCopies: 12, totalCopies: 15, location: 'Shelf A-4' },
+  { _id: 'bk_5', title: 'Higher Algebra', author: 'Hall & Knight', category: 'Mathematics', publisher: 'Arihant', isbn: '9789351449584', availableCopies: 8, totalCopies: 10, location: 'Shelf B-2' },
+  { _id: 'bk_6', title: 'Problems in General Physics', author: 'I.E. Irodov', category: 'Science', publisher: 'CBS Publishers', isbn: '9788123903866', availableCopies: 6, totalCopies: 8, location: 'Shelf A-6' },
+  { _id: 'bk_7', title: 'Organic Chemistry', author: 'Morrison & Boyd', category: 'Science', publisher: 'Pearson', isbn: '9788131704813', availableCopies: 9, totalCopies: 11, location: 'Shelf A-7' }
 ];
 
 // 12. Inventory Items (15 Items)
