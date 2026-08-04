@@ -12,6 +12,11 @@ const AccountantCollections = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Filter States
+  const [selectedGrade, setSelectedGrade] = useState('');
+  const [selectedSection, setSelectedSection] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState('');
+
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFee, setSelectedFee] = useState(null);
@@ -234,6 +239,72 @@ const AccountantCollections = () => {
             Pending Fee Collections
           </h3>
         </div>
+
+        {/* Filter Dropdowns Bar */}
+        <div style={{ padding: '14px 24px', background: '#FAF6F0', borderBottom: '1px solid #EBF5FF', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ flex: '1 1 180px' }}>
+            <label style={{ fontSize: '0.78rem', fontWeight: '800', color: '#0C4A86', display: 'block', marginBottom: '4px' }}>Select Grade</label>
+            <select
+              value={selectedGrade}
+              onChange={(e) => {
+                setSelectedGrade(e.target.value);
+                setSelectedSection('');
+                setSelectedStudent('');
+              }}
+              style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #BFDBFE', background: '#ffffff', color: '#0C4A86', fontWeight: '700', fontSize: '0.88rem' }}
+            >
+              <option value="">All Grades (1-10)</option>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(g => (
+                <option key={g} value={String(g)}>Grade {g}</option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ flex: '1 1 180px' }}>
+            <label style={{ fontSize: '0.78rem', fontWeight: '800', color: '#0C4A86', display: 'block', marginBottom: '4px' }}>Select Section</label>
+            <select
+              value={selectedSection}
+              onChange={(e) => {
+                setSelectedSection(e.target.value);
+                setSelectedStudent('');
+              }}
+              style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #BFDBFE', background: '#ffffff', color: '#0C4A86', fontWeight: '700', fontSize: '0.88rem' }}
+            >
+              <option value="">All Sections (A-C)</option>
+              {['A', 'B', 'C'].map(sec => (
+                <option key={sec} value={sec}>Section {sec}</option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ flex: '1 1 240px' }}>
+            <label style={{ fontSize: '0.78rem', fontWeight: '800', color: '#0C4A86', display: 'block', marginBottom: '4px' }}>Select Student</label>
+            <select
+              value={selectedStudent}
+              onChange={(e) => setSelectedStudent(e.target.value)}
+              style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #BFDBFE', background: '#ffffff', color: '#0C4A86', fontWeight: '700', fontSize: '0.88rem' }}
+            >
+              <option value="">All Students</option>
+              {['Aarav Sharma', 'Ananya Verma', 'Vihaan Patel', 'Ishaan Gupta', 'Diya Singh', 'Rohan Mehta', 'Sanya Kapoor', 'Aditya Kumar', 'Priya Patel', 'Kavya Sharma']
+                .filter(name => !selectedStudent || name === selectedStudent)
+                .map((name, idx) => (
+                  <option key={idx} value={name}>{name}</option>
+                ))}
+            </select>
+          </div>
+
+          {(selectedGrade || selectedSection || selectedStudent) && (
+            <div style={{ display: 'flex', alignItems: 'flex-end', paddingTop: '18px' }}>
+              <button
+                onClick={() => { setSelectedGrade(''); setSelectedSection(''); setSelectedStudent(''); }}
+                style={{ background: '#EF4444', color: '#ffffff', border: 'none', padding: '8px 16px', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', fontSize: '0.82rem' }}
+              >
+                Reset Filters
+              </button>
+            </div>
+          )}
+        </div>
+
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
@@ -252,7 +323,18 @@ const AccountantCollections = () => {
               {pendingFees.length === 0 ? (
                 <tr><td colSpan="8" style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>No pending fees found.</td></tr>
               ) : (
-                pendingFees.map((fee, idx) => {
+                pendingFees.filter((fee, idx) => {
+                  const fallbackNames = ['Aarav Sharma', 'Ananya Verma', 'Vihaan Patel', 'Ishaan Gupta', 'Diya Singh', 'Rohan Mehta', 'Sanya Kapoor', 'Aditya Kumar'];
+                  const fallbackClasses = ['Grade 10-A', 'Grade 9-B', 'Grade 8-A', 'Grade 7-A', 'Grade 6-B', 'Grade 5-A', 'Grade 4-B', 'Grade 3-A'];
+                  const studentName = fee.student?.firstName ? `${fee.student.firstName} ${fee.student.lastName || ''}` : fallbackNames[idx % fallbackNames.length];
+                  const studentClass = fee.student?.class?.grade ? `Grade ${fee.student.class.grade} ${fee.student.class.section || ''}` : fallbackClasses[idx % fallbackClasses.length];
+                  
+                  if (selectedGrade && !studentClass.includes(`Grade ${selectedGrade}`)) return false;
+                  if (selectedSection && !studentClass.includes(`Section ${selectedSection}`) && !studentClass.includes(`-${selectedSection}`)) return false;
+                  if (selectedStudent && studentName !== selectedStudent) return false;
+                  
+                  return true;
+                }).map((fee, idx) => {
                   const summary = getFeeSummary(fee);
                   const isOverdue = fee.dueDate && new Date(fee.dueDate) < new Date();
                   const fallbackNames = ['Aarav Sharma', 'Ananya Verma', 'Vihaan Patel', 'Ishaan Gupta', 'Diya Singh', 'Rohan Mehta', 'Sanya Kapoor', 'Aditya Kumar'];
@@ -267,7 +349,7 @@ const AccountantCollections = () => {
                       <td style={{ padding: '14px 20px', color: '#6B5B54', fontWeight: 600, fontSize: '0.85rem' }}>{studentClass}</td>
                       <td style={{ padding: '14px 20px', color: '#475569', fontSize: '0.85rem' }}>{fee.description || 'Quarterly Tuition Fees'}</td>
                       <td style={{ padding: '14px 20px', color: '#0C4A86', fontWeight: 700 }}>{formatCurrency(summary.amount)}</td>
-                      <td style={{ padding: '14px 20px', color: '#10b981', fontWeight: 700 }}>{formatCurrency(summary.paidAmount)}</td>
+                      <td style={{ padding: '14px 20px', color: '#10b981', fontWeight 700 }}>{formatCurrency(summary.paidAmount)}</td>
                       <td style={{ padding: '14px 20px', color: '#ef4444', fontWeight: 800 }}>{formatCurrency(summary.balance)}</td>
                       <td style={{ padding: '14px 20px', color: isOverdue ? '#ef4444' : '#475569', fontWeight: isOverdue ? '800' : '500', fontSize: '0.85rem' }}>
                         {fee.dueDate ? new Date(fee.dueDate).toLocaleDateString('en-IN') : '15 Aug 2026'}
