@@ -48,10 +48,12 @@ const defaultFeesList = [
   }
 ];
 
-const ParentFees = ({ isPaymentMode = false, selectedStudentId }) => {
+const ParentFees = ({ isPaymentMode = false, selectedStudentId, student }) => {
   const navigate = useNavigate();
   const [feesList, setFeesList] = useState(defaultFeesList);
   const [selectedFeeForPayment, setSelectedFeeForPayment] = useState(null);
+
+  const studentName = student?.name || student?.userId?.firstName || 'Ramesh Kumar';
 
   const calculateTotalPaid = () => {
     return feesList.reduce((sum, f) => sum + Number(f.paidAmount || 0), 0);
@@ -72,12 +74,11 @@ const ParentFees = ({ isPaymentMode = false, selectedStudentId }) => {
     setFeesList((prev) =>
       prev.map((f) =>
         f._id === paidFeeId
-          ? { ...f, isPaid: true, paidAmount: f.amount, transactionId: `TXN-${Date.now()}` }
+          ? { ...f, isPaid: true, paidAmount: f.amount, transactionId: `UPI-TXN-${Date.now()}` }
           : f
       )
     );
     setSelectedFeeForPayment(null);
-    alert('Payment processed successfully! Receipt generated.');
   };
 
   return (
@@ -96,8 +97,8 @@ const ParentFees = ({ isPaymentMode = false, selectedStudentId }) => {
               Fee Portal
             </span>
           </div>
-          <h1 className="text-2xl font-black">Fee Details, Payments & Online Receipts</h1>
-          <p className="text-sky-100 text-xs font-medium">Review tuition, transport, examination & activity fee ledgers with instant online payments.</p>
+          <h1 className="text-2xl font-black">{studentName}'s Fee Details & Payments</h1>
+          <p className="text-sky-100 text-xs font-medium">Review tuition, transport, examination & activity fee ledgers with instant online UPI payments.</p>
         </div>
       </div>
 
@@ -176,7 +177,7 @@ const ParentFees = ({ isPaymentMode = false, selectedStudentId }) => {
                       ) : (
                         <button
                           type="button"
-                          onClick={() => alert(`Downloading Receipt for ${fee.title} (Txn: ${fee.transactionId})...`)}
+                          onClick={() => alert(`Downloading Receipt for ${fee.title} (Txn: ${fee.transactionId || 'TXN-902812'})...`)}
                           className="inline-flex items-center gap-1 text-[#0C4A86] underline font-extrabold hover:text-black"
                         >
                           <Download className="h-3.5 w-3.5" /> Receipt PDF
@@ -197,7 +198,7 @@ const ParentFees = ({ isPaymentMode = false, selectedStudentId }) => {
           isOpen={!!selectedFeeForPayment}
           onClose={() => setSelectedFeeForPayment(null)}
           feeItem={selectedFeeForPayment}
-          studentData={selectedFeeForPayment?.student}
+          studentData={{ name: studentName, ...student }}
           onPaymentSuccess={() => handlePaymentSuccess(selectedFeeForPayment._id)}
         />
       )}

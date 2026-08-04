@@ -3,24 +3,28 @@ import { useNavigate } from 'react-router-dom';
 import { User, Award, Calendar, BookOpen, ShieldCheck, Mail, Phone, MapPin } from 'lucide-react';
 import { schoolDataService } from '../../services/schoolDataStore';
 
-const ParentStudentProfile = ({ students = [], selectedStudentId }) => {
+const ParentStudentProfile = ({ user, students = [], selectedStudentId, student }) => {
   const navigate = useNavigate();
 
-  const activeStudent = students.find(
+  const activeStudent = student || students.find(
     (s) => (s._id || s.userId?._id || s.userId) === selectedStudentId
   ) || students[0] || {
     name: 'Ramesh Kumar',
-    grade: 'Grade 9',
+    grade: 'Grade 5',
     section: 'Section A',
-    rollNumber: '09',
-    admissionNo: 'ADM-2026-0914',
+    rollNumber: '05',
+    admissionNo: 'ADM-2026-0512',
     classTeacher: 'Ramesh Sharma',
-    dob: '2012-08-05'
+    dob: '2016-08-05'
   };
 
   const name = activeStudent.userId?.firstName
     ? `${activeStudent.userId.firstName} ${activeStudent.userId.lastName || ''}`.trim()
     : activeStudent.name || 'Ramesh Kumar';
+
+  const primaryParentName = user?.firstName
+    ? `${user.firstName} ${user.lastName || ''}`.trim()
+    : (user?.name || activeStudent.parentName || 'Rajesh Sharma');
 
   return (
     <div className="space-y-6">
@@ -80,9 +84,9 @@ const ParentStudentProfile = ({ students = [], selectedStudentId }) => {
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-1">
-            <span className="text-slate-400 uppercase text-[10px] block">Primary Parent Contact</span>
-            <span className="text-sm font-black text-slate-900">Suresh Verma (Father)</span>
-            <span className="text-[11px] text-slate-500 block">+91 98765 43210</span>
+            <span className="text-slate-400 uppercase text-[10px] block">Primary Parent</span>
+            <span className="text-sm font-black text-slate-900">{primaryParentName}</span>
+            <span className="text-[11px] text-slate-500 block">Verified Parent Account ({user?.email || 'parent@school.edu'})</span>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-1">

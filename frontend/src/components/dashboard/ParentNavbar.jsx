@@ -52,45 +52,36 @@ const ParentNavbar = ({
         </div>
       </div>
 
-      {/* Center / Right: Multi-Child Selector Pills (Req 1, 2, 28) */}
+      {/* Center / Right: Select Child Selector (Req 1) */}
       <div className="flex items-center gap-2 overflow-x-auto py-1 max-w-full">
-        {students.length > 1 ? (
-          <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-2xl border border-slate-200">
-            <span className="text-[10px] font-extrabold uppercase text-[#0C4A86] px-2 flex items-center gap-1">
-              <Users className="h-3.5 w-3.5 text-[#0C4A86]" /> My Children:
+        <div className="flex items-center gap-2 rounded-2xl bg-amber-50/80 p-1.5 px-3 border border-amber-200 shadow-2xs">
+          <span className="text-xs font-black uppercase text-[#0C4A86] flex items-center gap-1.5">
+            <Users className="h-4 w-4 text-[#0C4A86]" /> Select Child:
+          </span>
+          {students.length > 1 ? (
+            <select
+              value={selectedStudentId}
+              onChange={(e) => onSelectStudent(e.target.value)}
+              className="rounded-xl border border-[#0C4A86] bg-white px-3 py-1.5 text-xs font-black text-[#0C4A86] focus:outline-none cursor-pointer shadow-xs"
+            >
+              {students.map((st) => {
+                const id = st._id || st.userId?._id || st.userId;
+                const name = st.name || `${st.userId?.firstName || ''} ${st.userId?.lastName || ''}`.trim() || 'Child';
+                const grade = st.grade || st.class?.grade || '5';
+                const section = st.section || st.class?.section || 'A';
+                return (
+                  <option key={id} value={id}>
+                    {name} — Grade {grade}, Section {section}
+                  </option>
+                );
+              })}
+            </select>
+          ) : students.length === 1 ? (
+            <span className="text-xs font-black text-[#0C4A86] bg-white px-3 py-1.5 rounded-xl border border-slate-200">
+              {students[0]?.name || `${students[0]?.userId?.firstName || 'Aarav'} ${students[0]?.userId?.lastName || ''}`.trim()} (Grade {students[0]?.grade || '5'}, Section {students[0]?.section || 'A'})
             </span>
-            {students.map((st) => {
-              const id = st._id || st.userId?._id || st.userId;
-              const name = st.userId?.firstName || st.name || 'Child';
-              const grade = st.grade || st.class?.grade || '6';
-              const section = st.section || st.class?.section || 'A';
-              const isSelected = id === selectedStudentId;
-
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => onSelectStudent(id)}
-                  className={`rounded-xl px-3 py-1.5 text-xs font-black transition-all flex items-center gap-1.5 whitespace-nowrap shadow-2xs ${
-                    isSelected
-                      ? 'bg-[#0C4A86] text-white border border-[#0C4A86] shadow-xs'
-                      : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-300'
-                  }`}
-                >
-                  <span>👤 {name}</span>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${isSelected ? 'bg-white/20 text-sky-100' : 'bg-slate-100 text-slate-500'}`}>
-                    {grade}{section}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        ) : students.length === 1 ? (
-          <div className="flex items-center gap-2 rounded-2xl border border-[#BFDBFE] bg-[#EBF5FF] px-3.5 py-1.5 shadow-2xs text-xs font-black text-[#0C4A86]">
-            <Users className="h-4 w-4 text-[#0C4A86] shrink-0" />
-            <span>Child: {`${students[0].userId?.firstName || students[0].name || 'Aarav'} ${students[0].userId?.lastName || ''}`.trim()} (Class {students[0].grade || students[0].class?.grade || '6'}{students[0].section || students[0].class?.section || 'A'})</span>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
       </div>
 
       {/* Right Controls: Notification Bell & Profile Dropdown */}

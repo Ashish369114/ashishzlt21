@@ -56,7 +56,7 @@ const initialStudentActivitiesList = [
   },
 ];
 
-const StudentActivities = () => {
+const StudentActivities = ({ isParentView = false, student, selectedStudentId }) => {
   const [activities, setActivities] = useState(initialStudentActivitiesList);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newActivityForm, setNewActivityForm] = useState({
@@ -69,8 +69,11 @@ const StudentActivities = () => {
     description: '',
   });
 
+  const studentName = student?.name || student?.userId?.firstName || 'Child';
+
   const handleAddSubmit = (e) => {
     e.preventDefault();
+    if (isParentView) return;
     if (!newActivityForm.title) {
       alert('Please enter activity title');
       return;
@@ -104,18 +107,20 @@ const StudentActivities = () => {
           <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3.5 py-1 text-xs font-bold text-white backdrop-blur-md mb-2">
             <Trophy className="h-3.5 w-3.5 text-amber-300" /> Extracurricular & Co-Curricular Portfolio
           </div>
-          <h1 className="text-2xl md:text-3xl font-black text-white">Activities & Achievements</h1>
+          <h1 className="text-2xl md:text-3xl font-black text-white">{isParentView ? `${studentName}'s Co-Curricular Activities` : 'Activities & Achievements'}</h1>
           <p className="text-xs md:text-sm font-semibold text-sky-100">
-            Track your sports events, science fairs, literary debates, leadership roles, and award certificates.
+            {isParentView ? `View sports events, science competitions, medals, awards & certificates for ${studentName}.` : 'Track your sports events, science fairs, literary debates, leadership roles, and award certificates.'}
           </p>
         </div>
 
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-xs font-extrabold text-[#0C4A86] shadow-sm hover:bg-sky-50 transition self-start md:self-auto"
-        >
-          <Plus className="h-4 w-4" /> Log New Activity
-        </button>
+        {!isParentView && (
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-xs font-extrabold text-[#0C4A86] shadow-sm hover:bg-sky-50 transition self-start md:self-auto"
+          >
+            <Plus className="h-4 w-4" /> Log New Activity
+          </button>
+        )}
       </div>
 
       {/* Stats Cards */}

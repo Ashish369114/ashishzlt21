@@ -148,7 +148,7 @@ export const examResultsDataMap = {
     { subject: 'Social Studies', marks: 18, maxMarks: 20, examType: 'Unit Test 3', grade: 'A+', status: 'Pass', comment: 'Detailed agriculture map answers.' }
   ],
   unit_test_4: [
-    { subject: 'Mathematics', marks: 20, maxMarks: 20, examType: 'Unit Test 4', grade: 'O', status: 'Pass', comment: 'Perfect score in surface area and volumes!' },
+    { subject: 'Mathematics', marks: 20, maxMarks: 20, examType: 'Unit Test 4', grade: 'A+', status: 'Pass', comment: 'Perfect score in surface area and volumes!' },
     { subject: 'Physics', marks: 19, maxMarks: 20, examType: 'Unit Test 4', grade: 'A+', status: 'Pass', comment: 'Excellent sources of energy paper.' },
     { subject: 'Chemistry', marks: 18, maxMarks: 20, examType: 'Unit Test 4', grade: 'A+', status: 'Pass', comment: 'Strong organic chemistry reactions.' },
     { subject: 'English Literature', marks: 19, maxMarks: 20, examType: 'Unit Test 4', grade: 'A+', status: 'Pass', comment: 'High quality letter writing format.' },
@@ -162,10 +162,10 @@ export const examResultsDataMap = {
     { subject: 'Social Studies', marks: 70, maxMarks: 80, examType: 'Mid-Term 2 / Pre-Final', grade: 'A+', status: 'Distinction', comment: 'Thorough answers in history and civics.' }
   ],
   final_exam: [
-    { subject: 'Mathematics', marks: 94, maxMarks: 100, examType: 'Final Examination', grade: 'O', status: 'Distinction', comment: 'Exemplary final board examination score.' },
+    { subject: 'Mathematics', marks: 94, maxMarks: 100, examType: 'Final Examination', grade: 'A+', status: 'Distinction', comment: 'Exemplary final board examination score.' },
     { subject: 'Physics', marks: 88, maxMarks: 100, examType: 'Final Examination', grade: 'A+', status: 'Distinction', comment: 'High proficiency in physics theory and practicals.' },
     { subject: 'Chemistry', marks: 89, maxMarks: 100, examType: 'Final Examination', grade: 'A+', status: 'Distinction', comment: 'Excellent practical and theoretical chemistry score.' },
-    { subject: 'English Literature', marks: 95, maxMarks: 100, examType: 'Final Examination', grade: 'O', status: 'Distinction', comment: 'School top rank in English literature.' },
+    { subject: 'English Literature', marks: 95, maxMarks: 100, examType: 'Final Examination', grade: 'A+', status: 'Distinction', comment: 'School top rank in English literature.' },
     { subject: 'Social Studies', marks: 88, maxMarks: 100, examType: 'Final Examination', grade: 'A+', status: 'Distinction', comment: 'Superb map work and descriptive answers.' }
   ]
 };

@@ -434,31 +434,27 @@ const ParentAttendance = ({ selectedStudentId, student }) => {
           </div>
         </div>
 
-        {/* Monthly Summary Metrics Bar */}
-        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6 text-center text-xs">
-          <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200">
-            <span className="text-slate-400 font-bold block text-[10px] uppercase">Working Days</span>
-            <span className="text-lg font-black text-slate-800">{totalWorkingDaysMonthly}</span>
+        {/* Summary Metrics Bar for Monthly & Weekly Views (Req 3) */}
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 text-center text-xs font-bold">
+          <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+            <span className="text-slate-500 font-extrabold block text-[10px] uppercase">Total Working Days</span>
+            <span className="text-xl font-black text-slate-900">{totalWorkingDaysMonthly} Days</span>
           </div>
-          <div className="bg-sky-50 p-3 rounded-2xl border border-sky-200">
-            <span className="text-sky-800 font-bold block text-[10px] uppercase">Recording Days</span>
-            <span className="text-lg font-black text-[#0C4A86]">{recordingDaysMonthly}</span>
+          <div className="bg-sky-50 p-3.5 rounded-2xl border border-sky-200">
+            <span className="text-sky-800 font-extrabold block text-[10px] uppercase">Total Recorded Days</span>
+            <span className="text-xl font-black text-[#0C4A86]">{recordingDaysMonthly} Days</span>
           </div>
-          <div className="bg-emerald-50 p-3 rounded-2xl border border-emerald-200">
-            <span className="text-emerald-800 font-bold block text-[10px] uppercase">Present Days</span>
-            <span className="text-lg font-black text-emerald-700">{presentDaysCount}</span>
+          <div className="bg-emerald-50 p-3.5 rounded-2xl border border-emerald-200">
+            <span className="text-emerald-800 font-extrabold block text-[10px] uppercase">Present Days</span>
+            <span className="text-xl font-black text-emerald-700">{presentDaysCount} Days</span>
           </div>
-          <div className="bg-rose-50 p-3 rounded-2xl border border-rose-200">
-            <span className="text-rose-800 font-bold block text-[10px] uppercase">Absent Days</span>
-            <span className="text-lg font-black text-rose-700">{absentDaysCount}</span>
+          <div className="bg-rose-50 p-3.5 rounded-2xl border border-rose-200">
+            <span className="text-rose-800 font-extrabold block text-[10px] uppercase">Absent Days</span>
+            <span className="text-xl font-black text-rose-700">{absentDaysCount} Days</span>
           </div>
-          <div className="bg-purple-50 p-3 rounded-2xl border border-purple-200">
-            <span className="text-purple-800 font-bold block text-[10px] uppercase">Off Days</span>
-            <span className="text-lg font-black text-purple-700">{offDaysMonthly}</span>
-          </div>
-          <div className="bg-[#0C4A86] p-3 rounded-2xl text-white">
-            <span className="text-sky-200 font-bold block text-[10px] uppercase">Attendance %</span>
-            <span className="text-lg font-black">{monthlyAttendancePercentage}%</span>
+          <div className="bg-[#0C4A86] p-3.5 rounded-2xl text-white">
+            <span className="text-sky-200 font-extrabold block text-[10px] uppercase">Attendance Percentage</span>
+            <span className="text-xl font-black">{monthlyAttendancePercentage}%</span>
           </div>
         </div>
 

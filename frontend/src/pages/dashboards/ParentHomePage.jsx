@@ -118,7 +118,7 @@ const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStuden
     {
       title: 'Academic Performance',
       value: '89.4%',
-      subtitle: 'Grade O • Overall Rank #3 in Class',
+      subtitle: 'Grade A+ • Overall Rank #3 in Class',
       icon: Award,
       path: '/dashboard/results',
       accent: 'border-amber-200 bg-amber-50/50 text-amber-900',

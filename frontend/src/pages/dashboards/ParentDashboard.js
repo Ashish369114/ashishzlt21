@@ -25,33 +25,40 @@ const mockChildrenList = [
     _id: 's1',
     userId: { _id: 'u1', firstName: 'Ramesh', lastName: 'Kumar' },
     name: 'Ramesh Kumar',
-    grade: '9',
+    grade: '5',
     section: 'A',
-    rollNumber: '09',
-    admissionNo: 'ADM-2026-0914',
+    rollNumber: '05',
+    admissionNo: 'ADM-2026-0512',
     classTeacher: 'Ramesh Sharma',
-    dob: '2012-08-05'
+    dob: '2016-08-05'
   },
   {
     _id: 's2',
     userId: { _id: 'u2', firstName: 'Anjali', lastName: 'Kumar' },
     name: 'Anjali Kumar',
-    grade: '6',
+    grade: '8',
     section: 'B',
     rollNumber: '14',
-    admissionNo: 'ADM-2026-0612',
+    admissionNo: 'ADM-2026-0814',
     classTeacher: 'Sunita Verma',
-    dob: '2015-03-12'
+    dob: '2013-03-12'
   }
 ];
 
 const ParentDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [students, setStudents] = useState(mockChildrenList);
-  const [selectedStudentId, setSelectedStudentId] = useState('s1');
+  const [selectedStudentId, setSelectedStudentId] = useState(() => {
+    return localStorage.getItem('parent_selected_student_id') || 's1';
+  });
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState(null);
+
+  const handleSelectStudent = (id) => {
+    setSelectedStudentId(id);
+    localStorage.setItem('parent_selected_student_id', id);
+  };
 
   useEffect(() => {
     const fetchParentDashboard = async () => {
@@ -63,8 +70,15 @@ const ParentDashboard = ({ user, onLogout }) => {
         const studentResponse = await studentService.getByParent();
         if (studentResponse.data && studentResponse.data.length > 0) {
           setStudents(studentResponse.data);
-          const firstId = studentResponse.data[0]._id || studentResponse.data[0].userId?._id;
-          setSelectedStudentId(firstId);
+          const savedId = localStorage.getItem('parent_selected_student_id');
+          const validSaved = studentResponse.data.some(
+            (st) => (st._id || st.userId?._id || st.userId) === savedId
+          );
+          if (!validSaved) {
+            const firstId = studentResponse.data[0]._id || studentResponse.data[0].userId?._id;
+            setSelectedStudentId(firstId);
+            localStorage.setItem('parent_selected_student_id', firstId);
+          }
         }
       } catch (error) {
         console.warn('Backend API connection unavailable, using local student store data:', error?.message);
@@ -101,7 +115,7 @@ const ParentDashboard = ({ user, onLogout }) => {
           user={user}
           students={students}
           selectedStudentId={selectedStudentId}
-          onSelectStudent={setSelectedStudentId}
+          onSelectStudent={handleSelectStudent}
           onLogout={handleLogout}
           onToggleSidebar={() => setIsMobileSidebarOpen(true)}
           unreadCount={3}
@@ -122,7 +136,7 @@ const ParentDashboard = ({ user, onLogout }) => {
                     user={user}
                     students={students}
                     selectedStudentId={selectedStudentId}
-                    onSelectStudent={setSelectedStudentId}
+                    onSelectStudent={handleSelectStudent}
                     stats={stats}
                   />
                 }
@@ -134,13 +148,13 @@ const ParentDashboard = ({ user, onLogout }) => {
                     user={user}
                     students={students}
                     selectedStudentId={selectedStudentId}
-                    onSelectStudent={setSelectedStudentId}
+                    onSelectStudent={handleSelectStudent}
                     stats={stats}
                   />
                 }
               />
-              <Route path="child" element={<ParentStudentProfile students={students} selectedStudentId={selectedStudentId} student={activeStudent} />} />
-              <Route path="student-overview" element={<ParentStudentProfile students={students} selectedStudentId={selectedStudentId} student={activeStudent} />} />
+              <Route path="child" element={<ParentStudentProfile user={user} students={students} selectedStudentId={selectedStudentId} student={activeStudent} />} />
+              <Route path="student-overview" element={<ParentStudentProfile user={user} students={students} selectedStudentId={selectedStudentId} student={activeStudent} />} />
               <Route path="attendance" element={<ParentAttendance selectedStudentId={selectedStudentId} student={activeStudent} />} />
               <Route path="homework" element={<ParentHomework selectedStudentId={selectedStudentId} student={activeStudent} />} />
               <Route path="assignments" element={<ParentAssignments selectedStudentId={selectedStudentId} student={activeStudent} />} />
@@ -148,7 +162,7 @@ const ParentDashboard = ({ user, onLogout }) => {
               <Route path="timetable" element={<ParentTimetable selectedStudentId={selectedStudentId} student={activeStudent} />} />
               <Route path="exams" element={<ParentExams selectedStudentId={selectedStudentId} student={activeStudent} />} />
               <Route path="results" element={<ParentResults selectedStudentId={selectedStudentId} student={activeStudent} />} />
-              <Route path="activities" element={<StudentActivities />} />
+              <Route path="activities" element={<StudentActivities isParentView={true} selectedStudentId={selectedStudentId} student={activeStudent} />} />
               <Route path="classroom-activities" element={<ParentClassroomActivities selectedStudentId={selectedStudentId} student={activeStudent} />} />
               <Route
                 path="communication"
