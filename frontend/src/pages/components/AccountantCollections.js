@@ -18,6 +18,9 @@ const AccountantCollections = () => {
   const [selectedSection, setSelectedSection] = useState('');
   const [selectedStudent, setSelectedStudent] = useState('');
 
+  // Session Payments Tracking for Real-Time KPI Updates
+  const [sessionPayments, setSessionPayments] = useState([]);
+
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFee, setSelectedFee] = useState(null);
@@ -165,6 +168,8 @@ const AccountantCollections = () => {
 
     const studentName = resolveStudentNameHelper(selectedFee, selectedFee._idx || 0);
 
+    setSessionPayments((prev) => [...prev, { amount, studentName, date: new Date() }]);
+
     setPendingFees((prevFees) =>
       prevFees.map((f, idx) => {
         const isMatch = f._id === selectedFee._id || idx === selectedFee._idx;
@@ -216,6 +221,45 @@ const AccountantCollections = () => {
 
   if (loading) return <div className="spinner" style={{ margin: '40px auto' }}></div>;
 
+  // Real-Time Dynamic Calculations for KPI Cards
+  const todaySessionTotal = sessionPayments.reduce((sum, p) => sum + p.amount, 0);
+  const todaySessionCount = sessionPayments.length;
+
+  const displayTodayTotal = (stats?.todayTotal || 0) + todaySessionTotal;
+  const displayTodayCount = (stats?.todayCount || 0) + todaySessionCount;
+  const displayMonthTotal = (stats?.monthTotal || 0) + todaySessionTotal;
+
+  // Filtered subset calculation for pending, collected, and student count
+  const filteredFeesForKPIs = pendingFees.filter((fee, idx) => {
+    const studentClass = resolveStudentClass(fee, idx);
+    if (selectedGrade) {
+      const gradeRegex = new RegExp(`\\bGrade\\s*${selectedGrade}\\b`, 'i');
+      if (!gradeRegex.test(studentClass)) return false;
+    }
+    if (selectedSection) {
+      const secRegex = new RegExp(`[\\-\\s]${selectedSection}\\b`, 'i');
+      if (!secRegex.test(studentClass)) return false;
+    }
+    const studentName = resolveStudentNameHelper(fee, idx);
+    if (selectedStudent && studentName !== selectedStudent) return false;
+    return true;
+  });
+
+  const displayPendingAmount = filteredFeesForKPIs.reduce((sum, fee) => {
+    const summary = getFeeSummary(fee);
+    return sum + summary.balance;
+  }, 0);
+
+  const displayPendingCount = filteredFeesForKPIs.filter(fee => getFeeSummary(fee).balance > 0).length;
+
+  const displayTotalCollected = filteredFeesForKPIs.reduce((sum, fee) => {
+    const summary = getFeeSummary(fee);
+    return sum + summary.paidAmount;
+  }, 0);
+
+  const displayTotalExpected = displayTotalCollected + displayPendingAmount;
+  const displayCollectionPercentage = displayTotalExpected > 0 ? Math.round((displayTotalCollected / displayTotalExpected) * 100) : 0;
+
   return (
     <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -232,9 +276,9 @@ const AccountantCollections = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
             Today's Collection <IndianRupee size={18} />
           </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#0f172a' }}>{formatCurrency(stats.todayTotal)}</div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#0f172a' }}>{formatCurrency(displayTodayTotal)}</div>
           <div style={{ fontSize: '0.85rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <CheckCircle2 size={14} /> {stats.todayCount} payments received
+            <CheckCircle2 size={14} /> {displayTodayCount} payments received
           </div>
         </div>
 
@@ -242,20 +286,20 @@ const AccountantCollections = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
             Monthly Collection <TrendingUp size={18} />
           </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#0f172a' }}>{formatCurrency(stats.monthTotal)}</div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#0f172a' }}>{formatCurrency(displayMonthTotal)}</div>
           <div style={{ width: '100%', background: '#f1f5f9', height: '6px', borderRadius: '4px', marginTop: '4px', overflow: 'hidden' }}>
-            <div style={{ width: `${Math.min((stats.monthTotal / stats.monthlyTarget) * 100, 100)}%`, background: '#8b5cf6', height: '100%' }}></div>
+            <div style={{ width: `${Math.min((displayMonthTotal / (stats?.monthlyTarget || 500000)) * 100, 100)}%`, background: '#8b5cf6', height: '100%' }}></div>
           </div>
-          <div style={{ fontSize: '0.8rem', color: '#64748b', textAlign: 'right', marginTop: '2px' }}>Target: {formatCurrency(stats.monthlyTarget)}</div>
+          <div style={{ fontSize: '0.8rem', color: '#64748b', textAlign: 'right', marginTop: '2px' }}>Target: {formatCurrency(stats?.monthlyTarget || 500000)}</div>
         </div>
 
         <div style={{ ...kpiCardStyle, borderTop: '4px solid #ef4444' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
             Fees Pending <AlertCircle size={18} />
           </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#0f172a' }}>{formatCurrency(stats.pendingAmount)}</div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#0f172a' }}>{formatCurrency(displayPendingAmount)}</div>
           <div style={{ fontSize: '0.85rem', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <UsersIcon size={14} /> {stats.pendingCount} students with dues
+            <UsersIcon size={14} /> {displayPendingCount} students with dues
           </div>
         </div>
 
@@ -263,9 +307,9 @@ const AccountantCollections = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: '0.9rem', fontWeight: 600 }}>
             Total Collected (Year) <FileSpreadsheet size={18} />
           </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#0f172a' }}>{formatCurrency(stats.totalCollectedAmount)}</div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#0f172a' }}>{formatCurrency(displayTotalCollected)}</div>
           <div style={{ fontSize: '0.85rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-            <TrendingUp size={14} /> {stats.collectionPercentage}% collected overall
+            <TrendingUp size={14} /> {displayCollectionPercentage}% collected overall
           </div>
         </div>
 
