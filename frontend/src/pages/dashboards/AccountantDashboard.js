@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
+import { 
+  LayoutDashboard, Users, Clock, CreditCard, Gift, DollarSign, 
+  TrendingDown, BarChart3, Settings, LogOut, Wallet, GraduationCap
+} from 'lucide-react';
 import { studentService, feeService, teacherService, expenseService, classService } from '../../services/api';
 import { subscribeToDataChanges } from '../../services/syncService';
 import StudentManagement from '../components/StudentManagement';
@@ -293,34 +297,74 @@ const AccountantDashboard = ({ user, onLogout }) => {
           }
         }
       `}</style>
-      <div className="sidebar">
-        <div className="sidebar-header">
-          <h2>
-            <div style={{ width: '32px', height: '32px', background: '#0C4A86', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: '1.2rem' }}>💼</span>
+      <div className="sidebar" style={{ background: '#FAF6F0', borderRight: '1px solid #BFDBFE' }}>
+        {/* Examiner-style clean brand header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingBottom: '20px', borderBottom: '1px solid #BFDBFE', marginBottom: '20px' }}>
+          <div style={{ width: '42px', height: '42px', background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', boxShadow: '0 4px 15px rgba(20, 158, 242, 0.25)', flexShrink: 0 }}>
+            <Wallet size={22} />
+          </div>
+          <div>
+            <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#0C4A86', letterSpacing: '-0.3px', lineHeight: 1.1 }}>
+              {user?.role === 'super_admin' ? 'Super Admin' : user?.role === 'principal' ? 'Principal' : 'Accountant'}
             </div>
-            {user?.role === 'super_admin' ? 'Super Admin' : user?.role === 'principal' ? 'Principal' : 'Accountant'}
-          </h2>
+            <div style={{ fontSize: '10px', fontWeight: '800', color: '#0096DA', textTransform: 'uppercase', letterSpacing: '0.6px', marginTop: '3px' }}>
+              FINANCE & ACCOUNTS
+            </div>
+          </div>
         </div>
 
-        <ul className="nav-menu">
-          <li><Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''}>Dashboard</Link></li>
-          <li><Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''}>Students</Link></li>
-
-
-          <li><Link to="/dashboard/pending" className={isActive('/dashboard/pending') ? 'active' : ''}>Pending Dues</Link></li>
-          <li><Link to="/dashboard/collections" className={isActive('/dashboard/collections') ? 'active' : ''}>Collections</Link></li>
+        <ul className="nav-menu" style={{ marginTop: '20px' }}>
+          <li>
+            <Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <LayoutDashboard size={18} /> Dashboard
+            </Link>
+          </li>
+          <li>
+            <Link to="/dashboard/students" className={isActive('/dashboard/students') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <GraduationCap size={18} /> Students
+            </Link>
+          </li>
+          <li>
+            <Link to="/dashboard/pending" className={isActive('/dashboard/pending') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <Clock size={18} /> Pending Dues
+            </Link>
+          </li>
+          <li>
+            <Link to="/dashboard/collections" className={isActive('/dashboard/collections') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <CreditCard size={18} /> Collections
+            </Link>
+          </li>
           {isGoldOrBetter && (
-            <li><Link to="/dashboard/concessions" className={isActive('/dashboard/concessions') ? 'active' : ''}>Concessions</Link></li>
+            <li>
+              <Link to="/dashboard/concessions" className={isActive('/dashboard/concessions') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <Gift size={18} /> Concessions
+              </Link>
+            </li>
           )}
-          <li><Link to="/dashboard/payroll" className={isActive('/dashboard/payroll') ? 'active' : ''}>Payroll</Link></li>
-          <li><Link to="/dashboard/expenses" className={isActive('/dashboard/expenses') ? 'active' : ''}>Expenses</Link></li>
-          <li><Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''}>Reports</Link></li>
-          <li><Link to="/dashboard/settings" className={isActive('/dashboard/settings') ? 'active' : ''}>Settings</Link></li>
+          <li>
+            <Link to="/dashboard/payroll" className={isActive('/dashboard/payroll') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <DollarSign size={18} /> Payroll
+            </Link>
+          </li>
+          <li>
+            <Link to="/dashboard/expenses" className={isActive('/dashboard/expenses') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <TrendingDown size={18} /> Expenses
+            </Link>
+          </li>
+          <li>
+            <Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <BarChart3 size={18} /> Reports
+            </Link>
+          </li>
+          <li>
+            <Link to="/dashboard/settings" className={isActive('/dashboard/settings') ? 'active' : ''} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <Settings size={18} /> Settings
+            </Link>
+          </li>
           
-          <li style={{ marginTop: '30px', borderTop: '1px solid #BFDBFE', paddingTop: '20px' }}>
-            <button onClick={handleLogout} className="logout-btn" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444' }}>
-              Logout
+          <li style={{ marginTop: '25px', borderTop: '1px solid #BFDBFE', paddingTop: '16px' }}>
+            <button onClick={handleLogout} className="logout-btn" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '50px', padding: '10px' }}>
+              <LogOut size={18} /> Logout
             </button>
           </li>
         </ul>
