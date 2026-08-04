@@ -69,11 +69,35 @@ const AccountantCollections = () => {
       const cautionDeposits = 120000;
       const refundsPending = 3;
 
-      setPendingFees(pending);
+      const defaultPendingFeesList = [
+        { _id: 'pf_1', studentName: 'Aarav Sharma', student: { firstName: 'Aarav', lastName: 'Sharma', class: { grade: '1', section: 'A' } }, description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 0, dueDate: '2026-08-15' },
+        { _id: 'pf_2', studentName: 'Meera Mishra', student: { firstName: 'Meera', lastName: 'Mishra', class: { grade: '1', section: 'A' } }, description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 0, dueDate: '2026-08-15' },
+        { _id: 'pf_3', studentName: 'Dev Choudhury', student: { firstName: 'Dev', lastName: 'Choudhury', class: { grade: '1', section: 'A' } }, description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 0, dueDate: '2026-08-15' },
+        { _id: 'pf_4', studentName: 'Kavya Sharma', student: { firstName: 'Kavya', lastName: 'Sharma', class: { grade: '1', section: 'A' } }, description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 0, dueDate: '2026-08-15' },
+        { _id: 'pf_5', studentName: 'Vivaan Verma', student: { firstName: 'Vivaan', lastName: 'Verma', class: { grade: '1', section: 'A' } }, description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 0, dueDate: '2026-08-15' },
+        { _id: 'pf_6', studentName: 'Anushka Gupta', student: { firstName: 'Anushka', lastName: 'Gupta', class: { grade: '1', section: 'B' } }, description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 0, dueDate: '2026-08-15' },
+        { _id: 'pf_7', studentName: 'Ananya Verma', student: { firstName: 'Ananya', lastName: 'Verma', class: { grade: '2', section: 'A' } }, description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 0, dueDate: '2026-08-15' },
+        { _id: 'pf_8', studentName: 'Vihaan Patel', student: { firstName: 'Vihaan', lastName: 'Patel', class: { grade: '3', section: 'A' } }, description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 0, dueDate: '2026-08-15' },
+        { _id: 'pf_9', studentName: 'Ishaan Gupta', student: { firstName: 'Ishaan', lastName: 'Gupta', class: { grade: '4', section: 'A' } }, description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 18880, dueDate: '2026-08-15' },
+        { _id: 'pf_10', studentName: 'Diya Singh', student: { firstName: 'Diya', lastName: 'Singh', class: { grade: '6', section: 'B' } }, description: 'Quarterly Tuition Fees', amount: 47600, paidAmount: 19040, dueDate: '2026-08-15' },
+        { _id: 'pf_11', studentName: 'Rohan Mehta', student: { firstName: 'Rohan', lastName: 'Mehta', class: { grade: '5', section: 'A' } }, description: 'Quarterly Tuition Fees', amount: 47600, paidAmount: 0, dueDate: '2026-08-15' },
+        { _id: 'pf_12', studentName: 'Sanya Kapoor', student: { firstName: 'Sanya', lastName: 'Kapoor', class: { grade: '4', section: 'B' } }, description: 'Quarterly Tuition Fees', amount: 47600, paidAmount: 0, dueDate: '2026-08-15' },
+        { _id: 'pf_13', studentName: 'Aditya Kumar', student: { firstName: 'Aditya', lastName: 'Kumar', class: { grade: '3', section: 'A' } }, description: 'Quarterly Tuition Fees', amount: 48000, paidAmount: 19200, dueDate: '2026-08-15' },
+        { _id: 'pf_14', studentName: 'Karan Patel', student: { firstName: 'Karan', lastName: 'Patel', class: { grade: '10', section: 'A' } }, description: 'Quarterly Tuition Fees', amount: 50000, paidAmount: 0, dueDate: '2026-08-15' },
+        { _id: 'pf_15', studentName: 'Shreya Iyer', student: { firstName: 'Shreya', lastName: 'Iyer', class: { grade: '7', section: 'A' } }, description: 'Quarterly Tuition Fees', amount: 45000, paidAmount: 0, dueDate: '2026-08-15' },
+        { _id: 'pf_16', studentName: 'Pooja Nair', student: { firstName: 'Pooja', lastName: 'Nair', class: { grade: '8', section: 'A' } }, description: 'Quarterly Tuition Fees', amount: 46000, paidAmount: 0, dueDate: '2026-08-15' },
+        { _id: 'pf_17', studentName: 'Simran Singh', student: { firstName: 'Simran', lastName: 'Singh', class: { grade: '9', section: 'A' } }, description: 'Quarterly Tuition Fees', amount: 47000, paidAmount: 0, dueDate: '2026-08-15' }
+      ];
+
+      const pendingFeesToUse = pending.length > 0 ? pending : defaultPendingFeesList;
+
+      setPendingFees(pendingFeesToUse);
       setPaidFees(paid);
       setStats({
         todayTotal, todayCount, monthTotal, monthlyTarget,
-        pendingAmount, pendingCount, totalCollectedAmount, collectionPercentage,
+        pendingAmount: pendingFeesToUse.reduce((sum, fee) => sum + Number(fee.amount || 0), 0),
+        pendingCount: pendingFeesToUse.length,
+        totalCollectedAmount, collectionPercentage,
         discountProvided, discountBeneficiaries, cautionDeposits, refundsPending,
         // Mock activity data
         overdueNotices: 5, receiptsGenerated: todayCount + 2, refundsProcessed: 1, scholarshipsApproved: 0
@@ -285,11 +309,31 @@ const AccountantCollections = () => {
               style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #BFDBFE', background: '#ffffff', color: '#0C4A86', fontWeight: '700', fontSize: '0.88rem' }}
             >
               <option value="">All Students</option>
-              {['Aarav Sharma', 'Ananya Verma', 'Vihaan Patel', 'Ishaan Gupta', 'Diya Singh', 'Rohan Mehta', 'Sanya Kapoor', 'Aditya Kumar', 'Priya Patel', 'Kavya Sharma']
-                .filter(name => !selectedStudent || name === selectedStudent)
-                .map((name, idx) => (
-                  <option key={idx} value={name}>{name}</option>
-                ))}
+              {Array.from(new Set(
+                pendingFees
+                  .filter((fee, idx) => {
+                    const fallbackClasses = ['Grade 10-A', 'Grade 9-B', 'Grade 8-A', 'Grade 7-A', 'Grade 6-B', 'Grade 5-A', 'Grade 4-B', 'Grade 3-A'];
+                    const studentClass = fee.student?.class?.grade ? `Grade ${fee.student.class.grade} ${fee.student.class.section || ''}` : fallbackClasses[idx % fallbackClasses.length];
+                    
+                    if (selectedGrade) {
+                      const gradeRegex = new RegExp(`\\bGrade\\s*${selectedGrade}\\b`, 'i');
+                      if (!gradeRegex.test(studentClass)) return false;
+                    }
+
+                    if (selectedSection) {
+                      const secRegex = new RegExp(`[\\-\\s]${selectedSection}\\b`, 'i');
+                      if (!secRegex.test(studentClass)) return false;
+                    }
+
+                    return true;
+                  })
+                  .map((fee, idx) => {
+                    const fallbackNames = ['Aarav Sharma', 'Ananya Verma', 'Vihaan Patel', 'Ishaan Gupta', 'Diya Singh', 'Rohan Mehta', 'Sanya Kapoor', 'Aditya Kumar'];
+                    return fee.student?.firstName ? `${fee.student.firstName} ${fee.student.lastName || ''}` : fee.studentName || fallbackNames[idx % fallbackNames.length];
+                  })
+              )).map((name, idx) => (
+                <option key={idx} value={name}>{name}</option>
+              ))}
             </select>
           </div>
 
