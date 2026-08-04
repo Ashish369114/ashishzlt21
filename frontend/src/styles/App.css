@@ -190,16 +190,18 @@ body {
 
 .nav-menu li {
   display: block;
+  margin: 0;
+  padding: 0;
 }
 
-.nav-menu li[style] {
-  margin-top: 16px !important;
-  border-top: 1px solid #BFDBFE !important;
-  padding-top: 16px !important;
+.nav-menu li.menu-divider {
+  margin-top: 16px;
+  border-top: 1px solid #BFDBFE;
+  padding-top: 16px;
 }
 
 .nav-menu a {
-  color: #0C4A86 !important;
+  color: #0C4A86;
   text-decoration: none;
   padding: 11px 16px;
   border-radius: 12px;
@@ -209,21 +211,27 @@ body {
   transition: all 0.2s ease;
   background: transparent;
   border: 1.5px solid transparent;
-  font-size: 14px;
+  font-size: 0.9rem;
   font-weight: 600;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .nav-menu a:hover {
-  background: #EBF5FF !important;
-  color: #0C4A86 !important;
+  background: #EBF5FF;
+  color: #0C4A86;
 }
 
 .nav-menu a.active {
-  background: #EBF5FF !important;
-  color: #0C4A86 !important;
-  border-color: #0096DA !important;
-  box-shadow: 0 4px 12px rgba(0, 150, 218, 0.15) !important;
-  font-weight: 800 !important;
+  background: #0C4A86 !important;
+  color: #ffffff !important;
+  border-color: #0C4A86 !important;
+  box-shadow: 0 4px 12px rgba(12, 74, 134, 0.2) !important;
+  font-weight: 700 !important;
+}
+
+.nav-menu a.active svg {
+  color: #ffffff !important;
 }
 
 .logout-btn {

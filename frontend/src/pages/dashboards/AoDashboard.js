@@ -70,7 +70,7 @@ const AoDashboard = ({ user, onLogout }) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
               return (
-                <li key={item.id} style={{ marginBottom: '8px' }}>
+                <li key={item.id}>
                   <a
                     href="#"
                     onClick={(e) => {
@@ -78,21 +78,8 @@ const AoDashboard = ({ user, onLogout }) => {
                       setActiveTab(item.id);
                     }}
                     className={isActive ? 'active' : ''}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      color: isActive ? '#ffffff' : '#0C4A86',
-                      background: isActive ? '#0C4A86' : 'transparent',
-                      padding: '12px 16px',
-                      borderRadius: '10px',
-                      textDecoration: 'none',
-                      fontWeight: '600',
-                      fontSize: '0.9rem',
-                      transition: 'all 0.2s'
-                    }}
                   >
-                    <Icon size={18} color={isActive ? '#ffffff' : '#0C4A86'} /> {item.label}
+                    <Icon size={18} /> <span>{item.label}</span>
                   </a>
                 </li>
               );
