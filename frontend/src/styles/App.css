@@ -201,7 +201,7 @@ body {
 }
 
 .nav-menu a {
-  color: #0C4A86;
+  color: #0C4A86 !important;
   text-decoration: none;
   padding: 11px 16px;
   border-radius: 12px;
@@ -217,9 +217,17 @@ body {
   box-sizing: border-box;
 }
 
+.nav-menu a svg {
+  color: #0C4A86 !important;
+}
+
 .nav-menu a:hover {
-  background: #EBF5FF;
-  color: #0C4A86;
+  background: #EBF5FF !important;
+  color: #0C4A86 !important;
+}
+
+.nav-menu a:hover svg {
+  color: #0C4A86 !important;
 }
 
 .nav-menu a.active {
