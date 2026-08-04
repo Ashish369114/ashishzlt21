@@ -1521,54 +1521,6 @@ const StudentManagement = () => {
         </div>
       )}
 
-      {isAccountant && (
-        <div className="premium-card mt-6" style={{ marginTop: '24px' }}>
-          <div className="card-header border-b" style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 className="card-title" style={{ fontSize: '1.05rem', fontWeight: '700', color: '#1e293b', margin: 0 }}>Pending Fee List</h3>
-          </div>
-          <div className="table-responsive" style={{ overflowX: 'auto', padding: '0 20px 20px' }}>
-            <table className="premium-table" style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
-              <thead>
-                <tr style={{ background: '#f8fafc', color: '#64748b', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Student Name</th>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Grade</th>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Amount Due</th>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Due Date</th>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.filter(student => {
-                  const pending = allFeesData.filter(f => f.studentId === student._id && !f.isPaid);
-                  return pending.length > 0;
-                }).map(student => {
-                  const pendingFeesForStudent = allFeesData.filter(f => f.studentId === student._id && !f.isPaid);
-                  const totalPending = pendingFeesForStudent.reduce((sum, f) => sum + f.amount, 0);
-                  const dueDate = pendingFeesForStudent[0]?.dueDate || 'N/A';
-                  return (
-                    <tr key={student._id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '12px', fontWeight: '500', color: '#1e293b' }}>
-                        {student.userId?.firstName} {student.userId?.lastName}
-                      </td>
-                      <td style={{ padding: '12px', color: '#64748b' }}>Grade {student.classId?.grade || ''}</td>
-                      <td style={{ padding: '12px', color: '#ef4444', fontWeight: '600' }}>{formatCurrency(totalPending)}</td>
-                      <td style={{ padding: '12px', color: '#64748b' }}>{dueDate !== 'N/A' ? new Date(dueDate).toLocaleDateString() : 'N/A'}</td>
-                      <td style={{ padding: '12px' }}>
-                        <button 
-                          onClick={() => alert(`Notification sent to ${student.userId?.firstName} ${student.userId?.lastName} for pending fee of ${formatCurrency(totalPending)}`)}
-                          style={{ background: 'none', border: 'none', color: '#3b82f6', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-                        >
-                          Notify <ChevronRight size={14} />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
 
       {notesModalStudent && (
         <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
