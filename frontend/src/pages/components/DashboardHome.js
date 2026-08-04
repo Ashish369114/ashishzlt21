@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { 
+  CreditCard, Receipt, TrendingDown, DollarSign, Send, 
+  Users, UserCheck, BookOpen, Calendar, Clock, AlertCircle, FileText, CheckCircle2 
+} from 'lucide-react';
 import useRealtimeUpdates from '../../hooks/useRealtimeUpdates';
 import { eventService, feeService, expenseService } from '../../services/api';
 import PrincipalLeaveManagement from './PrincipalLeaveManagement';
