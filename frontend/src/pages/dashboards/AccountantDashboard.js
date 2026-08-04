@@ -328,13 +328,8 @@ const AccountantDashboard = ({ user, onLogout }) => {
             </Link>
           </li>
           <li>
-            <Link to="/dashboard/pending" className={isActive('/dashboard/pending') ? 'active' : ''}>
-              <Clock size={18} /> <span>Pending Dues</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/dashboard/collections" className={isActive('/dashboard/collections') ? 'active' : ''}>
-              <CreditCard size={18} /> <span>Collections</span>
+            <Link to="/dashboard/collections" className={isActive('/dashboard/collections') || isActive('/dashboard/pending') ? 'active' : ''}>
+              <CreditCard size={18} /> <span>Fee Collections & Dues</span>
             </Link>
           </li>
           {isGoldOrBetter && (
@@ -454,9 +449,8 @@ const AccountantDashboard = ({ user, onLogout }) => {
           <Route path="students" element={<StudentManagement />} />
           <Route path="teachers" element={<AccountantTeachers />} />
           <Route path="payroll" element={<AccountantPayroll />} />
-          <Route path="collections" element={<AccountantCollections />} />
-          <Route path="fees" element={<FeeManagement user={user} />} />
-          <Route path="pending" element={<AccountantPendingFees />} />
+          <Route path="collections" element={<AccountantCollections defaultTab="collections" />} />
+          <Route path="pending" element={<AccountantCollections defaultTab="pending" />} />
           <Route path="payments" element={<AccountantPayments />} />
           <Route path="concessions" element={<ConcessionManagement />} />
           <Route path="reports" element={<AccountantReports isPremiumFeatureAllowed={isPremiumFeatureAllowed} />} />

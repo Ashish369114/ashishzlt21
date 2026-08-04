@@ -1,17 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { feeService } from '../../services/api';
 import { demoStudents } from '../../utils/demoData';
+import AccountantPendingFees from './AccountantPendingFees';
 import { 
   IndianRupee, CreditCard, TrendingUp, AlertCircle, 
-  Wallet, FileText, Send, CheckCircle2, FileSpreadsheet, X, Gift, ShieldAlert
+  Wallet, FileText, Send, CheckCircle2, FileSpreadsheet, X, Gift, ShieldAlert, Clock
 } from 'lucide-react';
 
-const AccountantCollections = () => {
+const AccountantCollections = ({ defaultTab = 'collections' }) => {
+  const [activeTab, setActiveTab] = useState(defaultTab);
   const [pendingFees, setPendingFees] = useState([]);
   const [paidFees, setPaidFees] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (defaultTab) {
+      setActiveTab(defaultTab);
+    }
+  }, [defaultTab]);
 
   // Filter States
   const [selectedGrade, setSelectedGrade] = useState('');
@@ -280,13 +288,63 @@ const AccountantCollections = () => {
 
   return (
     <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h2 style={{ margin: 0, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Wallet size={28} color="#3b82f6" /> Fee Collection Overview
+      {/* Top Header & Merged Navigation Tabs */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
+        <h2 style={{ margin: 0, color: '#0C4A86', fontSize: '1.5rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Wallet size={28} color="#0096DA" /> Fee Collections & Dues Management
         </h2>
+
+        {/* Tab Switcher */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#ffffff', padding: '6px', borderRadius: '16px', border: '1px solid #BFDBFE', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+          <button
+            type="button"
+            onClick={() => setActiveTab('collections')}
+            style={{
+              padding: '9px 18px',
+              borderRadius: '12px',
+              border: activeTab === 'collections' ? '1.5px solid #0096DA' : '1px solid transparent',
+              background: activeTab === 'collections' ? '#EBF5FF' : 'transparent',
+              color: '#0C4A86',
+              fontWeight: '800',
+              fontSize: '0.88rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <CreditCard size={18} color="#0096DA" /> Collections & Payment History
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('pending')}
+            style={{
+              padding: '9px 18px',
+              borderRadius: '12px',
+              border: activeTab === 'pending' ? '1.5px solid #0096DA' : '1px solid transparent',
+              background: activeTab === 'pending' ? '#EBF5FF' : 'transparent',
+              color: '#0C4A86',
+              fontWeight: '800',
+              fontSize: '0.88rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <Clock size={18} color="#0096DA" /> Pending Dues & Reminders
+          </button>
+        </div>
       </div>
 
-      {error && <div style={{ background: '#fef2f2', color: '#991b1b', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}><AlertCircle size={20} /> {error}</div>}
+      {activeTab === 'pending' ? (
+        <AccountantPendingFees />
+      ) : (
+        <>
+          {error && <div style={{ background: '#fef2f2', color: '#991b1b', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}><AlertCircle size={20} /> {error}</div>}
 
       {/* Top-Level Filter Bar */}
       <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #BFDBFE', padding: '14px 24px', marginBottom: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-end', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
@@ -670,6 +728,8 @@ const AccountantCollections = () => {
             </form>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );
