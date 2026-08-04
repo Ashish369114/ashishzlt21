@@ -197,26 +197,40 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
 
       {/* Quick Actions (Accountant Only) */}
       {(role === 'accountant' || role === 'accountant_admin') && (
-        <div className="quick-actions-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-          <Link to="/dashboard/fees" className="quick-action-btn">
-            <span style={{ fontSize: '24px', background: '#e0e7ff', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px' }}>💸</span>
-            Collect Fee
+        <div className="quick-actions-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', marginBottom: '24px' }}>
+          <Link to="/dashboard/fees" className="quick-action-btn" style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #BFDBFE', borderTop: '3px solid #0096DA', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', transition: 'all 0.2s ease' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#0096DA', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(0,150,218,0.25)' }}>
+              <CreditCard size={20} />
+            </div>
+            <span style={{ fontWeight: '800', color: '#0C4A86', fontSize: '0.92rem' }}>Collect Fee</span>
           </Link>
-          <Link to="/dashboard/collections" className="quick-action-btn">
-            <span style={{ fontSize: '24px', background: '#dcfce7', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px' }}>🧾</span>
-            Generate Receipt
+
+          <Link to="/dashboard/collections" className="quick-action-btn" style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #BFDBFE', borderTop: '3px solid #10B981', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', transition: 'all 0.2s ease' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#10B981', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(16,185,129,0.25)' }}>
+              <Receipt size={20} />
+            </div>
+            <span style={{ fontWeight: '800', color: '#0C4A86', fontSize: '0.92rem' }}>Generate Receipt</span>
           </Link>
-          <Link to="/dashboard/expenses" className="quick-action-btn">
-            <span style={{ fontSize: '24px', background: '#fee2e2', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px' }}>📉</span>
-            Record Expense
+
+          <Link to="/dashboard/expenses" className="quick-action-btn" style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #BFDBFE', borderTop: '3px solid #EF4444', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', transition: 'all 0.2s ease' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#EF4444', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(239,68,68,0.25)' }}>
+              <TrendingDown size={20} />
+            </div>
+            <span style={{ fontWeight: '800', color: '#0C4A86', fontSize: '0.92rem' }}>Record Expense</span>
           </Link>
-          <Link to="/dashboard/payroll" className="quick-action-btn">
-            <span style={{ fontSize: '24px', background: '#f3e8ff', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px' }}>💰</span>
-            Generate Payroll
+
+          <Link to="/dashboard/payroll" className="quick-action-btn" style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #BFDBFE', borderTop: '3px solid #9333EA', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', transition: 'all 0.2s ease' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#9333EA', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(147,51,234,0.25)' }}>
+              <DollarSign size={20} />
+            </div>
+            <span style={{ fontWeight: '800', color: '#0C4A86', fontSize: '0.92rem' }}>Generate Payroll</span>
           </Link>
-          <Link to="/dashboard/pending" className="quick-action-btn">
-            <span style={{ fontSize: '24px', background: '#fff7ed', width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '10px' }}>📢</span>
-            Send Due Notice
+
+          <Link to="/dashboard/pending" className="quick-action-btn" style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #BFDBFE', borderTop: '3px solid #F59E0B', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', transition: 'all 0.2s ease' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#F59E0B', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(245,158,11,0.25)' }}>
+              <Send size={20} />
+            </div>
+            <span style={{ fontWeight: '800', color: '#0C4A86', fontSize: '0.92rem' }}>Send Due Notice</span>
           </Link>
         </div>
       )}
@@ -227,27 +241,88 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', alignItems: 'stretch', flex: 1 }}>
             {cards.map((card) => {
-              const getIcon = (label) => {
+              const getCardMeta = (label) => {
                 switch (label) {
-                  case 'Total Students': return '👨‍🎓';
-                  case 'Total Teachers': return '👩‍🏫';
-                  case 'Total Classes': return '🏫';
-                  case 'Collected Fees': return '💰';
-                  case "Today's Collection": return '💰';
-                  case 'Monthly Collection': return '📅';
-                  case 'Pending Fees': return '⏳';
-                  case 'Outstanding Amount': return '💸';
-                  case 'Total Expenses': return '📉';
-                  case 'Net Income': return '⚖️';
-                  default: return '📊';
+                  case "Today's Collection":
+                    return { icon: DollarSign, color: '#0096DA', pillText: '🟢 Live Today', pillBg: '#DCFCE7', pillColor: '#15803D', link: '/dashboard/collections', progress: 95 };
+                  case 'Monthly Collection':
+                    return { icon: Calendar, color: '#1E293B', pillText: 'Monthly Target', pillBg: '#F1F5F9', pillColor: '#334155', link: '/dashboard/collections', progress: 85 };
+                  case 'Pending Fees':
+                    return { icon: Clock, color: '#F59E0B', pillText: 'Action Req', pillBg: '#FEF3C7', pillColor: '#B45309', link: '/dashboard/pending', progress: 65 };
+                  case 'Outstanding Amount':
+                    return { icon: CreditCard, color: '#9333EA', pillText: 'Audit Active', pillBg: '#F3E8FF', pillColor: '#7E22CE', link: '/dashboard/pending', progress: 70 };
+                  case 'Total Students':
+                    return { icon: Users, color: '#0096DA', pillText: 'Enrolled', pillBg: '#EBF5FF', pillColor: '#0C4A86', link: '/dashboard/students', progress: 90 };
+                  case 'Total Teachers':
+                    return { icon: UserCheck, color: '#1E293B', pillText: 'Faculty', pillBg: '#F1F5F9', pillColor: '#334155', link: '/dashboard/teachers', progress: 100 };
+                  case 'Total Classes':
+                    return { icon: BookOpen, color: '#0C4A86', pillText: 'Active', pillBg: '#EBF5FF', pillColor: '#0C4A86', link: '/dashboard/classes', progress: 80 };
+                  default:
+                    return { icon: CreditCard, color: '#0C4A86', pillText: 'Overview', pillBg: '#EBF5FF', pillColor: '#0C4A86', link: '/dashboard', progress: 75 };
                 }
               };
+              const meta = getCardMeta(card.label);
+              const IconComp = meta.icon;
               return (
-                <div className="stat-card-acc" key={card.label}>
-                  <div style={{ fontSize: '2.2rem', marginBottom: '10px' }}>{getIcon(card.label)}</div>
-                  <h3 style={{ fontSize: '0.9rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px 0', fontWeight: '700' }}>{card.label}</h3>
-                  <div className="value" style={{ fontSize: '1.75rem', fontWeight: '800', color: '#0f172a' }}>{card.value}</div>
-                </div>
+                <Link key={card.label} to={meta.link} style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}>
+                  <div style={{
+                    background: '#ffffff',
+                    borderRadius: '20px',
+                    border: '1px solid #BFDBFE',
+                    borderTop: `4px solid ${meta.color}`,
+                    padding: '20px',
+                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.04)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    height: '100%',
+                    boxSizing: 'border-box',
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                  }}>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                        <div style={{
+                          width: '42px',
+                          height: '42px',
+                          borderRadius: '12px',
+                          background: meta.color,
+                          color: '#ffffff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: `0 4px 12px ${meta.color}40`
+                        }}>
+                          <IconComp size={22} strokeWidth={2.2} />
+                        </div>
+                        <span style={{
+                          fontSize: '0.72rem',
+                          fontWeight: '700',
+                          padding: '4px 10px',
+                          borderRadius: '50px',
+                          background: meta.pillBg,
+                          color: meta.pillColor,
+                          border: `1px solid ${meta.pillBg ? 'transparent' : '#BFDBFE'}`
+                        }}>
+                          {meta.pillText}
+                        </span>
+                      </div>
+
+                      <p style={{ fontSize: '0.75rem', fontWeight: '800', color: '#6B5B54', textTransform: 'uppercase', letterSpacing: '0.6px', margin: '0 0 6px 0' }}>{card.label}</p>
+                      <h3 style={{ fontSize: '1.5rem', fontWeight: '900', color: '#0C4A86', margin: '0 0 12px 0', lineHeight: 1.1 }}>{card.value}</h3>
+                    </div>
+
+                    <div>
+                      <div style={{ width: '100%', height: '4px', background: '#EBF5FF', borderRadius: '10px', overflow: 'hidden', marginBottom: '12px' }}>
+                        <div style={{ width: `${meta.progress}%`, height: '100%', background: meta.color, borderRadius: '10px' }} />
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', fontWeight: '700', color: meta.color }}>
+                        <span>View Ledger</span>
+                        <span>→</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
               );
             })}
           </div>
