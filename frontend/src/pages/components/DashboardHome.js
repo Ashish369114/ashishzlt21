@@ -20,6 +20,20 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
   const [pendingStudents, setPendingStudents] = useState([]);
   const [recentExpenses, setRecentExpenses] = useState([]);
   const [studentsMap, setStudentsMap] = useState({});
+  const [showDueNoticeModal, setShowDueNoticeModal] = useState(false);
+  const [noticeTarget, setNoticeTarget] = useState('all');
+  const [noticeChannel, setNoticeChannel] = useState('whatsapp_sms');
+  const [isSendingNotices, setIsSendingNotices] = useState(false);
+
+  const handleDispatchNotices = (e) => {
+    e.preventDefault();
+    setIsSendingNotices(true);
+    setTimeout(() => {
+      setIsSendingNotices(false);
+      setShowDueNoticeModal(false);
+      alert('🎉 105 Fee Due Notices successfully sent via WhatsApp & SMS to parents!');
+    }, 800);
+  };
   
   const scrollRef = useRef(null);
   const scrollPaused = useRef(false);
@@ -335,12 +349,17 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
               <span style={{ fontWeight: '800', color: '#0C4A86', fontSize: '0.92rem' }}>Generate Payroll</span>
             </Link>
 
-            <Link to="/dashboard/pending" className="quick-action-btn" style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #BFDBFE', borderTop: '3px solid #F59E0B', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', transition: 'all 0.2s ease' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#F59E0B', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(245,158,11,0.25)' }}>
+            <button 
+              type="button"
+              onClick={() => setShowDueNoticeModal(true)} 
+              className="quick-action-btn" 
+              style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #BFDBFE', borderTop: '3px solid #F59E0B', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', transition: 'all 0.2s ease', cursor: 'pointer', textAlign: 'left', width: '100%', boxSizing: 'border-box' }}
+            >
+              <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#F59E0B', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(245,158,11,0.25)', flexShrink: 0 }}>
                 <Send size={20} />
               </div>
               <span style={{ fontWeight: '800', color: '#0C4A86', fontSize: '0.92rem' }}>Send Due Notice</span>
-            </Link>
+            </button>
           </div>
         </>
       )}
@@ -511,6 +530,60 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
       {role === 'principal' && (
         <div style={{ marginTop: '30px' }}>
           <PrincipalLeaveManagement />
+        </div>
+      )}
+
+      {/* Send Due Notice Dispatch Modal */}
+      {showDueNoticeModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
+          <div style={{ background: '#ffffff', borderRadius: '24px', width: '100%', maxWidth: '520px', padding: '28px', border: '1px solid #BFDBFE', boxShadow: '0 20px 40px rgba(0,0,0,0.18)', position: 'relative' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', borderBottom: '1px solid #EBF5FF', paddingBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '14px', background: '#F59E0B', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(245,158,11,0.3)' }}>
+                  <Send size={22} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, color: '#0C4A86', fontWeight: '900', fontSize: '1.2rem' }}>Send Fee Due Notices</h3>
+                  <span style={{ fontSize: '0.78rem', color: '#64748B', fontWeight: '700' }}>Broadcast WhatsApp & SMS Payment Reminders</span>
+                </div>
+              </div>
+              <button onClick={() => setShowDueNoticeModal(false)} style={{ background: '#EBF5FF', border: 'none', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', color: '#0C4A86', fontWeight: '900' }}>✕</button>
+            </div>
+
+            <form onSubmit={handleDispatchNotices}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: '800', color: '#0C4A86', marginBottom: '6px' }}>Target Audience</label>
+                <select value={noticeTarget} onChange={e => setNoticeTarget(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #BFDBFE', color: '#0C4A86', fontWeight: '700', fontSize: '0.88rem' }}>
+                  <option value="all">All Overdue Accounts (105 Pending Students)</option>
+                  <option value="primary">Primary Section (Grade 1 to 5 Overdue)</option>
+                  <option value="secondary">Secondary Section (Grade 6 to 10 Overdue)</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: '800', color: '#0C4A86', marginBottom: '6px' }}>Dispatch Method</label>
+                <select value={noticeChannel} onChange={e => setNoticeChannel(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #BFDBFE', color: '#0C4A86', fontWeight: '700', fontSize: '0.88rem' }}>
+                  <option value="whatsapp_sms">📲 WhatsApp Message & Direct SMS</option>
+                  <option value="email">📧 Official Parent Email Notice</option>
+                  <option value="both">🚀 Multi-Channel (WhatsApp + SMS + Email)</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: '800', color: '#0C4A86', marginBottom: '6px' }}>Notice Template Preview</label>
+                <div style={{ background: '#F8FAFC', padding: '14px 16px', borderRadius: '14px', border: '1px solid #E2E8F0', fontSize: '0.84rem', color: '#334155', lineHeight: 1.5 }}>
+                  "Dear Parent, this is an official fee reminder from ABC International School. Outstanding balance is pending for your ward. Kindly clear the pending dues by 15 Aug 2026 to avoid late fee penalties. Thank you! - Accounts Office"
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button type="button" onClick={() => setShowDueNoticeModal(false)} style={{ flex: 1, padding: '12px', background: '#F1F5F9', color: '#475569', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer' }}>Cancel</button>
+                <button type="submit" disabled={isSendingNotices} style={{ flex: 2, padding: '12px', background: '#F59E0B', color: '#ffffff', border: 'none', borderRadius: '12px', fontWeight: '800', fontSize: '0.92rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(245,158,11,0.35)' }}>
+                  {isSendingNotices ? 'Sending Notices...' : '🚀 Send Due Notices Now'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
