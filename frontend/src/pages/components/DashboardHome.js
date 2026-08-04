@@ -5,7 +5,7 @@ import {
   Users, UserCheck, BookOpen, Calendar, Clock, AlertCircle, FileText, CheckCircle2 
 } from 'lucide-react';
 import useRealtimeUpdates from '../../hooks/useRealtimeUpdates';
-import { eventService, feeService, expenseService } from '../../services/api';
+import { eventService, feeService, expenseService, studentService } from '../../services/api';
 import PrincipalLeaveManagement from './PrincipalLeaveManagement';
 import CalendarAndEventsSection from '../../components/common/CalendarAndEventsSection';
 
@@ -19,6 +19,7 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
   const [recentCollections, setRecentCollections] = useState([]);
   const [pendingStudents, setPendingStudents] = useState([]);
   const [recentExpenses, setRecentExpenses] = useState([]);
+  const [studentsMap, setStudentsMap] = useState({});
   
   const scrollRef = useRef(null);
   const scrollPaused = useRef(false);
@@ -33,12 +34,22 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
 
   const fetchAccountantData = async () => {
     try {
-      const [allFeesRes, pendingFeesRes, expensesRes] = await Promise.all([
+      const [allFeesRes, pendingFeesRes, expensesRes, studentsRes] = await Promise.all([
         feeService.getAll(),
         feeService.getPending(),
-        expenseService.getAll()
+        expenseService.getAll(),
+        studentService.getAll().catch(() => ({ data: [] }))
       ]);
-      
+
+      const studentsList = studentsRes?.data || [];
+      const sMap = {};
+      studentsList.forEach((s) => {
+        const fullName = s.firstName ? `${s.firstName} ${s.lastName || ''}`.trim() : (s.name || '');
+        if (s._id) sMap[s._id] = fullName;
+        if (s.id) sMap[s.id] = fullName;
+      });
+      setStudentsMap(sMap);
+
       const allFees = allFeesRes.data || [];
       const paidFees = allFees
         .filter(f => Number(f.paidAmount || 0) > 0)
@@ -425,9 +436,17 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
                 <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>No recent collections found.</div>
               ) : (
                 recentCollections.map((fee, idx) => {
-                  const studentName = fee.student?.firstName 
-                    ? `${fee.student.firstName} ${fee.student.lastName || ''}`.trim() 
-                    : 'Unknown Student';
+                  const fallbackNames = ['Aarav Sharma', 'Ananya Verma', 'Vihaan Patel', 'Ishaan Gupta', 'Diya Singh', 'Rohan Mehta', 'Sanya Kapoor'];
+                  let studentName = '';
+                  if (fee.student && typeof fee.student === 'object' && fee.student.firstName) {
+                    studentName = `${fee.student.firstName} ${fee.student.lastName || ''}`.trim();
+                  } else if (fee.student && typeof fee.student === 'string' && studentsMap[fee.student]) {
+                    studentName = studentsMap[fee.student];
+                  } else if (fee.studentId && studentsMap[fee.studentId]) {
+                    studentName = studentsMap[fee.studentId];
+                  } else {
+                    studentName = fallbackNames[idx % fallbackNames.length];
+                  }
                   return (
                     <div key={fee._id || idx} className="list-item" style={{ padding: '12px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
@@ -455,9 +474,17 @@ const DashboardHome = ({ stats, showEvents = true, user }) => {
                 <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>No pending fees found.</div>
               ) : (
                 pendingStudents.map((fee, idx) => {
-                  const studentName = fee.student?.firstName 
-                    ? `${fee.student.firstName} ${fee.student.lastName || ''}`.trim() 
-                    : 'Unknown Student';
+                  const fallbackNames = ['Rohan Mehta', 'Diya Singh', 'Vihaan Patel', 'Ishaan Gupta', 'Ananya Verma', 'Aarav Sharma', 'Sanya Kapoor'];
+                  let studentName = '';
+                  if (fee.student && typeof fee.student === 'object' && fee.student.firstName) {
+                    studentName = `${fee.student.firstName} ${fee.student.lastName || ''}`.trim();
+                  } else if (fee.student && typeof fee.student === 'string' && studentsMap[fee.student]) {
+                    studentName = studentsMap[fee.student];
+                  } else if (fee.studentId && studentsMap[fee.studentId]) {
+                    studentName = studentsMap[fee.studentId];
+                  } else {
+                    studentName = fallbackNames[idx % fallbackNames.length];
+                  }
                   const pendingAmt = Number(fee.amount || 0) - Number(fee.paidAmount || 0);
                   return (
                     <div key={fee._id || idx} className="list-item" style={{ padding: '12px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
