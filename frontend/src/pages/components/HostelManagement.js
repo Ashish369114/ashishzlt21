@@ -314,10 +314,15 @@ const HostelManagement = () => {
     }
   };
 
-  // Filter Logic — case-insensitive on hostelType
+  // Filter Logic — string-safe comparisons
   const filteredBlocks = hostels.filter(block => {
     if (selectedGender !== 'all' && (block.hostelType || '').toLowerCase() !== selectedGender.toLowerCase()) return false;
-    if (selectedBlock !== 'all' && block._id !== selectedBlock && String(block.blockCode || '') !== String(selectedBlock)) return false;
+    if (selectedBlock !== 'all') {
+      const blockId = String(block._id || '');
+      const blockName = String(block.hostelName || '');
+      const blockCode = String(block.blockCode || '');
+      if (blockId !== selectedBlock && blockName !== selectedBlock && blockCode !== selectedBlock) return false;
+    }
     return true;
   });
 
@@ -372,8 +377,8 @@ const HostelManagement = () => {
               style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', border: '1.5px solid #cbd5e1', fontSize: '0.88rem', color: '#0f172a', fontWeight: '600' }}
             >
               <option value="all">All Blocks</option>
-              {hostels.map(b => (
-                <option key={b._id} value={b._id}>{b.hostelName}</option>
+              {hostels.map((b, idx) => (
+                <option key={idx} value={String(b._id)}>{b.hostelName}</option>
               ))}
             </select>
           </div>
