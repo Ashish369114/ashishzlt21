@@ -40,7 +40,9 @@ const ParentTimetable = ({ selectedStudentId, student }) => {
 
   const studentGrade = student?.grade || '5';
   const studentSection = student?.section || 'A';
-  const studentName = student?.name || student?.userId?.firstName || 'Child';
+  const studentName = student?.userId?.firstName
+    ? `${student.userId.firstName} ${student.userId.lastName || ''}`.trim()
+    : (student?.name || 'Child');
 
   const timetableData = String(studentGrade) === '8' ? grade8Timetable : grade5Timetable;
 

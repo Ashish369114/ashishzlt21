@@ -88,11 +88,13 @@ const ParentClassroomActivities = ({ selectedStudentId, student }) => {
 
   const studentGrade = student?.grade || '5';
   const studentSection = student?.section || 'A';
-  const studentName = student?.name || student?.userId?.firstName || 'Child';
+  const studentName = student?.userId?.firstName
+    ? `${student.userId.firstName} ${student.userId.lastName || ''}`.trim()
+    : (student?.name || 'Child');
 
-  // Filter classroom activities by child's grade & section (Req 10)
+  // Filter classroom activities by child's grade & section
   const activities = sampleClassroomActivities.filter(
-    (act) => act.grade === String(studentGrade) || (studentGrade === '5' && act.grade === '5')
+    (act) => act.grade === String(studentGrade)
   );
 
   return (

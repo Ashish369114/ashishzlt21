@@ -27,7 +27,9 @@ const ParentExams = ({ selectedStudentId, student }) => {
 
   const studentGrade = student?.grade || '5';
   const studentSection = student?.section || 'A';
-  const studentName = student?.name || student?.userId?.firstName || 'Child';
+  const studentName = student?.userId?.firstName
+    ? `${student.userId.firstName} ${student.userId.lastName || ''}`.trim()
+    : (student?.name || 'Child');
 
   // Filter exams for selected term
   const examsForTerm = allSubjectsExamSchedule.filter((ex) => ex.examType === selectedExamTypeId);

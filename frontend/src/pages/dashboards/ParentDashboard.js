@@ -173,10 +173,12 @@ const ParentDashboard = ({ user, onLogout }) => {
                   <MultiRoleMessagingSystem
                     currentUserRole="Parent"
                     currentUserName={`${user?.firstName || 'Priya'} ${user?.lastName || 'Sharma'} (Parent)`}
+                    selectedStudentId={selectedStudentId}
+                    student={activeStudent}
                   />
                 }
               />
-              <Route path="notifications" element={<ParentNotifications />} />
+              <Route path="notifications" element={<ParentNotifications selectedStudentId={selectedStudentId} student={activeStudent} />} />
               <Route path="fees" element={<ParentFees selectedStudentId={selectedStudentId} student={activeStudent} />} />
               <Route path="calendar" element={<InteractiveGoogleCalendar />} />
               <Route path="settings" element={<ParentSettingsPage user={user} onLogout={handleLogout} />} />

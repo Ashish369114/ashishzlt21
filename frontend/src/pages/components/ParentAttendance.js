@@ -108,7 +108,9 @@ const ParentAttendance = ({ selectedStudentId, student }) => {
   const [selectedWeekIndex, setSelectedWeekIndex] = useState(0);
 
   const studentId = student?._id || student?.userId?._id || selectedStudentId;
-  const studentName = student?.name || student?.userId?.name || 'Child';
+  const studentName = student?.userId?.firstName
+    ? `${student.userId.firstName} ${student.userId.lastName || ''}`.trim()
+    : (student?.name || 'Child');
 
   useEffect(() => {
     const loadAttendance = async () => {

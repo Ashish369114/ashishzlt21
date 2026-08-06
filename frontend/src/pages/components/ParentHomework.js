@@ -142,7 +142,9 @@ const ParentHomework = ({ selectedStudentId, student }) => {
 
   const studentGrade = student?.grade || '5';
   const studentSection = student?.section || 'A';
-  const studentName = student?.name || student?.userId?.firstName || 'Child';
+  const studentName = student?.userId?.firstName
+    ? `${student.userId.firstName} ${student.userId.lastName || ''}`.trim()
+    : (student?.name || 'Child');
 
   useEffect(() => {
     const fetchHomework = async () => {
@@ -177,9 +179,9 @@ const ParentHomework = ({ selectedStudentId, student }) => {
 
       // Filter sample homeworks according to selected child's grade
       const childHomeworks = sampleHomeworks.filter(
-        (hw) => hw.grade === String(studentGrade) || (studentGrade === '5' && hw.grade === '5')
+        (hw) => hw.grade === String(studentGrade)
       );
-      setHomeworkList(childHomeworks.length > 0 ? childHomeworks : sampleHomeworks);
+      setHomeworkList(childHomeworks);
     };
 
     fetchHomework();

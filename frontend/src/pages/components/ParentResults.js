@@ -50,6 +50,10 @@ const ParentResults = ({ selectedStudentId, student }) => {
     return 'bg-amber-100 text-amber-800 border-amber-300';
   };
 
+  const studentName = student?.userId?.firstName
+    ? `${student.userId.firstName} ${student.userId.lastName || ''}`.trim()
+    : (student?.name || 'Child');
+
   return (
     <div className="space-y-6">
       {/* Header Banner */}
@@ -66,7 +70,7 @@ const ParentResults = ({ selectedStudentId, student }) => {
               <Award className="h-3.5 w-3.5 inline mr-1" /> Academic Results
             </span>
           </div>
-          <h1 className="text-2xl font-bold">{activeExamConfig.name} — Report Card</h1>
+          <h1 className="text-2xl font-bold">{studentName}'s {activeExamConfig.name} — Report Card</h1>
           <p className="text-sky-100 text-sm">Subject-wise marks breakdown, score percentage & official report card download.</p>
         </div>
 
@@ -295,10 +299,11 @@ const ParentResults = ({ selectedStudentId, student }) => {
         onClose={() => setIsReportCardOpen(false)}
         examName={activeExamConfig.name}
         studentData={{
-          name: student?.name || 'Ramesh Kumar',
-          rollNo: student?.rollNumber || '09',
-          grade: student?.grade ? `Grade ${student.grade}` : 'Grade 9',
+          name: studentName,
+          rollNo: student?.rollNumber || '05',
+          grade: student?.grade ? `Grade ${student.grade}` : 'Grade 5',
           section: student?.section || 'A',
+          admissionNo: student?.admissionNo || 'ADM-2026-0512'
         }}
         marksData={displayedMarks}
         attendancePct={96}
