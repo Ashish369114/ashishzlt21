@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { feeService, studentService } from '../../services/api';
 import { getUnifiedStudents, resolveStudentName, subscribeToDataChanges } from '../../services/syncService';
+import { demoStudents } from '../../utils/demoData';
 import { formatCurrency } from '../../utils/currencyFormatter';
 import { CreditCard, AlertCircle, Clock, CheckCircle2 } from 'lucide-react';
 
@@ -193,17 +194,25 @@ const AccountantPendingFees = () => {
       ]);
 
       const allStudents = getUnifiedStudents(studentsRes.data || []);
-      setStudents(allStudents);
+      const activeStudentsList = (allStudents && allStudents.length > 0) ? allStudents : demoStudents;
+      setStudents(activeStudentsList);
 
-      const list = Array.isArray(pendingRes.data) && pendingRes.data.length ? pendingRes.data : [
-        { _id: 'f1', description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 0, dueDate: '2026-08-15', grade: '5', section: 'A' },
-        { _id: 'f2', description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 0, dueDate: '2026-08-15', grade: '10', section: 'A' },
-        { _id: 'f3', description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 0, dueDate: '2026-08-15', grade: '9', section: 'B' },
-        { _id: 'f4', description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 18880, dueDate: '2026-08-15', grade: '8', section: 'B' },
-        { _id: 'f5', description: 'Quarterly Tuition Fees', amount: 47600, paidAmount: 19040, dueDate: '2026-08-15', grade: '6', section: 'C' },
-        { _id: 'f6', description: 'Quarterly Tuition Fees', amount: 47600, paidAmount: 0, dueDate: '2026-08-15', grade: '7', section: 'A' },
-        { _id: 'f7', description: 'Quarterly Tuition Fees', amount: 47600, paidAmount: 0, dueDate: '2026-08-15', grade: '5', section: 'B' }
-      ];
+      const list = Array.isArray(pendingRes.data) && pendingRes.data.length ? pendingRes.data : activeStudentsList.map((std, idx) => {
+        const sName = `${std.firstName || 'Student'} ${std.lastName || idx + 1}`;
+        const gradeStr = String(std.grade || std.class?.grade || (Math.floor(idx / 15) + 1));
+        const secStr = String(std.section || std.class?.section || ['A', 'B', 'C'][idx % 3]);
+        return {
+          _id: `pf_${std._id || idx}`,
+          student: std,
+          studentName: sName,
+          grade: gradeStr,
+          section: secStr,
+          description: idx % 3 === 0 ? 'Quarterly Tuition Fees' : idx % 3 === 1 ? 'Exam Fee' : 'Annual Administrative Fee',
+          amount: 47200,
+          paidAmount: idx % 4 === 0 ? 18880 : idx % 5 === 0 ? 47200 : 0,
+          dueDate: '2026-08-15'
+        };
+      });
       setFees(list);
       setError('');
     } catch (err) {

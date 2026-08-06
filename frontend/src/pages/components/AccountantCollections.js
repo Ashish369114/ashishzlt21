@@ -669,12 +669,36 @@ const AccountantCollections = ({ defaultTab = 'collections' }) => {
 const AccountantLibraryFines = () => {
   const [finesList, setFinesList] = useState(() => {
     const saved = localStorage.getItem('library_fines_list');
-    return saved ? JSON.parse(saved) : [
-      { id: 1, title: 'The Great Gatsby', isbn: '9780743273565', student: 'Aarav Patel', gradeSec: 'Grade 5 - Section A', dueDate: '15 Jul 2026', daysOverdue: 7, amount: 350, status: 'Unpaid', examType: 'Library Overdue' },
-      { id: 2, title: 'Introduction to Algorithms', isbn: '9780262033848', student: 'Rahul Kumar', gradeSec: 'Grade 10 - Section A', dueDate: '20 Jul 2026', daysOverdue: 5, amount: 250, status: 'Unpaid', examType: 'Mid-Term Exam Fine' },
-      { id: 3, title: 'Advanced High School Physics', isbn: '9780133647181', student: 'Priya Sharma', gradeSec: 'Grade 9 - Section B', dueDate: '22 Jul 2026', daysOverdue: 3, amount: 150, status: 'Unpaid', examType: 'Unit Test Penalty' },
-      { id: 4, title: 'A Brief History of Time', isbn: '9780553380163', student: 'Vihaan Gupta', gradeSec: 'Grade 8 - Section B', dueDate: '10 Jul 2026', daysOverdue: 12, amount: 600, status: 'Paid', paymentMethod: 'UPI', paidDate: '01 Aug 2026', examType: 'Final Exam Fine' }
+    if (saved) return JSON.parse(saved);
+    const books = [
+      { title: 'The Great Gatsby', isbn: '9780743273565' },
+      { title: 'Introduction to Algorithms', isbn: '9780262033848' },
+      { title: 'Advanced High School Physics', isbn: '9780133647181' },
+      { title: 'A Brief History of Time', isbn: '9780553380163' },
+      { title: 'Organic Chemistry Reactions', isbn: '9780138095788' }
     ];
+    return demoStudents.map((std, idx) => {
+      const bk = books[idx % books.length];
+      const g = String(std.grade || '1');
+      const sec = String(std.section || 'A');
+      const days = (idx % 8) + 1;
+      return {
+        id: idx + 1,
+        title: bk.title,
+        isbn: bk.isbn,
+        student: `${std.firstName} ${std.lastName}`,
+        grade: g,
+        section: sec,
+        gradeSec: `Grade ${g} - Section ${sec}`,
+        dueDate: `${10 + (idx % 15)} Jul 2026`,
+        daysOverdue: days,
+        amount: 50 * days,
+        status: idx % 3 === 0 ? 'Paid' : 'Unpaid',
+        paymentMethod: idx % 3 === 0 ? 'UPI' : undefined,
+        paidDate: idx % 3 === 0 ? '01 Aug 2026' : undefined,
+        examType: idx % 4 === 0 ? 'Library Overdue' : idx % 4 === 1 ? 'Mid-Term Exam Fine' : idx % 4 === 2 ? 'Unit Test Penalty' : 'Final Exam Fine'
+      };
+    });
   });
 
   const [collectModalFor, setCollectModalFor] = useState(null);
