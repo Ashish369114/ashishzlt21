@@ -126,7 +126,7 @@ table th,
 table thead th {
   background: linear-gradient(135deg, #0C4A86 0%, #0096DA 100%) !important;
   padding: 14px 16px !important;
-  text-align: left !important;
+  text-align: left;
   font-weight: 800 !important;
   color: #FFFFFF !important;
   font-size: 0.82rem !important;

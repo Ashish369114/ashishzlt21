@@ -780,16 +780,16 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
           </div>
 
           {/* Book Catalog Table */}
-          <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', overflow: 'hidden' }}>
+          <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', overflow: 'visible' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
               <thead>
-                <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0', color: '#475569', fontSize: '0.78rem', textTransform: 'uppercase' }}>
-                  <th style={{ padding: '14px 20px' }}>Title & Author</th>
-                  <th style={{ padding: '14px 20px' }}>ISBN / Category</th>
-                  <th style={{ padding: '14px 20px' }}>Publisher</th>
-                  <th style={{ padding: '14px 20px' }}>Stock</th>
-                  <th style={{ padding: '14px 20px' }}>Status</th>
-                  <th style={{ padding: '14px 20px', textAlign: 'right' }}>Actions</th>
+                <tr style={{ background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', color: '#ffffff', fontSize: '0.78rem', textTransform: 'uppercase' }}>
+                  <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Title & Author</th>
+                  <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>ISBN / Category</th>
+                  <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Publisher</th>
+                  <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Stock</th>
+                  <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Status</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'right', color: '#ffffff', fontWeight: '800' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -816,35 +816,93 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
                         </span>
                       </td>
                       <td style={{ padding: '14px 20px', textAlign: 'right' }} className="action-menu-container">
-                        <div style={{ position: 'relative', display: 'inline-block' }}>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setActionMenuOpenFor(prev => prev === bookKey ? null : bookKey);
-                            }}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', borderRadius: '50%' }}
-                          >
-                            <MoreVertical size={18} color="#64748b" />
-                          </button>
-                          
-                          {actionMenuOpenFor === bookKey && (
-                            <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: '4px', background: '#fff', borderRadius: '10px', boxShadow: '0 10px 25px rgba(0,0,0,0.12)', border: '1px solid #e2e8f0', width: '170px', zIndex: 100, overflow: 'hidden', textAlign: 'left' }}>
-                              {book.availableCopies > 0 && (
-                                <button onClick={(e) => { e.stopPropagation(); setBorrowModalOpenFor(book); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#10b981', fontWeight: '600' }}>Borrow Book</button>
-                              )}
-                              <button onClick={(e) => { e.stopPropagation(); setReserveModalOpenFor(book); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#8b5cf6', fontWeight: '600' }}>Reserve Book</button>
-                              {book.availableCopies < book.totalCopies && (
-                                <>
-                                  <button onClick={(e) => { e.stopPropagation(); handleReturnBook(book._id || book.id); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#3b82f6', fontWeight: '600' }}>Return Book</button>
-                                  <button onClick={(e) => { e.stopPropagation(); handleRenewBook(book._id || book.id); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#f59e0b', fontWeight: '600' }}>Renew Book (+14d)</button>
-                                </>
-                              )}
-                              <button onClick={(e) => { e.stopPropagation(); setHistoryModalOpenFor(book); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#475569', fontWeight: '600' }}>Reading History</button>
-                              <div style={{ height: '1px', background: '#f1f5f9', margin: '4px 0' }}></div>
-                              <button onClick={(e) => { e.stopPropagation(); handleEditBook(book); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#1e293b' }}>Edit Book</button>
-                              <button onClick={(e) => { e.stopPropagation(); handleDeleteBook(book._id || book.id); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#ef4444' }}>Delete Book</button>
-                            </div>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end' }}>
+                          {book.availableCopies > 0 && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setBorrowModalOpenFor(book); }}
+                              style={{
+                                padding: '6px 12px',
+                                background: '#10b981',
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontSize: '0.78rem',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                whiteSpace: 'nowrap',
+                                boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)'
+                              }}
+                            >
+                              + Borrow
+                            </button>
                           )}
+                          {book.availableCopies < book.totalCopies && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleReturnBook(book._id || book.id); }}
+                              style={{
+                                padding: '6px 12px',
+                                background: '#3b82f6',
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontSize: '0.78rem',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                whiteSpace: 'nowrap',
+                                boxShadow: '0 2px 4px rgba(59, 130, 246, 0.2)'
+                              }}
+                            >
+                              Return
+                            </button>
+                          )}
+
+                          <div style={{ position: 'relative', display: 'inline-block' }}>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActionMenuOpenFor(prev => prev === bookKey ? null : bookKey);
+                              }}
+                              style={{
+                                background: '#f1f5f9',
+                                border: '1px solid #cbd5e1',
+                                cursor: 'pointer',
+                                padding: '6px 8px',
+                                borderRadius: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="More options"
+                            >
+                              <MoreVertical size={16} color="#475569" />
+                            </button>
+                            
+                            {actionMenuOpenFor === bookKey && (
+                              <div style={{
+                                position: 'absolute',
+                                right: 0,
+                                top: '100%',
+                                marginTop: '6px',
+                                background: '#ffffff',
+                                borderRadius: '12px',
+                                boxShadow: '0 12px 30px rgba(0,0,0,0.18)',
+                                border: '1px solid #cbd5e1',
+                                width: '180px',
+                                zIndex: 9999,
+                                overflow: 'hidden',
+                                textAlign: 'left'
+                              }}>
+                                <button onClick={(e) => { e.stopPropagation(); setReserveModalOpenFor(book); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#8b5cf6', fontWeight: '600' }}>Reserve Book</button>
+                                {book.availableCopies < book.totalCopies && (
+                                  <button onClick={(e) => { e.stopPropagation(); handleRenewBook(book._id || book.id); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#f59e0b', fontWeight: '600' }}>Renew Book (+14d)</button>
+                                )}
+                                <button onClick={(e) => { e.stopPropagation(); setHistoryModalOpenFor(book); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#475569', fontWeight: '600' }}>Reading History</button>
+                                <div style={{ height: '1px', background: '#f1f5f9', margin: '4px 0' }}></div>
+                                <button onClick={(e) => { e.stopPropagation(); handleEditBook(book); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#1e293b' }}>Edit Book</button>
+                                <button onClick={(e) => { e.stopPropagation(); handleDeleteBook(book._id || book.id); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#ef4444' }}>Delete Book</button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </td>
                     </tr>
