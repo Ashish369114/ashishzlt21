@@ -817,11 +817,11 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
                       </td>
                       <td style={{ padding: '14px 20px', textAlign: 'right' }} className="action-menu-container">
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end' }}>
-                          {book.availableCopies > 0 && (
+                          {book.availableCopies > 0 ? (
                             <button
                               onClick={(e) => { e.stopPropagation(); setBorrowModalOpenFor(book); }}
                               style={{
-                                padding: '6px 12px',
+                                padding: '6px 14px',
                                 background: '#10b981',
                                 color: '#ffffff',
                                 border: 'none',
@@ -835,25 +835,18 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
                             >
                               + Borrow
                             </button>
-                          )}
-                          {book.availableCopies < book.totalCopies && (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleReturnBook(book._id || book.id); }}
-                              style={{
-                                padding: '6px 12px',
-                                background: '#3b82f6',
-                                color: '#ffffff',
-                                border: 'none',
-                                borderRadius: '8px',
-                                fontSize: '0.78rem',
-                                fontWeight: '700',
-                                cursor: 'pointer',
-                                whiteSpace: 'nowrap',
-                                boxShadow: '0 2px 4px rgba(59, 130, 246, 0.2)'
-                              }}
-                            >
-                              Return
-                            </button>
+                          ) : (
+                            <span style={{
+                              padding: '4px 10px',
+                              background: '#fee2e2',
+                              color: '#b91c1c',
+                              borderRadius: '8px',
+                              fontSize: '0.75rem',
+                              fontWeight: '700',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              Out of Stock
+                            </span>
                           )}
 
                           <div style={{ position: 'relative', display: 'inline-block' }}>
