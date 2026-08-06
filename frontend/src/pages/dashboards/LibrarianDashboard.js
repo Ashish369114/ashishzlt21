@@ -246,6 +246,32 @@ const upcomingEventsList = [
 const LibrarianDashboardHome = ({ onNavigate }) => {
   const eventsScrollRef = useRef(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [stats, setStats] = useState(() => {
+    const saved = localStorage.getItem('library_books_list');
+    if (saved) {
+      const books = JSON.parse(saved);
+      const total = books.reduce((a, b) => a + (b.totalCopies || 0), 0);
+      const avail = books.reduce((a, b) => a + (b.availableCopies !== undefined ? b.availableCopies : (b.totalCopies || 0)), 0);
+      return { total: total || 66, available: avail, borrowed: (total || 66) - avail };
+    }
+    const statsSaved = localStorage.getItem('library_stats');
+    return statsSaved ? JSON.parse(statsSaved) : { total: 66, available: 53, borrowed: 13 };
+  });
+
+  useEffect(() => {
+    const updateStats = () => {
+      const saved = localStorage.getItem('library_books_list');
+      if (saved) {
+        const books = JSON.parse(saved);
+        const total = books.reduce((a, b) => a + (b.totalCopies || 0), 0);
+        const avail = books.reduce((a, b) => a + (b.availableCopies !== undefined ? b.availableCopies : (b.totalCopies || 0)), 0);
+        setStats({ total: total || 66, available: avail, borrowed: (total || 66) - avail });
+      }
+    };
+    window.addEventListener('storage', updateStats);
+    updateStats();
+    return () => window.removeEventListener('storage', updateStats);
+  }, []);
 
   useEffect(() => {
     const el = eventsScrollRef.current;
@@ -285,9 +311,9 @@ const LibrarianDashboardHome = ({ onNavigate }) => {
               <BookOpen size={18} />
             </div>
           </div>
-          <div style={{ fontSize: '1.7rem', fontWeight: '800', color: '#0C4A86', marginBottom: '4px' }}>1,245</div>
+          <div style={{ fontSize: '1.7rem', fontWeight: '800', color: '#0C4A86', marginBottom: '4px' }}>{stats.total}</div>
           <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#166534', background: '#dcfce7', padding: '3px 8px', borderRadius: '12px' }}>
-            +24 New Additions
+            {stats.available} Available Copies
           </span>
         </div>
 
@@ -301,9 +327,9 @@ const LibrarianDashboardHome = ({ onNavigate }) => {
               <Repeat size={18} />
             </div>
           </div>
-          <div style={{ fontSize: '1.7rem', fontWeight: '800', color: '#0C4A86', marginBottom: '4px' }}>312</div>
+          <div style={{ fontSize: '1.7rem', fontWeight: '800', color: '#0C4A86', marginBottom: '4px' }}>{stats.borrowed}</div>
           <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#0369a1', background: '#e0f2fe', padding: '3px 8px', borderRadius: '12px' }}>
-            25% Active Circulation
+            {Math.round((stats.borrowed / (stats.total || 1)) * 100)}% Active Circulation
           </span>
         </div>
 
@@ -317,9 +343,9 @@ const LibrarianDashboardHome = ({ onNavigate }) => {
               <DollarSign size={18} />
             </div>
           </div>
-          <div style={{ fontSize: '1.7rem', fontWeight: '800', color: '#d97706', marginBottom: '4px' }}>14 Books</div>
+          <div style={{ fontSize: '1.7rem', fontWeight: '800', color: '#d97706', marginBottom: '4px' }}>3 Books</div>
           <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#92400e', background: '#fef3c7', padding: '3px 8px', borderRadius: '12px' }}>
-            ₹1,850 Fines Pending
+            ₹450 Fines Pending
           </span>
         </div>
       </div>
