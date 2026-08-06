@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { feeService, studentService } from '../../services/api';
-import { getUnifiedStudents, resolveStudentName, subscribeToDataChanges } from '../../services/syncService';
+import { feeService } from '../../services/api';
+import { subscribeToDataChanges } from '../../services/syncService';
 import { demoStudents } from '../../utils/demoData';
 import { formatCurrency } from '../../utils/currencyFormatter';
 import { CreditCard, AlertCircle, Clock, CheckCircle2 } from 'lucide-react';
@@ -188,31 +188,36 @@ const AccountantPendingFees = () => {
   const fetchFees = async () => {
     try {
       setLoading(true);
-      const [pendingRes, studentsRes] = await Promise.all([
-        feeService.getPending().catch(() => ({ data: [] })),
-        studentService.getAll().catch(() => ({ data: [] }))
-      ]);
+      const pendingRes = await feeService.getPending().catch(() => ({ data: [] }));
 
-      const allStudents = getUnifiedStudents(studentsRes.data || []);
-      const activeStudentsList = (allStudents && allStudents.length > 0) ? allStudents : demoStudents;
-      setStudents(activeStudentsList);
+      // Always use demoStudents for the dropdown — they have flat grade/section strings guaranteed
+      setStudents(demoStudents);
 
-      const list = Array.isArray(pendingRes.data) && pendingRes.data.length ? pendingRes.data : activeStudentsList.map((std, idx) => {
-        const sName = `${std.firstName || 'Student'} ${std.lastName || idx + 1}`;
-        const gradeStr = String(std.grade || std.class?.grade || (Math.floor(idx / 15) + 1));
-        const secStr = String(std.section || std.class?.section || ['A', 'B', 'C'][idx % 3]);
-        return {
-          _id: `pf_${std._id || idx}`,
-          student: std,
-          studentName: sName,
-          grade: gradeStr,
-          section: secStr,
-          description: idx % 3 === 0 ? 'Quarterly Tuition Fees' : idx % 3 === 1 ? 'Exam Fee' : 'Annual Administrative Fee',
-          amount: 47200,
-          paidAmount: idx % 4 === 0 ? 18880 : idx % 5 === 0 ? 47200 : 0,
-          dueDate: '2026-08-15'
-        };
-      });
+      const list = Array.isArray(pendingRes.data) && pendingRes.data.length > 0
+        ? pendingRes.data.map((fee, idx) => {
+            // If the API fee doesn't have flat grade/section, try to pull from nested class
+            const g = String(fee.grade || fee.student?.grade || fee.student?.class?.grade || fee.class?.grade || '');
+            const sec = String(fee.section || fee.student?.section || fee.student?.class?.section || fee.class?.section || '').toUpperCase();
+            const sName = fee.studentName
+              || (fee.student?.firstName ? `${fee.student.firstName} ${fee.student.lastName || ''}`.trim() : '')
+              || '';
+            return { ...fee, grade: g, section: sec, studentName: sName };
+          })
+        : demoStudents.map((std, idx) => {
+            const sName = `${std.firstName} ${std.lastName}`;
+            return {
+              _id: `pf_${std._id}`,
+              student: std,
+              studentName: sName,
+              grade: String(std.grade),
+              section: String(std.section),
+              description: idx % 3 === 0 ? 'Quarterly Tuition Fees' : idx % 3 === 1 ? 'Exam Fee' : 'Annual Administrative Fee',
+              amount: 47200,
+              paidAmount: idx % 4 === 0 ? 18880 : idx % 5 === 0 ? 47200 : 0,
+              dueDate: '2026-08-15'
+            };
+          });
+
       setFees(list);
       setError('');
     } catch (err) {
