@@ -992,7 +992,7 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
               </table>
             </div>
 
-            {/* Right Box: Daily Insights, Upcoming Events & Notifications */}
+            {/* Right Box: Daily Insights & Notifications */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               
               {/* Daily Insights */}
@@ -1011,23 +1011,6 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
                     <span>•</span> <span>CBSE Textbooks for Grade 9 & 10 fully reconciled with publisher stock.</span>
                   </li>
                 </ul>
-              </div>
-
-              {/* Upcoming Events */}
-              <div style={{ background: '#fff', padding: '18px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-                <h4 style={{ margin: '0 0 10px 0', fontSize: '0.95rem', fontWeight: '800', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Calendar size={16} color="#8b5cf6" /> Upcoming Events
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.82rem' }}>
-                  <div style={{ background: '#f8fafc', padding: '8px 12px', borderRadius: '8px', borderLeft: '3px solid #8b5cf6' }}>
-                    <div style={{ fontWeight: '700', color: '#0f172a' }}>Annual Sports Uniform Distribution</div>
-                    <div style={{ color: '#64748b', fontSize: '0.75rem' }}>July 28, 2026 • Main Gymnasium</div>
-                  </div>
-                  <div style={{ background: '#f8fafc', padding: '8px 12px', borderRadius: '8px', borderLeft: '3px solid #0284c7' }}>
-                    <div style={{ fontWeight: '700', color: '#0f172a' }}>Quarterly Inventory & Stock Audit</div>
-                    <div style={{ color: '#64748b', fontSize: '0.75rem' }}>August 05, 2026 • Central Store Room</div>
-                  </div>
-                </div>
               </div>
 
             </div>
