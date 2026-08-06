@@ -3,7 +3,7 @@ import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
 import { 
   ChevronDown, ChevronRight, CheckCircle2, Camera,
   LayoutDashboard, Calendar, MessageSquare, GraduationCap, Users, 
-  FileText, BookOpen, Bell, FileSpreadsheet, BarChart2, LogOut, ShieldCheck, Settings
+  FileText, BookOpen, Bell, FileSpreadsheet, BarChart2, LogOut, ShieldCheck, Settings, Gift
 } from 'lucide-react';
 import { studentService, teacherService, feeService, attendanceService, examService } from '../../services/api';
 import { subscribeToDataChanges } from '../../services/syncService';
@@ -141,6 +141,7 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           <li><Link to="/dashboard/notices" className={isActive('/dashboard/notices') ? 'active' : ''}><Bell size={18} /> <span>Circulars & Notices</span></Link></li>
           <li><Link to="/dashboard/meeting-moms" className={isActive('/dashboard/meeting-moms') ? 'active' : ''}><FileSpreadsheet size={18} /> <span>Meeting MOMs</span></Link></li>
           <li><Link to="/dashboard/reports" className={isActive('/dashboard/reports') ? 'active' : ''}><BarChart2 size={18} /> <span>Executive Reports</span></Link></li>
+          <li><Link to="/dashboard/concessions" className={isActive('/dashboard/concessions') ? 'active' : ''}><Gift size={18} /> <span>Approve Concessions</span></Link></li>
           <li><Link to="/dashboard/settings" className={isActive('/dashboard/settings') ? 'active' : ''}><Settings size={18} /> <span>Settings & Profile</span></Link></li>
 
           <li style={{ marginTop: '16px', padding: '0 4px' }}>
@@ -173,6 +174,7 @@ const PrincipalDashboard = ({ user, onLogout }) => {
           <Route path="notices" element={<NoticeManagement />} />
           <Route path="meeting-moms" element={<MeetingMomManagement />} />
           <Route path="complaints" element={<PrincipalTeacherComplaints />} />
+          <Route path="concessions" element={<PrincipalConcessionGrant />} />
           <Route path="settings" element={<TeacherSettingsPage user={{ role: 'principal', ...user }} />} />
           <Route path="*" element={<PrincipalDashboardHome stats={stats} user={user} />} />
         </Routes>
