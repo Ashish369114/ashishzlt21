@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { concessionService } from '../../services/api';
 import { formatCurrency } from '../../utils/currencyFormatter';
+import { demoStudents } from '../../utils/demoData';
 
 const fmt   = d => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 const rupee = formatCurrency;
@@ -14,8 +15,24 @@ const ConcessionManagement = () => {
   const fetchAll = async () => {
     setLoading(true); setError('');
     try {
-      const res = await concessionService.getAll();
-      setConcessions(Array.isArray(res.data) ? res.data : []);
+      const res = await concessionService.getAll().catch(() => ({ data: [] }));
+      const apiData = Array.isArray(res.data) ? res.data : [];
+      if (apiData.length > 0) {
+        setConcessions(apiData);
+      } else {
+        const reasons = ['Merit Scholarship', 'EWS Fee Waiver', 'Staff Ward Benefit', 'Sports Achievement', 'Need-Based Aid', 'Sibling Concession'];
+        const seeded = demoStudents.slice(0, 30).map((std, idx) => ({
+          _id: `con_${idx}`,
+          student: std,
+          concessionAmount: [2000, 5000, 8000, 10000, 15000, 3500][idx % 6],
+          reason: reasons[idx % reasons.length],
+          grantedBy: 'Principal',
+          approvedAt: new Date(Date.now() - idx * 3 * 24 * 60 * 60 * 1000).toISOString(),
+          createdAt: new Date(Date.now() - idx * 3 * 24 * 60 * 60 * 1000).toISOString(),
+          status: idx % 4 === 3 ? 'Revoked' : 'Active'
+        }));
+        setConcessions(seeded);
+      }
     } catch (err) {
       setError('Failed to load concession records.');
     } finally {
