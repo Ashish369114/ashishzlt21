@@ -1092,24 +1092,6 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
       {/* ==================================================== */}
       {activeTab === 'inventory' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          
-          {/* Executive Banner */}
-          <div style={{ background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)', borderRadius: '18px', padding: '24px 30px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-            <div>
-              <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '800' }}>🏛️ Administrative Operations Dashboard</h2>
-              <p style={{ margin: '6px 0 0', color: '#e0f2fe', fontSize: '0.88rem' }}>
-                Real-time inventory summary (uniforms & books), admissions pipeline, accommodation occupancy, low stock alerts, & quick actions.
-              </p>
-            </div>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button onClick={() => { setAddModalType('uniform'); setShowAddModal(true); }} style={{ padding: '10px 16px', background: '#ffffff', color: '#0284c7', border: 'none', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
-                <Plus size={16} /> Quick Add Uniform
-              </button>
-              <button onClick={() => { setAddModalType('book'); setShowAddModal(true); }} style={{ padding: '10px 16px', background: 'rgba(255,255,255,0.2)', color: '#ffffff', border: '1px solid #ffffff', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
-                <Plus size={16} /> Quick Add Book
-              </button>
-            </div>
-          </div>
 
           {/* Inventory Sub-Tabs Header */}
           <div style={{ background: '#fff', padding: '12px 20px', borderRadius: '14px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
