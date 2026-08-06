@@ -67,14 +67,26 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
   const [showNotifications, setShowNotifications] = useState(false);
 
   // Fine Collection State
-  const [finesList, setFinesList] = useState([
-    { id: 1, title: 'The Great Gatsby', isbn: '9780743273565', student: 'Aarav Patel', gradeSec: 'Grade 5 - Section A', dueDate: '15 Jul 2026', daysOverdue: 7, amount: 350, status: 'Unpaid' },
-    { id: 2, title: 'Introduction to Algorithms', isbn: '9780262033848', student: 'Rahul Kumar', gradeSec: 'Grade 10 - Section A', dueDate: '20 Jul 2026', daysOverdue: 5, amount: 250, status: 'Unpaid' },
-    { id: 3, title: 'Advanced High School Physics', isbn: '9780133647181', student: 'Priya Sharma', gradeSec: 'Grade 9 - Section B', dueDate: '22 Jul 2026', daysOverdue: 3, amount: 150, status: 'Unpaid' },
-    { id: 4, title: 'A Brief History of Time', isbn: '9780553380163', student: 'Vihaan Gupta', gradeSec: 'Grade 8 - Section B', dueDate: '10 Jul 2026', daysOverdue: 12, amount: 600, status: 'Paid', paymentMethod: 'UPI', paidDate: '01 Aug 2026' }
-  ]);
+  const [finesList, setFinesList] = useState(() => {
+    const saved = localStorage.getItem('library_fines_list');
+    return saved ? JSON.parse(saved) : [
+      { id: 1, title: 'The Great Gatsby', isbn: '9780743273565', student: 'Aarav Patel', gradeSec: 'Grade 5 - Section A', dueDate: '15 Jul 2026', daysOverdue: 7, amount: 350, status: 'Unpaid' },
+      { id: 2, title: 'Introduction to Algorithms', isbn: '9780262033848', student: 'Rahul Kumar', gradeSec: 'Grade 10 - Section A', dueDate: '20 Jul 2026', daysOverdue: 5, amount: 250, status: 'Unpaid' },
+      { id: 3, title: 'Advanced High School Physics', isbn: '9780133647181', student: 'Priya Sharma', gradeSec: 'Grade 9 - Section B', dueDate: '22 Jul 2026', daysOverdue: 3, amount: 150, status: 'Unpaid' },
+      { id: 4, title: 'A Brief History of Time', isbn: '9780553380163', student: 'Vihaan Gupta', gradeSec: 'Grade 8 - Section B', dueDate: '10 Jul 2026', daysOverdue: 12, amount: 600, status: 'Paid', paymentMethod: 'UPI', paidDate: '01 Aug 2026' }
+    ];
+  });
   const [collectFineModalFor, setCollectFineModalFor] = useState(null);
   const [finePaymentMethod, setFinePaymentMethod] = useState('Cash');
+
+  useEffect(() => {
+    const syncFines = () => {
+      const saved = localStorage.getItem('library_fines_list');
+      if (saved) setFinesList(JSON.parse(saved));
+    };
+    window.addEventListener('storage', syncFines);
+    return () => window.removeEventListener('storage', syncFines);
+  }, []);
 
   // Unified Full Student List
   const fullStudentsList = useMemo(() => {
@@ -158,7 +170,11 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
     e.preventDefault();
     if (!collectFineModalFor) return;
     const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-    setFinesList(prev => prev.map(f => f.id === collectFineModalFor.id ? { ...f, status: 'Paid', paymentMethod: finePaymentMethod, paidDate: today } : f));
+    setFinesList(prev => {
+      const updated = prev.map(f => f.id === collectFineModalFor.id ? { ...f, status: 'Paid', paymentMethod: finePaymentMethod, paidDate: today } : f);
+      localStorage.setItem('library_fines_list', JSON.stringify(updated));
+      return updated;
+    });
     alert(`🎉 Fine ₹${collectFineModalFor.amount} collected via ${finePaymentMethod} for ${collectFineModalFor.student}! Digital receipt issued.`);
     setCollectFineModalFor(null);
   };

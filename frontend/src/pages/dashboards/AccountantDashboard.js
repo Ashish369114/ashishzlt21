@@ -332,6 +332,11 @@ const AccountantDashboard = ({ user, onLogout }) => {
               <CreditCard size={18} /> <span>Fee Collections & Dues</span>
             </Link>
           </li>
+          <li>
+            <Link to="/dashboard/fines" className={isActive('/dashboard/fines') || isActive('/dashboard/library-fines') ? 'active' : ''}>
+              <DollarSign size={18} /> <span>Library & Late Fines</span>
+            </Link>
+          </li>
           {isGoldOrBetter && (
             <li>
               <Link to="/dashboard/concessions" className={isActive('/dashboard/concessions') ? 'active' : ''}>
@@ -451,6 +456,8 @@ const AccountantDashboard = ({ user, onLogout }) => {
           <Route path="payroll" element={<AccountantPayroll />} />
           <Route path="collections" element={<AccountantCollections defaultTab="collections" />} />
           <Route path="pending" element={<AccountantCollections defaultTab="pending" />} />
+          <Route path="fines" element={<AccountantCollections defaultTab="library_fines" />} />
+          <Route path="library-fines" element={<AccountantCollections defaultTab="library_fines" />} />
           <Route path="payments" element={<AccountantPayments />} />
           <Route path="concessions" element={<ConcessionManagement />} />
           <Route path="reports" element={<AccountantReports isPremiumFeatureAllowed={isPremiumFeatureAllowed} />} />

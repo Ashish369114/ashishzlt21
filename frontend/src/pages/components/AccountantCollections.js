@@ -337,10 +337,33 @@ const AccountantCollections = ({ defaultTab = 'collections' }) => {
           >
             <Clock size={18} color="#0096DA" /> Pending Dues & Reminders
           </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('library_fines')}
+            style={{
+              padding: '9px 18px',
+              borderRadius: '12px',
+              border: (activeTab === 'library_fines' || activeTab === 'fines') ? '1.5px solid #0096DA' : '1px solid transparent',
+              background: (activeTab === 'library_fines' || activeTab === 'fines') ? '#EBF5FF' : 'transparent',
+              color: '#0C4A86',
+              fontWeight: '800',
+              fontSize: '0.88rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <IndianRupee size={18} color="#0096DA" /> Library & Late Fines
+          </button>
         </div>
       </div>
 
-      {activeTab === 'pending' ? (
+      {(activeTab === 'library_fines' || activeTab === 'fines') ? (
+        <AccountantLibraryFines />
+      ) : activeTab === 'pending' ? (
         <AccountantPendingFees />
       ) : (
         <>
@@ -637,6 +660,171 @@ const AccountantCollections = ({ defaultTab = 'collections' }) => {
         </div>
       )}
         </>
+      )}
+    </div>
+  );
+};
+
+// Accountant Library & Late Fines Ledger Component
+const AccountantLibraryFines = () => {
+  const [finesList, setFinesList] = useState(() => {
+    const saved = localStorage.getItem('library_fines_list');
+    return saved ? JSON.parse(saved) : [
+      { id: 1, title: 'The Great Gatsby', isbn: '9780743273565', student: 'Aarav Patel', gradeSec: 'Grade 5 - Section A', dueDate: '15 Jul 2026', daysOverdue: 7, amount: 350, status: 'Unpaid' },
+      { id: 2, title: 'Introduction to Algorithms', isbn: '9780262033848', student: 'Rahul Kumar', gradeSec: 'Grade 10 - Section A', dueDate: '20 Jul 2026', daysOverdue: 5, amount: 250, status: 'Unpaid' },
+      { id: 3, title: 'Advanced High School Physics', isbn: '9780133647181', student: 'Priya Sharma', gradeSec: 'Grade 9 - Section B', dueDate: '22 Jul 2026', daysOverdue: 3, amount: 150, status: 'Unpaid' },
+      { id: 4, title: 'A Brief History of Time', isbn: '9780553380163', student: 'Vihaan Gupta', gradeSec: 'Grade 8 - Section B', dueDate: '10 Jul 2026', daysOverdue: 12, amount: 600, status: 'Paid', paymentMethod: 'UPI', paidDate: '01 Aug 2026' }
+    ];
+  });
+
+  const [collectModalFor, setCollectModalFor] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('Cash');
+
+  useEffect(() => {
+    const syncFines = () => {
+      const saved = localStorage.getItem('library_fines_list');
+      if (saved) setFinesList(JSON.parse(saved));
+    };
+    window.addEventListener('storage', syncFines);
+    return () => window.removeEventListener('storage', syncFines);
+  }, []);
+
+  const totalOutstanding = finesList.filter(f => f.status === 'Unpaid').reduce((sum, f) => sum + Number(f.amount || 0), 0);
+
+  const handleCollect = (e) => {
+    e.preventDefault();
+    if (!collectModalFor) return;
+    const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    const updated = finesList.map(f => f.id === collectModalFor.id ? { ...f, status: 'Paid', paymentMethod: paymentMethod, paidDate: today } : f);
+    setFinesList(updated);
+    localStorage.setItem('library_fines_list', JSON.stringify(updated));
+    alert(`🎉 Fine ₹${collectModalFor.amount} collected via ${paymentMethod} for ${collectModalFor.student}! Digital receipt issued by Accountant.`);
+    setCollectModalFor(null);
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* Banner */}
+      <div style={{ background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', padding: '24px 30px', borderRadius: '18px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '800' }}>💰 Library & Late Fine Collection Ledger</h2>
+          <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', opacity: 0.9 }}>Track overdue book penalties, receive fine payments, and manage accountant fee receipts.</p>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: '800', opacity: 0.8 }}>TOTAL FINES OUTSTANDING</div>
+          <div style={{ fontSize: '2rem', fontWeight: '900' }}>₹{totalOutstanding}</div>
+        </div>
+      </div>
+
+      {/* Fines Table */}
+      <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+          <thead>
+            <tr style={{ background: '#0C4A86', color: '#ffffff', fontSize: '0.78rem', textTransform: 'uppercase' }}>
+              <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Book Title & ISBN</th>
+              <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Student Borrower</th>
+              <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Due Date</th>
+              <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Days Overdue</th>
+              <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Fine Amount</th>
+              <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800', textAlign: 'right' }}>Action / Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {finesList.map((fine) => (
+              <tr key={fine.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                <td style={{ padding: '14px 20px' }}>
+                  <div style={{ fontWeight: '700', color: '#0f172a' }}>{fine.title}</div>
+                  <div style={{ fontSize: '0.78rem', color: '#64748b', fontFamily: 'monospace' }}>ISBN: {fine.isbn}</div>
+                </td>
+                <td style={{ padding: '14px 20px' }}>
+                  <div style={{ fontWeight: '700', color: '#0f172a' }}>{fine.student}</div>
+                  <div style={{ fontSize: '0.78rem', color: '#64748b' }}>{fine.gradeSec}</div>
+                </td>
+                <td style={{ padding: '14px 20px', fontWeight: '700', color: '#dc2626' }}>{fine.dueDate}</td>
+                <td style={{ padding: '14px 20px', fontWeight: '700', color: '#dc2626' }}>{fine.daysOverdue} Days</td>
+                <td style={{ padding: '14px 20px', fontWeight: '800', color: '#d97706', fontSize: '1rem' }}>₹{fine.amount}</td>
+                <td style={{ padding: '14px 20px', textAlign: 'right' }}>
+                  {fine.status === 'Unpaid' ? (
+                    <button
+                      onClick={() => setCollectModalFor(fine)}
+                      style={{
+                        padding: '6px 14px',
+                        background: '#10b981',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontWeight: '700',
+                        fontSize: '0.8rem',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)'
+                      }}
+                    >
+                      Collect Fine
+                    </button>
+                  ) : (
+                    <span style={{
+                      padding: '4px 10px',
+                      background: '#dcfce7',
+                      color: '#15803d',
+                      borderRadius: '8px',
+                      fontSize: '0.75rem',
+                      fontWeight: '800'
+                    }}>
+                      Paid ✅ ({fine.paymentMethod || 'UPI'})
+                    </span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Collect Fine Modal */}
+      {collectModalFor && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '440px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, color: '#0f172a', fontWeight: '800' }}>💰 Collect Overdue Fine (Accountant)</h3>
+              <button onClick={() => setCollectModalFor(null)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#64748b' }}>&times;</button>
+            </div>
+            
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px', marginBottom: '16px', fontSize: '0.88rem' }}>
+              <div style={{ fontWeight: '800', color: '#0f172a', fontSize: '1rem', marginBottom: '4px' }}>{collectModalFor.title}</div>
+              <div style={{ color: '#64748b', fontSize: '0.8rem', marginBottom: '8px' }}>ISBN: {collectModalFor.isbn}</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #cbd5e1', paddingTop: '8px' }}>
+                <span style={{ color: '#475569', fontWeight: '600' }}>Student:</span>
+                <span style={{ color: '#0f172a', fontWeight: '700' }}>{collectModalFor.student} ({collectModalFor.gradeSec})</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
+                <span style={{ color: '#475569', fontWeight: '600' }}>Days Overdue:</span>
+                <span style={{ color: '#ef4444', fontWeight: '700' }}>{collectModalFor.daysOverdue} Days</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', borderTop: '1px dashed #cbd5e1', paddingTop: '8px', fontSize: '1.1rem' }}>
+                <span style={{ color: '#0f172a', fontWeight: '800' }}>Fine Penalty:</span>
+                <span style={{ color: '#d97706', fontWeight: '800' }}>₹{collectModalFor.amount}</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleCollect}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ fontSize: '0.82rem', fontWeight: 'bold', color: '#475569', marginBottom: '6px', display: 'block' }}>Payment Method:</label>
+                <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.88rem' }}>
+                  <option value="Cash">💵 Cash Payment</option>
+                  <option value="UPI">📱 UPI / GPay / PhonePe</option>
+                  <option value="Card">💳 Credit / Debit Card</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                <button type="button" onClick={() => setCollectModalFor(null)} style={{ padding: '10px 16px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
+                <button type="submit" style={{ padding: '10px 18px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' }}>
+                  Confirm Collection & Issue Receipt
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
