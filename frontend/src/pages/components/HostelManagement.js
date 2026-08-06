@@ -314,12 +314,10 @@ const HostelManagement = () => {
     }
   };
 
-  // Filter Logic
+  // Filter Logic — case-insensitive on hostelType
   const filteredBlocks = hostels.filter(block => {
-    // Gender Filter
-    if (selectedGender !== 'all' && block.hostelType !== selectedGender) return false;
-    // Block Filter
-    if (selectedBlock !== 'all' && block._id !== selectedBlock && block.blockCode !== selectedBlock) return false;
+    if (selectedGender !== 'all' && (block.hostelType || '').toLowerCase() !== selectedGender.toLowerCase()) return false;
+    if (selectedBlock !== 'all' && block._id !== selectedBlock && String(block.blockCode || '') !== String(selectedBlock)) return false;
     return true;
   });
 
@@ -449,11 +447,21 @@ const HostelManagement = () => {
           {/* 3 FLOORS GRID */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {(block.floors || []).map(floor => {
-              // Floor filter check
+              // Apply floor filter
               if (selectedFloor !== 'all' && String(floor.floorNumber) !== String(selectedFloor)) return null;
 
               const filteredRooms = (floor.rooms || []).filter(room => {
-                if (selectedRoomNumber !== 'all' && room.roomNumber !== selectedRoomNumber) return false;
+                if (selectedRoomNumber !== 'all' && String(room.roomNumber) !== String(selectedRoomNumber)) return false;
+                // Apply student search
+                if (searchQuery.trim()) {
+                  const q = searchQuery.toLowerCase();
+                  const hasMatch = (room.occupants || []).some(o =>
+                    (o.name || '').toLowerCase().includes(q) ||
+                    (o.admNo || '').toLowerCase().includes(q) ||
+                    (o.grade || '').toLowerCase().includes(q)
+                  );
+                  if (!hasMatch) return false;
+                }
                 return true;
               });
 
