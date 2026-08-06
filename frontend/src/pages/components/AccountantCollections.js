@@ -668,8 +668,12 @@ const AccountantCollections = ({ defaultTab = 'collections' }) => {
 // Accountant Library & Late Fines Ledger Component
 const AccountantLibraryFines = () => {
   const [finesList, setFinesList] = useState(() => {
+    // Version check: bust stale cache that had only 4 hardcoded entries
+    const FINES_VERSION = 'v2_150students';
+    const storedVersion = localStorage.getItem('library_fines_version');
     const saved = localStorage.getItem('library_fines_list');
-    if (saved) return JSON.parse(saved);
+    if (saved && storedVersion === FINES_VERSION) return JSON.parse(saved);
+    // Regenerate from demoStudents (all 150 students across all grades)
     const books = [
       { title: 'The Great Gatsby', isbn: '9780743273565' },
       { title: 'Introduction to Algorithms', isbn: '9780262033848' },
@@ -677,7 +681,7 @@ const AccountantLibraryFines = () => {
       { title: 'A Brief History of Time', isbn: '9780553380163' },
       { title: 'Organic Chemistry Reactions', isbn: '9780138095788' }
     ];
-    return demoStudents.map((std, idx) => {
+    const fresh = demoStudents.map((std, idx) => {
       const bk = books[idx % books.length];
       const g = String(std.grade || '1');
       const sec = String(std.section || 'A');
@@ -699,6 +703,9 @@ const AccountantLibraryFines = () => {
         examType: idx % 4 === 0 ? 'Library Overdue' : idx % 4 === 1 ? 'Mid-Term Exam Fine' : idx % 4 === 2 ? 'Unit Test Penalty' : 'Final Exam Fine'
       };
     });
+    localStorage.setItem('library_fines_list', JSON.stringify(fresh));
+    localStorage.setItem('library_fines_version', FINES_VERSION);
+    return fresh;
   });
 
   const [collectModalFor, setCollectModalFor] = useState(null);
