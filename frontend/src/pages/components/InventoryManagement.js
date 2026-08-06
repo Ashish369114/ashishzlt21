@@ -97,7 +97,7 @@ const InventoryManagement = () => {
             <Package size={26} color="#3b82f6" /> Inventory & Stock Management
           </h2>
           <p style={{ color: '#64748b', margin: '4px 0 0 0', fontSize: '0.9rem' }}>
-            Manage school uniforms, books, and stock distribution to students.
+            Overview of school stock levels and issued items (Direct item issuance is managed by Administrative Officer).
           </p>
         </div>
       </div>
@@ -152,7 +152,7 @@ const InventoryManagement = () => {
               <th style={{ padding: '16px 24px' }}>Issued</th>
               <th style={{ padding: '16px 24px' }}>Available</th>
               <th style={{ padding: '16px 24px' }}>Status</th>
-              <th style={{ padding: '16px 24px', textAlign: 'right' }}>Actions</th>
+              <th style={{ padding: '16px 24px', textAlign: 'right' }}>Issuance Access</th>
             </tr>
           </thead>
           <tbody>
@@ -178,42 +178,20 @@ const InventoryManagement = () => {
                     </span>
                   </td>
                   <td style={{ padding: '16px 24px', textAlign: 'right' }}>
-                    <button
-                      onClick={() => {
-                        setSelectedItem(item);
-                        setIssueQty(1);
-                        setShowIssueModal(true);
-                      }}
-                      disabled={available <= 0}
-                      style={{
-                        padding: '8px 16px',
-                        background: available > 0 ? '#3b82f6' : '#cbd5e1',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '8px',
-                        fontWeight: '600',
-                        fontSize: '0.85rem',
-                        cursor: available > 0 ? 'pointer' : 'not-allowed',
-                        marginRight: '8px'
-                      }}
-                    >
-                      Issue to Student
-                    </button>
-
-                    <button
-                      onClick={() => handleResetStock(item.id)}
-                      title="Reset issued count"
-                      style={{
-                        padding: '8px',
-                        background: '#f1f5f9',
-                        color: '#64748b',
-                        border: 'none',
-                        borderRadius: '8px',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <RefreshCw size={15} />
-                    </button>
+                    <span style={{
+                      padding: '6px 14px',
+                      background: '#f1f5f9',
+                      color: '#475569',
+                      borderRadius: '8px',
+                      fontSize: '0.82rem',
+                      fontWeight: '700',
+                      border: '1px solid #e2e8f0',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}>
+                      🔒 Managed by AO
+                    </span>
                   </td>
                 </tr>
               );
