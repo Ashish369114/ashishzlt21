@@ -314,15 +314,10 @@ const HostelManagement = () => {
     }
   };
 
-  // Filter Logic — string-safe comparisons
+  // Filter Logic — uses hostelName as block key (always a plain string)
   const filteredBlocks = hostels.filter(block => {
     if (selectedGender !== 'all' && (block.hostelType || '').toLowerCase() !== selectedGender.toLowerCase()) return false;
-    if (selectedBlock !== 'all') {
-      const blockId = String(block._id || '');
-      const blockName = String(block.hostelName || '');
-      const blockCode = String(block.blockCode || '');
-      if (blockId !== selectedBlock && blockName !== selectedBlock && blockCode !== selectedBlock) return false;
-    }
+    if (selectedBlock !== 'all' && block.hostelName !== selectedBlock) return false;
     return true;
   });
 
@@ -378,7 +373,7 @@ const HostelManagement = () => {
             >
               <option value="all">All Blocks</option>
               {hostels.map((b, idx) => (
-                <option key={idx} value={String(b._id)}>{b.hostelName}</option>
+                <option key={idx} value={b.hostelName}>{b.hostelName}</option>
               ))}
             </select>
           </div>
@@ -425,7 +420,7 @@ const HostelManagement = () => {
           {/* Block Header Banner */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #EBF5FF', pb: '16px', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: block.hostelType === 'girls' ? 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' : 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: (block.hostelType || '').toLowerCase() === 'girls' ? 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' : 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                 <Building size={26} />
               </div>
               <div>
