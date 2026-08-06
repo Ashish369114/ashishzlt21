@@ -217,8 +217,22 @@ const HostelManagement = () => {
     try {
       setLoading(true);
       const response = await api.get('/hostels').catch(() => ({ data: [] }));
-      if (response.data && response.data.length > 0) {
-        setHostels(response.data);
+      const apiHostels = Array.isArray(response.data) ? response.data : [];
+
+      if (apiHostels.length > 0) {
+        // API returned blocks — inject floor/room data from defaultBlocks if missing
+        const enriched = apiHostels.map((h, idx) => {
+          const hasFloors = h.floors && h.floors.length > 0 &&
+            h.floors.some(f => f.rooms && f.rooms.length > 0 && f.rooms.some(r => r.occupants && r.occupants.length > 0));
+          if (hasFloors) return h;
+          // Use matching defaultBlocks floors based on hostelType or index
+          const fallback = defaultBlocks.find(d =>
+            (h.hostelType || '').toLowerCase() === d.hostelType ||
+            idx === defaultBlocks.indexOf(d)
+          ) || defaultBlocks[idx % defaultBlocks.length];
+          return { ...h, floors: fallback.floors, totalRooms: fallback.totalRooms, totalBeds: fallback.totalBeds };
+        });
+        setHostels(enriched);
       } else {
         setHostels(defaultBlocks);
       }
