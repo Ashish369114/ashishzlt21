@@ -265,8 +265,8 @@ const AccountantPendingFees = () => {
       if (s.firstName) return `${s.firstName} ${s.lastName || ''}`.trim();
       if (s.userId?.firstName) return `${s.userId.firstName} ${s.userId.lastName || ''}`.trim();
     }
-    // fallback to syncService resolver
-    return resolveStudentName(fee, students, 0) || 'Unknown';
+    // fallback
+    return 'Unknown';
   };
 
   const getFeeGrade = (fee) => String(fee.grade || fee.student?.grade || fee.student?.class?.grade || '');
