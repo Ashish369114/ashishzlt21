@@ -670,10 +670,10 @@ const AccountantLibraryFines = () => {
   const [finesList, setFinesList] = useState(() => {
     const saved = localStorage.getItem('library_fines_list');
     return saved ? JSON.parse(saved) : [
-      { id: 1, title: 'The Great Gatsby', isbn: '9780743273565', student: 'Aarav Patel', gradeSec: 'Grade 5 - Section A', dueDate: '15 Jul 2026', daysOverdue: 7, amount: 350, status: 'Unpaid' },
-      { id: 2, title: 'Introduction to Algorithms', isbn: '9780262033848', student: 'Rahul Kumar', gradeSec: 'Grade 10 - Section A', dueDate: '20 Jul 2026', daysOverdue: 5, amount: 250, status: 'Unpaid' },
-      { id: 3, title: 'Advanced High School Physics', isbn: '9780133647181', student: 'Priya Sharma', gradeSec: 'Grade 9 - Section B', dueDate: '22 Jul 2026', daysOverdue: 3, amount: 150, status: 'Unpaid' },
-      { id: 4, title: 'A Brief History of Time', isbn: '9780553380163', student: 'Vihaan Gupta', gradeSec: 'Grade 8 - Section B', dueDate: '10 Jul 2026', daysOverdue: 12, amount: 600, status: 'Paid', paymentMethod: 'UPI', paidDate: '01 Aug 2026' }
+      { id: 1, title: 'The Great Gatsby', isbn: '9780743273565', student: 'Aarav Patel', gradeSec: 'Grade 5 - Section A', dueDate: '15 Jul 2026', daysOverdue: 7, amount: 350, status: 'Unpaid', examType: 'Library Overdue' },
+      { id: 2, title: 'Introduction to Algorithms', isbn: '9780262033848', student: 'Rahul Kumar', gradeSec: 'Grade 10 - Section A', dueDate: '20 Jul 2026', daysOverdue: 5, amount: 250, status: 'Unpaid', examType: 'Mid-Term Exam Fine' },
+      { id: 3, title: 'Advanced High School Physics', isbn: '9780133647181', student: 'Priya Sharma', gradeSec: 'Grade 9 - Section B', dueDate: '22 Jul 2026', daysOverdue: 3, amount: 150, status: 'Unpaid', examType: 'Unit Test Penalty' },
+      { id: 4, title: 'A Brief History of Time', isbn: '9780553380163', student: 'Vihaan Gupta', gradeSec: 'Grade 8 - Section B', dueDate: '10 Jul 2026', daysOverdue: 12, amount: 600, status: 'Paid', paymentMethod: 'UPI', paidDate: '01 Aug 2026', examType: 'Final Exam Fine' }
     ];
   });
 
@@ -684,6 +684,8 @@ const AccountantLibraryFines = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGrade, setSelectedGrade] = useState('all');
   const [selectedSection, setSelectedSection] = useState('all');
+  const [selectedStudent, setSelectedStudent] = useState('all');
+  const [selectedExamType, setSelectedExamType] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
 
   useEffect(() => {
@@ -696,6 +698,23 @@ const AccountantLibraryFines = () => {
   }, []);
 
   const totalOutstanding = finesList.filter(f => f.status === 'Unpaid').reduce((sum, f) => sum + Number(f.amount || 0), 0);
+
+  // Student options for Student Dropdown
+  const studentOptions = React.useMemo(() => {
+    const raw = demoStudents || [];
+    return raw.map((s, idx) => ({
+      id: s._id || s.id || `std_${idx}`,
+      name: `${s.firstName} ${s.lastName}`,
+      grade: String(s.grade || '1'),
+      section: String(s.section || 'A')
+    }));
+  }, []);
+
+  const filteredStudentOptions = studentOptions.filter(s => {
+    if (selectedGrade !== 'all' && s.grade !== selectedGrade) return false;
+    if (selectedSection !== 'all' && s.section !== selectedSection) return false;
+    return true;
+  });
 
   const filteredFines = finesList.filter(f => {
     const q = searchQuery.toLowerCase();
@@ -711,12 +730,23 @@ const AccountantLibraryFines = () => {
       matchesSection = (f.gradeSec || '').toLowerCase().includes(`section ${selectedSection.toLowerCase()}`) || (f.gradeSec || '').includes(`-${selectedSection}`);
     }
 
+    let matchesStudent = true;
+    if (selectedStudent !== 'all') {
+      matchesStudent = (f.student || '').toLowerCase().includes(selectedStudent.toLowerCase());
+    }
+
+    let matchesExamType = true;
+    if (selectedExamType !== 'all') {
+      const et = (f.examType || f.category || '').toLowerCase();
+      matchesExamType = et.includes(selectedExamType.toLowerCase()) || (f.title || '').toLowerCase().includes(selectedExamType.toLowerCase());
+    }
+
     let matchesStatus = true;
     if (selectedStatus !== 'all') {
       matchesStatus = f.status.toLowerCase() === selectedStatus.toLowerCase();
     }
 
-    return matchesQuery && matchesGrade && matchesSection && matchesStatus;
+    return matchesQuery && matchesGrade && matchesSection && matchesStudent && matchesExamType && matchesStatus;
   });
 
   const handleCollect = (e) => {
@@ -744,14 +774,14 @@ const AccountantLibraryFines = () => {
         </div>
       </div>
 
-      {/* Filter Bar with Suitable Dropdowns */}
+      {/* Filter Bar with Grade, Sec, Student & Exam Type Dropdowns */}
       <div style={{
         background: '#ffffff',
         padding: '16px 24px',
         borderRadius: '16px',
         border: '1px solid #BFDBFE',
         display: 'flex',
-        gap: '14px',
+        gap: '12px',
         flexWrap: 'wrap',
         alignItems: 'center',
         boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
@@ -760,34 +790,18 @@ const AccountantLibraryFines = () => {
           <Filter size={16} color="#0096DA" /> Filters:
         </span>
 
-        <div style={{ flex: '1 1 200px', position: 'relative' }}>
-          <input
-            type="text"
-            placeholder="Search by student, book, ISBN..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '9px 14px 9px 36px',
-              borderRadius: '10px',
-              border: '1.5px solid #BFDBFE',
-              fontSize: '0.86rem',
-              outline: 'none',
-              fontWeight: '600',
-              color: '#0C4A86'
-            }}
-          />
-          <Search size={16} color="#0096DA" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-        </div>
-
+        {/* Grade Dropdown */}
         <select
           value={selectedGrade}
-          onChange={e => setSelectedGrade(e.target.value)}
+          onChange={e => {
+            setSelectedGrade(e.target.value);
+            setSelectedStudent('all');
+          }}
           style={{
             padding: '9px 14px',
             borderRadius: '10px',
             border: '1.5px solid #BFDBFE',
-            fontSize: '0.86rem',
+            fontSize: '0.85rem',
             background: '#ffffff',
             color: '#0C4A86',
             fontWeight: '700',
@@ -801,14 +815,18 @@ const AccountantLibraryFines = () => {
           ))}
         </select>
 
+        {/* Section Dropdown */}
         <select
           value={selectedSection}
-          onChange={e => setSelectedSection(e.target.value)}
+          onChange={e => {
+            setSelectedSection(e.target.value);
+            setSelectedStudent('all');
+          }}
           style={{
             padding: '9px 14px',
             borderRadius: '10px',
             border: '1.5px solid #BFDBFE',
-            fontSize: '0.86rem',
+            fontSize: '0.85rem',
             background: '#ffffff',
             color: '#0C4A86',
             fontWeight: '700',
@@ -822,6 +840,54 @@ const AccountantLibraryFines = () => {
           ))}
         </select>
 
+        {/* Student Dropdown */}
+        <select
+          value={selectedStudent}
+          onChange={e => setSelectedStudent(e.target.value)}
+          style={{
+            padding: '9px 14px',
+            borderRadius: '10px',
+            border: '1.5px solid #BFDBFE',
+            fontSize: '0.85rem',
+            background: '#ffffff',
+            color: '#0C4A86',
+            fontWeight: '700',
+            outline: 'none',
+            cursor: 'pointer',
+            maxWidth: '180px'
+          }}
+        >
+          <option value="all">All Students</option>
+          {filteredStudentOptions.map(s => (
+            <option key={s.id} value={s.name}>{s.name}</option>
+          ))}
+        </select>
+
+        {/* Exam Type / Fine Type Dropdown */}
+        <select
+          value={selectedExamType}
+          onChange={e => setSelectedExamType(e.target.value)}
+          style={{
+            padding: '9px 14px',
+            borderRadius: '10px',
+            border: '1.5px solid #BFDBFE',
+            fontSize: '0.85rem',
+            background: '#ffffff',
+            color: '#0C4A86',
+            fontWeight: '700',
+            outline: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          <option value="all">All Exam / Fine Types</option>
+          <option value="Mid-Term">📝 Mid-Term Exam Fine</option>
+          <option value="Final Exam">🎓 Final Exam Fine</option>
+          <option value="Unit Test">✏️ Unit Test Penalty</option>
+          <option value="Library Overdue">📖 Library Overdue Fine</option>
+          <option value="Late Fee">⏱️ Late Fee Penalty</option>
+        </select>
+
+        {/* Status Dropdown */}
         <select
           value={selectedStatus}
           onChange={e => setSelectedStatus(e.target.value)}
@@ -829,7 +895,7 @@ const AccountantLibraryFines = () => {
             padding: '9px 14px',
             borderRadius: '10px',
             border: '1.5px solid #BFDBFE',
-            fontSize: '0.86rem',
+            fontSize: '0.85rem',
             background: '#ffffff',
             color: '#0C4A86',
             fontWeight: '700',
@@ -842,9 +908,37 @@ const AccountantLibraryFines = () => {
           <option value="Paid">✅ Paid Fines</option>
         </select>
 
-        {(selectedGrade !== 'all' || selectedSection !== 'all' || selectedStatus !== 'all' || searchQuery) && (
+        {/* Search input */}
+        <div style={{ flex: '1 1 160px', position: 'relative' }}>
+          <input
+            type="text"
+            placeholder="Search by student, book, ISBN..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '9px 14px 9px 34px',
+              borderRadius: '10px',
+              border: '1.5px solid #BFDBFE',
+              fontSize: '0.85rem',
+              outline: 'none',
+              fontWeight: '600',
+              color: '#0C4A86'
+            }}
+          />
+          <Search size={15} color="#0096DA" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+        </div>
+
+        {(selectedGrade !== 'all' || selectedSection !== 'all' || selectedStudent !== 'all' || selectedExamType !== 'all' || selectedStatus !== 'all' || searchQuery) && (
           <button
-            onClick={() => { setSelectedGrade('all'); setSelectedSection('all'); setSelectedStatus('all'); setSearchQuery(''); }}
+            onClick={() => {
+              setSelectedGrade('all');
+              setSelectedSection('all');
+              setSelectedStudent('all');
+              setSelectedExamType('all');
+              setSelectedStatus('all');
+              setSearchQuery('');
+            }}
             style={{
               padding: '9px 14px',
               background: '#FEE2E2',
@@ -856,7 +950,7 @@ const AccountantLibraryFines = () => {
               cursor: 'pointer'
             }}
           >
-            Reset Filters ✕
+            Reset ✕
           </button>
         )}
       </div>
