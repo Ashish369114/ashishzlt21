@@ -203,19 +203,27 @@ const AccountantPendingFees = () => {
               || '';
             return { ...fee, grade: g, section: sec, studentName: sName };
           })
-        : demoStudents.map((std, idx) => {
+        : demoStudents.flatMap((std, idx) => {
             const sName = `${std.firstName} ${std.lastName}`;
-            return {
-              _id: `pf_${std._id}`,
+            const g     = String(std.grade);
+            const sec   = String(std.section);
+            // 3 fee records per student with different types and varied statuses
+            const feeTypes = [
+              { desc: 'Quarterly Tuition Fees',    amount: 47200, paidAmount: idx % 3 === 0 ? 47200 : idx % 3 === 1 ? 18880 : 0 },
+              { desc: 'Exam Fee',                   amount: 5000,  paidAmount: idx % 3 === 1 ? 5000  : idx % 3 === 2 ? 2000  : 0 },
+              { desc: 'Annual Administrative Fee',  amount: 12000, paidAmount: idx % 3 === 2 ? 12000 : idx % 3 === 0 ? 4000  : 0 },
+            ];
+            return feeTypes.map((ft, fIdx) => ({
+              _id: `pf_${std._id}_${fIdx}`,
               student: std,
               studentName: sName,
-              grade: String(std.grade),
-              section: String(std.section),
-              description: idx % 3 === 0 ? 'Quarterly Tuition Fees' : idx % 3 === 1 ? 'Exam Fee' : 'Annual Administrative Fee',
-              amount: 47200,
-              paidAmount: idx % 4 === 0 ? 18880 : idx % 5 === 0 ? 47200 : 0,
-              dueDate: '2026-08-15'
-            };
+              grade:  g,
+              section: sec,
+              description: ft.desc,
+              amount: ft.amount,
+              paidAmount: ft.paidAmount,
+              dueDate: `2026-${String(8 + fIdx).padStart(2, '0')}-15`
+            }));
           });
 
       setFees(list);
