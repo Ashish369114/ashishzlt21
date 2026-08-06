@@ -4,7 +4,7 @@ import { demoStudents } from '../../utils/demoData';
 import AccountantPendingFees from './AccountantPendingFees';
 import { 
   IndianRupee, CreditCard, TrendingUp, AlertCircle, 
-  Wallet, FileText, Send, CheckCircle2, FileSpreadsheet, X, Gift, ShieldAlert, Clock, Filter
+  Wallet, FileText, Send, CheckCircle2, FileSpreadsheet, X, Gift, ShieldAlert, Clock, Filter, Search
 } from 'lucide-react';
 
 const AccountantCollections = ({ defaultTab = 'collections' }) => {
