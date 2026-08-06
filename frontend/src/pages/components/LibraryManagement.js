@@ -1571,51 +1571,50 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
               <button onClick={() => { setBorrowModalOpenFor(null); setBorrowUserId(''); }} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#64748b' }}>&times;</button>
             </div>
             
-            <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '16px' }}>Select class grade, section, and student borrowing this book.</p>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (!borrowUserId) {
+                alert('Please select a student');
+                return;
+              }
+              handleBorrowBookSubmit();
+            }}>
+              <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '16px' }}>Select class grade, section, and student borrowing this book.</p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#475569', marginBottom: '4px', display: 'block' }}>Select Grade:</label>
-                <select value={borrowGrade} onChange={e => setBorrowGrade(e.target.value)} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem' }}>
-                  {[1,2,3,4,5,6,7,8,9,10].map(g => <option key={g} value={`Grade ${g}`}>Grade {g}</option>)}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#475569', marginBottom: '4px', display: 'block' }}>Select Grade:</label>
+                  <select value={borrowGrade} onChange={e => setBorrowGrade(e.target.value)} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem' }}>
+                    {[1,2,3,4,5,6,7,8,9,10].map(g => <option key={g} value={`Grade ${g}`}>Grade {g}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#475569', marginBottom: '4px', display: 'block' }}>Select Section:</label>
+                  <select value={borrowSection} onChange={e => setBorrowSection(e.target.value)} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem' }}>
+                    <option value="Section A">Section A</option>
+                    <option value="Section B">Section B</option>
+                    <option value="Section C">Section C</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#475569', marginBottom: '4px', display: 'block' }}>Select Student:</label>
+                <select value={borrowUserId} onChange={e => setBorrowUserId(e.target.value)} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.88rem' }}>
+                  <option value="">Select Student from {borrowGrade} ({borrowSection})...</option>
+                  {getBorrowStudentsList().map(s => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} ({s.roll})
+                    </option>
+                  ))}
                 </select>
               </div>
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#475569', marginBottom: '4px', display: 'block' }}>Select Section:</label>
-                <select value={borrowSection} onChange={e => setBorrowSection(e.target.value)} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.85rem' }}>
-                  <option value="Section A">Section A</option>
-                  <option value="Section B">Section B</option>
-                  <option value="Section C">Section C</option>
-                </select>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                <button type="button" onClick={() => { setBorrowModalOpenFor(null); setBorrowUserId(''); }} style={{ padding: '10px 18px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}>Cancel</button>
+                <button type="submit" style={{ padding: '10px 18px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' }}>Confirm Borrow</button>
               </div>
-            </div>
-
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#475569', marginBottom: '4px', display: 'block' }}>Select Student:</label>
-              <select value={borrowUserId} onChange={e => setBorrowUserId(e.target.value)} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.88rem' }}>
-                <option value="">Select Student from {borrowGrade} ({borrowSection})...</option>
-                {getBorrowStudentsList().map(s => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} ({s.roll})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-              <button onClick={() => { setBorrowModalOpenFor(null); setBorrowUserId(''); }} style={{ padding: '10px 18px', background: '#f1f5f9', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' }}>Cancel</button>
-              <button onClick={() => {
-                if (!borrowUserId) {
-                  alert('Please select a student');
-                  return;
-                }
-                const selectedStd = getBorrowStudentsList().find(s => s.id === borrowUserId);
-                const sName = selectedStd ? `${selectedStd.name} (${borrowGrade}-${borrowSection.slice(-1)})` : 'Selected Student';
-                alert(`🎉 Book "${borrowModalOpenFor.title}" borrowed successfully to ${sName}! Due date set to 14 days.`);
-                setBorrowModalOpenFor(null);
-                setBorrowUserId('');
-              }} style={{ padding: '10px 18px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' }}>Confirm Borrow</button>
-            </div>
+            </form>
           </div>
         </div>
       )}
