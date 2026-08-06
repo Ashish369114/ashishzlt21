@@ -680,6 +680,12 @@ const AccountantLibraryFines = () => {
   const [collectModalFor, setCollectModalFor] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('Cash');
 
+  // Filter States
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedGrade, setSelectedGrade] = useState('all');
+  const [selectedSection, setSelectedSection] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+
   useEffect(() => {
     const syncFines = () => {
       const saved = localStorage.getItem('library_fines_list');
@@ -690,6 +696,28 @@ const AccountantLibraryFines = () => {
   }, []);
 
   const totalOutstanding = finesList.filter(f => f.status === 'Unpaid').reduce((sum, f) => sum + Number(f.amount || 0), 0);
+
+  const filteredFines = finesList.filter(f => {
+    const q = searchQuery.toLowerCase();
+    const matchesQuery = !q || (f.title || '').toLowerCase().includes(q) || (f.student || '').toLowerCase().includes(q) || (f.isbn || '').toLowerCase().includes(q);
+    
+    let matchesGrade = true;
+    if (selectedGrade !== 'all') {
+      matchesGrade = (f.gradeSec || '').toLowerCase().includes(`grade ${selectedGrade.toLowerCase()}`) || (f.gradeSec || '').includes(selectedGrade);
+    }
+    
+    let matchesSection = true;
+    if (selectedSection !== 'all') {
+      matchesSection = (f.gradeSec || '').toLowerCase().includes(`section ${selectedSection.toLowerCase()}`) || (f.gradeSec || '').includes(`-${selectedSection}`);
+    }
+
+    let matchesStatus = true;
+    if (selectedStatus !== 'all') {
+      matchesStatus = f.status.toLowerCase() === selectedStatus.toLowerCase();
+    }
+
+    return matchesQuery && matchesGrade && matchesSection && matchesStatus;
+  });
 
   const handleCollect = (e) => {
     e.preventDefault();
@@ -716,6 +744,123 @@ const AccountantLibraryFines = () => {
         </div>
       </div>
 
+      {/* Filter Bar with Suitable Dropdowns */}
+      <div style={{
+        background: '#ffffff',
+        padding: '16px 24px',
+        borderRadius: '16px',
+        border: '1px solid #BFDBFE',
+        display: 'flex',
+        gap: '14px',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+      }}>
+        <span style={{ fontSize: '0.84rem', fontWeight: '800', color: '#0C4A86', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Filter size={16} color="#0096DA" /> Filters:
+        </span>
+
+        <div style={{ flex: '1 1 200px', position: 'relative' }}>
+          <input
+            type="text"
+            placeholder="Search by student, book, ISBN..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '9px 14px 9px 36px',
+              borderRadius: '10px',
+              border: '1.5px solid #BFDBFE',
+              fontSize: '0.86rem',
+              outline: 'none',
+              fontWeight: '600',
+              color: '#0C4A86'
+            }}
+          />
+          <Search size={16} color="#0096DA" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+        </div>
+
+        <select
+          value={selectedGrade}
+          onChange={e => setSelectedGrade(e.target.value)}
+          style={{
+            padding: '9px 14px',
+            borderRadius: '10px',
+            border: '1.5px solid #BFDBFE',
+            fontSize: '0.86rem',
+            background: '#ffffff',
+            color: '#0C4A86',
+            fontWeight: '700',
+            outline: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          <option value="all">All Grades (1-10)</option>
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(g => (
+            <option key={g} value={String(g)}>Grade {g}</option>
+          ))}
+        </select>
+
+        <select
+          value={selectedSection}
+          onChange={e => setSelectedSection(e.target.value)}
+          style={{
+            padding: '9px 14px',
+            borderRadius: '10px',
+            border: '1.5px solid #BFDBFE',
+            fontSize: '0.86rem',
+            background: '#ffffff',
+            color: '#0C4A86',
+            fontWeight: '700',
+            outline: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          <option value="all">All Sections (A-C)</option>
+          {['A', 'B', 'C'].map(sec => (
+            <option key={sec} value={sec}>Section {sec}</option>
+          ))}
+        </select>
+
+        <select
+          value={selectedStatus}
+          onChange={e => setSelectedStatus(e.target.value)}
+          style={{
+            padding: '9px 14px',
+            borderRadius: '10px',
+            border: '1.5px solid #BFDBFE',
+            fontSize: '0.86rem',
+            background: '#ffffff',
+            color: '#0C4A86',
+            fontWeight: '700',
+            outline: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          <option value="all">All Status</option>
+          <option value="Unpaid">⚠️ Unpaid Fines</option>
+          <option value="Paid">✅ Paid Fines</option>
+        </select>
+
+        {(selectedGrade !== 'all' || selectedSection !== 'all' || selectedStatus !== 'all' || searchQuery) && (
+          <button
+            onClick={() => { setSelectedGrade('all'); setSelectedSection('all'); setSelectedStatus('all'); setSearchQuery(''); }}
+            style={{
+              padding: '9px 14px',
+              background: '#FEE2E2',
+              color: '#991B1B',
+              border: 'none',
+              borderRadius: '10px',
+              fontWeight: '800',
+              fontSize: '0.82rem',
+              cursor: 'pointer'
+            }}
+          >
+            Reset Filters ✕
+          </button>
+        )}
+      </div>
+
       {/* Fines Table */}
       <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
@@ -730,7 +875,7 @@ const AccountantLibraryFines = () => {
             </tr>
           </thead>
           <tbody>
-            {finesList.map((fine) => (
+            {filteredFines.map((fine) => (
               <tr key={fine.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                 <td style={{ padding: '14px 20px' }}>
                   <div style={{ fontWeight: '700', color: '#0f172a' }}>{fine.title}</div>
