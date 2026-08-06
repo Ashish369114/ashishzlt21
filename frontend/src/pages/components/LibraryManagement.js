@@ -9,7 +9,10 @@ import {
 } from 'lucide-react';
 
 const LibraryManagement = ({ activeSection, initialTab }) => {
-  const [books, setBooks] = useState([]);
+  const [books, setBooks] = useState(() => {
+    const saved = localStorage.getItem('library_books_list');
+    return saved ? JSON.parse(saved) : demoLibraryBooks;
+  });
   const [availableBooks, setAvailableBooks] = useState(0);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -255,23 +258,28 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
         libraryService.getAll().catch(() => ({ data: [] })),
         studentService.getAll().catch(() => ({ data: [] }))
       ]);
-      const fetchedBooks = (libRes.data && libRes.data.length) ? libRes.data : demoLibraryBooks;
-      const fetchedStudents = (stuRes.data && stuRes.data.length) ? stuRes.data : demoStudents;
+      const savedBooks = localStorage.getItem('library_books_list');
+      let fetchedBooks = (libRes.data && libRes.data.length > 0) ? libRes.data : (savedBooks ? JSON.parse(savedBooks) : demoLibraryBooks);
+      const fetchedStudents = (stuRes.data && stuRes.data.length > 0) ? stuRes.data : demoStudents;
       
       setBooks(fetchedBooks);
-      const avail = fetchedBooks.reduce((acc, b) => acc + (b.availableCopies || 0), 0);
+      const avail = fetchedBooks.reduce((acc, b) => acc + (b.availableCopies !== undefined ? b.availableCopies : (b.totalCopies || 0)), 0);
       const total = fetchedBooks.reduce((acc, b) => acc + (b.totalCopies || 0), 0);
       setAvailableBooks(avail);
       setStudents(fetchedStudents);
 
-      // Sync stats to localStorage for Super Admin Dashboard real-time reflection
+      if (!savedBooks) {
+        localStorage.setItem('library_books_list', JSON.stringify(fetchedBooks));
+      }
       localStorage.setItem('library_stats', JSON.stringify({ total, available: avail, borrowed: total - avail }));
     } catch (err) {
-      console.warn('Error fetching books, using demo books:', err);
-      setBooks(demoLibraryBooks);
+      console.warn('Error fetching books, using demo/saved books:', err);
+      const savedBooks = localStorage.getItem('library_books_list');
+      const fallback = savedBooks ? JSON.parse(savedBooks) : demoLibraryBooks;
+      setBooks(fallback);
       setStudents(demoStudents);
-      const avail = demoLibraryBooks.reduce((acc, b) => acc + (b.availableCopies || 0), 0);
-      const total = demoLibraryBooks.reduce((acc, b) => acc + (b.totalCopies || 0), 0);
+      const avail = fallback.reduce((acc, b) => acc + (b.availableCopies !== undefined ? b.availableCopies : 0), 0);
+      const total = fallback.reduce((acc, b) => acc + (b.totalCopies || 0), 0);
       setAvailableBooks(avail);
     } finally {
       setLoading(false);
@@ -373,6 +381,7 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
       const totalAvail = updated.reduce((acc, b) => acc + (b.availableCopies !== undefined ? b.availableCopies : 0), 0);
       const totalCopiesSum = updated.reduce((acc, b) => acc + (b.totalCopies || 0), 0);
       setAvailableBooks(totalAvail);
+      localStorage.setItem('library_books_list', JSON.stringify(updated));
       localStorage.setItem('library_stats', JSON.stringify({ total: totalCopiesSum, available: totalAvail, borrowed: totalCopiesSum - totalAvail }));
       return updated;
     });
@@ -442,6 +451,7 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
       const totalAvail = updated.reduce((acc, b) => acc + (b.availableCopies !== undefined ? b.availableCopies : 0), 0);
       const totalCopiesSum = updated.reduce((acc, b) => acc + (b.totalCopies || 0), 0);
       setAvailableBooks(totalAvail);
+      localStorage.setItem('library_books_list', JSON.stringify(updated));
       localStorage.setItem('library_stats', JSON.stringify({ total: totalCopiesSum, available: totalAvail, borrowed: totalCopiesSum - totalAvail }));
       return updated;
     });
