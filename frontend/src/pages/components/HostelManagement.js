@@ -195,6 +195,9 @@ const HostelManagement = () => {
 
   // Selected Room Modal State ("Who is in this room?")
   const [viewingRoom, setViewingRoom] = useState(null);
+  const [showAssignForm, setShowAssignForm] = useState(false);
+  const [assignForm, setAssignForm] = useState({ name: '', admNo: '', grade: '', parentPhone: '' });
+  const [assignError, setAssignError] = useState('');
 
   // Form State
   const [showAddForm, setShowAddForm] = useState(false);
@@ -312,6 +315,54 @@ const HostelManagement = () => {
     if (window.confirm('Are you sure you want to delete this hostel block?')) {
       setHostels(prev => prev.filter(h => h._id !== id));
     }
+  };
+
+  // Assign a student to the currently viewed room
+  const handleAssignStudent = () => {
+    if (!assignForm.name.trim() || !assignForm.admNo.trim() || !assignForm.grade.trim()) {
+      setAssignError('Name, Admission No, and Grade are required.'); return;
+    }
+    if (!viewingRoom) return;
+    const newOccupant = {
+      id: `S_${Date.now()}`,
+      name: assignForm.name.trim(),
+      admNo: assignForm.admNo.trim(),
+      grade: assignForm.grade.trim(),
+      parentPhone: assignForm.parentPhone.trim() || '—',
+      bedNo: `Bed ${(viewingRoom.occupants || []).length + 1}`,
+    };
+    // Update hostels state in place
+    setHostels(prev => prev.map(block => ({
+      ...block,
+      floors: (block.floors || []).map(floor => ({
+        ...floor,
+        rooms: (floor.rooms || []).map(room => {
+          if (room.roomNumber !== viewingRoom.roomNumber) return room;
+          return { ...room, occupants: [...(room.occupants || []), newOccupant] };
+        })
+      }))
+    })));
+    // Also update the viewingRoom state so modal reflects change immediately
+    setViewingRoom(prev => ({ ...prev, occupants: [...(prev.occupants || []), newOccupant] }));
+    setAssignForm({ name: '', admNo: '', grade: '', parentPhone: '' });
+    setAssignError('');
+    setShowAssignForm(false);
+  };
+
+  // Remove a student from the currently viewed room
+  const handleRemoveStudent = (studentId) => {
+    if (!window.confirm('Remove this student from the room?')) return;
+    setHostels(prev => prev.map(block => ({
+      ...block,
+      floors: (block.floors || []).map(floor => ({
+        ...floor,
+        rooms: (floor.rooms || []).map(room => {
+          if (room.roomNumber !== viewingRoom.roomNumber) return room;
+          return { ...room, occupants: (room.occupants || []).filter(o => o.id !== studentId) };
+        })
+      }))
+    })));
+    setViewingRoom(prev => ({ ...prev, occupants: (prev.occupants || []).filter(o => o.id !== studentId) }));
   };
 
   // Filter Logic — uses hostelName as block key (always a plain string)
@@ -565,7 +616,50 @@ const HostelManagement = () => {
                 <div>Total Capacity: <strong style={{ color: '#059669' }}>{viewingRoom.capacity || 4} Beds</strong></div>
               </div>
 
-              <h3 style={{ margin: '0 0 12px', fontSize: '1rem', fontWeight: '800', color: '#0C4A86' }}>Resident Students List:</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '800', color: '#0C4A86' }}>Resident Students List:</h3>
+                {(viewingRoom.occupants || []).length < (viewingRoom.capacity || 4) && (
+                  <button
+                    onClick={() => { setShowAssignForm(v => !v); setAssignError(''); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', background: '#0C4A86', color: '#fff', border: 'none', borderRadius: '50px', fontSize: '0.82rem', fontWeight: '700', cursor: 'pointer' }}
+                  >
+                    {showAssignForm ? '✕ Cancel' : '+ Assign Student'}
+                  </button>
+                )}
+                {(viewingRoom.occupants || []).length >= (viewingRoom.capacity || 4) && (
+                  <span style={{ fontSize: '0.78rem', fontWeight: '700', background: '#fee2e2', color: '#b91c1c', padding: '4px 12px', borderRadius: '50px' }}>🔒 Room Full</span>
+                )}
+              </div>
+
+              {/* Assign Student Form */}
+              {showAssignForm && (
+                <div style={{ background: '#f0f9ff', border: '1.5px solid #bae6fd', borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
+                  <div style={{ fontSize: '0.88rem', fontWeight: '800', color: '#0C4A86', marginBottom: '12px' }}>📋 Assign New Student to Room {viewingRoom.roomNumber}</div>
+                  {assignError && <div style={{ background: '#fee2e2', color: '#b91c1c', padding: '8px 12px', borderRadius: '6px', fontSize: '0.82rem', fontWeight: '600', marginBottom: '10px' }}>{assignError}</div>}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#475569', display: 'block', marginBottom: '4px' }}>Student Name *</label>
+                      <input value={assignForm.name} onChange={e => setAssignForm(p => ({...p, name: e.target.value}))} placeholder="e.g. Aarav Sharma" style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '0.88rem', boxSizing: 'border-box' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#475569', display: 'block', marginBottom: '4px' }}>Admission No *</label>
+                      <input value={assignForm.admNo} onChange={e => setAssignForm(p => ({...p, admNo: e.target.value}))} placeholder="e.g. ADM-2026-150" style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '0.88rem', boxSizing: 'border-box' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#475569', display: 'block', marginBottom: '4px' }}>Grade & Section *</label>
+                      <input value={assignForm.grade} onChange={e => setAssignForm(p => ({...p, grade: e.target.value}))} placeholder="e.g. Grade 9A" style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '0.88rem', boxSizing: 'border-box' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#475569', display: 'block', marginBottom: '4px' }}>Parent Phone</label>
+                      <input value={assignForm.parentPhone} onChange={e => setAssignForm(p => ({...p, parentPhone: e.target.value}))} placeholder="e.g. 9876543210" style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '0.88rem', boxSizing: 'border-box' }} />
+                    </div>
+                  </div>
+                  <div style={{ marginTop: '12px', display: 'flex', gap: '10px' }}>
+                    <button onClick={handleAssignStudent} style={{ padding: '8px 20px', background: '#059669', color: '#fff', border: 'none', borderRadius: '50px', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer' }}>✅ Confirm Assignment</button>
+                    <button onClick={() => { setShowAssignForm(false); setAssignError(''); }} style={{ padding: '8px 16px', background: '#f1f5f9', color: '#475569', border: 'none', borderRadius: '50px', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer' }}>Cancel</button>
+                  </div>
+                </div>
+              )}
 
               {viewingRoom.occupants && viewingRoom.occupants.length > 0 ? (
                 <div style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
@@ -577,6 +671,7 @@ const HostelManagement = () => {
                         <th style={{ padding: '10px 14px', fontSize: '0.8rem', color: '#475569' }}>Admission No</th>
                         <th style={{ padding: '10px 14px', fontSize: '0.8rem', color: '#475569' }}>Grade & Section</th>
                         <th style={{ padding: '10px 14px', fontSize: '0.8rem', color: '#475569' }}>Parent Phone</th>
+                        <th style={{ padding: '10px 14px', fontSize: '0.8rem', color: '#475569' }}>Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -587,20 +682,27 @@ const HostelManagement = () => {
                           <td style={{ padding: '12px 14px', fontWeight: '600', color: '#0C4A86' }}>{st.admNo}</td>
                           <td style={{ padding: '12px 14px', fontWeight: '600', color: '#475569' }}>{st.grade}</td>
                           <td style={{ padding: '12px 14px', fontWeight: '600', color: '#059669' }}>{st.parentPhone}</td>
+                          <td style={{ padding: '12px 14px' }}>
+                            <button onClick={() => handleRemoveStudent(st.id)} style={{ padding: '4px 10px', background: '#fee2e2', color: '#b91c1c', border: 'none', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer' }}>Remove</button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               ) : (
-                <div style={{ textAlign: 'center', padding: '30px', color: '#64748b', fontSize: '0.9rem' }}>
-                  No students currently assigned to Room {viewingRoom.roomNumber}.
+                <div style={{ textAlign: 'center', padding: '30px', color: '#64748b', fontSize: '0.9rem', background: '#f8fafc', borderRadius: '12px', border: '1px dashed #cbd5e1' }}>
+                  🛏️ No students currently assigned to Room {viewingRoom.roomNumber}.<br />
+                  <span style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Click "+ Assign Student" above to add a resident.</span>
                 </div>
               )}
             </div>
 
-            <div style={{ padding: '16px 24px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', textAlign: 'right' }}>
-              <button onClick={() => setViewingRoom(null)} style={{ padding: '8px 20px', borderRadius: '50px', background: '#0C4A86', color: '#fff', border: 'none', fontWeight: '700', cursor: 'pointer' }}>Close</button>
+            <div style={{ padding: '16px 24px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.82rem', color: '#64748b' }}>
+                {(viewingRoom.occupants || []).length}/{viewingRoom.capacity || 4} beds occupied
+              </span>
+              <button onClick={() => { setViewingRoom(null); setShowAssignForm(false); setAssignError(''); }} style={{ padding: '8px 20px', borderRadius: '50px', background: '#0C4A86', color: '#fff', border: 'none', fontWeight: '700', cursor: 'pointer' }}>Close</button>
             </div>
           </div>
         </div>
