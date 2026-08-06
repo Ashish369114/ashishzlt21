@@ -682,11 +682,11 @@ const AccountantLibraryFines = () => {
 
   // Filter States
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedGrade, setSelectedGrade] = useState('all');
-  const [selectedSection, setSelectedSection] = useState('all');
-  const [selectedStudent, setSelectedStudent] = useState('all');
-  const [selectedExamType, setSelectedExamType] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedGrade, setSelectedGrade] = useState('');
+  const [selectedSection, setSelectedSection] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState('');
+  const [selectedExamType, setSelectedExamType] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
 
   useEffect(() => {
     const syncFines = () => {
@@ -711,42 +711,41 @@ const AccountantLibraryFines = () => {
   }, []);
 
   const filteredStudentOptions = studentOptions.filter(s => {
-    if (selectedGrade !== 'all' && s.grade !== selectedGrade) return false;
-    if (selectedSection !== 'all' && s.section !== selectedSection) return false;
+    if (selectedGrade && s.grade !== selectedGrade) return false;
+    if (selectedSection && s.section.toUpperCase() !== selectedSection.toUpperCase()) return false;
     return true;
   });
 
-  const filteredFines = finesList.filter(f => {
+  const isSelectionMade = Boolean(selectedGrade || selectedSection || selectedStudent || selectedExamType || selectedStatus || searchQuery);
+
+  const filteredFines = !isSelectionMade ? [] : finesList.filter(f => {
     const q = searchQuery.toLowerCase();
-    const matchesQuery = !q || (f.title || '').toLowerCase().includes(q) || (f.student || '').toLowerCase().includes(q) || (f.isbn || '').toLowerCase().includes(q);
+    if (q && !((f.title || '').toLowerCase().includes(q) || (f.student || '').toLowerCase().includes(q) || (f.isbn || '').toLowerCase().includes(q))) return false;
     
-    let matchesGrade = true;
-    if (selectedGrade !== 'all') {
-      matchesGrade = (f.gradeSec || '').toLowerCase().includes(`grade ${selectedGrade.toLowerCase()}`) || (f.gradeSec || '').includes(selectedGrade);
+    if (selectedGrade) {
+      const matchesGrade = (f.gradeSec || '').toLowerCase().includes(`grade ${selectedGrade.toLowerCase()}`) || (f.gradeSec || '').includes(selectedGrade);
+      if (!matchesGrade) return false;
     }
     
-    let matchesSection = true;
-    if (selectedSection !== 'all') {
-      matchesSection = (f.gradeSec || '').toLowerCase().includes(`section ${selectedSection.toLowerCase()}`) || (f.gradeSec || '').includes(`-${selectedSection}`);
+    if (selectedSection) {
+      const matchesSection = (f.gradeSec || '').toLowerCase().includes(`section ${selectedSection.toLowerCase()}`) || (f.gradeSec || '').includes(`-${selectedSection}`);
+      if (!matchesSection) return false;
     }
 
-    let matchesStudent = true;
-    if (selectedStudent !== 'all') {
-      matchesStudent = (f.student || '').toLowerCase().includes(selectedStudent.toLowerCase());
+    if (selectedStudent) {
+      if (!(f.student || '').toLowerCase().includes(selectedStudent.toLowerCase())) return false;
     }
 
-    let matchesExamType = true;
-    if (selectedExamType !== 'all') {
+    if (selectedExamType) {
       const et = (f.examType || f.category || '').toLowerCase();
-      matchesExamType = et.includes(selectedExamType.toLowerCase()) || (f.title || '').toLowerCase().includes(selectedExamType.toLowerCase());
+      if (!et.includes(selectedExamType.toLowerCase()) && !(f.title || '').toLowerCase().includes(selectedExamType.toLowerCase())) return false;
     }
 
-    let matchesStatus = true;
-    if (selectedStatus !== 'all') {
-      matchesStatus = f.status.toLowerCase() === selectedStatus.toLowerCase();
+    if (selectedStatus) {
+      if (f.status.toLowerCase() !== selectedStatus.toLowerCase()) return false;
     }
 
-    return matchesQuery && matchesGrade && matchesSection && matchesStudent && matchesExamType && matchesStatus;
+    return true;
   });
 
   const handleCollect = (e) => {
@@ -795,7 +794,7 @@ const AccountantLibraryFines = () => {
           value={selectedGrade}
           onChange={e => {
             setSelectedGrade(e.target.value);
-            setSelectedStudent('all');
+            setSelectedStudent('');
           }}
           style={{
             padding: '9px 14px',
@@ -809,7 +808,7 @@ const AccountantLibraryFines = () => {
             cursor: 'pointer'
           }}
         >
-          <option value="all">All Grades (1-10)</option>
+          <option value="">Select Grade</option>
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(g => (
             <option key={g} value={String(g)}>Grade {g}</option>
           ))}
@@ -820,7 +819,7 @@ const AccountantLibraryFines = () => {
           value={selectedSection}
           onChange={e => {
             setSelectedSection(e.target.value);
-            setSelectedStudent('all');
+            setSelectedStudent('');
           }}
           style={{
             padding: '9px 14px',
@@ -834,7 +833,7 @@ const AccountantLibraryFines = () => {
             cursor: 'pointer'
           }}
         >
-          <option value="all">All Sections (A-C)</option>
+          <option value="">Select Section</option>
           {['A', 'B', 'C'].map(sec => (
             <option key={sec} value={sec}>Section {sec}</option>
           ))}
@@ -857,7 +856,7 @@ const AccountantLibraryFines = () => {
             maxWidth: '180px'
           }}
         >
-          <option value="all">All Students</option>
+          <option value="">Select Student</option>
           {filteredStudentOptions.map(s => (
             <option key={s.id} value={s.name}>{s.name}</option>
           ))}
@@ -879,7 +878,7 @@ const AccountantLibraryFines = () => {
             cursor: 'pointer'
           }}
         >
-          <option value="all">All Exam / Fine Types</option>
+          <option value="">Select Exam / Fine Type</option>
           <option value="Mid-Term">📝 Mid-Term Exam Fine</option>
           <option value="Final Exam">🎓 Final Exam Fine</option>
           <option value="Unit Test">✏️ Unit Test Penalty</option>
@@ -903,7 +902,7 @@ const AccountantLibraryFines = () => {
             cursor: 'pointer'
           }}
         >
-          <option value="all">All Status</option>
+          <option value="">Select Status</option>
           <option value="Unpaid">⚠️ Unpaid Fines</option>
           <option value="Paid">✅ Paid Fines</option>
         </select>
@@ -929,14 +928,14 @@ const AccountantLibraryFines = () => {
           <Search size={15} color="#0096DA" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
         </div>
 
-        {(selectedGrade !== 'all' || selectedSection !== 'all' || selectedStudent !== 'all' || selectedExamType !== 'all' || selectedStatus !== 'all' || searchQuery) && (
+        {isSelectionMade && (
           <button
             onClick={() => {
-              setSelectedGrade('all');
-              setSelectedSection('all');
-              setSelectedStudent('all');
-              setSelectedExamType('all');
-              setSelectedStatus('all');
+              setSelectedGrade('');
+              setSelectedSection('');
+              setSelectedStudent('');
+              setSelectedExamType('');
+              setSelectedStatus('');
               setSearchQuery('');
             }}
             style={{
@@ -955,69 +954,109 @@ const AccountantLibraryFines = () => {
         )}
       </div>
 
-      {/* Fines Table */}
-      <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
-          <thead>
-            <tr style={{ background: '#0C4A86', color: '#ffffff', fontSize: '0.78rem', textTransform: 'uppercase' }}>
-              <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Book Title & ISBN</th>
-              <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Student Borrower</th>
-              <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Due Date</th>
-              <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Days Overdue</th>
-              <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Fine Amount</th>
-              <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800', textAlign: 'right' }}>Action / Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredFines.map((fine) => (
-              <tr key={fine.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                <td style={{ padding: '14px 20px' }}>
-                  <div style={{ fontWeight: '700', color: '#0f172a' }}>{fine.title}</div>
-                  <div style={{ fontSize: '0.78rem', color: '#64748b', fontFamily: 'monospace' }}>ISBN: {fine.isbn}</div>
-                </td>
-                <td style={{ padding: '14px 20px' }}>
-                  <div style={{ fontWeight: '700', color: '#0f172a' }}>{fine.student}</div>
-                  <div style={{ fontSize: '0.78rem', color: '#64748b' }}>{fine.gradeSec}</div>
-                </td>
-                <td style={{ padding: '14px 20px', fontWeight: '700', color: '#dc2626' }}>{fine.dueDate}</td>
-                <td style={{ padding: '14px 20px', fontWeight: '700', color: '#dc2626' }}>{fine.daysOverdue} Days</td>
-                <td style={{ padding: '14px 20px', fontWeight: '800', color: '#d97706', fontSize: '1rem' }}>₹{fine.amount}</td>
-                <td style={{ padding: '14px 20px', textAlign: 'right' }}>
-                  {fine.status === 'Unpaid' ? (
-                    <button
-                      onClick={() => setCollectModalFor(fine)}
-                      style={{
-                        padding: '6px 14px',
-                        background: '#10b981',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '8px',
-                        fontWeight: '700',
-                        fontSize: '0.8rem',
-                        cursor: 'pointer',
-                        boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)'
-                      }}
-                    >
-                      Collect Fine
-                    </button>
-                  ) : (
-                    <span style={{
-                      padding: '4px 10px',
-                      background: '#dcfce7',
-                      color: '#15803d',
-                      borderRadius: '8px',
-                      fontSize: '0.75rem',
-                      fontWeight: '800'
-                    }}>
-                      Paid ✅ ({fine.paymentMethod || 'UPI'})
-                    </span>
-                  )}
-                </td>
+      {/* Fines Table / Prompt */}
+      {!isSelectionMade ? (
+        <div style={{
+          background: '#ffffff',
+          borderRadius: '20px',
+          border: '2px dashed #BFDBFE',
+          padding: '50px 24px',
+          textAlign: 'center',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.02)'
+        }}>
+          <div style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '16px',
+            background: '#EBF5FF',
+            color: '#0096DA',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 16px',
+            boxShadow: '0 4px 12px rgba(0,150,218,0.15)'
+          }}>
+            <Filter size={28} />
+          </div>
+          <h3 style={{ margin: '0 0 8px', color: '#0C4A86', fontWeight: 900, fontSize: '1.25rem' }}>
+            No Filter Selected
+          </h3>
+          <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', fontWeight: 600, maxWidth: '480px', margin: '0 auto' }}>
+            Please select a <strong>Grade</strong>, <strong>Section</strong>, <strong>Student</strong>, or <strong>Exam / Fine Type</strong> from the dropdown filters above to display fine records.
+          </p>
+        </div>
+      ) : (
+        <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', overflow: 'hidden' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+            <thead>
+              <tr style={{ background: '#0C4A86', color: '#ffffff', fontSize: '0.78rem', textTransform: 'uppercase' }}>
+                <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Book Title & ISBN</th>
+                <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Student Borrower</th>
+                <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Due Date</th>
+                <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Days Overdue</th>
+                <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800' }}>Fine Amount</th>
+                <th style={{ padding: '14px 20px', color: '#ffffff', fontWeight: '800', textAlign: 'right' }}>Action / Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {filteredFines.length === 0 ? (
+                <tr>
+                  <td colSpan="6" style={{ padding: '30px', textAlign: 'center', color: '#64748b', fontWeight: '600' }}>
+                    No matching fine records found for the selected criteria.
+                  </td>
+                </tr>
+              ) : (
+                filteredFines.map((fine) => (
+                  <tr key={fine.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '14px 20px' }}>
+                      <div style={{ fontWeight: '700', color: '#0f172a' }}>{fine.title}</div>
+                      <div style={{ fontSize: '0.78rem', color: '#64748b', fontFamily: 'monospace' }}>ISBN: {fine.isbn}</div>
+                    </td>
+                    <td style={{ padding: '14px 20px' }}>
+                      <div style={{ fontWeight: '700', color: '#0f172a' }}>{fine.student}</div>
+                      <div style={{ fontSize: '0.78rem', color: '#64748b' }}>{fine.gradeSec}</div>
+                    </td>
+                    <td style={{ padding: '14px 20px', fontWeight: '700', color: '#dc2626' }}>{fine.dueDate}</td>
+                    <td style={{ padding: '14px 20px', fontWeight: '700', color: '#dc2626' }}>{fine.daysOverdue} Days</td>
+                    <td style={{ padding: '14px 20px', fontWeight: '800', color: '#d97706', fontSize: '1rem' }}>₹{fine.amount}</td>
+                    <td style={{ padding: '14px 20px', textAlign: 'right' }}>
+                      {fine.status === 'Unpaid' ? (
+                        <button
+                          onClick={() => setCollectModalFor(fine)}
+                          style={{
+                            padding: '6px 14px',
+                            background: '#10b981',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontWeight: '700',
+                            fontSize: '0.8rem',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)'
+                          }}
+                        >
+                          Collect Fine
+                        </button>
+                      ) : (
+                        <span style={{
+                          padding: '4px 10px',
+                          background: '#dcfce7',
+                          color: '#15803d',
+                          borderRadius: '8px',
+                          fontSize: '0.75rem',
+                          fontWeight: '800'
+                        }}>
+                          Paid ✅ ({fine.paymentMethod || 'UPI'})
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Collect Fine Modal */}
       {collectModalFor && (

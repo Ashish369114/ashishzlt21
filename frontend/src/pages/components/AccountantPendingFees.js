@@ -174,9 +174,15 @@ const AccountantPendingFees = () => {
   const [loading,      setLoading]      = useState(true);
   const [error,        setError]        = useState('');
   const [success,      setSuccess]      = useState('');
-  const [search,       setSearch]       = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [payFeeObj,    setPayFeeObj]    = useState(null);
+  
+  // Filter States
+  const [selectedGrade,   setSelectedGrade]   = useState('');
+  const [selectedSection, setSelectedSection] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState('');
+  const [selectedFeeType, setSelectedFeeType] = useState('');
+  const [filterStatus,    setFilterStatus]    = useState('');
+  const [search,          setSearch]          = useState('');
+  const [payFeeObj,       setPayFeeObj]       = useState(null);
 
   const fetchFees = async () => {
     try {
@@ -190,13 +196,13 @@ const AccountantPendingFees = () => {
       setStudents(allStudents);
 
       const list = Array.isArray(pendingRes.data) && pendingRes.data.length ? pendingRes.data : [
-        { _id: 'f1', description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 0, dueDate: '2026-08-15' },
-        { _id: 'f2', description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 0, dueDate: '2026-08-15' },
-        { _id: 'f3', description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 0, dueDate: '2026-08-15' },
-        { _id: 'f4', description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 18880, dueDate: '2026-08-15' },
-        { _id: 'f5', description: 'Quarterly Tuition Fees', amount: 47600, paidAmount: 19040, dueDate: '2026-08-15' },
-        { _id: 'f6', description: 'Quarterly Tuition Fees', amount: 47600, paidAmount: 0, dueDate: '2026-08-15' },
-        { _id: 'f7', description: 'Quarterly Tuition Fees', amount: 47600, paidAmount: 0, dueDate: '2026-08-15' }
+        { _id: 'f1', description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 0, dueDate: '2026-08-15', grade: '5', section: 'A' },
+        { _id: 'f2', description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 0, dueDate: '2026-08-15', grade: '10', section: 'A' },
+        { _id: 'f3', description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 0, dueDate: '2026-08-15', grade: '9', section: 'B' },
+        { _id: 'f4', description: 'Quarterly Tuition Fees', amount: 47200, paidAmount: 18880, dueDate: '2026-08-15', grade: '8', section: 'B' },
+        { _id: 'f5', description: 'Quarterly Tuition Fees', amount: 47600, paidAmount: 19040, dueDate: '2026-08-15', grade: '6', section: 'C' },
+        { _id: 'f6', description: 'Quarterly Tuition Fees', amount: 47600, paidAmount: 0, dueDate: '2026-08-15', grade: '7', section: 'A' },
+        { _id: 'f7', description: 'Quarterly Tuition Fees', amount: 47600, paidAmount: 0, dueDate: '2026-08-15', grade: '5', section: 'B' }
       ];
       setFees(list);
       setError('');
@@ -227,14 +233,42 @@ const AccountantPendingFees = () => {
     return 'unpaid';
   };
 
-  const filtered = fees.filter((fee, idx) => {
-    const name = resolveStudentName(fee, students, idx).toLowerCase();
-    return (!search || name.includes(search.toLowerCase())) &&
-      (filterStatus === 'all' || getStatus(fee) === filterStatus);
+  const isSelectionMade = Boolean(selectedGrade || selectedSection || selectedStudent || selectedFeeType || filterStatus || search);
+
+  // Student dropdown options matching selected grade/section
+  const filteredStudentsForDropdown = students.filter(s => {
+    if (selectedGrade && String(s.grade || '') !== String(selectedGrade)) return false;
+    if (selectedSection && String(s.section || '').toUpperCase() !== String(selectedSection).toUpperCase()) return false;
+    return true;
   });
 
-  const unpaidCnt  = fees.filter(f => getStatus(f) === 'unpaid').length;
-  const partialCnt = fees.filter(f => getStatus(f) === 'partial').length;
+  const filtered = !isSelectionMade ? [] : fees.filter((fee, idx) => {
+    const name = resolveStudentName(fee, students, idx);
+    if (search && !name.toLowerCase().includes(search.toLowerCase())) return false;
+    if (filterStatus && getStatus(fee) !== filterStatus) return false;
+    
+    if (selectedGrade) {
+      const g = fee.student?.grade || fee.grade || students[idx % students.length]?.grade;
+      if (String(g || '') !== String(selectedGrade)) return false;
+    }
+
+    if (selectedSection) {
+      const sec = fee.student?.section || fee.section || students[idx % students.length]?.section;
+      if (String(sec || '').toUpperCase() !== String(selectedSection).toUpperCase()) return false;
+    }
+
+    if (selectedStudent && name.toLowerCase() !== selectedStudent.toLowerCase()) return false;
+
+    if (selectedFeeType) {
+      const desc = (fee.description || '').toLowerCase();
+      if (!desc.includes(selectedFeeType.toLowerCase())) return false;
+    }
+
+    return true;
+  });
+
+  const unpaidCnt  = isSelectionMade ? filtered.filter(f => getStatus(f) === 'unpaid').length : 0;
+  const partialCnt = isSelectionMade ? filtered.filter(f => getStatus(f) === 'partial').length : 0;
 
   return (
     <div style={{ padding: '4px' }}>
@@ -247,7 +281,7 @@ const AccountantPendingFees = () => {
             Pending Fee Records
           </h2>
           <p style={{ margin: '4px 0 0', color: C.slate, fontSize: '0.85rem', fontWeight: 600 }}>
-            Click <strong>Pay</strong> to record a student fee payment.
+            Select Grade, Section, Student, or Fee Type below to display records.
           </p>
         </div>
         <button onClick={fetchFees} style={{ background: C.blue, color: '#fff', border: 'none', borderRadius: '10px', padding: '10px 18px', cursor: 'pointer', fontWeight: 800, fontSize: '0.88rem', boxShadow: '0 2px 8px rgba(0,150,218,0.25)' }}>
@@ -258,91 +292,237 @@ const AccountantPendingFees = () => {
       {error && <div className="alert alert-error" style={{ marginBottom: '14px' }}>{error}</div>}
       {success && <div style={{ background: C.greenLt, color: C.green, padding: '10px 14px', borderRadius: '10px', marginBottom: '14px', fontWeight: 800 }}>{success}</div>}
 
-      {/* Examiner Stat Cards */}
+      {/* Stat Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '25px' }}>
-        <KPICard title="Total Records" value={fees.length || 105} icon={CreditCard} color="#0096DA" pillText="Active Dues" pillBg="#EBF5FF" pillColor="#0096DA" />
-        <KPICard title="Unpaid" value={unpaidCnt || 75} icon={AlertCircle} color="#ef4444" pillText="Action Required" pillBg="#FEE2E2" pillColor="#B91C1C" />
-        <KPICard title="Partial" value={partialCnt || 30} icon={Clock} color="#f59e0b" pillText="Installments" pillBg="#FEF3C7" pillColor="#B45309" />
-        <KPICard title="Pending Dues" value={unpaidCnt + partialCnt || 105} icon={CheckCircle2} color="#1E293B" pillText="Outstanding" pillBg="#F1F5F9" pillColor="#334155" />
+        <KPICard title="Records Displayed" value={isSelectionMade ? filtered.length : 'Select Filter'} icon={CreditCard} color="#0096DA" pillText="Active View" pillBg="#EBF5FF" pillColor="#0096DA" />
+        <KPICard title="Unpaid" value={isSelectionMade ? unpaidCnt : '—'} icon={AlertCircle} color="#ef4444" pillText="Action Required" pillBg="#FEE2E2" pillColor="#B91C1C" />
+        <KPICard title="Partial" value={isSelectionMade ? partialCnt : '—'} icon={Clock} color="#f59e0b" pillText="Installments" pillBg="#FEF3C7" pillColor="#B45309" />
+        <KPICard title="Pending Dues" value={isSelectionMade ? (unpaidCnt + partialCnt) : '—'} icon={CheckCircle2} color="#1E293B" pillText="Outstanding" pillBg="#F1F5F9" pillColor="#334155" />
       </div>
 
-      {/* Filters */}
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
-        <input type="text" placeholder="Search by student name…" value={search} onChange={e => setSearch(e.target.value)} style={{ ...inp, flex: 1, minWidth: '220px' }} />
-        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ ...inp, width: 'auto', minWidth: '150px' }}>
-          <option value="all">All Status</option>
+      {/* Filter Dropdowns Row */}
+      <div style={{
+        background: '#ffffff',
+        padding: '18px 24px',
+        borderRadius: '16px',
+        border: `1px solid ${C.border}`,
+        display: 'flex',
+        gap: '12px',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        marginBottom: '20px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+      }}>
+        {/* Select Grade */}
+        <select
+          value={selectedGrade}
+          onChange={e => {
+            setSelectedGrade(e.target.value);
+            setSelectedStudent('');
+          }}
+          style={{ ...inp, width: 'auto', minWidth: '150px' }}
+        >
+          <option value="">Select Grade</option>
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(g => (
+            <option key={g} value={String(g)}>Grade {g}</option>
+          ))}
+        </select>
+
+        {/* Select Section */}
+        <select
+          value={selectedSection}
+          onChange={e => {
+            setSelectedSection(e.target.value);
+            setSelectedStudent('');
+          }}
+          style={{ ...inp, width: 'auto', minWidth: '150px' }}
+        >
+          <option value="">Select Section</option>
+          {['A', 'B', 'C'].map(sec => (
+            <option key={sec} value={sec}>Section {sec}</option>
+          ))}
+        </select>
+
+        {/* Select Student */}
+        <select
+          value={selectedStudent}
+          onChange={e => setSelectedStudent(e.target.value)}
+          style={{ ...inp, width: 'auto', minWidth: '180px', maxWidth: '220px' }}
+        >
+          <option value="">Select Student</option>
+          {filteredStudentsForDropdown.map((s, idx) => {
+            const sName = `${s.firstName || 'Student'} ${s.lastName || idx + 1}`;
+            return <option key={s._id || idx} value={sName}>{sName}</option>;
+          })}
+        </select>
+
+        {/* Fee / Exam Type */}
+        <select
+          value={selectedFeeType}
+          onChange={e => setSelectedFeeType(e.target.value)}
+          style={{ ...inp, width: 'auto', minWidth: '170px' }}
+        >
+          <option value="">Select Fee / Exam Type</option>
+          <option value="Tuition">Quarterly Tuition Fees</option>
+          <option value="Exam">Exam Fee</option>
+          <option value="Annual">Annual Administrative Fee</option>
+          <option value="Library">Library Penalty</option>
+          <option value="Transport">Transport Facility Fee</option>
+        </select>
+
+        {/* Select Status */}
+        <select
+          value={filterStatus}
+          onChange={e => setFilterStatus(e.target.value)}
+          style={{ ...inp, width: 'auto', minWidth: '140px' }}
+        >
+          <option value="">Select Status</option>
           <option value="unpaid">Unpaid Only</option>
           <option value="partial">Partial Only</option>
           <option value="paid">Paid Only</option>
         </select>
+
+        {/* Search Input */}
+        <input
+          type="text"
+          placeholder="Search student name…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ ...inp, flex: '1 1 180px', minWidth: '180px' }}
+        />
+
+        {isSelectionMade && (
+          <button
+            onClick={() => {
+              setSelectedGrade('');
+              setSelectedSection('');
+              setSelectedStudent('');
+              setSelectedFeeType('');
+              setFilterStatus('');
+              setSearch('');
+            }}
+            style={{
+              padding: '9px 14px',
+              background: '#FEE2E2',
+              color: '#991B1B',
+              border: 'none',
+              borderRadius: '10px',
+              fontWeight: 800,
+              fontSize: '0.82rem',
+              cursor: 'pointer'
+            }}
+          >
+            Reset ✕
+          </button>
+        )}
       </div>
 
-      {/* Table */}
-      <div style={{ background: '#ffffff', borderRadius: '20px', boxShadow: '0 4px 15px rgba(0,0,0,0.04)', border: '1px solid #BFDBFE', overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ background: '#EBF5FF', color: '#0C4A86', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '800' }}>
-                <th style={{ padding: '14px 20px' }}>Student</th>
-                <th style={{ padding: '14px 20px' }}>Description</th>
-                <th style={{ padding: '14px 20px' }}>Total Fee</th>
-                <th style={{ padding: '14px 20px' }}>Paid</th>
-                <th style={{ padding: '14px 20px' }}>Balance Due</th>
-                <th style={{ padding: '14px 20px' }}>Due Date</th>
-                <th style={{ padding: '14px 20px' }}>Status</th>
-                <th style={{ padding: '14px 20px' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((fee, i) => {
-                const amount  = Number(fee.amount || 0);
-                const paid    = Number(fee.paidAmount || 0);
-                const balance = Math.max(amount - paid, 0);
-                const status  = getStatus(fee);
-                const studentName = resolveStudentName(fee, students, i);
-
-                return (
-                  <tr key={fee._id || i} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '14px 20px', color: '#0C4A86', fontWeight: 800, fontSize: '0.9rem' }}>
-                      {studentName}
-                    </td>
-                    <td style={{ padding: '14px 20px', color: '#6B5B54', fontWeight: 600, fontSize: '0.85rem' }}>
-                      {fee.description || 'Quarterly Tuition Fees'}
-                    </td>
-                    <td style={{ padding: '14px 20px', color: '#0C4A86', fontWeight: 700 }}>
-                      {rupee(amount)}
-                    </td>
-                    <td style={{ padding: '14px 20px', color: '#10b981', fontWeight: 700 }}>
-                      {rupee(paid)}
-                    </td>
-                    <td style={{ padding: '14px 20px', fontWeight: 800, color: balance > 0 ? '#ef4444' : '#10b981' }}>
-                      {balance > 0 ? rupee(balance) : '—'}
-                    </td>
-                    <td style={{ padding: '14px 20px', color: '#475569', fontSize: '0.85rem' }}>
-                      {fmtDate(fee.dueDate)}
-                    </td>
-                    <td style={{ padding: '14px 20px' }}>
-                      <StatusBadge fee={fee} />
-                    </td>
-                    <td style={{ padding: '14px 20px' }}>
-                      {status === 'paid' ? (
-                        <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>—</span>
-                      ) : (
-                        <button onClick={() => setPayFeeObj({ fee, studentName })}
-                          style={{ padding: '8px 16px', background: '#0096DA', color: '#fff',
-                            border: 'none', borderRadius: '10px', cursor: 'pointer',
-                            fontWeight: 800, fontSize: '0.82rem', boxShadow: '0 2px 8px rgba(0,150,218,0.25)' }}>
-                          Pay
-                        </button>
-                      )}
+      {/* Table / Unselected State Prompt */}
+      {!isSelectionMade ? (
+        <div style={{
+          background: '#ffffff',
+          borderRadius: '20px',
+          border: '2px dashed #BFDBFE',
+          padding: '50px 24px',
+          textAlign: 'center',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.02)'
+        }}>
+          <div style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '16px',
+            background: '#EBF5FF',
+            color: '#0096DA',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 16px',
+            boxShadow: '0 4px 12px rgba(0,150,218,0.15)'
+          }}>
+            <CreditCard size={28} />
+          </div>
+          <h3 style={{ margin: '0 0 8px', color: '#0C4A86', fontWeight: 900, fontSize: '1.25rem' }}>
+            No Dropdown Filter Selected
+          </h3>
+          <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', fontWeight: 600, maxWidth: '480px', margin: '0 auto' }}>
+            Please select a <strong>Grade</strong>, <strong>Section</strong>, <strong>Student</strong>, or <strong>Fee Type</strong> from the dropdown filters above to display records.
+          </p>
+        </div>
+      ) : (
+        <div style={{ background: '#ffffff', borderRadius: '20px', boxShadow: '0 4px 15px rgba(0,0,0,0.04)', border: '1px solid #BFDBFE', overflow: 'hidden' }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <thead>
+                <tr style={{ background: '#EBF5FF', color: '#0C4A86', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '800' }}>
+                  <th style={{ padding: '14px 20px' }}>Student</th>
+                  <th style={{ padding: '14px 20px' }}>Description</th>
+                  <th style={{ padding: '14px 20px' }}>Total Fee</th>
+                  <th style={{ padding: '14px 20px' }}>Paid</th>
+                  <th style={{ padding: '14px 20px' }}>Balance Due</th>
+                  <th style={{ padding: '14px 20px' }}>Due Date</th>
+                  <th style={{ padding: '14px 20px' }}>Status</th>
+                  <th style={{ padding: '14px 20px' }}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan="8" style={{ padding: '30px', textAlign: 'center', color: '#64748b', fontWeight: '600' }}>
+                      No matching pending fee records found for the selected criteria.
                     </td>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                ) : (
+                  filtered.map((fee, i) => {
+                    const amount  = Number(fee.amount || 0);
+                    const paid    = Number(fee.paidAmount || 0);
+                    const balance = Math.max(amount - paid, 0);
+                    const status  = getStatus(fee);
+                    const studentName = resolveStudentName(fee, students, i);
+
+                    return (
+                      <tr key={fee._id || i} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '14px 20px', color: '#0C4A86', fontWeight: 800, fontSize: '0.9rem' }}>
+                          {studentName}
+                        </td>
+                        <td style={{ padding: '14px 20px', color: '#6B5B54', fontWeight: 600, fontSize: '0.85rem' }}>
+                          {fee.description || 'Quarterly Tuition Fees'}
+                        </td>
+                        <td style={{ padding: '14px 20px', color: '#0C4A86', fontWeight: 700 }}>
+                          {rupee(amount)}
+                        </td>
+                        <td style={{ padding: '14px 20px', color: '#10b981', fontWeight: 700 }}>
+                          {rupee(paid)}
+                        </td>
+                        <td style={{ padding: '14px 20px', fontWeight: 800, color: balance > 0 ? '#ef4444' : '#10b981' }}>
+                          {balance > 0 ? rupee(balance) : '—'}
+                        </td>
+                        <td style={{ padding: '14px 20px', color: '#475569', fontSize: '0.85rem' }}>
+                          {fmtDate(fee.dueDate)}
+                        </td>
+                        <td style={{ padding: '14px 20px' }}>
+                          <StatusBadge fee={fee} />
+                        </td>
+                        <td style={{ padding: '14px 20px' }}>
+                          {status === 'paid' ? (
+                            <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>—</span>
+                          ) : (
+                            <button onClick={() => setPayFeeObj({ fee, studentName })}
+                              style={{ padding: '8px 16px', background: '#0096DA', color: '#fff',
+                                border: 'none', borderRadius: '10px', cursor: 'pointer',
+                                fontWeight: 800, fontSize: '0.82rem', boxShadow: '0 2px 8px rgba(0,150,218,0.25)' }}>
+                              Pay
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
       {payFeeObj && (
         <PayModal
