@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   MessageSquare, Send, Paperclip, CheckCircle2, Clock, Filter, Search,
   PlusCircle, User, FileText, Image, Video, X, Bell, ShieldCheck, CornerDownLeft
@@ -6,6 +7,7 @@ import {
 import { unifiedCommunicationService } from '../../services/unifiedCommunicationStore';
 
 const MultiRoleMessagingSystem = ({ currentUserRole = 'Teacher', currentUserName = 'Ramesh Sharma' }) => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [activeTab, setActiveTab] = useState('inbox'); // 'inbox' | 'sent'
   const [selectedThread, setSelectedThread] = useState(null);
@@ -119,6 +121,14 @@ const MultiRoleMessagingSystem = ({ currentUserRole = 'Teacher', currentUserName
       {/* Header Bar */}
       <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
+          {currentUserRole === 'Parent' && (
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#0C4A86] px-3.5 py-1 text-xs font-black text-white hover:bg-black transition-all"
+            >
+              ← Back
+            </button>
+          )}
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0C4A86] text-white shadow-md">
             <MessageSquare className="h-6 w-6" />
           </div>

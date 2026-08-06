@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { attendanceService } from '../../services/api';
 import { CheckCircle2, XCircle, Calendar, AlertCircle, Filter, Clock, ChevronLeft, ChevronRight, Sparkles, Sun, Info } from 'lucide-react';
 
@@ -92,6 +93,7 @@ const monthNames = [
 ];
 
 const ParentAttendance = ({ selectedStudentId, student }) => {
+  const navigate = useNavigate();
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -160,7 +162,7 @@ const ParentAttendance = ({ selectedStudentId, student }) => {
 
     return {
       totalWorkingDays,
-      totalRecordingDays: recordedDays || (isCurrentYear ? 52 : 210),
+      totalRecordedDays: recordedDays || (isCurrentYear ? 52 : 210),
       presentDays: presentDays || (isCurrentYear ? 48 : 195),
       absentDays: absentDays || (isCurrentYear ? 4 : 15),
       offDays,
@@ -252,20 +254,28 @@ const ParentAttendance = ({ selectedStudentId, student }) => {
   const totalWorkingDaysMonthly = Math.max(0, totalDays - weekendDaysCount - holidayDaysCount);
   const presentDaysCount = activeStatsDays.filter((d) => d.status === 'Present').length;
   const absentDaysCount = activeStatsDays.filter((d) => d.status === 'Absent').length;
-  const recordingDaysMonthly = presentDaysCount + absentDaysCount;
+  const recordedDaysMonthly = presentDaysCount + absentDaysCount;
   const offDaysMonthly = weekendDaysCount + holidayDaysCount;
 
-  const monthlyAttendancePercentage = recordingDaysMonthly > 0
-    ? ((presentDaysCount / recordingDaysMonthly) * 100).toFixed(1)
+  const monthlyAttendancePercentage = recordedDaysMonthly > 0
+    ? ((presentDaysCount / recordedDaysMonthly) * 100).toFixed(1)
     : '0.0';
 
   return (
     <div className="space-y-8">
       {/* Header Banner */}
       <div className="rounded-3xl bg-gradient-to-r from-[#0C4A86] to-[#0096DA] p-6 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur-md mb-2">
-            <Calendar className="h-3.5 w-3.5" /> Parent Portal • Attendance
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1 text-xs font-black text-white hover:bg-white hover:text-[#0C4A86] transition-all"
+            >
+              ← Back
+            </button>
+            <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur-md">
+              Parent Portal • Attendance
+            </span>
           </div>
           <h1 className="text-2xl font-bold">{studentName}'s Attendance Register</h1>
           <p className="text-sky-100 text-sm">Academic Year Summary, Monthly Calendar, and Weekly Attendance tracking.</p>
@@ -298,7 +308,7 @@ const ParentAttendance = ({ selectedStudentId, student }) => {
             </p>
           </div>
 
-          {/* Academic Year Selector (Req 2) */}
+          {/* Academic Year Selector */}
           <div className="flex items-center gap-2">
             <label className="text-xs font-extrabold text-slate-600 whitespace-nowrap">
               Academic Year:
@@ -314,7 +324,7 @@ const ParentAttendance = ({ selectedStudentId, student }) => {
           </div>
         </div>
 
-        {/* 7 Academic Year Summary Cards (Req 1 & 10) */}
+        {/* Academic Year Summary Cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Card 1: Total Working Days */}
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-1">
@@ -323,10 +333,10 @@ const ParentAttendance = ({ selectedStudentId, student }) => {
             <p className="text-xs font-semibold text-slate-500">Official working days in {academicYear}</p>
           </div>
 
-          {/* Card 2: Total Recording Days */}
+          {/* Card 2: Total Recorded Days */}
           <div className="rounded-2xl border border-sky-200 bg-sky-50/50 p-4 space-y-1">
-            <p className="text-[11px] font-extrabold uppercase tracking-wider text-sky-800">Total Recording Days</p>
-            <p className="text-3xl font-black text-[#0C4A86]">{yearStats.totalRecordingDays} Days</p>
+            <p className="text-[11px] font-extrabold uppercase tracking-wider text-sky-800">Total Recorded Days</p>
+            <p className="text-3xl font-black text-[#0C4A86]">{yearStats.totalRecordedDays} Days</p>
             <p className="text-xs font-semibold text-sky-700">Attendance actually recorded so far</p>
           </div>
 
@@ -346,33 +356,6 @@ const ParentAttendance = ({ selectedStudentId, student }) => {
               <XCircle className="h-6 w-6" /> {yearStats.absentDays} Days
             </p>
             <p className="text-xs font-semibold text-rose-700">Absences recorded</p>
-          </div>
-
-          {/* Card 5: Half Days */}
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 space-y-1">
-            <p className="text-[11px] font-extrabold uppercase tracking-wider text-amber-800">Half Days</p>
-            <p className="text-3xl font-black text-amber-600 flex items-center gap-2">
-              <Clock className="h-6 w-6 text-amber-600" /> 0 Days
-            </p>
-            <p className="text-xs font-semibold text-amber-700">Half-day sessions attended</p>
-          </div>
-
-          {/* Card 6: Off Days / Holidays */}
-          <div className="rounded-2xl border border-purple-200 bg-purple-50/50 p-4 space-y-1">
-            <p className="text-[11px] font-extrabold uppercase tracking-wider text-purple-800">Off Days / Holidays</p>
-            <p className="text-3xl font-black text-purple-700 flex items-center gap-2">
-              <Sun className="h-6 w-6 text-purple-600" /> {yearStats.offDays} Days
-            </p>
-            <p className="text-xs font-semibold text-purple-700">Weekends & official school holidays</p>
-          </div>
-
-          {/* Card 7: Remaining / Unrecorded Days */}
-          <div className="rounded-2xl border border-slate-200 bg-slate-100/60 p-4 space-y-1 sm:col-span-2 lg:col-span-1">
-            <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Remaining / Unrecorded Days</p>
-            <p className="text-3xl font-black text-slate-800 flex items-center gap-2">
-              <Info className="h-6 w-6 text-slate-600" /> {yearStats.remainingDays} Days
-            </p>
-            <p className="text-xs font-semibold text-slate-500">Working days remaining in {academicYear}</p>
           </div>
         </div>
       </div>
@@ -442,7 +425,7 @@ const ParentAttendance = ({ selectedStudentId, student }) => {
           </div>
           <div className="bg-sky-50 p-3.5 rounded-2xl border border-sky-200">
             <span className="text-sky-800 font-extrabold block text-[10px] uppercase">Total Recorded Days</span>
-            <span className="text-xl font-black text-[#0C4A86]">{recordingDaysMonthly} Days</span>
+            <span className="text-xl font-black text-[#0C4A86]">{recordedDaysMonthly} Days</span>
           </div>
           <div className="bg-emerald-50 p-3.5 rounded-2xl border border-emerald-200">
             <span className="text-emerald-800 font-extrabold block text-[10px] uppercase">Present Days</span>

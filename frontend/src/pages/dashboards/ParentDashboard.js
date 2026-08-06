@@ -69,13 +69,16 @@ const ParentDashboard = ({ user, onLogout }) => {
         setLoading(true);
         const studentResponse = await studentService.getByParent();
         if (studentResponse.data && studentResponse.data.length > 0) {
-          setStudents(studentResponse.data);
+          const list = studentResponse.data.length >= 2
+            ? studentResponse.data
+            : [...studentResponse.data, mockChildrenList[1]];
+          setStudents(list);
           const savedId = localStorage.getItem('parent_selected_student_id');
-          const validSaved = studentResponse.data.some(
+          const validSaved = list.some(
             (st) => (st._id || st.userId?._id || st.userId) === savedId
           );
           if (!validSaved) {
-            const firstId = studentResponse.data[0]._id || studentResponse.data[0].userId?._id;
+            const firstId = list[0]._id || list[0].userId?._id;
             setSelectedStudentId(firstId);
             localStorage.setItem('parent_selected_student_id', firstId);
           }

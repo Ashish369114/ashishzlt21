@@ -10,6 +10,7 @@ const grade5Timetable = [
   { time: '09:15 AM - 10:00 AM', period: 'Period 2', monday: { subject: 'English', teacher: 'Ananya Roy', room: 'Room 5A' }, tuesday: { subject: 'Social Studies', teacher: 'Vikram Joshi', room: 'Room 5A' }, wednesday: { subject: 'Science', teacher: 'Sunita Verma', room: 'Room 5A' }, thursday: { subject: 'Telugu', teacher: 'P. Subbarao', room: 'Room 5A' }, friday: { subject: 'English', teacher: 'Ananya Roy', room: 'Room 5A' }, saturday: { subject: 'Sports & PE', teacher: 'Coach Arjun', room: 'Sports Ground' } },
   { time: '10:15 AM - 11:00 AM', period: 'Period 3', monday: { subject: 'Science', teacher: 'Sunita Verma', room: 'Science Lab 1' }, tuesday: { subject: 'Mathematics', teacher: 'Ramesh Sharma', room: 'Room 5A' }, wednesday: { subject: 'English', teacher: 'Ananya Roy', room: 'Room 5A' }, thursday: { subject: 'Hindi', teacher: 'Meena Sharma', room: 'Room 5A' }, friday: { subject: 'Social Studies', teacher: 'Vikram Joshi', room: 'Room 5A' }, saturday: { subject: 'Art & Craft', teacher: 'S. Kulkarni', room: 'Art Studio' } },
   { time: '11:00 AM - 11:45 AM', period: 'Period 4', monday: { subject: 'Social Studies', teacher: 'Vikram Joshi', room: 'Room 5A' }, tuesday: { subject: 'Telugu', teacher: 'P. Subbarao', room: 'Room 5A' }, wednesday: { subject: 'Social Studies', teacher: 'Vikram Joshi', room: 'Room 5A' }, thursday: { subject: 'Mathematics', teacher: 'Ramesh Sharma', room: 'Room 5A' }, friday: { subject: 'Telugu', teacher: 'P. Subbarao', room: 'Room 5A' }, saturday: { subject: 'Library Hour', teacher: 'Librarian', room: 'Central Library' } },
+  { time: '11:45 AM - 12:30 PM', period: 'Lunch Break', isBreak: true, monday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, tuesday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, wednesday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, thursday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, friday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, saturday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' } },
   { time: '12:30 PM - 01:15 PM', period: 'Period 5', monday: { subject: 'Telugu', teacher: 'P. Subbarao', room: 'Room 5A' }, tuesday: { subject: 'Hindi', teacher: 'Meena Sharma', room: 'Room 5A' }, wednesday: { subject: 'Hindi', teacher: 'Meena Sharma', room: 'Room 5A' }, thursday: { subject: 'Science Lab', teacher: 'Sunita Verma', room: 'Science Lab 2' }, friday: { subject: 'Hindi', teacher: 'Meena Sharma', room: 'Room 5A' }, saturday: { subject: 'Value Education', teacher: 'Principal', room: 'Auditorium' } },
   { time: '01:15 PM - 02:00 PM', period: 'Period 6', monday: { subject: 'Hindi', teacher: 'Meena Sharma', room: 'Room 5A' }, tuesday: { subject: 'Art & Music', teacher: 'S. Kulkarni', room: 'Music Room' }, wednesday: { subject: 'Computer Lab', teacher: 'K. Rajesh', room: 'Computer Lab' }, thursday: { subject: 'Sports', teacher: 'Coach Arjun', room: 'Ground' }, friday: { subject: 'Moral Science', teacher: 'Ananya Roy', room: 'Room 5A' }, saturday: { subject: 'Club Activity', teacher: 'Activity In-charge', room: 'Campus' } }
 ];
@@ -19,7 +20,10 @@ const grade8Timetable = [
   { time: '08:30 AM - 09:15 AM', period: 'Period 1', monday: { subject: 'Physics', teacher: 'Sunita Verma', room: 'Physics Lab' }, tuesday: { subject: 'Algebra', teacher: 'Ramesh Sharma', room: 'Room 8B' }, wednesday: { subject: 'Chemistry', teacher: 'Dr. Patel', room: 'Chem Lab' }, thursday: { subject: 'Physics', teacher: 'Sunita Verma', room: 'Room 8B' }, friday: { subject: 'Algebra', teacher: 'Ramesh Sharma', room: 'Room 8B' }, saturday: { subject: 'Coding & AI', teacher: 'K. Rajesh', room: 'Computer Lab' } },
   { time: '09:15 AM - 10:00 AM', period: 'Period 2', monday: { subject: 'English Lit', teacher: 'Ananya Roy', room: 'Room 8B' }, tuesday: { subject: 'Biology', teacher: 'Dr. Gupta', room: 'Bio Lab' }, wednesday: { subject: 'English Lit', teacher: 'Ananya Roy', room: 'Room 8B' }, thursday: { subject: 'Biology', teacher: 'Dr. Gupta', room: 'Room 8B' }, friday: { subject: 'English Lit', teacher: 'Ananya Roy', room: 'Room 8B' }, saturday: { subject: 'Basketball', teacher: 'Coach Arjun', room: 'Sports Complex' } },
   { time: '10:15 AM - 11:00 AM', period: 'Period 3', monday: { subject: 'History', teacher: 'Vikram Joshi', room: 'Room 8B' }, tuesday: { subject: 'Civics', teacher: 'Vikram Joshi', room: 'Room 8B' }, wednesday: { subject: 'Geography', teacher: 'Vikram Joshi', room: 'Room 8B' }, thursday: { subject: 'History', teacher: 'Vikram Joshi', room: 'Room 8B' }, friday: { subject: 'Civics', teacher: 'Vikram Joshi', room: 'Room 8B' }, saturday: { subject: 'Robotics Workshop', teacher: 'K. Rajesh', room: 'STEM Lab' } },
-  { time: '11:00 AM - 11:45 AM', period: 'Period 4', monday: { subject: 'Advanced Math', teacher: 'Ramesh Sharma', room: 'Room 8B' }, tuesday: { subject: 'Hindi Lit', teacher: 'Meena Sharma', room: 'Room 8B' }, wednesday: { subject: 'Telugu Lit', teacher: 'P. Subbarao', room: 'Room 8B' }, thursday: { subject: 'Advanced Math', teacher: 'Ramesh Sharma', room: 'Room 8B' }, friday: { subject: 'Telugu Lit', teacher: 'P. Subbarao', room: 'Room 8B' }, saturday: { subject: 'General Knowledge', teacher: 'Ananya Roy', room: 'Room 8B' } }
+  { time: '11:00 AM - 11:45 AM', period: 'Period 4', monday: { subject: 'Advanced Math', teacher: 'Ramesh Sharma', room: 'Room 8B' }, tuesday: { subject: 'Hindi Lit', teacher: 'Meena Sharma', room: 'Room 8B' }, wednesday: { subject: 'Telugu Lit', teacher: 'P. Subbarao', room: 'Room 8B' }, thursday: { subject: 'Advanced Math', teacher: 'Ramesh Sharma', room: 'Room 8B' }, friday: { subject: 'Telugu Lit', teacher: 'P. Subbarao', room: 'Room 8B' }, saturday: { subject: 'General Knowledge', teacher: 'Ananya Roy', room: 'Room 8B' } },
+  { time: '11:45 AM - 12:30 PM', period: 'Lunch Break', isBreak: true, monday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, tuesday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, wednesday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, thursday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, friday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, saturday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' } },
+  { time: '12:30 PM - 01:15 PM', period: 'Period 5', monday: { subject: 'Telugu', teacher: 'P. Subbarao', room: 'Room 8B' }, tuesday: { subject: 'Hindi', teacher: 'Meena Sharma', room: 'Room 8B' }, wednesday: { subject: 'Hindi', teacher: 'Meena Sharma', room: 'Room 8B' }, thursday: { subject: 'Science Lab', teacher: 'Sunita Verma', room: 'Science Lab 2' }, friday: { subject: 'Hindi', teacher: 'Meena Sharma', room: 'Room 8B' }, saturday: { subject: 'Value Education', teacher: 'Principal', room: 'Auditorium' } },
+  { time: '01:15 PM - 02:00 PM', period: 'Period 6', monday: { subject: 'Hindi', teacher: 'Meena Sharma', room: 'Room 8B' }, tuesday: { subject: 'Art & Music', teacher: 'S. Kulkarni', room: 'Music Room' }, wednesday: { subject: 'Computer Lab', teacher: 'K. Rajesh', room: 'Computer Lab' }, thursday: { subject: 'Sports', teacher: 'Coach Arjun', room: 'Ground' }, friday: { subject: 'Moral Science', teacher: 'Ananya Roy', room: 'Room 8B' }, saturday: { subject: 'Club Activity', teacher: 'Activity In-charge', room: 'Campus' } }
 ];
 
 const getCurrentDayName = () => {
@@ -49,7 +53,7 @@ const ParentTimetable = ({ selectedStudentId, student }) => {
         <div className="space-y-1">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => navigate('/dashboard')}
               className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1 text-xs font-black text-white hover:bg-white hover:text-[#0C4A86] transition-all"
             >
               ← Back
@@ -63,7 +67,7 @@ const ParentTimetable = ({ selectedStudentId, student }) => {
         </div>
       </div>
 
-      {/* View Toggle Bar (Req 6) */}
+      {/* View Toggle Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between bg-white p-4 rounded-3xl border border-slate-200 shadow-2xs gap-3">
         <div className="flex items-center gap-2">
           <span className="text-xs font-black text-[#0C4A86]">Schedule View:</span>
@@ -114,7 +118,7 @@ const ParentTimetable = ({ selectedStudentId, student }) => {
         )}
       </div>
 
-      {/* Daily View Layout (Req 6) */}
+      {/* Daily View Layout */}
       {viewMode === 'daily' ? (
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -136,13 +140,37 @@ const ParentTimetable = ({ selectedStudentId, student }) => {
               const periodInfo = row[currentDayKey];
               if (!periodInfo) return null;
 
+              if (row.isBreak) {
+                return (
+                  <div
+                    key={idx}
+                    className="rounded-2xl border border-amber-300 bg-amber-50 p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-900"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500 text-white font-black text-xs shadow-2xs">
+                        Lunch
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-amber-700 flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5 text-amber-600" /> {row.time}
+                        </span>
+                        <h4 className="text-base font-black text-amber-900">{periodInfo.subject}</h4>
+                      </div>
+                    </div>
+                    <div className="text-xs font-extrabold text-amber-800">
+                      <span>Dining Hall • School Cafeteria / Break</span>
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <div
                   key={idx}
                   className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 hover:bg-white transition-all shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0C4A86] text-white font-black text-xs shadow-2xs">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0C4A86] text-white font-black text-xs shadow-2xs shrink-0">
                       {row.period}
                     </div>
                     <div>
@@ -167,7 +195,7 @@ const ParentTimetable = ({ selectedStudentId, student }) => {
           </div>
         </div>
       ) : (
-        /* Weekly View Matrix Table (Req 6) */
+        /* Weekly View Matrix Table (Req 6 - Perfectly Aligned Columns) */
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <h3 className="text-base font-black text-[#0C4A86]">
@@ -177,51 +205,73 @@ const ParentTimetable = ({ selectedStudentId, student }) => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
+            <table className="w-full text-left border-collapse text-xs table-fixed">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 uppercase tracking-wider font-bold">
-                  <th className="p-3">Time Slot</th>
-                  <th className="p-3">Monday</th>
-                  <th className="p-3">Tuesday</th>
-                  <th className="p-3">Wednesday</th>
-                  <th className="p-3">Thursday</th>
-                  <th className="p-3">Friday</th>
-                  <th className="p-3">Saturday</th>
+                <tr className="border-b border-slate-200 bg-slate-100 text-slate-700 uppercase tracking-wider font-extrabold text-center">
+                  <th className="p-3.5 w-36 text-left bg-slate-200/60">Time Slot / Period</th>
+                  <th className="p-3.5 w-32 border-l border-slate-200">Monday</th>
+                  <th className="p-3.5 w-32 border-l border-slate-200">Tuesday</th>
+                  <th className="p-3.5 w-32 border-l border-slate-200">Wednesday</th>
+                  <th className="p-3.5 w-32 border-l border-slate-200">Thursday</th>
+                  <th className="p-3.5 w-32 border-l border-slate-200">Friday</th>
+                  <th className="p-3.5 w-32 border-l border-slate-200">Saturday</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-semibold text-slate-800">
-                {timetableData.map((row, i) => (
-                  <tr key={i} className="hover:bg-slate-50">
-                    <td className="p-3 font-black text-[#0096DA] bg-slate-50/50">
-                      <div>{row.period}</div>
-                      <div className="text-[10px] text-slate-500 font-normal">{row.time}</div>
-                    </td>
-                    <td className="p-3">
-                      <div className="font-extrabold text-[#0C4A86]">{row.monday?.subject}</div>
-                      <div className="text-[10px] text-slate-500">{row.monday?.teacher}</div>
-                    </td>
-                    <td className="p-3">
-                      <div className="font-extrabold text-[#0C4A86]">{row.tuesday?.subject}</div>
-                      <div className="text-[10px] text-slate-500">{row.tuesday?.teacher}</div>
-                    </td>
-                    <td className="p-3">
-                      <div className="font-extrabold text-[#0C4A86]">{row.wednesday?.subject}</div>
-                      <div className="text-[10px] text-slate-500">{row.wednesday?.teacher}</div>
-                    </td>
-                    <td className="p-3">
-                      <div className="font-extrabold text-[#0C4A86]">{row.thursday?.subject}</div>
-                      <div className="text-[10px] text-slate-500">{row.thursday?.teacher}</div>
-                    </td>
-                    <td className="p-3">
-                      <div className="font-extrabold text-[#0C4A86]">{row.friday?.subject}</div>
-                      <div className="text-[10px] text-slate-500">{row.friday?.teacher}</div>
-                    </td>
-                    <td className="p-3">
-                      <div className="font-extrabold text-emerald-700">{row.saturday?.subject}</div>
-                      <div className="text-[10px] text-slate-500">{row.saturday?.teacher}</div>
-                    </td>
-                  </tr>
-                ))}
+              <tbody className="divide-y divide-slate-200 font-semibold text-slate-800">
+                {timetableData.map((row, i) => {
+                  if (row.isBreak) {
+                    return (
+                      <tr key={i} className="bg-amber-50/90 font-bold border-y border-amber-300">
+                        <td className="p-3.5 font-black text-amber-900 bg-amber-100/80 border-r border-amber-200 text-left">
+                          <div className="font-extrabold text-xs text-amber-900">🍱 {row.period}</div>
+                          <div className="text-[10px] text-amber-800 font-bold whitespace-nowrap">{row.time}</div>
+                        </td>
+                        <td colSpan={6} className="p-3.5 text-center font-black text-amber-900 uppercase tracking-wider text-xs bg-amber-50">
+                          🍱 Lunch Break (11:45 AM - 12:30 PM) — School Cafeteria / Dining Hall
+                        </td>
+                      </tr>
+                    );
+                  }
+
+                  return (
+                    <tr key={i} className="hover:bg-sky-50/40 transition-colors">
+                      <td className="p-3.5 font-black text-[#0096DA] bg-slate-50 border-r border-slate-200 text-left">
+                        <div className="text-xs font-black text-[#0C4A86]">{row.period}</div>
+                        <div className="text-[10px] text-slate-500 font-semibold whitespace-nowrap">{row.time}</div>
+                      </td>
+                      <td className="p-3.5 border-l border-slate-100 text-left align-top">
+                        <div className="font-extrabold text-[#0C4A86]">{row.monday?.subject}</div>
+                        <div className="text-[10px] text-slate-500">{row.monday?.teacher}</div>
+                        <div className="text-[9px] text-purple-700 font-bold mt-0.5">{row.monday?.room}</div>
+                      </td>
+                      <td className="p-3.5 border-l border-slate-100 text-left align-top">
+                        <div className="font-extrabold text-[#0C4A86]">{row.tuesday?.subject}</div>
+                        <div className="text-[10px] text-slate-500">{row.tuesday?.teacher}</div>
+                        <div className="text-[9px] text-purple-700 font-bold mt-0.5">{row.tuesday?.room}</div>
+                      </td>
+                      <td className="p-3.5 border-l border-slate-100 text-left align-top">
+                        <div className="font-extrabold text-[#0C4A86]">{row.wednesday?.subject}</div>
+                        <div className="text-[10px] text-slate-500">{row.wednesday?.teacher}</div>
+                        <div className="text-[9px] text-purple-700 font-bold mt-0.5">{row.wednesday?.room}</div>
+                      </td>
+                      <td className="p-3.5 border-l border-slate-100 text-left align-top">
+                        <div className="font-extrabold text-[#0C4A86]">{row.thursday?.subject}</div>
+                        <div className="text-[10px] text-slate-500">{row.thursday?.teacher}</div>
+                        <div className="text-[9px] text-purple-700 font-bold mt-0.5">{row.thursday?.room}</div>
+                      </td>
+                      <td className="p-3.5 border-l border-slate-100 text-left align-top">
+                        <div className="font-extrabold text-[#0C4A86]">{row.friday?.subject}</div>
+                        <div className="text-[10px] text-slate-500">{row.friday?.teacher}</div>
+                        <div className="text-[9px] text-purple-700 font-bold mt-0.5">{row.friday?.room}</div>
+                      </td>
+                      <td className="p-3.5 border-l border-slate-100 text-left align-top">
+                        <div className="font-extrabold text-emerald-700">{row.saturday?.subject}</div>
+                        <div className="text-[10px] text-slate-500">{row.saturday?.teacher}</div>
+                        <div className="text-[9px] text-purple-700 font-bold mt-0.5">{row.saturday?.room}</div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

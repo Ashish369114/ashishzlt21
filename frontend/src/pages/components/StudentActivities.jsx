@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Trophy, Award, Calendar, MapPin, Users, Star, Plus, ShieldCheck, Download, ExternalLink, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Trophy, Award, Calendar, MapPin, Users, Star, Plus, ShieldCheck, Download, ExternalLink, Sparkles, Play, Image as ImageIcon, Video, X } from 'lucide-react';
 
 const initialStudentActivitiesList = [
   {
@@ -13,7 +14,9 @@ const initialStudentActivitiesList = [
     description: 'Designed an autonomous solar-powered waste sorting rover. Won first place among 24 participating schools.',
     status: 'Completed',
     badgeColor: 'bg-amber-100 text-amber-800',
-    image: 'https://images.unsplash.com/photo-1561557944-6e7860d1a7eb?auto=format&fit=crop&w=600&q=80',
+    image: 'https://images.unsplash.com/photo-1561557944-6e7860d1a7eb?auto=format&fit=crop&w=1200&q=80',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    mediaCount: '4 High-Res Photos & 1 Video'
   },
   {
     id: 2,
@@ -26,7 +29,9 @@ const initialStudentActivitiesList = [
     description: 'Secured second position in the 100m sprint finals with a personal best timing of 11.8 seconds.',
     status: 'Completed',
     badgeColor: 'bg-emerald-100 text-emerald-800',
-    image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=600&q=80',
+    image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    mediaCount: '6 Track Photos & HD Race Video'
   },
   {
     id: 3,
@@ -39,7 +44,9 @@ const initialStudentActivitiesList = [
     description: 'Participated in weekly parliamentary debates, leading the opposition team on technology ethics topics.',
     status: 'Active',
     badgeColor: 'bg-purple-100 text-purple-800',
-    image: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=600&q=80',
+    image: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=1200&q=80',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+    mediaCount: '3 Event Photos & Speech Clip'
   },
   {
     id: 4,
@@ -52,13 +59,18 @@ const initialStudentActivitiesList = [
     description: 'Planted over 50 saplings across the campus and led awareness sessions on eco-friendly recycling.',
     status: 'Completed',
     badgeColor: 'bg-teal-100 text-teal-800',
-    image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=600&q=80',
+    image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1200&q=80',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+    mediaCount: '5 Garden Photos & Drive Highlights'
   },
 ];
 
 const StudentActivities = ({ isParentView = false, student, selectedStudentId }) => {
+  const navigate = useNavigate();
   const [activities, setActivities] = useState(initialStudentActivitiesList);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedVideo, setSelectedVideo] = useState(null);
   const [newActivityForm, setNewActivityForm] = useState({
     title: '',
     category: 'Robotics & AI',
@@ -90,7 +102,9 @@ const StudentActivities = ({ isParentView = false, student, selectedStudentId })
       description: newActivityForm.description || 'Logged student co-curricular activity record.',
       status: 'Active',
       badgeColor: 'bg-blue-100 text-blue-800',
-      image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=600&q=80',
+      image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1200&q=80',
+      videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+      mediaCount: '1 Photo & Video'
     };
 
     setActivities([newAct, ...activities]);
@@ -104,12 +118,22 @@ const StudentActivities = ({ isParentView = false, student, selectedStudentId })
       {/* Top Banner Header */}
       <div className="rounded-3xl bg-gradient-to-r from-[#0C4A86] to-[#0096DA] p-6 md:p-8 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3.5 py-1 text-xs font-bold text-white backdrop-blur-md mb-2">
-            <Trophy className="h-3.5 w-3.5 text-amber-300" /> Extracurricular & Co-Curricular Portfolio
+          <div className="flex items-center gap-3 mb-2">
+            {isParentView && (
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1 text-xs font-black text-white hover:bg-white hover:text-[#0C4A86] transition-all"
+              >
+                ← Back
+              </button>
+            )}
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3.5 py-1 text-xs font-bold text-white backdrop-blur-md">
+              <Trophy className="h-3.5 w-3.5 text-amber-300" /> Extracurricular & Co-Curricular Portfolio
+            </span>
           </div>
           <h1 className="text-2xl md:text-3xl font-black text-white">{isParentView ? `${studentName}'s Co-Curricular Activities` : 'Activities & Achievements'}</h1>
           <p className="text-xs md:text-sm font-semibold text-sky-100">
-            {isParentView ? `View sports events, science competitions, medals, awards & certificates for ${studentName}.` : 'Track your sports events, science fairs, literary debates, leadership roles, and award certificates.'}
+            {isParentView ? `View sports events, science competitions, medals, video highlights & photo galleries for ${studentName}.` : 'Track sports events, science fairs, literary debates, leadership roles, videos and award certificates.'}
           </p>
         </div>
 
@@ -144,20 +168,43 @@ const StudentActivities = ({ isParentView = false, student, selectedStudentId })
         {activities.map((act) => (
           <div
             key={act.id}
-            className="group overflow-hidden rounded-3xl border border-[#BFDBFE] bg-white shadow-xs transition-all duration-300 hover:shadow-md hover:border-[#0096DA] flex flex-col"
+            className="group overflow-hidden rounded-3xl border border-[#BFDBFE] bg-white shadow-xs transition-all duration-300 hover:shadow-md hover:border-[#0096DA] flex flex-col justify-between"
           >
-            {/* Image Preview */}
-            <div className="relative h-44 w-full overflow-hidden bg-slate-100">
+            {/* Image Preview & Media Controls */}
+            <div className="relative h-48 w-full overflow-hidden bg-slate-900">
               <img
                 src={act.image}
                 alt={act.title}
-                className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                className="h-full w-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute top-3 left-3">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
+
+              <div className="absolute top-3 left-3 flex items-center gap-2">
                 <span className={`rounded-lg px-2.5 py-1 text-[11px] font-extrabold backdrop-blur-md shadow-xs ${act.badgeColor}`}>
                   {act.category}
                 </span>
               </div>
+
+              {/* Action Buttons: Watch Video & View Images (Point 8) */}
+              <div className="absolute inset-0 flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSelectedVideo(act)}
+                  className="flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-xs font-black text-white shadow-xl hover:scale-105 transition-all border border-white/50"
+                  title="Watch Video Demonstration"
+                >
+                  <Play className="h-4 w-4 fill-current ml-0.5" /> Watch Video
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedImage(act)}
+                  className="flex items-center gap-2 rounded-full bg-white/90 backdrop-blur-md px-4 py-2 text-xs font-black text-[#0C4A86] shadow-xl hover:bg-white hover:scale-105 transition-all border border-slate-200"
+                  title="View Photos Gallery"
+                >
+                  <ImageIcon className="h-4 w-4 text-[#0096DA]" /> View Photos
+                </button>
+              </div>
+
               <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg text-[11px] font-bold text-white flex items-center gap-1">
                 <Calendar className="h-3 w-3 text-amber-400" /> {act.date}
               </div>
@@ -191,7 +238,7 @@ const StudentActivities = ({ isParentView = false, student, selectedStudentId })
                     <MapPin className="h-3.5 w-3.5 text-slate-400" /> {act.venue}
                   </span>
                   <span className="text-amber-700 font-extrabold flex items-center gap-1">
-                    <Sparkles className="h-3 w-3" /> Verified Entry
+                    <Sparkles className="h-3 w-3" /> {act.mediaCount || 'Photos & Video Included'}
                   </span>
                 </div>
               </div>
@@ -199,6 +246,73 @@ const StudentActivities = ({ isParentView = false, student, selectedStudentId })
           </div>
         ))}
       </div>
+
+      {/* Video Modal Player (Point 8) */}
+      {selectedVideo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div className="relative w-full max-w-3xl overflow-hidden rounded-3xl bg-slate-900 text-white shadow-2xl space-y-4 p-4">
+            <div className="flex items-center justify-between border-b border-slate-700 pb-3">
+              <div className="flex items-center gap-2">
+                <Video className="h-5 w-5 text-rose-500" />
+                <h3 className="text-sm font-black truncate max-w-md">{selectedVideo.title} — Recorded Video</h3>
+              </div>
+              <button
+                onClick={() => setSelectedVideo(null)}
+                className="rounded-full bg-slate-800 p-1.5 text-slate-300 hover:bg-rose-600 hover:text-white transition-all"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black">
+              <video
+                src={selectedVideo.videoUrl}
+                controls
+                autoPlay
+                className="h-full w-full object-contain"
+              />
+            </div>
+
+            <div className="p-2 space-y-1 text-xs">
+              <p className="font-extrabold text-amber-400">{selectedVideo.category} • {selectedVideo.date}</p>
+              <p className="text-slate-300">{selectedVideo.description}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Lightbox Viewer Modal (Point 8) */}
+      {selectedImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
+          <div className="relative w-full max-w-4xl overflow-hidden rounded-3xl bg-slate-900 text-white shadow-2xl space-y-4 p-4">
+            <div className="flex items-center justify-between border-b border-slate-700 pb-3">
+              <div className="flex items-center gap-2">
+                <ImageIcon className="h-5 w-5 text-sky-400" />
+                <h3 className="text-sm font-black truncate max-w-md">{selectedImage.title} — High-Res Photo Gallery</h3>
+              </div>
+              <button
+                onClick={() => setSelectedImage(null)}
+                className="rounded-full bg-slate-800 p-1.5 text-slate-300 hover:bg-rose-600 hover:text-white transition-all"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="relative max-h-[70vh] w-full overflow-hidden rounded-2xl bg-black flex items-center justify-center">
+              <img
+                src={selectedImage.image}
+                alt={selectedImage.title}
+                className="max-h-[70vh] w-auto object-contain"
+              />
+            </div>
+
+            <div className="p-2 space-y-1 text-xs">
+              <p className="font-extrabold text-sky-300">{selectedImage.category} • {selectedImage.date} • {selectedImage.venue}</p>
+              <p className="text-slate-300">{selectedImage.description}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Activity Modal */}
       {isAddModalOpen && (

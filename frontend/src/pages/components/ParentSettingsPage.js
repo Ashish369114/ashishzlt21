@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/api';
 import PasswordChangeForm from './PasswordChangeForm';
 import { User, Lock, Bell, Sliders, CheckCircle2, AlertCircle, Save } from 'lucide-react';
 
 const ParentSettingsPage = ({ user }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [profile, setProfile] = useState({
     firstName: '',
@@ -55,10 +57,10 @@ const ParentSettingsPage = ({ user }) => {
         setProfile({
           firstName: user?.firstName || 'Priya',
           lastName: user?.lastName || 'Sharma',
-          email: user?.email || 'parent@school.com',
-          phone: '+91 98765 43210',
-          address: '42, Park Street, New Delhi',
-          relationship: 'Parent (Mother)',
+          email: user?.email || 'parent@school.edu',
+          phone: user?.phone || '+91 98765 43210',
+          address: user?.address || '123 Academic Colony, Hyderabad',
+          relationship: 'Parent',
         });
       } finally {
         setLoading(false);
@@ -99,6 +101,23 @@ const ParentSettingsPage = ({ user }) => {
   return (
     <div className="card" style={{ padding: '24px', background: '#fff', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
       <div className="card-header" style={{ marginBottom: '24px', borderBottom: '1px solid #e2e8f0', pb: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+          <button
+            onClick={() => navigate('/dashboard')}
+            style={{
+              padding: '6px 14px',
+              borderRadius: '20px',
+              border: 'none',
+              background: '#0C4A86',
+              color: '#fff',
+              fontWeight: '800',
+              fontSize: '0.75rem',
+              cursor: 'pointer'
+            }}
+          >
+            ← Back
+          </button>
+        </div>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
           ⚙️ Parent Account Settings
         </h2>

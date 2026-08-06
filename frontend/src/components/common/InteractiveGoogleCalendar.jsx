@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, MapPin,
   X, Filter, Cake, User
@@ -88,7 +89,9 @@ const InteractiveGoogleCalendar = ({
   hideCreateEvent = false,
   hideViewToggle = false,
   assignedClassesOnly = true,
+  showBackButton = true,
 }) => {
+  const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -227,6 +230,14 @@ const InteractiveGoogleCalendar = ({
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
         <div className="flex items-center gap-3">
+          {window.location.pathname.includes('/calendar') && (
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#0C4A86] px-3.5 py-1 text-xs font-black text-white hover:bg-black transition-all"
+            >
+              ← Back
+            </button>
+          )}
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0C4A86] text-white shadow-xs">
             <CalendarIcon className="h-5 w-5" />
           </div>

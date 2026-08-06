@@ -325,9 +325,9 @@ const StudentAttendance = ({ userId }) => {
             <p className="text-xs font-semibold text-slate-500">Official working days in {academicYear}</p>
           </div>
 
-          {/* Card 2: Total Recording Days */}
+          {/* Card 2: Total Recorded Days */}
           <div className="rounded-2xl border border-sky-200 bg-sky-50/50 p-4 space-y-1">
-            <p className="text-[11px] font-extrabold uppercase tracking-wider text-sky-800">Total Recording Days</p>
+            <p className="text-[11px] font-extrabold uppercase tracking-wider text-sky-800">Total Recorded Days</p>
             <p className="text-3xl font-black text-[#0C4A86]">{yearStats.totalRecordingDays} Days</p>
             <p className="text-xs font-semibold text-sky-700">Attendance actually recorded so far</p>
           </div>
@@ -443,7 +443,7 @@ const StudentAttendance = ({ userId }) => {
             <span className="text-lg font-black text-slate-800">{totalWorkingDaysMonthly}</span>
           </div>
           <div className="bg-sky-50 p-3 rounded-2xl border border-sky-200">
-            <span className="text-sky-800 font-bold block text-[10px] uppercase">Recording Days</span>
+            <span className="text-sky-800 font-bold block text-[10px] uppercase">Recorded Days</span>
             <span className="text-lg font-black text-[#0C4A86]">{recordingDaysMonthly}</span>
           </div>
           <div className="bg-emerald-50 p-3 rounded-2xl border border-emerald-200">

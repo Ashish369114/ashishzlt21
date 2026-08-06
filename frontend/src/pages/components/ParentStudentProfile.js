@@ -33,7 +33,7 @@ const ParentStudentProfile = ({ user, students = [], selectedStudentId, student 
         <div className="space-y-1">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => navigate('/dashboard')}
               className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1 text-xs font-black text-white hover:bg-white hover:text-[#0C4A86] transition-all"
             >
               ← Back
