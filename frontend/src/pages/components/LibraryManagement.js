@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { libraryService, studentService } from '../../services/api';
 import { demoLibraryBooks, demoStudents } from '../../utils/demoData';
+import { resolveStudentName } from '../../services/syncService';
 import '../../styles/ManagementStyles.css';
 import { 
   Bell, MoreVertical, BookOpen, Clock, AlertCircle, QrCode, Scan, 
@@ -75,24 +76,82 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
   const [collectFineModalFor, setCollectFineModalFor] = useState(null);
   const [finePaymentMethod, setFinePaymentMethod] = useState('Cash');
 
-  const getBorrowStudentsList = () => {
-    const indianFirstNames = ['Aarav', 'Ananya', 'Vihaan', 'Diya', 'Aditya', 'Aadhya', 'Sai', 'Pari', 'Reyansh', 'Anika', 'Arjun', 'Navya', 'Vivaan', 'Avani', 'Ayaan', 'Myra', 'Ishaan', 'Kavya', 'Dhruv', 'Prisha', 'Kabir', 'Riya', 'Rohan', 'Shreya'];
-    const indianLastNames = ['Sharma', 'Verma', 'Gupta', 'Singh', 'Patel', 'Reddy', 'Joshi', 'Chawla', 'Mehta', 'Nair', 'Iyer', 'Kumar', 'Das', 'Mishra', 'Prasad', 'Kapoor'];
+  // Unified Full Student List
+  const fullStudentsList = useMemo(() => {
+    const rawLoaded = (students && students.length > 0) ? students : (demoStudents || []);
+    const loaded = Array.isArray(rawLoaded[0]) ? rawLoaded.flat() : rawLoaded;
     
-    const gradeNum = parseInt(borrowGrade.replace(/\D/g, '') || '1', 10);
-    const secCode = borrowSection.charCodeAt(borrowSection.length - 1) || 65;
-    const seed = gradeNum * 37 + secCode * 13;
+    if (loaded && loaded.length > 0) {
+      return loaded.map((s, idx) => {
+        const rawName = resolveStudentName(s, loaded, idx);
+        let g = String(s.grade || s.class?.grade || s.classGrade || '1');
+        if (!g.toLowerCase().startsWith('grade')) g = `Grade ${g}`;
+        let sec = String(s.section || s.class?.section || 'A');
+        if (!sec.toLowerCase().startsWith('section')) sec = `Section ${sec}`;
+        return {
+          id: s._id || s.id || s.studentId || `STU-${1000 + idx}`,
+          name: rawName,
+          grade: g,
+          section: sec,
+          rollNo: s.rollNumber || s.rollNo || `${g.replace(/\D/g, '')}${sec.slice(-1)}${String(idx + 1).padStart(2, '0')}`
+        };
+      });
+    }
 
-    return Array.from({ length: 8 }, (_, idx) => {
-      const fn = indianFirstNames[(seed + idx * 3) % indianFirstNames.length];
-      const ln = indianLastNames[(seed + idx * 5 + 1) % indianLastNames.length];
-      const roll = `${gradeNum}${borrowSection.slice(-1)}${String(idx + 1).padStart(2, '0')}`;
-      return {
-        id: `std_${gradeNum}_${secCode}_${idx}`,
-        name: `${fn} ${ln}`,
-        roll: roll
-      };
-    });
+    // Fallback: authentic names list
+    const fallbackNames = [
+      'Aarav Sharma', 'Ananya Verma', 'Rohan Gupta', 'Priya Singh', 'Kabir Patel',
+      'Diya Reddy', 'Vihaan Joshi', 'Ishita Chawla', 'Arjun Mehta', 'Sanya Nair',
+      'Aditya Iyer', 'Meera Kumar', 'Dev Das', 'Kavya Mishra', 'Vivaan Choudhury',
+      'Anushka Prasad', 'Reyansh Goel', 'Riya Sen', 'Ayaan Tripathi', 'Tara Dubey'
+    ];
+    const list = [];
+    let count = 1001;
+    let nameIdx = 0;
+    for (let g = 1; g <= 10; g++) {
+      for (const secCode of ['A', 'B', 'C']) {
+        for (let sIdx = 1; sIdx <= 4; sIdx++) {
+          const name = fallbackNames[nameIdx % fallbackNames.length];
+          nameIdx++;
+          list.push({
+            id: `STU-${count++}`,
+            name,
+            grade: `Grade ${g}`,
+            section: `Section ${secCode}`,
+            rollNo: `${g}${secCode}${String(sIdx).padStart(2, '0')}`
+          });
+        }
+      }
+    }
+    return list;
+  }, [students]);
+
+  const getBorrowStudentsList = () => {
+    const normGrade = borrowGrade.toLowerCase().startsWith('grade') ? borrowGrade : `Grade ${borrowGrade}`;
+    const normSec = borrowSection.toLowerCase().startsWith('section') ? borrowSection : `Section ${borrowSection}`;
+
+    const matched = fullStudentsList.filter(s => 
+      s.grade.toLowerCase() === normGrade.toLowerCase() &&
+      s.section.toLowerCase() === normSec.toLowerCase()
+    );
+
+    if (matched.length > 0) {
+      return matched.map(s => ({
+        id: s.id,
+        name: s.name,
+        roll: s.rollNo
+      }));
+    }
+
+    // Fallback if specific grade/sec has no matched records
+    const gradeNum = parseInt(borrowGrade.replace(/\D/g, '') || '1', 10);
+    const secLetter = borrowSection.slice(-1) || 'A';
+    return [
+      { id: `std_${gradeNum}${secLetter}_1`, name: 'Aarav Sharma', roll: `${gradeNum}${secLetter}01` },
+      { id: `std_${gradeNum}${secLetter}_2`, name: 'Ananya Verma', roll: `${gradeNum}${secLetter}02` },
+      { id: `std_${gradeNum}${secLetter}_3`, name: 'Rohan Gupta', roll: `${gradeNum}${secLetter}03` },
+      { id: `std_${gradeNum}${secLetter}_4`, name: 'Priya Singh', roll: `${gradeNum}${secLetter}04` }
+    ];
   };
 
   const handleConfirmCollectFine = (e) => {
