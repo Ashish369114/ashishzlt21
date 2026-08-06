@@ -313,12 +313,23 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
   const fetchBooks = async () => {
     try {
       setLoading(true);
+      const savedBooks = localStorage.getItem('library_books_list');
       const [libRes, stuRes] = await Promise.all([
         libraryService.getAll().catch(() => ({ data: [] })),
         studentService.getAll().catch(() => ({ data: [] }))
       ]);
-      const savedBooks = localStorage.getItem('library_books_list');
-      let fetchedBooks = (libRes.data && libRes.data.length > 0) ? libRes.data : (savedBooks ? JSON.parse(savedBooks) : demoLibraryBooks);
+
+      let fetchedBooks;
+      if (savedBooks) {
+        fetchedBooks = JSON.parse(savedBooks);
+      } else if (libRes.data && libRes.data.length > 0) {
+        fetchedBooks = libRes.data;
+        localStorage.setItem('library_books_list', JSON.stringify(fetchedBooks));
+      } else {
+        fetchedBooks = demoLibraryBooks;
+        localStorage.setItem('library_books_list', JSON.stringify(demoLibraryBooks));
+      }
+
       const fetchedStudents = (stuRes.data && stuRes.data.length > 0) ? stuRes.data : demoStudents;
       
       setBooks(fetchedBooks);
@@ -327,9 +338,6 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
       setAvailableBooks(avail);
       setStudents(fetchedStudents);
 
-      if (!savedBooks) {
-        localStorage.setItem('library_books_list', JSON.stringify(fetchedBooks));
-      }
       localStorage.setItem('library_stats', JSON.stringify({ total, available: avail, borrowed: total - avail }));
     } catch (err) {
       console.warn('Error fetching books, using demo/saved books:', err);
