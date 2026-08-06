@@ -251,28 +251,33 @@ const AccountantPendingFees = () => {
     return true;
   });
 
-  const filtered = !isSelectionMade ? [] : fees.filter((fee, idx) => {
-    const name = resolveStudentName(fee, students, idx);
+  const getStudentName = (fee) => {
+    // fee.studentName is directly set during mapping from demoStudents
+    if (fee.studentName) return fee.studentName;
+    // fallback: from nested student object
+    const s = fee.student;
+    if (s) {
+      if (s.firstName) return `${s.firstName} ${s.lastName || ''}`.trim();
+      if (s.userId?.firstName) return `${s.userId.firstName} ${s.userId.lastName || ''}`.trim();
+    }
+    // fallback to syncService resolver
+    return resolveStudentName(fee, students, 0) || 'Unknown';
+  };
+
+  const getFeeGrade = (fee) => String(fee.grade || fee.student?.grade || fee.student?.class?.grade || '');
+  const getFeeSection = (fee) => String(fee.section || fee.student?.section || fee.student?.class?.section || '').toUpperCase();
+
+  const filtered = !isSelectionMade ? [] : fees.filter((fee) => {
+    const name = getStudentName(fee);
     if (search && !name.toLowerCase().includes(search.toLowerCase())) return false;
     if (filterStatus && getStatus(fee) !== filterStatus) return false;
-    
-    if (selectedGrade) {
-      const g = fee.student?.grade || fee.grade || students[idx % students.length]?.grade;
-      if (String(g || '') !== String(selectedGrade)) return false;
-    }
-
-    if (selectedSection) {
-      const sec = fee.student?.section || fee.section || students[idx % students.length]?.section;
-      if (String(sec || '').toUpperCase() !== String(selectedSection).toUpperCase()) return false;
-    }
-
+    if (selectedGrade && getFeeGrade(fee) !== String(selectedGrade)) return false;
+    if (selectedSection && getFeeSection(fee) !== String(selectedSection).toUpperCase()) return false;
     if (selectedStudent && name.toLowerCase() !== selectedStudent.toLowerCase()) return false;
-
     if (selectedFeeType) {
       const desc = (fee.description || '').toLowerCase();
       if (!desc.includes(selectedFeeType.toLowerCase())) return false;
     }
-
     return true;
   });
 
@@ -360,8 +365,8 @@ const AccountantPendingFees = () => {
         >
           <option value="">Select Student</option>
           {filteredStudentsForDropdown.map((s, idx) => {
-            const sName = `${s.firstName || 'Student'} ${s.lastName || idx + 1}`;
-            return <option key={s._id || idx} value={sName}>{sName}</option>;
+            const sName = `${s.firstName || 'Student'} ${s.lastName || ''}`.trim();
+            return <option key={s._id || `std_${idx}`} value={sName}>{sName}</option>;
           })}
         </select>
 
@@ -486,7 +491,7 @@ const AccountantPendingFees = () => {
                     const paid    = Number(fee.paidAmount || 0);
                     const balance = Math.max(amount - paid, 0);
                     const status  = getStatus(fee);
-                    const studentName = resolveStudentName(fee, students, i);
+                    const studentName = getStudentName(fee);
 
                     return (
                       <tr key={fee._id || i} style={{ borderBottom: '1px solid #f1f5f9' }}>
