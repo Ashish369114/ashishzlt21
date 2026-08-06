@@ -873,11 +873,6 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
       {activeTab === 'dashboard' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
-
-
-          {/* 2-Column Calendar & Upcoming Events Section */}
-          <CalendarAndEventsSection />
-
           {/* 4 Key Summary Widgets */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '18px' }}>
             
@@ -937,6 +932,9 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
               </div>
             </div>
           </div>
+
+          {/* 2-Column Calendar & Upcoming Events Section */}
+          <CalendarAndEventsSection />
 
           {/* Quick Actions & Daily Insights Section */}
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
