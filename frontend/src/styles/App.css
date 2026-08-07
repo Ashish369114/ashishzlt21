@@ -219,22 +219,22 @@ body {
 .nav-menu a {
   color: #0F172A !important;
   text-decoration: none !important;
-  padding: 12px 16px !important;
+  padding: 10px 12px !important;
   border-radius: 16px !important;
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
   justify-content: flex-start !important;
-  gap: 12px !important;
+  gap: 10px !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   background: #FFFFFF !important;
   border: 1.5px solid #E2E8F0 !important;
-  font-size: 0.9rem !important;
+  font-size: 0.84rem !important;
   font-weight: 700 !important;
   width: 100% !important;
   box-sizing: border-box !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02) !important;
-  white-space: nowrap !important;
+  overflow: hidden !important;
 }
 
 .nav-menu a svg {
@@ -248,6 +248,11 @@ body {
   display: inline-block !important;
   line-height: 1.2 !important;
   white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+  flex: 1 !important;
+  min-width: 0 !important;
 }
 
 .nav-menu a:hover {
@@ -272,10 +277,6 @@ body {
 .nav-menu a.active svg {
   color: #0096DA !important;
   stroke: #0096DA !important;
-}
-
-.nav-menu a.active svg {
-  color: #ffffff !important;
 }
 
 .logout-btn {
