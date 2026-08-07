@@ -180,7 +180,7 @@ const EmployeeManagement = () => {
       employeeType: employee.employeeType || 'staff',
       designation: employee.designation || '',
       dateOfJoining: employee.dateOfJoining ? employee.dateOfJoining.split('T')[0] : '',
-      employeeStatus: employee.status === 'terminated' || employee.status === 'inactive' ? 'Terminated' : employee.inNoticePeriod ? 'Serving Notice Period' : 'Working',
+      employeeStatus: employee.employeeStatus || (employee.status === 'Left' || employee.status === 'terminated' || employee.status === 'inactive' ? 'Left' : employee.inNoticePeriod || employee.status === 'Notice Period' ? 'Serving Notice Period' : 'Working'),
       salary: {
         baseSalary: employee.salary?.baseSalary || 0,
         allowances: employee.salary?.allowances || {},
@@ -212,8 +212,9 @@ const EmployeeManagement = () => {
       const employeePayload = {
         ...newEmployee,
         school: newEmployee.school || schools[0]?._id,
-        status: newEmployee.employeeStatus === 'Terminated' ? 'terminated' : 'active',
+        status: newEmployee.employeeStatus === 'Left' || newEmployee.employeeStatus === 'Terminated' ? 'Left' : newEmployee.employeeStatus === 'Serving Notice Period' ? 'Notice Period' : 'active',
         inNoticePeriod: newEmployee.employeeStatus === 'Serving Notice Period',
+        employeeStatus: newEmployee.employeeStatus,
       };
       delete employeePayload.employeeStatus;
       let response;
@@ -567,6 +568,7 @@ const EmployeeManagement = () => {
                 >
                   <option value="Working">Working</option>
                   <option value="Serving Notice Period">Serving Notice Period</option>
+                  <option value="Left">Left</option>
                   <option value="Terminated">Terminated</option>
                 </select>
                 {selectedTypeFilter === 'teaching' && (
@@ -702,7 +704,7 @@ const EmployeeManagement = () => {
                         <th style={{ whiteSpace: 'nowrap' }}>Type</th>
                         {canViewSalary && <th style={{ whiteSpace: 'nowrap' }}>Base Salary</th>}
                         <th style={{ whiteSpace: 'nowrap' }}>Joining Date</th>
-                        <th style={{ whiteSpace: 'nowrap' }}>Remarks</th>
+                        <th style={{ whiteSpace: 'nowrap' }}>Remarks / Status</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -721,14 +723,14 @@ const EmployeeManagement = () => {
                           {canViewSalary && <td>{formatCurrency(employee.salary?.baseSalary || 0)}</td>}
                           <td>{formatJoiningDate(employee.dateOfJoining)}</td>
                           <td>
-                            {employee.status === 'terminated' || employee.status === 'inactive' ? (
-                               <span style={{ color: '#ef4444', fontWeight: '500', padding: '4px 8px', background: '#fee2e2', borderRadius: '4px', fontSize: '0.85rem' }}>Terminated</span>
-                            ) : employee.inNoticePeriod ? (
-                              <span style={{ color: '#d97706', fontWeight: '500', padding: '4px 8px', background: '#fef3c7', borderRadius: '4px', fontSize: '0.85rem' }}>Serving Notice Period</span>
+                            {employee.status === 'Left' || employee.status === 'terminated' || employee.status === 'inactive' || employee.employeeStatus === 'Left' || employee.employeeStatus === 'Terminated' ? (
+                               <span style={{ color: '#ef4444', fontWeight: '600', padding: '4px 10px', background: '#fee2e2', borderRadius: '6px', fontSize: '0.82rem' }}>Left</span>
+                            ) : employee.inNoticePeriod || employee.status === 'Notice Period' || employee.employeeStatus === 'Serving Notice Period' || employee.employeeStatus === 'Notice Period' ? (
+                              <span style={{ color: '#d97706', fontWeight: '600', padding: '4px 10px', background: '#fef3c7', borderRadius: '6px', fontSize: '0.82rem' }}>Serving Notice Period</span>
                             ) : employee.remarks ? (
                               <span style={{ color: '#4b5563', fontSize: '0.85rem' }}>{employee.remarks}</span>
                             ) : (
-                              <span style={{ color: '#059669', fontWeight: '500', padding: '4px 8px', background: '#d1fae5', borderRadius: '4px', fontSize: '0.85rem' }}>Working</span>
+                              <span style={{ color: '#059669', fontWeight: '600', padding: '4px 10px', background: '#d1fae5', borderRadius: '6px', fontSize: '0.82rem' }}>Working</span>
                             )}
                           </td>
                         </tr>

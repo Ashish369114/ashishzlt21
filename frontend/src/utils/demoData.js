@@ -75,6 +75,21 @@ export const demoEmployees = demoClasses.map((cls, cIdx) => {
   const joinMonth = String((cIdx % 12) + 1).padStart(2, '0');
   const joinDay = String((cIdx % 25) + 1).padStart(2, '0');
 
+  // Status distribution: 3 Serving Notice Period, 2 Left, rest Working/Active
+  let status = 'Active';
+  let employeeStatus = 'Working';
+  let inNoticePeriod = false;
+
+  if (cIdx === 3 || cIdx === 8 || cIdx === 14) {
+    status = 'Notice Period';
+    employeeStatus = 'Serving Notice Period';
+    inNoticePeriod = true;
+  } else if (cIdx === 5 || cIdx === 11) {
+    status = 'Left';
+    employeeStatus = 'Left';
+    inNoticePeriod = false;
+  }
+
   return {
     _id: `emp_${cIdx + 1}`,
     employeeId: `EMP-${100 + cIdx + 1}`,
@@ -86,7 +101,9 @@ export const demoEmployees = demoClasses.map((cls, cIdx) => {
     email: `${fn.toLowerCase()}.${ln.toLowerCase()}@school.com`,
     phone: `9876500${String(100 + cIdx)}`,
     salary: 45000 + (cIdx * 1000),
-    status: 'Active',
+    status: status,
+    employeeStatus: employeeStatus,
+    inNoticePeriod: inNoticePeriod,
     dateOfJoining: `${joinYear}-${joinMonth}-${joinDay}`,
     assignedClasses: [cls]
   };
