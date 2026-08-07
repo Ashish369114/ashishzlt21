@@ -13,6 +13,7 @@ import ReportCardModal from '../../components/common/ReportCardModal';
 
 import { academicExamTypes, getExamTypeById } from '../../utils/academicExamConfig';
 import { schoolDataService, assignedTeacherClasses } from '../../services/schoolDataStore';
+import { attendanceService } from '../../services/api';
 
 const TeacherClassesPage = ({ user }) => {
   const navigate = useNavigate();
@@ -67,9 +68,24 @@ const TeacherClassesPage = ({ user }) => {
   };
 
   // "Save Attendance" Action
-  const handleSaveAttendance = (e) => {
+  const handleSaveAttendance = async (e) => {
     if (e) e.preventDefault();
     schoolDataService.saveAttendanceRecord(selectedClassId, attendanceDate, attendanceRecords);
+    
+    try {
+      const promises = Object.entries(attendanceRecords).map(([stId, status]) => {
+        return attendanceService.mark({
+          student: stId,
+          class: selectedClassId,
+          date: attendanceDate,
+          status: status || 'Present',
+        }).catch((err) => console.warn('Attendance API sync notice:', err?.message || err));
+      });
+      await Promise.all(promises);
+    } catch (err) {
+      console.warn('Attendance sync warn:', err);
+    }
+
     setIsAttendanceSaved(true);
     const msg = 'Attendance saved successfully.';
     setAttendanceSuccessMsg(msg);
