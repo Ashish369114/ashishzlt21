@@ -434,10 +434,7 @@ const AttendanceManagement = () => {
                 marginBottom: '28px'
               }}>
                 <ModernKPICard title="Total Days" value={daysInMonth} icon="📅" iconBg="#F0F9FF" trend="↑ Month" trendText="calendar days" />
-                <ModernKPICard title="Working Days" value={totalWorkDays} icon="🏢" iconBg="#EEF2FF" trend="↑ Active" trendText="duty days" />
-                <ModernKPICard title="Avg Present Days" value={staffPresentAvg} icon="✅" iconBg="#ECFDF5" trend="↑ 94%" trendText="on duty" />
-                <ModernKPICard title="Avg Absent Days" value={staffAbsentAvg} icon="❌" iconBg="#FEF2F2" trend="↓ 6%" trendText="on leave" />
-                <ModernKPICard title="Staff Attendance Rate" value={`${staffAttPct}%`} icon="📈" iconBg="#EFF6FF" trend="↑ 1.2%" trendText="vs last month" />
+                <ModernKPICard title="Total Working Days" value={totalWorkDays} icon="🏢" iconBg="#EEF2FF" trend="↑ Active" trendText="duty days" />
               </div>
 
               <div style={{ overflowX: 'auto', background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
@@ -450,7 +447,6 @@ const AttendanceManagement = () => {
                       {daysArray.map(d => <th key={d} style={{ padding: '12px 6px', fontSize: '0.8rem', minWidth: '28px', color: '#64748b' }}>{d}</th>)}
                       <th style={{ padding: '12px 10px', borderLeft: '1px solid #cbd5e1', color: '#166534', fontSize: '0.85rem' }}>P</th>
                       <th style={{ padding: '12px 10px', color: '#991b1b', fontSize: '0.85rem' }}>A</th>
-                      <th style={{ padding: '12px 10px', color: '#1d4ed8', fontSize: '0.85rem' }}>%</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -492,8 +488,6 @@ const AttendanceManagement = () => {
                         );
                       });
 
-                      const staffPct = (pCount + aCount) > 0 ? ((pCount / (pCount + aCount)) * 100).toFixed(1) : '100.0';
-
                       return (
                         <tr key={st._id || st.id || idx}>
                           <td style={{ padding: '12px 16px', position: 'sticky', left: 0, background: '#fff', zIndex: 1, borderRight: '2px solid #cbd5e1', borderBottom: '1px solid #e2e8f0', textAlign: 'left', whiteSpace: 'nowrap' }}>
@@ -503,7 +497,6 @@ const AttendanceManagement = () => {
                           {staffDays}
                           <td style={{ padding: '12px 10px', borderLeft: '2px solid #cbd5e1', borderBottom: '1px solid #e2e8f0', fontWeight: '600', color: '#166534' }}>{pCount}</td>
                           <td style={{ padding: '12px 10px', borderBottom: '1px solid #e2e8f0', fontWeight: '600', color: '#991b1b' }}>{aCount}</td>
-                          <td style={{ padding: '12px 10px', borderBottom: '1px solid #e2e8f0', fontWeight: 'bold', color: '#1d4ed8' }}>{staffPct}%</td>
                         </tr>
                       );
                     })}
