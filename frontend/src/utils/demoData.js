@@ -11,54 +11,72 @@ export const demoClasses = Array.from({ length: 10 }, (_, i) => {
   }));
 }).flat();
 
-// First & Last Names lists for realistic student, parent & teacher names
+// First & Last Names lists for canonical student & parent names across all portals
 const firstNames = [
-  'Aarav', 'Ananya', 'Rohan', 'Priya', 'Kabir', 'Diya', 'Vihaan', 'Ishita', 'Arjun', 'Sanya',
-  'Aditya', 'Meera', 'Dev', 'Kavya', 'Vivaan', 'Anushka', 'Reyansh', 'Riya', 'Ayaan', 'Tara',
-  'Karthik', 'Nisha', 'Amit', 'Deepa', 'Sanjay', 'Ritu', 'Vijay', 'Kiran', 'Alok', 'Shweta',
-  'Manoj', 'Anjali', 'Sunil', 'Kavita', 'Pradeep', 'Pooja', 'Rakesh', 'Jyoti', 'Harish', 'Nidhi'
+  'Rohan', 'Ananya', 'Aarav', 'Ishita', 'Kabir', 'Diya', 'Vihaan', 'Siddharth', 'Riya', 'Karan',
+  'Neha', 'Rahul', 'Tanvi', 'Aditya', 'Meera', 'Arjun', 'Pooja', 'Vikram', 'Anushka', 'Devansh',
+  'Sneha', 'Harsh', 'Ritu', 'Kunal', 'Sanjana', 'Yash', 'Preeti', 'Gautam', 'Simran', 'Nikhil'
 ];
 
 const lastNames = [
-  'Sharma', 'Verma', 'Gupta', 'Singh', 'Patel', 'Reddy', 'Joshi', 'Chawla', 'Mehta', 'Nair',
-  'Iyer', 'Kumar', 'Das', 'Mishra', 'Choudhury', 'Prasad', 'Goel', 'Sen', 'Tripathi', 'Dubey',
-  'Saxena', 'Pandey', 'Bose', 'Gill', 'Malhotra', 'Kapoor', 'Roy', 'Jadhav', 'Kulkarni', 'Deshmukh'
+  'Verma', 'Sharma', 'Singh', 'Patel', 'Mehta', 'Kapoor', 'Joshi', 'Rao', 'Sen', 'Nair',
+  'Deshmukh', 'Gupta', 'Kulkarni', 'Roy', 'Reddy', 'Bhatt', 'Malhotra', 'Saxena', 'Pandey', 'Iyer',
+  'Jain', 'Ahuja', 'Das', 'Agrawal', 'Chowdary', 'Pillai', 'Kaur', 'Saxena', 'Bhatia', 'Menon'
 ];
 
-// 2. Generate 150 Students (5 students for each of the 30 classes)
-export const demoStudents = demoClasses.map((cls, cIdx) => {
-  return Array.from({ length: 5 }, (_, sIdx) => {
-    const globalIdx = cIdx * 5 + sIdx;
-    const fn = firstNames[globalIdx % firstNames.length];
-    const ln = lastNames[(globalIdx + 2) % lastNames.length];
-    const pFn = firstNames[(globalIdx + 5) % firstNames.length];
-    const pLn = ln;
-    const rollNo = `${cls.grade}${cls.section}${String(sIdx + 1).padStart(2, '0')}`;
+// Sample Date of Birth helper to generate realistic birthdays
+const getSampleDob = (index) => {
+  const today = new Date();
+  const month = (today.getMonth() + (index % 3)) % 12;
+  const day = index % 5 === 0 ? today.getDate() : ((today.getDate() + index * 3) % 28) + 1;
+  const year = 2011 + (index % 3);
+  return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+};
+
+// 2. Generate Students for each of the 30 classes (in 100% sync with Teacher & Parent views)
+export const demoStudents = demoClasses.map((cls) => {
+  const gNum = parseInt(cls.grade, 10);
+  const secOffset = cls.section === 'A' ? 1 : cls.section === 'B' ? 31 : 61;
+  const baseRoll = gNum * 100 + secOffset;
+
+  return Array.from({ length: 15 }, (_, i) => {
+    const fn = firstNames[i % firstNames.length];
+    const ln = lastNames[(i * 3 + 1) % lastNames.length];
+    const rollNo = `${baseRoll + i}`;
+    const admNo = `ADM-2026-${baseRoll + i}`;
+    const pName = `Suresh ${ln}`;
+    const sPhone = `+91 98765 ${10000 + i}`;
+    const pPhone = `+91 98765 ${20000 + i}`;
+    const stdId = `st_${cls.grade.replace(/\s+/g, '')}_${cls.section}_${i + 1}`;
+    const dob = getSampleDob(i);
 
     return {
-      _id: `std_${cls.grade}_${cls.section.toLowerCase()}_${sIdx + 1}`,
-      studentId: `STD-${1000 + globalIdx + 1}`,
+      _id: stdId,
+      studentId: admNo,
+      admissionNo: admNo,
       firstName: fn,
       lastName: ln,
+      name: `${fn} ${ln}`,
       userId: { 
-        _id: `u_std_${globalIdx + 1}`, 
+        _id: `u_${stdId}`, 
         firstName: fn, 
         lastName: ln, 
-        email: `${fn.toLowerCase()}.${ln.toLowerCase()}${globalIdx + 1}@school.com`,
-        phone: `98765${String(10000 + globalIdx)}`
+        email: `${fn.toLowerCase()}.${ln.toLowerCase()}@school.com`,
+        phone: sPhone
       },
       class: { _id: cls._id, grade: cls.grade, section: cls.section },
       grade: cls.grade,
       section: cls.section,
       rollNumber: rollNo,
-      gender: globalIdx % 2 === 0 ? 'Male' : 'Female',
-      dob: `201${Math.min(9, Math.floor(cIdx / 3))}-0${(globalIdx % 9) + 1}-15`,
-      email: `${fn.toLowerCase()}.${ln.toLowerCase()}${globalIdx + 1}@school.com`,
-      phone: `98765${String(10000 + globalIdx)}`,
-      parentName: `${pFn} ${pLn}`,
-      parentPhone: `98764${String(10000 + globalIdx)}`,
-      parent: { firstName: pFn, lastName: pLn, phone: `98764${String(10000 + globalIdx)}` },
-      parentId: { _id: `p_u_${globalIdx + 1}`, firstName: pFn, lastName: pLn, phone: `98764${String(10000 + globalIdx)}` },
+      rollNo: rollNo,
+      gender: i % 2 === 0 ? 'Male' : 'Female',
+      dob: dob,
+      email: `${fn.toLowerCase()}.${ln.toLowerCase()}@school.com`,
+      phone: sPhone,
+      parentName: pName,
+      parentPhone: pPhone,
+      parent: { firstName: 'Suresh', lastName: ln, phone: pPhone },
+      parentId: { _id: `p_${stdId}`, firstName: 'Suresh', lastName: ln, phone: pPhone },
       status: 'Active'
     };
   });
