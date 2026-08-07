@@ -870,18 +870,18 @@ const StudentManagement = () => {
                 <div className="form-divider">
                   <h4>Parent / Guardian Details</h4>
                   <p style={{ marginTop: '8px', color: '#6b7280' }}>
-                    If you have an existing parent account, supply the Parent Account ID here. To create a new parent account, fill the parent user details below; leaving Parent User ID blank will auto-generate a parent login.
+                    If the student already has a parent account registered, enter their Parent User ID or Email below to link them. Otherwise, complete the new parent details below to auto-create a parent account.
                   </p>
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Existing Parent Account ID</label>
+                    <label>Link Existing Parent Account (Optional)</label>
                     <input
                       type="text"
                       name="parentId"
                       value={formData.parentId}
                       onChange={handleInputChange}
-                      placeholder="Link an existing parent account by ObjectId"
+                      placeholder="Enter Parent User ID or Email"
                     />
                   </div>
                 </div>
