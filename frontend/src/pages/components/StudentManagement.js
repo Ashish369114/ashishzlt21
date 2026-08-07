@@ -957,7 +957,7 @@ const StudentManagement = () => {
       )}
 
       {/* Filter Dropdowns */}
-      <div style={{ padding: '14px 24px', background: '#f8fafc', borderBottom: '1px solid #EBF5FF', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '0' }}>
+      <div style={{ padding: '14px 24px', background: '#FAF6F0', borderBottom: '1px solid #EBF5FF', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '0' }}>
         <div style={{ flex: '1 1 180px' }}>
           <label style={{ fontSize: '0.78rem', fontWeight: '800', color: '#0C4A86', display: 'block', marginBottom: '4px' }}>Select Grade</label>
           <select
