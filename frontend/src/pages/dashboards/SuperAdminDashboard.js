@@ -3,6 +3,7 @@ import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
 import { classService, studentService } from '../../services/api';
 import { subscribeToDataChanges } from '../../services/syncService';
 import { demoStudents } from '../../utils/demoData';
+import TopBar from '../../components/dashboard/TopBar';
 import AdmissionManagement from '../components/AdmissionManagement';
 import EmployeeManagement from '../components/EmployeeManagement';
 import HostelManagement from '../components/HostelManagement';
@@ -159,87 +160,16 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
         </ul>
       </div>
 
-      <div className="main-content" style={{ background: '#FAF6F0', padding: 0 }}>
-        {/* Top Header */}
-        <div style={{
-          background: '#ffffff',
-          padding: '20px 32px',
-          borderBottom: '1px solid #BFDBFE',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          position: 'sticky',
-          top: 0,
-          zIndex: 10
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '7px 14px',
-                borderRadius: '50px',
-                background: '#EBF5FF',
-                color: '#0C4A86',
-                border: '1.5px solid #BFDBFE',
-                fontSize: '0.82rem',
-                fontWeight: '700',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <ArrowLeft size={16} /> Back
-            </button>
-            <div>
-              <h1 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '700', color: '#0C4A86' }}>Good Morning, {userName} 👋</h1>
-              <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#6B5B54' }}>Here's what's happening with your school today.</p>
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <span style={{ fontSize: '0.85rem', color: '#6B5B54', fontWeight: '500' }}>
-              {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
-            </span>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderLeft: '1px solid #BFDBFE', paddingLeft: '20px' }}>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0C4A86' }}>{userName}</div>
-                <div style={{ fontSize: '0.75rem', color: '#6B5B54', fontWeight: '500' }}>
-                  Super Admin
-                </div>
-              </div>
-
-              {/* Photo Upload Avatar Feature */}
-              <input type="file" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" className="hidden" style={{ display: 'none' }} />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                title="Click to upload profile photo"
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #0C4A86 0%, #0096DA 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#ffffff',
-                  fontWeight: '700',
-                  border: '2px solid #BFDBFE',
-                  cursor: 'pointer',
-                  overflow: 'hidden',
-                  position: 'relative'
-                }}
-              >
-                {profileImage ? (
-                  <img src={profileImage} alt="Admin" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                  <span>{user?.firstName?.[0] || 'A'}</span>
-                )}
-              </button>
-            </div>
-          </div>
+      <div className="main-content" style={{ background: '#FAF6F0', padding: '24px' }}>
+        {/* Sticky TopBar at the very top (matching Pic 1) */}
+        <div style={{ position: 'sticky', top: 0, zIndex: 20, marginBottom: '20px' }}>
+          <TopBar
+            userName={userName}
+            subject="Super Admin Panel"
+            onOpenNotifications={() => navigate('/dashboard/notices')}
+            onOpenMessages={() => navigate('/dashboard/notices')}
+            onOpenSettings={() => navigate('/dashboard/settings')}
+          />
         </div>
 
         <Routes>

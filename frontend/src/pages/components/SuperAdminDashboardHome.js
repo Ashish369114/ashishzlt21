@@ -152,17 +152,66 @@ const SuperAdminDashboardHome = ({ stats }) => {
 
   return (
     <div className="saas-dashboard-container">
-      <div style={{ position: 'sticky', top: 0, zIndex: 20, marginBottom: '20px' }}>
-        <TopBar
-          userName="Super Administrator"
-          subject="System Control Panel"
-        />
+      {/* 1. Welcome Header Banner (Matching Pic 1 layout) */}
+      <div style={{
+        background: '#ffffff',
+        borderRadius: '20px',
+        padding: '20px 28px',
+        border: '1px solid #BFDBFE',
+        boxShadow: '0 4px 12px rgba(12, 74, 134, 0.05)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: '24px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <button
+            type="button"
+            onClick={() => window.history.back()}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 16px',
+              borderRadius: '50px',
+              background: '#EBF5FF',
+              color: '#0C4A86',
+              border: '1.5px solid #BFDBFE',
+              fontSize: '0.85rem',
+              fontWeight: '700',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            ← Back
+          </button>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <h1 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '800', color: '#0C4A86' }}>
+                Good Morning, Rajesh Sharma 👋
+              </h1>
+              <span style={{
+                background: '#E0F2FE',
+                color: '#0369A1',
+                padding: '3px 10px',
+                borderRadius: '50px',
+                fontSize: '0.75rem',
+                fontWeight: '700'
+              }}>
+                Super Admin
+              </span>
+            </div>
+            <p style={{ margin: '4px 0 0', fontSize: '0.88rem', color: '#64748B' }}>
+              Here's what's happening with your school today.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* 2. KPI Cards */}
       <div className="kpi-grid">
         {/* KPI Cards */}
-        <KPICard title="Total Students" value={stats?.totalStudents || '300'} icon={Users} trend="12%" trendUp={true} color="#0C4A86" />
+        <KPICard title="Total Students" value={stats?.totalStudents && Number(stats.totalStudents) >= 300 ? stats.totalStudents : '300'} icon={Users} trend="12%" trendUp={true} color="#0C4A86" />
         <KPICard title="Teaching Staff" value={stats?.totalTeachers || '30'} icon={UserCheck} trend="4%" trendUp={true} color="#0C4A86" />
         <KPICard title="Non-Teaching Staff" value={'28'} icon={Users} trend="1%" trendUp={true} color="#0C4A86" />
         <KPICard title="Fees (Collected / Pending)" value={`${stats?.collectedFees ? formatCurrency(stats.collectedFees * 100) : formatCurrency(45200)} / ${stats?.pendingFees ? formatCurrency(stats.pendingFees * 100) : formatCurrency(12400)}`} icon={CreditCard} trend="8%" trendUp={true} color="#10b981" />

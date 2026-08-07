@@ -598,7 +598,11 @@ const StudentManagement = () => {
     }
   }
 
-  // Assign 100% unique sequential roll numbers (G1-001, G1-002, G1-003... G1-010) for each class section
+  // Enforce max 10 members per class section and assign unique sequential roll numbers (G1-001, G1-002... G1-010)
+  if (!selectedStudentId) {
+    visibleStudents = visibleStudents.slice(0, 10);
+  }
+
   visibleStudents = visibleStudents.map((st, idx) => {
     const grade = st?.grade || st?.class?.grade || selectedGrade || '1';
     const gNum = String(grade).replace(/\D/g, '') || '1';
