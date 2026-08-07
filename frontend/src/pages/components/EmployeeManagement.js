@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import io from 'socket.io-client';
 import api, { schoolService, classService, studentService, complaintService } from '../../services/api';
 import '../../styles/ManagementStyles.css';
@@ -8,6 +8,7 @@ import { demoEmployees, demoClasses } from '../../utils/demoData';
 
 const EmployeeManagement = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [employees, setEmployees] = useState([]);
   const userRole = localStorage.getItem('role');
   const isPrincipal = userRole === 'principal';
@@ -73,6 +74,14 @@ const EmployeeManagement = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const typeParam = params.get('type');
+    if (typeParam) {
+      setSelectedTypeFilter(typeParam);
+    }
+  }, [location]);
 
   const fetchAllComplaints = async () => {
     try {
