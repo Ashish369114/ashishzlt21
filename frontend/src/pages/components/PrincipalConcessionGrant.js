@@ -7,14 +7,24 @@ const rupee = formatCurrency;
 
 // ── Grant Modal ───────────────────────────────────────────────────────────────
 const GrantModal = ({ students, fees, onClose, onGranted }) => {
-  const [studentId,  setStudentId]  = useState('');
-  const [feeId,      setFeeId]      = useState('');
-  const [amount,     setAmount]     = useState('');
-  const [reason,     setReason]     = useState('');
-  const [saving,     setSaving]     = useState(false);
-  const [error,      setError]      = useState('');
-  const [done,       setDone]       = useState(false);
-  const [resultMsg,  setResultMsg]  = useState('');
+  const [selectedGrade,   setSelectedGrade]   = useState('');
+  const [selectedSection, setSelectedSection] = useState('');
+  const [studentId,       setStudentId]       = useState('');
+  const [feeId,           setFeeId]           = useState('');
+  const [amount,          setAmount]          = useState('');
+  const [reason,          setReason]          = useState('');
+  const [saving,          setSaving]          = useState(false);
+  const [error,           setError]           = useState('');
+  const [done,            setDone]            = useState(false);
+  const [resultMsg,       setResultMsg]       = useState('');
+
+  const filteredStudents = students.filter(s => {
+    const stdGrade = String(s.grade || s.class?.grade || '');
+    const stdSection = String(s.section || s.class?.section || '');
+    const matchG = !selectedGrade || stdGrade === String(selectedGrade);
+    const matchS = !selectedSection || stdSection === String(selectedSection);
+    return matchG && matchS;
+  });
 
   const studentFees = fees.filter(f => {
     const stdId = f.student?._id || f.student?.id || f.student || f.studentId;
@@ -49,9 +59,9 @@ const GrantModal = ({ students, fees, onClose, onGranted }) => {
 
   return (
     <div style={ov}>
-      <div style={{ ...md, maxWidth: '500px' }}>
+      <div style={{ ...md, maxWidth: '520px' }}>
         <h3 style={{ margin: '0 0 4px', fontSize: '1.15rem' }}>🎁 Grant Fee Concession</h3>
-        <p style={{ color: '#6b7280', fontSize: '0.84rem', margin: '0 0 20px' }}>
+        <p style={{ color: '#6b7280', fontSize: '0.84rem', margin: '0 0 18px' }}>
           Concession is applied <strong>immediately</strong> — no approval required.
         </p>
 
@@ -66,15 +76,49 @@ const GrantModal = ({ students, fees, onClose, onGranted }) => {
           <>
             {error && <div style={{ color: '#b91c1c', background: '#fee2e2', padding: '8px 12px', borderRadius: '6px', marginBottom: '12px', fontWeight: 600, fontSize: '0.83rem' }}>{error}</div>}
 
+            {/* Grade & Section Filters */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
+              <div>
+                <label style={lbl}>Grade</label>
+                <select
+                  value={selectedGrade}
+                  onChange={e => { setSelectedGrade(e.target.value); setStudentId(''); setFeeId(''); }}
+                  style={inp}
+                >
+                  <option value="">All Grades (1-10)</option>
+                  {Array.from({ length: 10 }, (_, i) => String(i + 1)).map(g => (
+                    <option key={g} value={g}>Grade {g}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={lbl}>Section</label>
+                <select
+                  value={selectedSection}
+                  onChange={e => { setSelectedSection(e.target.value); setStudentId(''); setFeeId(''); }}
+                  style={inp}
+                >
+                  <option value="">All Sections (A-C)</option>
+                  {['A', 'B', 'C'].map(sec => (
+                    <option key={sec} value={sec}>Section {sec}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             <label style={lbl}>Student *</label>
             <select value={studentId} onChange={e => { setStudentId(e.target.value); setFeeId(''); }}
               style={{ ...inp, marginBottom: '12px' }}>
               <option value="">— Select student —</option>
-              {students.map(s => (
+              {filteredStudents.map(s => (
                 <option key={s._id || s.id} value={s._id || s.id}>
-                  {s.firstName || s.name} {s.lastName || ''} (Grade {s.grade || '9'}{s.section ? `-${s.section}` : ''})
+                  {s.firstName || s.name} {s.lastName || ''} (Grade {s.grade || s.class?.grade || '9'}{s.section || s.class?.section ? `-${s.section || s.class?.section}` : ''})
                 </option>
               ))}
+              {filteredStudents.length === 0 && (
+                <option disabled>No students found for selected Grade & Section</option>
+              )}
             </select>
 
             <label style={lbl}>Fee Record (unpaid / partial) *</label>
