@@ -377,10 +377,8 @@ const AttendanceManagement = () => {
           const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
           let totalWorkDays = 0;
-          const today = new Date();
           for (let d = 1; d <= daysInMonth; d++) {
-            const tempDate = new Date(year, parseInt(selectedMonth || '2', 10) - 1, d);
-            if (tempDate > today) break;
+            const tempDate = new Date(year, parseInt(selectedMonth || '8', 10) - 1, d);
             const day = tempDate.getDay();
             if (day !== 0 && !(day === 6 && d >= 8 && d <= 14)) {
               totalWorkDays++;
