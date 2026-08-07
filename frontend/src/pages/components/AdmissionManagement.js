@@ -130,7 +130,29 @@ const AdmissionManagement = () => {
 
   return (
     <div className="management-container">
-      <h1>Student Registration</h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+        <button
+          type="button"
+          onClick={() => window.history.back()}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '6px 14px',
+            borderRadius: '50px',
+            background: '#ffffff',
+            color: '#0C4A86',
+            border: '1px solid #BFDBFE',
+            fontSize: '0.8rem',
+            fontWeight: '800',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          ← Back
+        </button>
+        <h1 style={{ margin: 0 }}>Student Registration</h1>
+      </div>
 
       <form onSubmit={handleSubmitApplication} className="management-form">
         <h3>Add New Student</h3>

@@ -378,7 +378,29 @@ const HostelManagement = () => {
       {/* Header Title & Add Button */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '800', color: '#0C4A86' }}>Hostel Management & Resident Directory</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button
+              type="button"
+              onClick={() => window.history.back()}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                borderRadius: '50px',
+                background: '#f1f5f9',
+                color: '#0f172a',
+                border: '1px solid #cbd5e1',
+                fontSize: '0.8rem',
+                fontWeight: '800',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              ← Back
+            </button>
+            <h1 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '800', color: '#0C4A86' }}>Hostel Management & Resident Directory</h1>
+          </div>
           <p style={{ margin: '4px 0 0', fontSize: '0.88rem', color: '#64748b' }}>
             Manage Boys & Girls Hostel Blocks, Floor Maps (3 Floors), and Student Room Occupancy.
           </p>

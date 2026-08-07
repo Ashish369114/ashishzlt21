@@ -306,6 +306,29 @@ const AttendanceManagement = () => {
 
   return (
     <div className="attendance-management" style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
+        <button
+          type="button"
+          onClick={() => window.history.back()}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '8px 18px',
+            borderRadius: '50px',
+            background: '#f1f5f9',
+            color: '#0f172a',
+            border: '1px solid #cbd5e1',
+            fontSize: '0.85rem',
+            fontWeight: '800',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          ← Back
+        </button>
+        <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '800', color: '#0C4A86' }}>Attendance Management</h2>
+      </div>
       {/* Upper Tab Selection Bar */}
       <div style={{
         display: 'flex',

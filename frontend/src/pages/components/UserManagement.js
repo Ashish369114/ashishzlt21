@@ -106,8 +106,28 @@ const UserManagement = () => {
 
   return (
     <div className="card">
-      <div className="card-header">
-        <h2>👥 User Management</h2>
+      <div className="card-header" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <button
+          type="button"
+          onClick={() => window.history.back()}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '6px 14px',
+            borderRadius: '50px',
+            background: '#f1f5f9',
+            color: '#0f172a',
+            border: '1px solid #cbd5e1',
+            fontSize: '0.8rem',
+            fontWeight: '800',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          ← Back
+        </button>
+        <h2 style={{ margin: 0 }}>👥 User Management</h2>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}

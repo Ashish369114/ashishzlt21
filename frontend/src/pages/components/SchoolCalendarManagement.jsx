@@ -78,8 +78,17 @@ const SchoolCalendarManagement = () => {
       {/* Header Banner */}
       <div className="rounded-3xl bg-gradient-to-r from-[#0C4A86] to-[#0096DA] p-6 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3.5 py-1 text-xs font-bold text-white backdrop-blur-md mb-2">
-            <Calendar className="h-3.5 w-3.5 text-sky-200" /> Institution Academic Calendar
+          <div className="flex items-center gap-3 mb-2">
+            <button
+              type="button"
+              onClick={() => window.history.back()}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 text-xs font-bold text-white backdrop-blur-md border border-white/30 transition cursor-pointer"
+            >
+              ← Back
+            </button>
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3.5 py-1 text-xs font-bold text-white backdrop-blur-md">
+              <Calendar className="h-3.5 w-3.5 text-sky-200" /> Institution Academic Calendar
+            </div>
           </div>
           <h1 className="text-2xl font-black text-white">School Calendar & Event Schedule</h1>
           <p className="text-xs font-semibold text-sky-100">

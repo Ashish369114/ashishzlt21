@@ -736,7 +736,29 @@ const StudentManagement = () => {
       `}</style>
       <div className="card">
       <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2>👨‍🎓 {isAccountant ? 'Student Fee Management' : 'Student Management'}</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button
+            type="button"
+            onClick={() => window.history.back()}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 14px',
+              borderRadius: '50px',
+              background: '#f1f5f9',
+              color: '#0f172a',
+              border: '1px solid #cbd5e1',
+              fontSize: '0.8rem',
+              fontWeight: '800',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            ← Back
+          </button>
+          <h2 style={{ margin: 0 }}>👨‍🎓 {isAccountant ? 'Student Fee Management' : 'Student Management'}</h2>
+        </div>
         {!isAccountant && currentUser && ['super_admin', 'principal'].includes(currentUser.role) && (
           <button className="btn btn-primary" onClick={() => setShowForm(!showForm)} style={{ width: 'auto', marginTop: '0', padding: '10px 24px' }}>
             {showForm ? 'Cancel' : '➕ Add Student'}

@@ -93,9 +93,31 @@ const InventoryManagement = () => {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
         <div>
-          <h2 style={{ fontSize: '1.6rem', fontWeight: '800', color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Package size={26} color="#3b82f6" /> Inventory & Stock Management
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button
+              type="button"
+              onClick={() => window.history.back()}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                borderRadius: '50px',
+                background: '#f1f5f9',
+                color: '#0f172a',
+                border: '1px solid #cbd5e1',
+                fontSize: '0.8rem',
+                fontWeight: '800',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              ← Back
+            </button>
+            <h2 style={{ fontSize: '1.6rem', fontWeight: '800', color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Package size={26} color="#3b82f6" /> Inventory & Stock Management
+            </h2>
+          </div>
           <p style={{ color: '#64748b', margin: '4px 0 0 0', fontSize: '0.9rem' }}>
             Overview of school stock levels and issued items (Direct item issuance is managed by Administrative Officer).
           </p>
