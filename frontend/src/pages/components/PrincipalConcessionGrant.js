@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { concessionService, feeService, studentService } from '../../services/api';
 import { formatCurrency } from '../../utils/currencyFormatter';
 import { demoStudents } from '../../utils/demoData';
+import { resolveStudentName } from '../../services/syncService';
 
 const rupee = formatCurrency;
 
@@ -111,11 +112,16 @@ const GrantModal = ({ students, fees, onClose, onGranted }) => {
             <select value={studentId} onChange={e => { setStudentId(e.target.value); setFeeId(''); }}
               style={{ ...inp, marginBottom: '12px' }}>
               <option value="">— Select student —</option>
-              {filteredStudents.map(s => (
-                <option key={s._id || s.id} value={s._id || s.id}>
-                  {s.firstName || s.name} {s.lastName || ''} (Grade {s.grade || s.class?.grade || '9'}{s.section || s.class?.section ? `-${s.section || s.class?.section}` : ''})
-                </option>
-              ))}
+              {filteredStudents.map((s, idx) => {
+                const sName = resolveStudentName(s, students, idx);
+                const sGrade = s.grade || s.class?.grade || '9';
+                const sSec = s.section || s.class?.section || 'A';
+                return (
+                  <option key={s._id || s.id} value={s._id || s.id}>
+                    {sName} (Grade {sGrade}-{sSec})
+                  </option>
+                );
+              })}
               {filteredStudents.length === 0 && (
                 <option disabled>No students found for selected Grade & Section</option>
               )}
