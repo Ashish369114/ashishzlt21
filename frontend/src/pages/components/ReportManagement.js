@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api, { classService, studentService } from '../../services/api';
+import { demoStudents } from '../../utils/demoData';
 import '../../styles/ManagementStyles.css';
 
 const ReportManagement = () => {
@@ -34,21 +35,72 @@ const ReportManagement = () => {
 
   useEffect(() => {
     const fetchStudentsForClass = async () => {
-      if (!reportFilters.classId) {
+      if (!selectedGrade || !selectedSection) {
         setClassStudents([]);
         setSelectedStudent('');
         setReportFilters(prev => ({ ...prev, studentId: '' }));
         return;
       }
       try {
-        const response = await studentService.getByClass(reportFilters.classId);
-        setClassStudents(Array.isArray(response.data) ? response.data : []);
+        const response = await studentService.getAll().catch(() => ({ data: [] }));
+        const apiData = Array.isArray(response?.data) ? response.data : [];
+        let loadedStudents = [...apiData];
+
+        if (apiData.length < demoStudents.length) {
+          const existingIds = new Set(apiData.map(s => String(s._id || s.id)));
+          demoStudents.forEach(demoSt => {
+            if (!existingIds.has(String(demoSt._id))) {
+              loadedStudents.push(demoSt);
+            }
+          });
+        }
+
+        const filtered = loadedStudents.filter(st => {
+          const g = String(st.grade || st.class?.grade || '');
+          const s = String(st.section || st.class?.section || '');
+          return g === String(selectedGrade) && s === String(selectedSection);
+        }).slice(0, 10);
+
+        const gNum = String(selectedGrade).replace(/\D/g, '') || '1';
+        const formattedList = filtered.map((st, idx) => {
+          const seq = idx + 1;
+          const roll = `G${gNum}-${String(seq).padStart(3, '0')}`;
+          const firstName = st.firstName || st.userId?.firstName || 'Student';
+          const lastName = st.lastName || st.userId?.lastName || `${seq}`;
+          return {
+            ...st,
+            formattedRollNumber: roll,
+            displayName: `${firstName} ${lastName} (${roll})`
+          };
+        });
+
+        setClassStudents(formattedList);
       } catch (error) {
         console.error('Error fetching class students:', error);
+        const demoFiltered = demoStudents.filter(st => {
+          const g = String(st.grade || st.class?.grade || '');
+          const s = String(st.section || st.class?.section || '');
+          return g === String(selectedGrade) && s === String(selectedSection);
+        }).slice(0, 10);
+
+        const gNum = String(selectedGrade).replace(/\D/g, '') || '1';
+        const formattedList = demoFiltered.map((st, idx) => {
+          const seq = idx + 1;
+          const roll = `G${gNum}-${String(seq).padStart(3, '0')}`;
+          const firstName = st.firstName || st.userId?.firstName || 'Student';
+          const lastName = st.lastName || st.userId?.lastName || `${seq}`;
+          return {
+            ...st,
+            formattedRollNumber: roll,
+            displayName: `${firstName} ${lastName} (${roll})`
+          };
+        });
+        setClassStudents(formattedList);
       }
     };
+
     fetchStudentsForClass();
-  }, [reportFilters.classId]);
+  }, [selectedGrade, selectedSection]);
 
   useEffect(() => {
     if (!selectedGrade) {
@@ -269,7 +321,7 @@ const ReportManagement = () => {
           </select>
         </div>
 
-        {reportFilters.classId && (
+        {(selectedGrade && selectedSection) && (
           <select
             value={selectedStudent}
             onChange={e => {
@@ -280,8 +332,8 @@ const ReportManagement = () => {
           >
             <option value="">Select Student (Optional - All Students)</option>
             {classStudents.map(student => (
-              <option key={student._id} value={student._id}>
-                {student.userId?.firstName} {student.userId?.lastName} ({student.rollNumber || 'No Roll #'})
+              <option key={student._id || student.id} value={student._id || student.id}>
+                {student.displayName}
               </option>
             ))}
           </select>
