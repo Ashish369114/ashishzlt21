@@ -162,8 +162,8 @@ const SuperAdminDashboardHome = ({ stats }) => {
       {/* 2. KPI Cards */}
       <div className="kpi-grid">
         {/* KPI Cards */}
-        <KPICard title="Total Students" value={stats?.totalStudents || '1,245'} icon={Users} trend="12%" trendUp={true} color="#0C4A86" />
-        <KPICard title="Teaching Staff" value={stats?.totalTeachers || '84'} icon={UserCheck} trend="4%" trendUp={true} color="#0C4A86" />
+        <KPICard title="Total Students" value={stats?.totalStudents || '300'} icon={Users} trend="12%" trendUp={true} color="#0C4A86" />
+        <KPICard title="Teaching Staff" value={stats?.totalTeachers || '30'} icon={UserCheck} trend="4%" trendUp={true} color="#0C4A86" />
         <KPICard title="Non-Teaching Staff" value={'28'} icon={Users} trend="1%" trendUp={true} color="#0C4A86" />
         <KPICard title="Fees (Collected / Pending)" value={`${stats?.collectedFees ? formatCurrency(stats.collectedFees * 100) : formatCurrency(45200)} / ${stats?.pendingFees ? formatCurrency(stats.pendingFees * 100) : formatCurrency(12400)}`} icon={CreditCard} trend="8%" trendUp={true} color="#10b981" />
         <KPICard title="Today's Exams" value="4 Scheduled" icon={FileText} trend="Active" trendUp={true} color="#0C4A86" link="/dashboard/exams" />

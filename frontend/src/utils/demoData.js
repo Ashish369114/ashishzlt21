@@ -88,50 +88,112 @@ export const demoStudents = demoClasses.map((cls) => {
   });
 }).flat();
 
-// 3. Generate 30 Employees / Teachers
-export const demoEmployees = demoClasses.map((cls, cIdx) => {
-  const fn = firstNames[(cIdx + 10) % firstNames.length];
-  const ln = lastNames[(cIdx + 3) % lastNames.length];
-  const subjects = ['Mathematics', 'Science', 'English', 'Social Studies', 'Computer Science', 'Hindi', 'Telugu'];
-  const dept = cIdx % 2 === 0 ? 'Academics' : 'Administration';
-  const designation = cIdx <= 5 ? `Grade ${cls.grade} Class Teacher` : `Senior ${subjects[cIdx % subjects.length]} Faculty`;
-  const joinYear = 2020 + (cIdx % 4);
-  const joinMonth = String((cIdx % 12) + 1).padStart(2, '0');
-  const joinDay = String((cIdx % 25) + 1).padStart(2, '0');
+// 3. Generate 30 Teaching Staff & 28 Non-Teaching Staff (58 Total Employees)
+const teachingDesignations = [
+  'English Primary Teacher', 'Mathematics TGT', 'Kindergarten Teacher', 'Mathematics PGT',
+  'Physics PGT', 'Chemistry PGT', 'Science TGT', 'Nursery Teacher', 'Kindergarten Assistant',
+  'Biology PGT', 'Social Studies TGT', 'Computer Science PGT', 'Hindi TGT', 'Telugu TGT',
+  'Physical Education Teacher', 'Fine Arts Instructor', 'Music & Performing Arts Teacher',
+  'Environmental Science Teacher', 'Sanskrit Language Teacher', 'Primary School Head Teacher',
+  'Grade 1 Class Teacher', 'Grade 2 Class Teacher', 'Grade 3 Class Teacher', 'Grade 4 Class Teacher',
+  'Grade 5 Class Teacher', 'Grade 6 Class Teacher', 'Grade 7 Class Teacher', 'Grade 8 Class Teacher',
+  'Grade 9 Class Teacher', 'Grade 10 Class Teacher'
+];
 
-  // Status distribution: 3 Serving Notice Period, 2 Left, rest Working/Active
+const nonTeachingDesignations = [
+  'Accountant Clerk', 'Librarian', 'Administrative Officer', 'Senior Receptionist',
+  'IT Support Specialist', 'Office Assistant', 'Science Lab Assistant', 'Computer Lab Technician',
+  'Transport Manager', 'Head Security Guard', 'Girls Hostel Warden', 'Boys Hostel Warden',
+  'Facility Operations Manager', 'Student Counselor', 'School Nurse', 'Admissions Executive',
+  'Sports Equipment Curator', 'Canteen Supervisor', 'Store & Inventory Manager',
+  'Assistant Accountant', 'Digital Media Specialist', 'Campus Maintenance Supervisor',
+  'Records Clerk', 'Exam Cell Assistant', 'Security Supervisor', 'Senior Bus Fleet Officer',
+  'Sanitation Inspector', 'Front Desk Executive'
+];
+
+const generateTeachingEmployees = Array.from({ length: 30 }, (_, idx) => {
+  const fn = firstNames[(idx + 10) % firstNames.length];
+  const ln = lastNames[(idx + 3) % lastNames.length];
+  const designation = teachingDesignations[idx % teachingDesignations.length];
+  const joinYear = 2019 + (idx % 5);
+  const joinMonth = String((idx % 12) + 1).padStart(2, '0');
+  const joinDay = String((idx % 25) + 1).padStart(2, '0');
+
   let status = 'Active';
   let employeeStatus = 'Working';
   let inNoticePeriod = false;
 
-  if (cIdx === 3 || cIdx === 8 || cIdx === 14) {
+  if (idx === 7) {
     status = 'Notice Period';
     employeeStatus = 'Serving Notice Period';
     inNoticePeriod = true;
-  } else if (cIdx === 5 || cIdx === 11) {
+  } else if (idx === 8) {
     status = 'Left';
     employeeStatus = 'Left';
     inNoticePeriod = false;
   }
 
   return {
-    _id: `emp_${cIdx + 1}`,
-    employeeId: `EMP-${100 + cIdx + 1}`,
+    _id: `emp_t_${idx + 1}`,
+    employeeId: `EMP-T-${100 + idx + 1}`,
     firstName: fn,
     lastName: ln,
-    employeeType: cIdx % 4 === 0 ? 'Non-Teaching Staff' : 'teaching',
+    employeeType: 'teaching',
     designation: designation,
-    department: dept,
+    department: 'Academics',
     email: `${fn.toLowerCase()}.${ln.toLowerCase()}@school.com`,
-    phone: `9876500${String(100 + cIdx)}`,
-    salary: 45000 + (cIdx * 1000),
+    phone: `9876500${String(100 + idx)}`,
+    salary: 45000 + (idx * 1000),
     status: status,
     employeeStatus: employeeStatus,
     inNoticePeriod: inNoticePeriod,
     dateOfJoining: `${joinYear}-${joinMonth}-${joinDay}`,
-    assignedClasses: [cls]
+    assignedClasses: [demoClasses[idx % demoClasses.length]]
   };
 });
+
+const generateNonTeachingEmployees = Array.from({ length: 28 }, (_, idx) => {
+  const fn = firstNames[(idx + 25) % firstNames.length];
+  const ln = lastNames[(idx + 7) % lastNames.length];
+  const designation = nonTeachingDesignations[idx % nonTeachingDesignations.length];
+  const joinYear = 2018 + (idx % 6);
+  const joinMonth = String((idx % 12) + 1).padStart(2, '0');
+  const joinDay = String((idx % 25) + 1).padStart(2, '0');
+
+  let status = 'Active';
+  let employeeStatus = 'Working';
+  let inNoticePeriod = false;
+
+  if (idx === 5) {
+    status = 'Notice Period';
+    employeeStatus = 'Serving Notice Period';
+    inNoticePeriod = true;
+  } else if (idx === 4) {
+    status = 'Left';
+    employeeStatus = 'Left';
+    inNoticePeriod = false;
+  }
+
+  return {
+    _id: `emp_nt_${idx + 1}`,
+    employeeId: `EMP-NT-${200 + idx + 1}`,
+    firstName: fn,
+    lastName: ln,
+    employeeType: 'Non-Teaching Staff',
+    designation: designation,
+    department: 'Administration',
+    email: `${fn.toLowerCase()}.${ln.toLowerCase()}@school.com`,
+    phone: `9876599${String(100 + idx)}`,
+    salary: 35000 + (idx * 800),
+    status: status,
+    employeeStatus: employeeStatus,
+    inNoticePeriod: inNoticePeriod,
+    dateOfJoining: `${joinYear}-${joinMonth}-${joinDay}`,
+    assignedClasses: []
+  };
+});
+
+export const demoEmployees = [...generateTeachingEmployees, ...generateNonTeachingEmployees];
 
 // 4. Generate Exams for all grades & subjects
 const examTypes = ['Mid-Term Examination 2026', 'Unit Test 1', 'Annual Final Examination', 'Quarterly Assessment'];

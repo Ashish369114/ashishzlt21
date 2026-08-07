@@ -86,8 +86,20 @@ const EmployeeManagement = () => {
   const fetchEmployees = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/employees');
-      setEmployees((response.data && response.data.length) ? response.data : demoEmployees);
+      const response = await api.get('/employees').catch(() => ({ data: [] }));
+      const apiData = Array.isArray(response?.data) ? response.data : [];
+      let loaded = [...apiData];
+      
+      if (apiData.length < demoEmployees.length) {
+        const existingIds = new Set(apiData.map(e => String(e._id || e.id)));
+        demoEmployees.forEach(demoEmp => {
+          if (!existingIds.has(String(demoEmp._id))) {
+            loaded.push(demoEmp);
+          }
+        });
+      }
+
+      setEmployees(loaded);
     } catch (error) {
       console.warn('Error fetching employees, using demo employees:', error);
       setEmployees(demoEmployees);
