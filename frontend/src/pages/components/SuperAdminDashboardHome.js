@@ -152,13 +152,13 @@ const SuperAdminDashboardHome = ({ stats }) => {
 
   return (
     <div className="saas-dashboard-container">
-      {/* 1. Welcome Header Banner (Matching Pic 1 layout) */}
+      {/* 1. Welcome Header Banner (Matching Pic 2 Teacher Portal style) */}
       <div style={{
         background: '#ffffff',
-        borderRadius: '20px',
-        padding: '20px 28px',
-        border: '1px solid #BFDBFE',
-        boxShadow: '0 4px 12px rgba(12, 74, 134, 0.05)',
+        borderRadius: '24px',
+        padding: '22px 30px',
+        border: '1px solid rgba(226, 232, 240, 0.8)',
+        boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.04)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -172,13 +172,13 @@ const SuperAdminDashboardHome = ({ stats }) => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '8px 16px',
+              padding: '8px 18px',
               borderRadius: '50px',
-              background: '#EBF5FF',
-              color: '#0C4A86',
-              border: '1.5px solid #BFDBFE',
+              background: '#f1f5f9',
+              color: '#0f172a',
+              border: '1px solid #cbd5e1',
               fontSize: '0.85rem',
-              fontWeight: '700',
+              fontWeight: '800',
               cursor: 'pointer',
               transition: 'all 0.2s ease'
             }}
@@ -187,21 +187,21 @@ const SuperAdminDashboardHome = ({ stats }) => {
           </button>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <h1 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '800', color: '#0C4A86' }}>
+              <h1 style={{ margin: 0, fontSize: '1.45rem', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.3px' }}>
                 Good Morning, Rajesh Sharma 👋
               </h1>
               <span style={{
-                background: '#E0F2FE',
-                color: '#0369A1',
-                padding: '3px 10px',
+                background: '#dcfce7',
+                color: '#15803d',
+                padding: '3px 12px',
                 borderRadius: '50px',
                 fontSize: '0.75rem',
-                fontWeight: '700'
+                fontWeight: '800'
               }}>
                 Super Admin
               </span>
             </div>
-            <p style={{ margin: '4px 0 0', fontSize: '0.88rem', color: '#64748B' }}>
+            <p style={{ margin: '4px 0 0', fontSize: '0.88rem', color: '#64748b', fontWeight: '500' }}>
               Here's what's happening with your school today.
             </p>
           </div>

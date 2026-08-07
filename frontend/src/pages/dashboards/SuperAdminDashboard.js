@@ -160,9 +160,25 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
         </ul>
       </div>
 
-      <div className="main-content" style={{ background: '#FAF6F0', padding: '24px' }}>
-        {/* Sticky TopBar at the very top (matching Pic 1) */}
-        <div style={{ position: 'sticky', top: 0, zIndex: 20, marginBottom: '20px' }}>
+      <div className="main-content" style={{
+        background: 'radial-gradient(circle at top left, rgba(129, 140, 248, 0.14), transparent 30%), linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+        padding: '24px 32px',
+        minHeight: '100vh'
+      }}>
+        {/* Sticky Frosted Glass TopBar (matching Pic 2 Teacher Portal reference) */}
+        <div style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 30,
+          marginBottom: '24px',
+          borderRadius: '1.6rem',
+          border: '1px solid rgba(226, 232, 240, 0.8)',
+          background: 'rgba(255, 255, 255, 0.85)',
+          padding: '4px',
+          boxShadow: '0 4px 15px -2px rgba(0, 0, 0, 0.04)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)'
+        }}>
           <TopBar
             userName={userName}
             subject="Super Admin Panel"
