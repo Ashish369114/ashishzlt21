@@ -60,8 +60,23 @@ const defaultNotificationsList = [
   }
 ];
 
-const ParentNotifications = () => {
+const ParentNotifications = ({ selectedStudentId, student }) => {
   const navigate = useNavigate();
+
+  const studentName = student?.userId?.firstName
+    ? `${student.userId.firstName} ${student.userId.lastName || ''}`.trim()
+    : (student?.name || 'Child');
+  const studentGrade = student?.grade || '5';
+
+  const notificationsList = defaultNotificationsList.map((n) => {
+    if (n.id === 1) {
+      return { ...n, description: `${studentName}'s teacher assigned new coursework due this week.` };
+    }
+    if (n.id === 3) {
+      return { ...n, description: `${studentName}'s Unit Test 1 marks released for Grade ${studentGrade}.` };
+    }
+    return n;
+  });
 
   return (
     <div className="space-y-6">
@@ -79,14 +94,14 @@ const ParentNotifications = () => {
               Alerts & Notifications
             </span>
           </div>
-          <h1 className="text-2xl font-black">Parent Notification Center</h1>
-          <p className="text-sky-100 text-xs font-medium">Real-time alerts for homework, exam schedules, results, attendance, and school messages.</p>
+          <h1 className="text-2xl font-black">{studentName}'s Notification Center</h1>
+          <p className="text-sky-100 text-xs font-medium">Real-time alerts for {studentName}'s homework, exam schedules, results, attendance, and school messages.</p>
         </div>
       </div>
 
       {/* Notifications List */}
       <div className="space-y-3">
-        {defaultNotificationsList.map((notif) => {
+        {notificationsList.map((notif) => {
           const Icon = notif.icon;
           return (
             <div

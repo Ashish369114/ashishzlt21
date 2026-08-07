@@ -81,7 +81,9 @@ const StudentActivities = ({ isParentView = false, student, selectedStudentId })
     description: '',
   });
 
-  const studentName = student?.name || student?.userId?.firstName || 'Child';
+  const studentName = student?.userId?.firstName
+    ? `${student.userId.firstName} ${student.userId.lastName || ''}`.trim()
+    : (student?.name || 'Child');
 
   const handleAddSubmit = (e) => {
     e.preventDefault();

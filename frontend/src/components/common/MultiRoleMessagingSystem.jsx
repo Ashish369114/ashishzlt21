@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { unifiedCommunicationService } from '../../services/unifiedCommunicationStore';
 
-const MultiRoleMessagingSystem = ({ currentUserRole = 'Teacher', currentUserName = 'Ramesh Sharma' }) => {
+const MultiRoleMessagingSystem = ({ currentUserRole = 'Teacher', currentUserName = 'Ramesh Sharma', selectedStudentId, student }) => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [activeTab, setActiveTab] = useState('inbox'); // 'inbox' | 'sent'
@@ -15,12 +15,19 @@ const MultiRoleMessagingSystem = ({ currentUserRole = 'Teacher', currentUserName
   const [replyText, setReplyText] = useState('');
   const [replyFile, setReplyFile] = useState(null);
 
+  const studentName = student?.userId?.firstName
+    ? `${student.userId.firstName} ${student.userId.lastName || ''}`.trim()
+    : (student?.name || 'Child');
+  const studentGrade = student?.grade || '5';
+  const studentSection = student?.section || 'A';
+  const classTeacher = student?.classTeacher || 'Ramesh Sharma';
+
   // New Message Modal State
   const [isNewMessageOpen, setIsNewMessageOpen] = useState(false);
   const [newMessageForm, setNewMessageForm] = useState({
     targetRole: currentUserRole === 'Student' || currentUserRole === 'Parent' ? 'Teacher' : 'Parent',
-    targetName: currentUserRole === 'Student' || currentUserRole === 'Parent' ? 'Ramesh Sharma (Mathematics)' : 'Suresh Verma (Parent of Rohan)',
-    className: 'Grade 9 - A',
+    targetName: currentUserRole === 'Parent' ? `${classTeacher} (Teacher of ${studentName})` : (currentUserRole === 'Student' ? 'Ramesh Sharma (Mathematics)' : 'Suresh Verma (Parent of Rohan)'),
+    className: `Grade ${studentGrade} - ${studentSection}`,
     subject: '',
     category: currentUserRole === 'Student' ? 'Academic Doubt' : 'Parent Query',
     text: '',

@@ -61,10 +61,10 @@ const ParentStudentProfile = ({ user, students = [], selectedStudentId, student 
               </span>
             </div>
             <p className="text-xs font-bold text-[#0096DA]">
-              {activeStudent.grade ? `Grade ${activeStudent.grade}` : 'Grade 9'} - {activeStudent.section || 'Section A'} • Roll No: {activeStudent.rollNumber || '09'}
+              Grade {activeStudent.grade || '5'} - Section {activeStudent.section || 'A'} • Roll No: {activeStudent.rollNumber || '05'}
             </p>
             <p className="text-xs text-slate-500 font-semibold">
-              Admission No: <strong className="text-slate-800">{activeStudent.admissionNo || 'ADM-2026-0914'}</strong> • Academic Year: <strong className="text-slate-800">2026-2027</strong>
+              Admission No: <strong className="text-slate-800">{activeStudent.admissionNo || 'ADM-2026-0512'}</strong> • Academic Year: <strong className="text-slate-800">2026-2027</strong>
             </p>
           </div>
         </div>

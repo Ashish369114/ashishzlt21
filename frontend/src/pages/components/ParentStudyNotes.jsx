@@ -3,48 +3,83 @@ import { useNavigate } from 'react-router-dom';
 import { FileCode, Download, BookOpen, Clock, Paperclip, FileText } from 'lucide-react';
 
 const defaultStudyNotesList = [
+  // Grade 5 Study Notes
   {
     id: 1,
-    title: 'Polynomials & Algebraic Expressions Comprehensive Notes',
+    title: 'Grade 5 Mathematics: Fractions & Decimals Masterclass',
+    subject: 'Mathematics',
+    teacher: 'Ramesh Sharma',
+    date: 'August 1, 2026',
+    topic: 'Fractions & Decimals',
+    fileName: 'Grade5_Fractions_Decimals_Notes.pdf',
+    fileType: 'PDF Document',
+    description: 'Comprehensive study notes with practice problem sheets on equivalent fractions and decimal arithmetic.',
+    grade: '5'
+  },
+  {
+    id: 2,
+    title: 'Grade 5 Science: Plant Life Cycle & Photosynthesis',
+    subject: 'Science',
+    teacher: 'Sunita Verma',
+    date: 'July 28, 2026',
+    topic: 'Botany & Plant Science',
+    fileName: 'Grade5_Plant_Life_Cycle.pdf',
+    fileType: 'PDF Document',
+    description: 'Illustrated notes on plant germination stages, leaf taxonomy, and chlorophyll sunlight absorption.',
+    grade: '5'
+  },
+  {
+    id: 3,
+    title: 'Grade 5 English: Parts of Speech & Sentence Building',
+    subject: 'English',
+    teacher: 'Ananya Roy',
+    date: 'July 25, 2026',
+    topic: 'Grammar',
+    fileName: 'Grade5_Grammar_Mastery.docx',
+    fileType: 'Word Document',
+    description: 'Rules and exercises for nouns, pronouns, adjectives, adverbs, and complex sentence structures.',
+    grade: '5'
+  },
+  // Grade 8 Study Notes
+  {
+    id: 4,
+    title: 'Grade 8 Polynomials & Algebraic Expressions Notes',
     subject: 'Mathematics',
     teacher: 'Ramesh Sharma',
     date: 'August 1, 2026',
     topic: 'Algebra & Formulae',
-    fileName: 'Grade9_Polynomials_Notes.pdf',
+    fileName: 'Grade8_Polynomials_Notes.pdf',
     fileType: 'PDF Document',
-    description: 'Detailed study notes covering quadratic equations, polynomial division, and practice formula sheets.'
+    description: 'Detailed study notes covering quadratic equations, polynomial division, and formula sheets.',
+    grade: '8'
   },
   {
-    id: 2,
-    title: 'Coordinate Geometry & Slope Calculations',
-    subject: 'Mathematics',
-    teacher: 'Ramesh Sharma',
-    date: 'July 28, 2026',
-    topic: 'Geometry & Graphs',
-    fileName: 'Geometry_Coordinate_Guide.docx',
-    fileType: 'Word Document',
-    description: 'Step-by-step illustrations of Cartesian coordinates, distance formula, and slope derivation.'
-  },
-  {
-    id: 3,
-    title: 'Force & Laws of Motion Presentation Slides',
+    id: 5,
+    title: 'Grade 8 Force & Laws of Motion Presentation Slides',
     subject: 'Science',
     teacher: 'Sunita Verma',
     date: 'July 25, 2026',
     topic: 'Physics',
-    fileName: 'Physics_Newton_Laws.pptx',
+    fileName: 'Grade8_Physics_Newton_Laws.pptx',
     fileType: 'PowerPoint Slide',
-    description: 'Interactive slide deck on Newton 3 Laws of motion with real-world examples and diagrams.'
+    description: 'Interactive slide deck on Newton 3 Laws of motion with real-world momentum examples.',
+    grade: '8'
   }
 ];
 
-const ParentStudyNotes = () => {
+const ParentStudyNotes = ({ selectedStudentId, student }) => {
   const navigate = useNavigate();
   const [selectedSubject, setSelectedSubject] = useState('All');
 
+  const studentGrade = student?.grade || '5';
+  const studentName = student?.userId?.firstName
+    ? `${student.userId.firstName} ${student.userId.lastName || ''}`.trim()
+    : (student?.name || 'Child');
+
   const filteredNotes = defaultStudyNotesList.filter((note) => {
-    if (selectedSubject === 'All') return true;
-    return note.subject === selectedSubject;
+    const matchesGrade = note.grade === String(studentGrade);
+    const matchesSubject = selectedSubject === 'All' || note.subject === selectedSubject;
+    return matchesGrade && matchesSubject;
   });
 
   return (
@@ -63,8 +98,8 @@ const ParentStudyNotes = () => {
               Academic Resources
             </span>
           </div>
-          <h1 className="text-2xl font-black">Study Notes & Learning Materials</h1>
-          <p className="text-sky-100 text-xs font-medium">Access and download faculty lesson notes, study guides, and reference documents.</p>
+          <h1 className="text-2xl font-black">{studentName}'s Study Notes & Learning Materials</h1>
+          <p className="text-sky-100 text-xs font-medium">Access and download faculty lesson notes for Grade {studentGrade}.</p>
         </div>
       </div>
 

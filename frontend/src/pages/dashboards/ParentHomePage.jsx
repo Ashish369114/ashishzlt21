@@ -86,21 +86,22 @@ const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStuden
   const studentGradeDisplay = activeStudent.grade || activeStudent.class?.grade || '6';
   const studentSectionDisplay = activeStudent.section || activeStudent.class?.section || 'A';
 
-  // 1. Summary Cards
+  // 1. Summary Cards tailored to active student
+  const isGrade8 = String(studentGradeDisplay) === '8';
   const summaryCards = [
     {
       title: 'Attendance',
-      value: '92%',
-      subtitle: '23 Present • 2 Absent (25 Working Days)',
+      value: isGrade8 ? '92%' : '96%',
+      subtitle: isGrade8 ? '23 Present • 2 Absent (25 Working Days)' : '24 Present • 1 Absent (25 Working Days)',
       icon: CheckCircle2,
       path: '/dashboard/attendance',
       accent: 'border-emerald-200 bg-emerald-50/50 text-emerald-900',
-      badge: '92% Excellent'
+      badge: isGrade8 ? '92% Good' : '96% Excellent'
     },
     {
       title: 'Homework',
-      value: '12 Items',
-      subtitle: '10 Completed • 2 Pending',
+      value: isGrade8 ? '15 Items' : '12 Items',
+      subtitle: isGrade8 ? '13 Completed • 2 Pending' : '10 Completed • 2 Pending',
       icon: BookOpen,
       path: '/dashboard/homework',
       accent: 'border-blue-200 bg-blue-50/50 text-blue-900',
@@ -108,8 +109,8 @@ const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStuden
     },
     {
       title: 'Assignments',
-      value: '8 Tasks',
-      subtitle: '7 Submitted • 1 In Progress',
+      value: isGrade8 ? '10 Tasks' : '8 Tasks',
+      subtitle: isGrade8 ? '9 Submitted • 1 In Progress' : '7 Submitted • 1 In Progress',
       icon: FileText,
       path: '/dashboard/assignments',
       accent: 'border-purple-200 bg-purple-50/50 text-purple-900',
@@ -117,12 +118,12 @@ const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStuden
     },
     {
       title: 'Academic Performance',
-      value: '89.4%',
-      subtitle: 'Grade A+ • Overall Rank #3 in Class',
+      value: isGrade8 ? '89.4%' : '94.2%',
+      subtitle: isGrade8 ? 'Grade A+ • Overall Rank #3 in Class' : 'Grade O • Overall Rank #1 in Class',
       icon: Award,
       path: '/dashboard/results',
       accent: 'border-amber-200 bg-amber-50/50 text-amber-900',
-      badge: 'Rank #3'
+      badge: isGrade8 ? 'Rank #3' : 'Rank #1'
     }
   ];
 
@@ -159,7 +160,7 @@ const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStuden
           </div>
           <h1 className="text-2xl font-black">Welcome Back, {parentName} 👋</h1>
           <p className="text-xs text-sky-100 font-medium">
-            Here's your quick access portal for your child's attendance, assignments, timetable, and school notices.
+            Here's your quick access portal for {activeStudentName}'s attendance, assignments, timetable, and school notices.
           </p>
         </div>
 
@@ -189,11 +190,37 @@ const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStuden
             <div>
               <p className="font-black text-white text-sm">{activeStudentName}</p>
               <p className="text-[11px] text-sky-100 font-semibold">
-                Class {studentGradeDisplay} - Sec {studentSectionDisplay} • Roll No: {activeStudent.rollNumber || '09'} • Teacher: {activeStudent.classTeacher || 'Ramesh Sharma'}
+                Class {studentGradeDisplay} - Sec {studentSectionDisplay} • Roll No: {activeStudent.rollNumber || '05'} • Teacher: {activeStudent.classTeacher || 'Ramesh Sharma'}
               </p>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Dynamic Child Summary Cards */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div
+              key={card.title}
+              onClick={() => navigate(card.path)}
+              className={`rounded-3xl border p-5 shadow-2xs hover:shadow-md transition-all cursor-pointer space-y-3 ${card.accent}`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="rounded-full bg-white/80 px-2.5 py-0.5 text-[10px] font-black text-slate-800 border border-slate-200">
+                  {card.badge}
+                </span>
+                <Icon className="h-5 w-5 opacity-80" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">{card.title}</p>
+                <p className="text-2xl font-black text-slate-900">{card.value}</p>
+                <p className="text-[11px] font-semibold text-slate-600 mt-1">{card.subtitle}</p>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Parent Quick Actions Grid (Point 4: On Top of Dashboard) */}

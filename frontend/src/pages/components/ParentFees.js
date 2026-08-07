@@ -4,7 +4,7 @@ import { CreditCard, DollarSign, Download, CheckCircle2, AlertCircle, Clock } fr
 import OnlineFeePaymentModal from '../dashboards/components/OnlineFeePaymentModal';
 import { feeService } from '../../services/api';
 
-const defaultFeesList = [
+const defaultGrade5Fees = [
   {
     _id: 'fee1',
     title: 'Term 2 Tuition & Academic Fee',
@@ -13,8 +13,7 @@ const defaultFeesList = [
     paidAmount: 15000,
     dueDate: '2026-08-15',
     isPaid: true,
-    transactionId: 'TXN-902812',
-    student: { firstName: 'Ramesh', lastName: 'Kumar' }
+    transactionId: 'TXN-902812'
   },
   {
     _id: 'fee2',
@@ -24,8 +23,7 @@ const defaultFeesList = [
     paidAmount: 3500,
     dueDate: '2026-08-10',
     isPaid: true,
-    transactionId: 'TXN-902813',
-    student: { firstName: 'Ramesh', lastName: 'Kumar' }
+    transactionId: 'TXN-902813'
   },
   {
     _id: 'fee3',
@@ -34,8 +32,7 @@ const defaultFeesList = [
     amount: 1200,
     paidAmount: 0,
     dueDate: '2026-08-20',
-    isPaid: false,
-    student: { firstName: 'Ramesh', lastName: 'Kumar' }
+    isPaid: false
   },
   {
     _id: 'fee4',
@@ -44,17 +41,64 @@ const defaultFeesList = [
     amount: 800,
     paidAmount: 0,
     dueDate: '2026-08-25',
-    isPaid: false,
-    student: { firstName: 'Ramesh', lastName: 'Kumar' }
+    isPaid: false
+  }
+];
+
+const defaultGrade8Fees = [
+  {
+    _id: 'fee-g8-1',
+    title: 'Term 2 Tuition & STEM Lab Fee',
+    feeType: 'Tuition Fee',
+    amount: 18000,
+    paidAmount: 18000,
+    dueDate: '2026-08-15',
+    isPaid: true,
+    transactionId: 'TXN-908141'
+  },
+  {
+    _id: 'fee-g8-2',
+    title: 'School Transport & Bus Service Fee',
+    feeType: 'Transport Fee',
+    amount: 4000,
+    paidAmount: 4000,
+    dueDate: '2026-08-10',
+    isPaid: true,
+    transactionId: 'TXN-908142'
+  },
+  {
+    _id: 'fee-g8-3',
+    title: 'Robotics & Computer Lab Fee',
+    feeType: 'Lab Fee',
+    amount: 2000,
+    paidAmount: 0,
+    dueDate: '2026-08-22',
+    isPaid: false
+  },
+  {
+    _id: 'fee-g8-4',
+    title: 'Mid-Term Board Exam Evaluation Fee',
+    feeType: 'Exam Fee',
+    amount: 1500,
+    paidAmount: 0,
+    dueDate: '2026-08-28',
+    isPaid: false
   }
 ];
 
 const ParentFees = ({ isPaymentMode = false, selectedStudentId, student }) => {
   const navigate = useNavigate();
-  const [feesList, setFeesList] = useState(defaultFeesList);
+  const [feesList, setFeesList] = useState(defaultGrade5Fees);
   const [selectedFeeForPayment, setSelectedFeeForPayment] = useState(null);
 
-  const studentName = student?.name || student?.userId?.firstName || 'Ramesh Kumar';
+  const studentName = student?.userId?.firstName
+    ? `${student.userId.firstName} ${student.userId.lastName || ''}`.trim()
+    : (student?.name || 'Child');
+
+  React.useEffect(() => {
+    const isGrade8 = String(student?.grade || '') === '8';
+    setFeesList(isGrade8 ? defaultGrade8Fees : defaultGrade5Fees);
+  }, [selectedStudentId, student]);
 
   const calculateTotalPaid = () => {
     return feesList.reduce((sum, f) => sum + Number(f.paidAmount || 0), 0);

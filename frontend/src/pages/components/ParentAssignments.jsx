@@ -65,14 +65,16 @@ const ParentAssignments = ({ selectedStudentId, student }) => {
 
   const studentGrade = student?.grade || '5';
   const studentSection = student?.section || 'A';
-  const studentName = student?.name || student?.userId?.firstName || 'Child';
+  const studentName = student?.userId?.firstName
+    ? `${student.userId.firstName} ${student.userId.lastName || ''}`.trim()
+    : (student?.name || 'Child');
 
   useEffect(() => {
     // Filter assignments according to selected child's grade
     const filtered = sampleAssignments.filter(
-      (asg) => asg.grade === String(studentGrade) || (studentGrade === '5' && asg.grade === '5')
+      (asg) => asg.grade === String(studentGrade)
     );
-    setAssignments(filtered.length > 0 ? filtered : sampleAssignments);
+    setAssignments(filtered);
   }, [selectedStudentId, student, studentGrade, studentSection]);
 
   const handleDownloadAttachment = (asg) => {
