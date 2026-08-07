@@ -115,7 +115,20 @@ const AttendanceManagement = () => {
   const fetchEmployees = async () => {
     try {
       const response = await employeeService.getAll();
-      setEmployees(response.data && response.data.length ? response.data : demoEmployees);
+      const apiData = Array.isArray(response?.data) ? response.data : [];
+      let loaded = [...apiData];
+
+      if (apiData.length < demoEmployees.length) {
+        const existingIds = new Set(apiData.map(e => String(e._id || e.id || e.email)));
+        demoEmployees.forEach(demoEmp => {
+          const dKey = String(demoEmp._id || demoEmp.id || demoEmp.email);
+          if (!existingIds.has(dKey)) {
+            loaded.push(demoEmp);
+          }
+        });
+      }
+
+      setEmployees(loaded.length > 0 ? loaded : demoEmployees);
     } catch (err) {
       console.warn('Using demo employees data:', err);
       setEmployees(demoEmployees);
@@ -360,12 +373,23 @@ const AttendanceManagement = () => {
       {registerType !== 'student' ? (
         (() => {
           const isTeaching = registerType === 'teaching';
-          const staffList = employees.filter(emp => {
-            if (isTeaching) {
-              return emp.employeeType === 'teaching' || (emp.department && emp.department.toLowerCase().includes('academic')) || (emp.designation && emp.designation.toLowerCase().includes('teacher'));
-            } else {
-              return emp.employeeType !== 'teaching' && !(emp.department && emp.department.toLowerCase().includes('academic')) && !(emp.designation && emp.designation.toLowerCase().includes('teacher'));
-            }
+          const staffList = (employees.length > 0 ? employees : demoEmployees).filter(emp => {
+            const isTeacherRole = 
+              emp.employeeType === 'teaching' ||
+              emp.role === 'teacher' ||
+              (emp.department && emp.department.toLowerCase().includes('academic')) ||
+              (emp.designation && (
+                emp.designation.toLowerCase().includes('teacher') ||
+                emp.designation.toLowerCase().includes('faculty') ||
+                emp.designation.toLowerCase().includes('head') ||
+                emp.designation.toLowerCase().includes('instructor') ||
+                emp.designation.toLowerCase().includes('lecturer') ||
+                emp.designation.toLowerCase().includes('educator') ||
+                emp.designation.toLowerCase().includes('tgt') ||
+                emp.designation.toLowerCase().includes('pgt') ||
+                emp.designation.toLowerCase().includes('prt')
+              ));
+            return isTeaching ? isTeacherRole : !isTeacherRole;
           });
 
           const displayStaff = selectedStaffId 
