@@ -212,7 +212,7 @@ const PrincipalDashboardHome = ({ stats, user }) => {
           <div className="kpi-top">
             <div className="kpi-info">
               <h3>Total Students</h3>
-              <div className="kpi-value">{stats?.totalStudents || 1240}</div>
+              <div className="kpi-value">{stats?.totalStudents ?? 150}</div>
             </div>
             <div className="kpi-icon-container" style={{ background: '#eff6ff', color: '#3b82f6' }}>
               <Users size={22} />
@@ -224,7 +224,7 @@ const PrincipalDashboardHome = ({ stats, user }) => {
           <div className="kpi-top">
             <div className="kpi-info">
               <h3>Teaching Staff</h3>
-              <div className="kpi-value">{stats?.totalTeachers || 85}</div>
+              <div className="kpi-value">{stats?.totalTeachers ?? 30}</div>
             </div>
             <div className="kpi-icon-container" style={{ background: '#f3e8ff', color: '#a855f7' }}>
               <UserCheck size={22} />
