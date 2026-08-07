@@ -45,7 +45,7 @@ export const demoStudents = demoClasses.map((cls) => {
   const secOffset = cls.section === 'A' ? 1 : cls.section === 'B' ? 31 : 61;
   const baseRoll = gNum * 100 + secOffset;
 
-  return Array.from({ length: 30 }, (_, i) => {
+  return Array.from({ length: 10 }, (_, i) => {
     const fn = firstNames[(classOffset + i * 3) % firstNames.length];
     const ln = lastNames[(classOffset * 2 + i * 5 + 1) % lastNames.length];
     const rollNo = `${baseRoll + i}`;
@@ -159,7 +159,7 @@ export const demoExams = Array.from({ length: 10 }, (_, i) => {
   }).flat();
 }).flat();
 
-// 5. Generate Attendance Records for all 900 students
+// 5. Generate Attendance Records for all 300 students
 export const demoAttendance = demoStudents.map((s, idx) => ({
   _id: `att_${idx + 1}`,
   studentId: s._id,
@@ -173,7 +173,7 @@ export const demoAttendance = demoStudents.map((s, idx) => ({
   remarks: idx % 6 === 0 ? 'Medical leave requested' : idx % 7 === 0 ? '15 mins late due to traffic' : 'On time'
 }));
 
-// 6. Generate Fee Records for all 900 students
+// 6. Generate Fee Records for all 300 students
 export const demoFees = demoStudents.map((s, idx) => {
   const totalFee = 45000 + (Number(s.grade) * 1500);
   const paidFee = idx % 3 === 0 ? totalFee : idx % 3 === 1 ? Math.floor(totalFee * 0.6) : 0;

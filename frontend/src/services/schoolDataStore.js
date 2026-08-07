@@ -34,7 +34,7 @@ export const generate30Students = (grade, section, baseRoll) => {
   const secVal = String(section || 'A').toUpperCase() === 'A' ? 0 : String(section || 'A').toUpperCase() === 'B' ? 13 : 27;
   const classOffset = gNum * 7 + secVal;
 
-  return Array.from({ length: 30 }, (_, i) => {
+  return Array.from({ length: 10 }, (_, i) => {
     const fn = studentFirstNames[(classOffset + i * 3) % studentFirstNames.length];
     const ln = studentLastNames[(classOffset * 2 + i * 5 + 1) % studentLastNames.length];
     const roll = `${baseRoll + i}`;
@@ -62,11 +62,11 @@ export const generate30Students = (grade, section, baseRoll) => {
 };
 
 export const assignedTeacherClasses = [
-  { id: 'c1', grade: 'Grade 9', section: 'A', className: 'Grade 9 - A', subject: 'Mathematics', strength: 30, baseRoll: 901 },
-  { id: 'c2', grade: 'Grade 9', section: 'B', className: 'Grade 9 - B', subject: 'Mathematics', strength: 30, baseRoll: 931 },
-  { id: 'c3', grade: 'Grade 10', section: 'A', className: 'Grade 10 - A', subject: 'Mathematics', strength: 30, baseRoll: 1001 },
-  { id: 'c4', grade: 'Grade 10', section: 'B', className: 'Grade 10 - B', subject: 'Algebra & Statistics', strength: 30, baseRoll: 1031 },
-  { id: 'c5', grade: 'Grade 8', section: 'C', className: 'Grade 8 - C', subject: 'Geometry', strength: 30, baseRoll: 801 },
+  { id: 'c1', grade: 'Grade 9', section: 'A', className: 'Grade 9 - A', subject: 'Mathematics', strength: 10, baseRoll: 901 },
+  { id: 'c2', grade: 'Grade 9', section: 'B', className: 'Grade 9 - B', subject: 'Mathematics', strength: 10, baseRoll: 931 },
+  { id: 'c3', grade: 'Grade 10', section: 'A', className: 'Grade 10 - A', subject: 'Mathematics', strength: 10, baseRoll: 1001 },
+  { id: 'c4', grade: 'Grade 10', section: 'B', className: 'Grade 10 - B', subject: 'Algebra & Statistics', strength: 10, baseRoll: 1031 },
+  { id: 'c5', grade: 'Grade 8', section: 'C', className: 'Grade 8 - C', subject: 'Geometry', strength: 10, baseRoll: 801 },
 ];
 
 // Helper to get or initialize LocalStorage
@@ -149,12 +149,12 @@ const initialEventsList = [
 ];
 
 export const schoolDataService = {
-  // 1. Get Students for Class (guarantees 30 students per section)
+  // 1. Get Students for Class (guarantees 10 students per section)
   getStudentsForClass: (classId) => {
     const cls = assignedTeacherClasses.find((c) => c.id === classId) || assignedTeacherClasses[0];
     const key = `students_${cls.id}`;
     const existing = getStorageItem(key, null);
-    if (existing && Array.isArray(existing) && existing.length >= 30) return existing;
+    if (existing && Array.isArray(existing) && existing.length === 10) return existing;
     const generated = generate30Students(cls.grade, cls.section, cls.baseRoll);
     setStorageItem(key, generated);
     return generated;
