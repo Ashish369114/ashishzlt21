@@ -6,7 +6,7 @@ import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogle
 import DailyInsightWidget from '../../components/DailyInsightWidget';
 import TopBar from '../../components/dashboard/TopBar';
 import { subscribeToDataChanges } from '../../services/syncService';
-import { LayoutDashboard, Users, FileText, Settings, ShieldCheck, LogOut, Calendar as CalendarIcon, Camera } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Settings, ShieldCheck, LogOut, Calendar as CalendarIcon, Camera, FileCheck } from 'lucide-react';
 import TeacherSettingsPage from './TeacherSettingsPage';
 
 
@@ -45,10 +45,10 @@ const AoDashboard = ({ user, onLogout }) => {
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'staff', label: 'Staff Management', icon: Users },
+    { id: 'staff', label: 'Admissions & Verification', icon: FileCheck },
     { id: 'infrastructure', label: 'Infrastructure', icon: ShieldCheck },
     { id: 'inventory', label: 'Inventory & Assets', icon: FileText },
-    { id: 'vendors', label: 'Vendors & Contracts', icon: Users },
+    { id: 'vendors', label: 'Visitor & Security Log', icon: Users },
     { id: 'maintenance', label: 'Maintenance Requests', icon: Settings },
     { id: 'settings', label: 'Settings & Profile', icon: Settings },
   ];
