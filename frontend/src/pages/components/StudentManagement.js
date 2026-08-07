@@ -156,7 +156,7 @@ const StudentManagement = () => {
       const apiData = Array.isArray(studentsRes?.data) ? studentsRes.data : [];
       let loadedStudents = [...apiData];
       
-      // Ensure all 10 canonical students per section exist on dev.zltsos.com
+      // Strictly cap each class section to 10 students max (G1-001 through G1-010)
       if (apiData.length < demoStudents.length) {
         const existingIds = new Set(apiData.map(s => String(s._id || s.id)));
         demoStudents.forEach(demoSt => {
@@ -166,7 +166,19 @@ const StudentManagement = () => {
         });
       }
 
-      setStudents(getUnifiedStudents(loadedStudents));
+      const sectionGroups = {};
+      loadedStudents.forEach(st => {
+        const g = String(st.grade || st.class?.grade || '1');
+        const s = String(st.section || st.class?.section || 'A');
+        const key = `${g}_${s}`;
+        if (!sectionGroups[key]) sectionGroups[key] = [];
+        if (sectionGroups[key].length < 10) {
+          sectionGroups[key].push(st);
+        }
+      });
+
+      const final10PerSectionStudents = Object.values(sectionGroups).flat();
+      setStudents(final10PerSectionStudents.length > 0 ? final10PerSectionStudents : demoStudents);
       if (isAcc || true) {
         setAllFeesData(feesRes?.data || []);
       }
@@ -533,7 +545,7 @@ const StudentManagement = () => {
     ? [...new Set(classes.filter((cls) => String(cls.grade) === String(selectedGrade)).map((cls) => cls.section).filter(Boolean))].sort()
     : [];
 
-  const filteredStudentsForSelect = students.filter((student) => {
+  let filteredStudentsForSelect = students.filter((student) => {
     if (selectedGrade && (!student.class || String(student.class.grade) !== String(selectedGrade))) {
       return false;
     }
@@ -542,6 +554,10 @@ const StudentManagement = () => {
     }
     return true;
   });
+
+  if (selectedGrade && selectedSection) {
+    filteredStudentsForSelect = filteredStudentsForSelect.slice(0, 10);
+  }
 
   let visibleStudents = students.filter((student, idx) => {
     if (selectedGrade && (!student.class || String(student.class.grade) !== String(selectedGrade))) {
