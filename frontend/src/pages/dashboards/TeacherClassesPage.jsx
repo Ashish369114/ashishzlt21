@@ -14,6 +14,7 @@ import ReportCardModal from '../../components/common/ReportCardModal';
 import { academicExamTypes, getExamTypeById } from '../../utils/academicExamConfig';
 import { schoolDataService, assignedTeacherClasses } from '../../services/schoolDataStore';
 import { attendanceService } from '../../services/api';
+import { subscribeToDataChanges } from '../../services/syncService';
 
 const TeacherClassesPage = ({ user }) => {
   const navigate = useNavigate();
@@ -24,11 +25,23 @@ const TeacherClassesPage = ({ user }) => {
 
   const activeClass = assignedClasses.find((c) => c.id === selectedClassId) || assignedClasses[0];
 
-  // 1. Dynamic Class Students (30 per class)
+  // 1. Dynamic Class Students (Realtime Synced)
   const [students, setStudents] = useState([]);
   useEffect(() => {
-    const list = schoolDataService.getStudentsForClass(selectedClassId);
-    setStudents(list);
+    const loadStudents = () => {
+      const list = schoolDataService.getStudentsForClass(selectedClassId);
+      setStudents(list);
+    };
+    loadStudents();
+
+    const handleStorageUpdate = () => loadStudents();
+    window.addEventListener('schoolDataUpdated', handleStorageUpdate);
+    const unsubscribe = subscribeToDataChanges(() => loadStudents());
+
+    return () => {
+      window.removeEventListener('schoolDataUpdated', handleStorageUpdate);
+      unsubscribe();
+    };
   }, [selectedClassId]);
 
   // 2. Attendance State (Req 7, 8, 9, 10, 11, 12, 13, 14, 15)

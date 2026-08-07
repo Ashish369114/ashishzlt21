@@ -283,11 +283,51 @@ const StudentManagement = () => {
       }
       setError('');
 
+      let response;
       if (editingId) {
-        await studentService.update(editingId, formData);
+        response = await studentService.update(editingId, formData);
       } else {
-        await studentService.add(formData);
+        response = await studentService.add(formData);
       }
+
+      // Format student object for cross-portal sync
+      const fn = formData.firstName || 'New';
+      const ln = formData.lastName || 'Student';
+      const rNo = formData.rollNumber || `${Date.now().toString().slice(-3)}`;
+      const admNo = `ADM-2026-${rNo}`;
+      const newStudentObj = {
+        _id: editingId || response?.data?._id || `std_${Date.now()}`,
+        studentId: admNo,
+        admissionNo: admNo,
+        firstName: fn,
+        lastName: ln,
+        name: `${fn} ${ln}`,
+        rollNumber: rNo,
+        rollNo: rNo,
+        grade: selectedGrade || '9',
+        section: selectedSection || 'A',
+        className: `Grade ${selectedGrade || '9'} - ${selectedSection || 'A'}`,
+        parentName: `${formData.parentFirstName || 'Suresh'} ${formData.parentLastName || ln}`,
+        parentPhone: formData.parentPhone || '+91 98765 20000',
+        phone: formData.phone || '+91 98765 10000'
+      };
+
+      // Target class store update
+      const targetGrade = selectedGrade || '9';
+      const targetSec = selectedSection || 'A';
+      const targetClassId = (targetGrade === '9' && targetSec === 'A') ? 'c1' : `c_${targetGrade}_${targetSec.toLowerCase()}`;
+      const storeKey = `students_${targetClassId}`;
+      const existing = JSON.parse(localStorage.getItem(storeKey) || '[]');
+
+      if (editingId) {
+        const updated = existing.map(s => String(s._id || s.id) === String(editingId) ? { ...s, ...newStudentObj } : s);
+        localStorage.setItem(storeKey, JSON.stringify(updated));
+      } else {
+        localStorage.setItem(storeKey, JSON.stringify([...existing, newStudentObj]));
+      }
+
+      window.dispatchEvent(new Event('schoolDataUpdated'));
+      broadcastDataChange({ type: 'student_list_updated', student: newStudentObj });
 
       resetForm();
       fetchStudents();
@@ -327,7 +367,20 @@ const StudentManagement = () => {
   const handleDeleteStudent = async (id) => {
     if (window.confirm('Are you sure you want to delete this student?')) {
       try {
-        await studentService.delete(id);
+        await studentService.delete(id).catch(() => null);
+
+        // Remove from local storage store for instant cross-portal sync
+        const targetGrade = selectedGrade || '9';
+        const targetSec = selectedSection || 'A';
+        const targetClassId = (targetGrade === '9' && targetSec === 'A') ? 'c1' : `c_${targetGrade}_${targetSec.toLowerCase()}`;
+        const storeKey = `students_${targetClassId}`;
+        const existing = JSON.parse(localStorage.getItem(storeKey) || '[]');
+        const filtered = existing.filter(s => String(s._id || s.id) !== String(id));
+        localStorage.setItem(storeKey, JSON.stringify(filtered));
+
+        window.dispatchEvent(new Event('schoolDataUpdated'));
+        broadcastDataChange({ type: 'student_deleted', studentId: id });
+
         fetchStudents();
       } catch (err) {
         setError('Failed to delete student');
