@@ -110,7 +110,7 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
   };
 
   return (
-    <div className="dashboard-layout" style={{ background: '#FAF6F0', minHeight: '100vh' }}>
+    <div className="dashboard-layout" style={{ background: '#f8fafc', minHeight: '100vh' }}>
       <div className="sidebar">
         {/* Brand Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingBottom: '16px', borderBottom: '1px solid #BFDBFE' }}>
