@@ -153,7 +153,19 @@ const StudentManagement = () => {
         studentService.getAll().catch(err => ({ data: [] })),
         isAcc ? feeService.getAll().catch(err => ({ data: [] })) : Promise.resolve({ data: [] })
       ]);
-      const loadedStudents = studentsRes?.data && studentsRes.data.length ? studentsRes.data : demoStudents;
+      const apiData = Array.isArray(studentsRes?.data) ? studentsRes.data : [];
+      let loadedStudents = [...apiData];
+      
+      // Ensure all 10 canonical students per section exist on dev.zltsos.com
+      if (apiData.length < demoStudents.length) {
+        const existingIds = new Set(apiData.map(s => String(s._id || s.id)));
+        demoStudents.forEach(demoSt => {
+          if (!existingIds.has(String(demoSt._id))) {
+            loadedStudents.push(demoSt);
+          }
+        });
+      }
+
       setStudents(getUnifiedStudents(loadedStudents));
       if (isAcc || true) {
         setAllFeesData(feesRes?.data || []);

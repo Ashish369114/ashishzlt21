@@ -124,8 +124,17 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
   const fetchStudents = async () => {
     try {
       const response = await studentService.getAll().catch(() => ({ data: [] }));
-      const rawLoaded = (response?.data && response.data.length) ? response.data : demoStudents;
-      const loaded = Array.isArray(rawLoaded[0]) ? rawLoaded.flat() : rawLoaded;
+      const apiData = Array.isArray(response?.data) ? response.data : [];
+      let loaded = [...apiData];
+      
+      if (apiData.length < demoStudents.length) {
+        const existingIds = new Set(apiData.map(s => String(s._id || s.id)));
+        demoStudents.forEach(demoSt => {
+          if (!existingIds.has(String(demoSt._id))) {
+            loaded.push(demoSt);
+          }
+        });
+      }
       if (loaded && loaded.length > 0) {
         const mapped = loaded.map((s, idx) => {
           const rawName = resolveStudentName(s, loaded, idx);
