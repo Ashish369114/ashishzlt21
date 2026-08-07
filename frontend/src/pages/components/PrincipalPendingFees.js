@@ -414,8 +414,8 @@ const PrincipalPendingFees = () => {
         setFees(seeded);
       }
     } catch (err) {
-      setError('Failed to load data.');
-      console.error(err);
+      console.warn('Failed to load pending fees API data, using fallback:', err);
+      setError('');
     } finally {
       setLoading(false);
     }
