@@ -598,28 +598,17 @@ const StudentManagement = () => {
     }
   }
 
-  // Standardize roll number formatting (e.g. G1-001, G1-002...) and sort in numerical order
+  // Assign 100% unique sequential roll numbers (G1-001, G1-002, G1-003... G1-010) for each class section
   visibleStudents = visibleStudents.map((st, idx) => {
-    const rawRoll = st?.rollNumber || st?.rollNo;
     const grade = st?.grade || st?.class?.grade || selectedGrade || '1';
     const gNum = String(grade).replace(/\D/g, '') || '1';
-    let seq = null;
-
-    if (rawRoll) {
-      const digits = String(rawRoll).match(/\d+/g);
-      if (digits && digits.length > 0) {
-        const lastDigits = parseInt(digits[digits.length - 1], 10);
-        const rem = lastDigits % 100;
-        seq = rem > 0 ? rem : lastDigits;
-      }
-    }
-    if (!seq || seq > 99) seq = idx + 1;
+    const seq = idx + 1;
     return {
       ...st,
       rollSequence: seq,
       formattedRollNumber: `G${gNum}-${String(seq).padStart(3, '0')}`
     };
-  }).sort((a, b) => a.rollSequence - b.rollSequence);
+  });
 
   const activeRole = (currentUser?.role || localStorage.getItem('role') || '').toLowerCase();
   const isAccountant = activeRole === 'accountant' || activeRole === 'accountant_admin';
@@ -1013,9 +1002,11 @@ const StudentManagement = () => {
             {filteredStudentsForSelect.map((st, sIdx) => {
               const stName = resolveStudentName(st, students, sIdx);
               const stVal = String(st._id || st.id || st.studentId || st.rollNumber || `st_${sIdx}`);
+              const gNum = String(st?.grade || st?.class?.grade || selectedGrade || '1').replace(/\D/g, '') || '1';
+              const rollStr = `G${gNum}-${String(sIdx + 1).padStart(3, '0')}`;
               return (
                 <option key={stVal} value={stVal}>
-                  {stName} ({st.rollNumber || 'N/A'})
+                  {stName} ({rollStr})
                 </option>
               );
             })}
