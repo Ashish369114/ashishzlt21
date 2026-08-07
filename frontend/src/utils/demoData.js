@@ -15,13 +15,17 @@ export const demoClasses = Array.from({ length: 10 }, (_, i) => {
 const firstNames = [
   'Rohan', 'Ananya', 'Aarav', 'Ishita', 'Kabir', 'Diya', 'Vihaan', 'Siddharth', 'Riya', 'Karan',
   'Neha', 'Rahul', 'Tanvi', 'Aditya', 'Meera', 'Arjun', 'Pooja', 'Vikram', 'Anushka', 'Devansh',
-  'Sneha', 'Harsh', 'Ritu', 'Kunal', 'Sanjana', 'Yash', 'Preeti', 'Gautam', 'Simran', 'Nikhil'
+  'Sneha', 'Harsh', 'Ritu', 'Kunal', 'Sanjana', 'Yash', 'Preeti', 'Gautam', 'Simran', 'Nikhil',
+  'Aadhya', 'Advait', 'Bhavya', 'Chaitanya', 'Dhruv', 'Esha', 'Farhan', 'Garima', 'Hridaan', 'Isha',
+  'Jatin', 'Kavya', 'Laksh', 'Manvi', 'Navya', 'Ojas', 'Parth', 'Qasim', 'Rishi', 'Shreya',
+  'Tanya', 'Utkarsh', 'Vanya', 'Varun', 'Yashvi', 'Zaid', 'Ayaan', 'Bhumika', 'Charvi', 'Divyansh'
 ];
 
 const lastNames = [
   'Verma', 'Sharma', 'Singh', 'Patel', 'Mehta', 'Kapoor', 'Joshi', 'Rao', 'Sen', 'Nair',
   'Deshmukh', 'Gupta', 'Kulkarni', 'Roy', 'Reddy', 'Bhatt', 'Malhotra', 'Saxena', 'Pandey', 'Iyer',
-  'Jain', 'Ahuja', 'Das', 'Agrawal', 'Chowdary', 'Pillai', 'Kaur', 'Saxena', 'Bhatia', 'Menon'
+  'Jain', 'Ahuja', 'Das', 'Agrawal', 'Chowdary', 'Pillai', 'Kaur', 'Saxena', 'Bhatia', 'Menon',
+  'Trivedi', 'Chhabra', 'Goswami', 'Rastogi', 'Dutta', 'Mishra', 'Tripathi', 'Shukla', 'Bansal', 'Goyal'
 ];
 
 // Sample Date of Birth helper to generate realistic birthdays
@@ -36,12 +40,14 @@ const getSampleDob = (index) => {
 // 2. Generate Students for each of the 30 classes (in 100% sync with Teacher & Parent views)
 export const demoStudents = demoClasses.map((cls) => {
   const gNum = parseInt(cls.grade, 10);
+  const secVal = cls.section === 'A' ? 0 : cls.section === 'B' ? 13 : 27;
+  const classOffset = gNum * 7 + secVal;
   const secOffset = cls.section === 'A' ? 1 : cls.section === 'B' ? 31 : 61;
   const baseRoll = gNum * 100 + secOffset;
 
   return Array.from({ length: 30 }, (_, i) => {
-    const fn = firstNames[i % firstNames.length];
-    const ln = lastNames[(i * 3 + 1) % lastNames.length];
+    const fn = firstNames[(classOffset + i * 3) % firstNames.length];
+    const ln = lastNames[(classOffset * 2 + i * 5 + 1) % lastNames.length];
     const rollNo = `${baseRoll + i}`;
     const admNo = `ADM-2026-${baseRoll + i}`;
     const pName = `Suresh ${ln}`;

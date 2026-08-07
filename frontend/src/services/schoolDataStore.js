@@ -3,17 +3,21 @@
  * Provides reactive persistence across Teacher, Student, Parent, and Principal dashboards.
  */
 
-// Initial Sample Data Generator for 30 Students per class
+// Initial Sample Data Generator for 30 Students per class with distinct names per grade & section
 const studentFirstNames = [
   'Rohan', 'Ananya', 'Aarav', 'Ishita', 'Kabir', 'Diya', 'Vihaan', 'Siddharth', 'Riya', 'Karan',
   'Neha', 'Rahul', 'Tanvi', 'Aditya', 'Meera', 'Arjun', 'Pooja', 'Vikram', 'Anushka', 'Devansh',
-  'Sneha', 'Harsh', 'Ritu', 'Kunal', 'Sanjana', 'Yash', 'Preeti', 'Gautam', 'Simran', 'Nikhil'
+  'Sneha', 'Harsh', 'Ritu', 'Kunal', 'Sanjana', 'Yash', 'Preeti', 'Gautam', 'Simran', 'Nikhil',
+  'Aadhya', 'Advait', 'Bhavya', 'Chaitanya', 'Dhruv', 'Esha', 'Farhan', 'Garima', 'Hridaan', 'Isha',
+  'Jatin', 'Kavya', 'Laksh', 'Manvi', 'Navya', 'Ojas', 'Parth', 'Qasim', 'Rishi', 'Shreya',
+  'Tanya', 'Utkarsh', 'Vanya', 'Varun', 'Yashvi', 'Zaid', 'Ayaan', 'Bhumika', 'Charvi', 'Divyansh'
 ];
 
 const studentLastNames = [
   'Verma', 'Sharma', 'Singh', 'Patel', 'Mehta', 'Kapoor', 'Joshi', 'Rao', 'Sen', 'Nair',
   'Deshmukh', 'Gupta', 'Kulkarni', 'Roy', 'Reddy', 'Bhatt', 'Malhotra', 'Saxena', 'Pandey', 'Iyer',
-  'Jain', 'Ahuja', 'Das', 'Agrawal', 'Chowdary', 'Pillai', 'Kaur', 'Saxena', 'Bhatia', 'Menon'
+  'Jain', 'Ahuja', 'Das', 'Agrawal', 'Chowdary', 'Pillai', 'Kaur', 'Saxena', 'Bhatia', 'Menon',
+  'Trivedi', 'Chhabra', 'Goswami', 'Rastogi', 'Dutta', 'Mishra', 'Tripathi', 'Shukla', 'Bansal', 'Goyal'
 ];
 
 // Sample Date of Birth helper to generate realistic birthdays
@@ -26,9 +30,13 @@ const getSampleDob = (index) => {
 };
 
 export const generate30Students = (grade, section, baseRoll) => {
+  const gNum = parseInt(String(grade || '1').replace(/\D/g, ''), 10) || 1;
+  const secVal = String(section || 'A').toUpperCase() === 'A' ? 0 : String(section || 'A').toUpperCase() === 'B' ? 13 : 27;
+  const classOffset = gNum * 7 + secVal;
+
   return Array.from({ length: 30 }, (_, i) => {
-    const fn = studentFirstNames[i % studentFirstNames.length];
-    const ln = studentLastNames[(i * 3 + 1) % studentLastNames.length];
+    const fn = studentFirstNames[(classOffset + i * 3) % studentFirstNames.length];
+    const ln = studentLastNames[(classOffset * 2 + i * 5 + 1) % studentLastNames.length];
     const roll = `${baseRoll + i}`;
     const adm = `ADM-2026-${baseRoll + i}`;
     const id = `st_${grade.replace(/\s+/g, '')}_${section}_${i + 1}`;
