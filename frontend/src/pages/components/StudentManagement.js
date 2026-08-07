@@ -598,6 +598,29 @@ const StudentManagement = () => {
     }
   }
 
+  // Standardize roll number formatting (e.g. G1-001, G1-002...) and sort in numerical order
+  visibleStudents = visibleStudents.map((st, idx) => {
+    const rawRoll = st?.rollNumber || st?.rollNo;
+    const grade = st?.grade || st?.class?.grade || selectedGrade || '1';
+    const gNum = String(grade).replace(/\D/g, '') || '1';
+    let seq = null;
+
+    if (rawRoll) {
+      const digits = String(rawRoll).match(/\d+/g);
+      if (digits && digits.length > 0) {
+        const lastDigits = parseInt(digits[digits.length - 1], 10);
+        const rem = lastDigits % 100;
+        seq = rem > 0 ? rem : lastDigits;
+      }
+    }
+    if (!seq || seq > 99) seq = idx + 1;
+    return {
+      ...st,
+      rollSequence: seq,
+      formattedRollNumber: `G${gNum}-${String(seq).padStart(3, '0')}`
+    };
+  }).sort((a, b) => a.rollSequence - b.rollSequence);
+
   const activeRole = (currentUser?.role || localStorage.getItem('role') || '').toLowerCase();
   const isAccountant = activeRole === 'accountant' || activeRole === 'accountant_admin';
 
@@ -1061,7 +1084,7 @@ const StudentManagement = () => {
                     )}
                   </td>
                   <td>{student.class ? `Grade ${student.class.grade} - Section ${student.class.section}` : 'N/A'}</td>
-                  <td>{student.rollNumber}</td>
+                  <td>{student.formattedRollNumber}</td>
                   <td>{sPhone}</td>
                   <td>{sParent}</td>
                   {isAccountant && (

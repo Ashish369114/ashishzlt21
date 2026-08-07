@@ -179,13 +179,11 @@ const SuperAdminDashboardHome = ({ stats }) => {
       </div>
 
       {/* 6. Calendar & Upcoming Events Section */}
-      <CalendarAndEventsSection />
-
-      {/* 7. Activity, Notices & Events Section */}
-      <div className="dashboard-grid-2 mt-6 mb-8">
+      <CalendarAndEventsSection />      {/* 7. Activity & Notices Section */}
+      <div className="dashboard-grid-1 mt-6 mb-8" style={{ display: 'block' }}>
         
-        {/* Left: Recent Activities */}
-        <div className="premium-card">
+        {/* Recent Activities */}
+        <div className="premium-card" style={{ width: '100%' }}>
           <div className="card-header border-b">
             <h3 className="card-title">Recent Activities</h3>
             <button className="text-blue" style={{ color: '#0C4A86' }}>View All</button>
@@ -209,40 +207,6 @@ const SuperAdminDashboardHome = ({ stats }) => {
                 </li>
               ))}
             </ul>
-          </div>
-        </div>
-
-        {/* Upcoming Events */}
-        <div className="premium-card">
-          <div className="card-header border-b">
-            <h3 className="card-title flex items-center gap-2">
-              <Calendar size={18} color="#0C4A86" className="calendar-icon-pulse" /> 
-              Upcoming Events
-            </h3>
-          </div>
-          <div className="card-body p-0 relative events-scroll-container">
-            <div className="fade-overlay-top"></div>
-            <ul 
-              className="events-list events-scroller"
-              ref={scrollRef}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-              onScroll={handleScroll}
-            >
-              {scrollingEvents.map((event, idx) => (
-                <li 
-                  key={`${event.id}-${idx}`} 
-                  className={`event-item ${idx % upcomingEvents.length === activeIndex ? 'active' : ''}`}
-                >
-                  <div className={`event-dot ${event.type}`}></div>
-                  <div className="event-details">
-                    <h4>{event.title}</h4>
-                    <span>{event.date}</span>
-                  </div>
-                </li>
-              ))}
-             </ul>
-            <div className="fade-overlay-bottom"></div>
           </div>
         </div>
 
