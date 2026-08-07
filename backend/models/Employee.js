@@ -77,7 +77,7 @@ const Employee = sequelize.define('Employee', {
     defaultValue: [],
   },
   status: {
-    type: DataTypes.ENUM('active', 'inactive', 'on_leave', 'terminated'),
+    type: DataTypes.STRING,
     defaultValue: 'active',
   },
   performance: {

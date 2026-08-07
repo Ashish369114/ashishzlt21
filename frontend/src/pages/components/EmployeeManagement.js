@@ -209,12 +209,18 @@ const EmployeeManagement = () => {
   const handleAddEmployee = async (e) => {
     e.preventDefault();
     try {
+      const selectedStatus = newEmployee.employeeStatus || 'Working';
+      const isLeft = selectedStatus === 'Left' || selectedStatus === 'Terminated';
+      const isNotice = selectedStatus === 'Serving Notice Period' || selectedStatus === 'Notice Period';
+      
+      const backendStatus = isLeft ? 'Left' : isNotice ? 'Notice Period' : 'active';
+
       const employeePayload = {
         ...newEmployee,
         school: newEmployee.school || schools[0]?._id,
-        status: newEmployee.employeeStatus === 'Left' || newEmployee.employeeStatus === 'Terminated' ? 'Left' : newEmployee.employeeStatus === 'Serving Notice Period' ? 'Notice Period' : 'active',
-        inNoticePeriod: newEmployee.employeeStatus === 'Serving Notice Period',
-        employeeStatus: newEmployee.employeeStatus,
+        status: backendStatus,
+        inNoticePeriod: isNotice,
+        remarks: selectedStatus,
       };
       delete employeePayload.employeeStatus;
       let response;
