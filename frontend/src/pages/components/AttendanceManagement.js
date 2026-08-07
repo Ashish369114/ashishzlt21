@@ -452,7 +452,7 @@ const AttendanceManagement = () => {
                       let pCount = 0;
                       let aCount = 0;
                       const staffDays = daysArray.map(d => {
-                        const tempDate = new Date(year, parseInt(selectedMonth || '2', 10) - 1, d);
+                        const tempDate = new Date(year, parseInt(selectedMonth || '08', 10) - 1, d);
                         const day = tempDate.getDay();
                         const isSunday = day === 0;
                         const isSecondSaturday = (day === 6 && d >= 8 && d <= 14);
@@ -600,7 +600,7 @@ const AttendanceManagement = () => {
 
                 {(() => {
                   const year = new Date().getFullYear();
-                  const daysInMonth = new Date(year, parseInt(selectedMonth || '2', 10), 0).getDate();
+                  const daysInMonth = new Date(year, parseInt(selectedMonth || '08', 10), 0).getDate();
                   const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
                   const studentsToDisplay = selectedStudentId 
