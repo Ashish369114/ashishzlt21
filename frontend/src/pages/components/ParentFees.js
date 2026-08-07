@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CreditCard, DollarSign, Download, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import OnlineFeePaymentModal from '../dashboards/components/OnlineFeePaymentModal';
+import { feeService } from '../../services/api';
 
 const defaultFeesList = [
   {
@@ -70,7 +71,21 @@ const ParentFees = ({ isPaymentMode = false, selectedStudentId, student }) => {
     return feesList.reduce((sum, f) => sum + Number(f.amount || 0), 0);
   };
 
-  const handlePaymentSuccess = (paidFeeId) => {
+  const handlePaymentSuccess = async (paidFeeId) => {
+    const targetFee = feesList.find((f) => f._id === paidFeeId || f.id === paidFeeId);
+    try {
+      if (targetFee && targetFee._id && !targetFee._id.startsWith('fee')) {
+        await feeService.payFee({
+          feeId: targetFee._id,
+          amount: targetFee.amount,
+          paymentMethod: 'Online UPI',
+          transactionId: `UPI-TXN-${Date.now()}`,
+        }).catch((err) => console.warn('Fee API payment notice:', err?.message || err));
+      }
+    } catch (e) {
+      console.warn('Fee payment sync warn:', e);
+    }
+
     setFeesList((prev) =>
       prev.map((f) =>
         f._id === paidFeeId
