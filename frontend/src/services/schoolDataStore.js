@@ -149,12 +149,12 @@ const initialEventsList = [
 ];
 
 export const schoolDataService = {
-  // 1. Get Students for Class
+  // 1. Get Students for Class (guarantees 30 students per section)
   getStudentsForClass: (classId) => {
     const cls = assignedTeacherClasses.find((c) => c.id === classId) || assignedTeacherClasses[0];
     const key = `students_${cls.id}`;
     const existing = getStorageItem(key, null);
-    if (existing) return existing;
+    if (existing && Array.isArray(existing) && existing.length >= 30) return existing;
     const generated = generate30Students(cls.grade, cls.section, cls.baseRoll);
     setStorageItem(key, generated);
     return generated;
