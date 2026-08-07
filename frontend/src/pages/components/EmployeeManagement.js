@@ -709,14 +709,7 @@ const EmployeeManagement = () => {
                     </thead>
                     <tbody>
                       {filteredEmployees.map((employee) => (
-                        <tr 
-                          key={employee._id || employee.id} 
-                          onClick={() => handleEditEmployee(employee)}
-                          style={{ cursor: 'pointer', transition: 'background 0.15s' }}
-                          onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
-                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                          title="Click row to Edit Employee"
-                        >
+                        <tr key={employee._id || employee.id}>
                           <td style={{ fontWeight: '600', color: '#0f172a' }}>{employee.firstName} {employee.lastName}</td>
                           <td>{employee.designation}</td>
                           <td>{employee.employeeType}</td>
