@@ -72,7 +72,7 @@ const PrincipalDashboard = ({ user, onLogout }) => {
       const upcomingExams = examData.filter(e => new Date(e.date) > new Date()).length || 3;
       const pendingFees = feeData.filter(f => !f.isPaid).length;
 
-      const finalStudentCount = studentData.length > 0 ? studentData.length : 150;
+      const finalStudentCount = studentData.length > 0 ? studentData.length : 900;
       const finalTeacherCount = teacherData.length > 0 ? teacherData.length : 30;
 
       setStats({
@@ -90,9 +90,9 @@ const PrincipalDashboard = ({ user, onLogout }) => {
     } catch (error) {
       console.error('Error fetching data:', error);
       setStats({
-        totalStudents: 150,
+        totalStudents: 900,
         totalTeachers: 30,
-        totalParents: 75,
+        totalParents: 450,
         totalStaff: 54,
         todayAttendance: 28,
         todayFees: 12,
