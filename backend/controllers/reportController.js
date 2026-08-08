@@ -547,7 +547,7 @@ const downloadReport = async (req, res) => {
     const report = await Report.findByPk(req.params.id, {
       include: [
         { model: School, as: 'school' },
-        { model: User, as: 'generatedBy' }
+        { model: User, as: 'generatedBy', attributes: ['firstName', 'lastName'] }
       ]
     });
       
@@ -555,10 +555,59 @@ const downloadReport = async (req, res) => {
       return res.status(404).send('<h1>Report not found</h1>');
     }
 
-    // A simplified text/JSON rendering would suffice, but keeping some original structure
-    // Since original code had very long HTML generators, we will return the JSON data instead 
-    // for simplicity in backend APIs unless explicitly generating pdfs. We'll send the report data as JSON.
-    res.json(report);
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.json(report);
+    }
+
+    const reportData = Array.isArray(report.data) ? report.data : [];
+    const rowsHtml = reportData.map((d, i) => `
+      <tr>
+        <td style="padding: 10px; border: 1px solid #cbd5e1;">${d.date || d.paymentDate || i + 1}</td>
+        <td style="padding: 10px; border: 1px solid #cbd5e1; font-weight: 500;">${d.studentName || d.student?.user?.firstName || d.name || d.description || 'Student'}</td>
+        <td style="padding: 10px; border: 1px solid #cbd5e1; font-weight: bold; color: #166534;">${d.status || d.grade || d.marks || 'Completed'}</td>
+        <td style="padding: 10px; border: 1px solid #cbd5e1;">${d.remarks || d.amount || '-'}</td>
+      </tr>
+    `).join('');
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>${report.title}</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 30px; color: #1e293b; background: #fff; }
+            h1 { color: #0C4A86; font-size: 20px; border-bottom: 2px solid #0C4A86; padding-bottom: 8px; margin-bottom: 4px; }
+            .meta { color: #64748b; font-size: 13px; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+            th { background-color: #0C4A86; color: #fff; padding: 10px; text-align: left; border: 1px solid #0C4A86; }
+            @media print { .no-print { display: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="no-print" style="margin-bottom: 20px; display: flex; gap: 10px;">
+            <button onclick="window.print()" style="padding: 8px 16px; background: #0C4A86; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">🖨️ Print / Save as PDF</button>
+            <button onclick="window.close()" style="padding: 8px 16px; background: #e2e8f0; color: #334155; border: none; border-radius: 6px; cursor: pointer;">Close</button>
+          </div>
+          <h1>${report.title}</h1>
+          <div class="meta">Report Type: ${String(report.reportType).toUpperCase()} | Generated: ${new Date(report.createdAt).toLocaleString()} | Status: ${String(report.status).toUpperCase()}</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Date / Ref</th>
+                <th>Name / Item</th>
+                <th>Status / Grade / Score</th>
+                <th>Remarks / Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+    res.send(html);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

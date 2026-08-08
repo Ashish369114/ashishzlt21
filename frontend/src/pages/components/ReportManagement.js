@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api, { classService, studentService } from '../../services/api';
 import { demoStudents } from '../../utils/demoData';
 import { getUnifiedStudents, resolveStudentName } from '../../services/syncService';
+import { exportToPDF, exportToCSV, printPDF } from '../../utils/exportUtils';
 import '../../styles/ManagementStyles.css';
 
 const ReportManagement = () => {
@@ -233,22 +234,118 @@ const ReportManagement = () => {
     }
   };
 
-  const handleDownloadReport = async (reportId) => {
+  const handleDownloadReport = async (reportItem) => {
     try {
-      const response = await api.get(`/reports/${reportId}`);
-      if (response.data.fileUrl) {
-        const absoluteUrl = response.data.fileUrl.startsWith('http')
-          ? response.data.fileUrl
-          : `${process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace('/api', '') : 'http://localhost:5000'}${response.data.fileUrl}`;
-        window.open(absoluteUrl, '_blank');
+      let rep = reportItem;
+      if (typeof reportItem !== 'object' || !reportItem) {
+        rep = reports.find(r => String(r.id || r._id) === String(reportItem)) || generatedReportData;
       }
+      if (!rep) {
+        alert('Report data not available.');
+        return;
+      }
+
+      const repId = rep.id || rep._id;
+      let fullReport = { ...rep };
+
+      if (repId) {
+        try {
+          const response = await api.get(`/reports/${repId}`);
+          if (response?.data) {
+            fullReport = { ...rep, ...response.data };
+          }
+        } catch (e) {
+          console.warn('Using existing report object for export:', e);
+        }
+      }
+
+      const repFormat = String(fullReport.format || 'pdf').toLowerCase();
+      const reportTitle = fullReport.title || 'Generated_Report';
+      const reportData = Array.isArray(fullReport.data) ? fullReport.data : [];
+
+      if (repFormat === 'csv' || repFormat === 'excel') {
+        const csvRows = reportData.length > 0 ? reportData.map((d, i) => ({
+          Date: d.date || d.paymentDate || '',
+          StudentName: getDisplayStudentName(d, i),
+          Status: d.status || d.grade || d.marks || 'Completed',
+          LateMinutes: d.lateMinutes || 0,
+          Remarks: d.remarks || d.amount || ''
+        })) : [
+          { Title: reportTitle, Type: fullReport.reportType, Status: fullReport.status, Date: new Date(fullReport.createdAt || Date.now()).toLocaleDateString() }
+        ];
+        exportToCSV(csvRows, `${reportTitle.replace(/[^a-zA-Z0-9_-]/g, '_')}.${repFormat === 'excel' ? 'xls' : 'csv'}`);
+        return;
+      }
+
+      // PDF Export
+      let columns = [];
+      let rows = [];
+
+      if (fullReport.reportType === 'attendance' || (reportData.length > 0 && (reportData[0]?.date || reportData[0]?.status))) {
+        columns = [
+          { header: 'Date', key: 'date' },
+          { header: 'Student Name', key: 'name' },
+          { header: 'Status', key: 'status' },
+          { header: 'Late Minutes', key: 'lateMinutes' },
+          { header: 'Remarks', key: 'remarks' },
+        ];
+        rows = reportData.map((d, i) => ({
+          date: d.date ? new Date(d.date).toLocaleDateString('en-GB') : '',
+          name: getDisplayStudentName(d, i),
+          status: d.status || 'Present',
+          lateMinutes: `${d.lateMinutes || 0}`,
+          remarks: d.remarks || 'On time',
+        }));
+      } else if (fullReport.reportType === 'academic') {
+        columns = [
+          { header: 'Subject', key: 'subject' },
+          { header: 'Student Name', key: 'name' },
+          { header: 'Exam Type', key: 'examType' },
+          { header: 'Marks', key: 'marks' },
+          { header: 'Grade', key: 'grade' },
+        ];
+        rows = reportData.map((d, i) => ({
+          subject: d.subject?.name || d.subject || 'Mathematics',
+          name: getDisplayStudentName(d, i),
+          examType: d.examType || fullReport.filters?.term || 'Term 1',
+          marks: `${d.marks || 90}/100`,
+          grade: d.grade || (d.marks >= 90 ? 'A+' : 'A'),
+        }));
+      } else if (fullReport.reportType === 'financial') {
+        columns = [
+          { header: 'Description', key: 'description' },
+          { header: 'Total Amount (Rs)', key: 'amount' },
+          { header: 'Paid Amount (Rs)', key: 'paidAmount' },
+          { header: 'Status', key: 'status' },
+        ];
+        rows = reportData.map(d => ({
+          description: d.description || 'Tuition Fee',
+          amount: `Rs. ${d.amount || 0}`,
+          paidAmount: `Rs. ${d.paidAmount || 0}`,
+          status: String(d.status || 'paid').toUpperCase(),
+        }));
+      } else {
+        columns = [
+          { header: 'Student Name', key: 'name' },
+          { header: 'Average Marks', key: 'averageMarks' },
+          { header: 'Total Subjects', key: 'totalSubjects' },
+        ];
+        rows = reportData.map((d, i) => ({
+          name: d.name || getDisplayStudentName(d, i),
+          averageMarks: `${d.averageMarks || 90}%`,
+          totalSubjects: `${d.totalSubjects || 6}`,
+        }));
+      }
+
+      exportToPDF(reportTitle, columns, rows, `${reportTitle.replace(/[^a-zA-Z0-9_-]/g, '_')}.pdf`);
     } catch (error) {
       console.error('Error downloading report:', error);
+      alert('Failed to download report: ' + (error.message || 'Unknown error'));
     }
   };
 
   const handleDeleteReport = async (id) => {
-    if (window.confirm('Are you sure?')) {
+    if (window.confirm('Are you sure you want to delete this report?')) {
       try {
         await api.delete(`/reports/${id}`);
         fetchReports();
@@ -435,11 +532,13 @@ const ReportManagement = () => {
         <div style={{ marginTop: '30px', background: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <h3 style={{ margin: 0, color: '#1e293b' }}>{generatedReportData.title}</h3>
-            {generatedReportData.fileUrl && (
-              <a href={`${process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace('/api', '') : 'http://localhost:5000'}${generatedReportData.fileUrl}`} target="_blank" rel="noopener noreferrer" style={{ padding: '8px 16px', background: '#4f46e5', color: '#fff', textDecoration: 'none', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600 }}>
-                Download PDF
-              </a>
-            )}
+            <button 
+              type="button"
+              onClick={() => handleDownloadReport(generatedReportData)}
+              style={{ padding: '8px 18px', background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.88rem', fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 6px rgba(79,70,229,0.3)' }}
+            >
+              Download PDF
+            </button>
           </div>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
@@ -551,23 +650,46 @@ const ReportManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {reports.map((report) => (
-                <tr key={report._id}>
+              {reports.map((report, idx) => (
+                <tr key={report.id || report._id || idx}>
                   <td>{report.title}</td>
                   <td>{report.reportType}</td>
-                  <td>{new Date(report.createdAt).toLocaleString()}</td>
+                  <td>{new Date(report.createdAt || Date.now()).toLocaleString()}</td>
                   <td>{report.format}</td>
                   <td><span className={`status-${report.status}`}>{report.status}</span></td>
                   <td>
-                    {report.fileUrl && (
-                      <button onClick={() => handleDownloadReport(report._id)} className="btn-download">
-                        Download
-                      </button>
-                    )}
-                    <button onClick={() => handleEditReport(report)} className="btn btn-secondary btn-small" style={{ margin: '0 8px' }}>
+                    <button 
+                      type="button" 
+                      onClick={() => handleDownloadReport(report)} 
+                      className="btn-download"
+                      style={{
+                        background: '#0284c7',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '6px 14px',
+                        cursor: 'pointer',
+                        fontWeight: '600',
+                        fontSize: '0.82rem',
+                        boxShadow: '0 2px 4px rgba(2, 132, 199, 0.25)',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      Download
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => handleEditReport(report)} 
+                      className="btn btn-secondary btn-small" 
+                      style={{ margin: '0 8px' }}
+                    >
                       Edit
                     </button>
-                    <button onClick={() => handleDeleteReport(report._id)} className="btn-delete">
+                    <button 
+                      type="button" 
+                      onClick={() => handleDeleteReport(report.id || report._id)} 
+                      className="btn-delete"
+                    >
                       Delete
                     </button>
                   </td>
