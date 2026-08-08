@@ -83,11 +83,33 @@ export const getUnifiedStudents = (apiStudents = []) => {
       }
     });
 
+export const getUnifiedConcessions = (apiConcessions = []) => {
+  try {
+    const { demoConcessions } = require('../utils/demoData');
+    const localSaved = JSON.parse(localStorage.getItem('school_concessions') || '[]');
+    const combinedMap = new Map();
+
+    // 1. Initial canonical demo concessions
+    (demoConcessions || []).forEach((c) => {
+      if (c && c._id) combinedMap.set(String(c._id), c);
+    });
+
+    // 2. API concessions
+    (apiConcessions || []).forEach((c) => {
+      if (c && c._id) combinedMap.set(String(c._id), c);
+    });
+
+    // 3. Locally granted/saved concessions (Principal grant / edit)
+    (localSaved || []).forEach((c) => {
+      if (c && c._id) combinedMap.set(String(c._id), c);
+    });
+
     return Array.from(combinedMap.values());
   } catch (e) {
-    return apiStudents;
+    return apiConcessions;
   }
 };
+
 
 export const resolveStudentName = (item, studentsList = [], fallbackIdx = 0) => {
   if (!item) return 'Aarav Sharma';

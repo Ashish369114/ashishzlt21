@@ -393,3 +393,74 @@ export const demoMaintenanceRequests = [
   { _id: 'mnt_3', issueTitle: 'Auditorium Air Conditioning Filter Cleaning', location: 'Main Auditorium', priority: 'Low', reportedBy: 'Mrs. Pooja Sharma', reportDate: '2026-07-30', status: 'Completed' }
 ];
 
+// 22. Canonical Concessions (Shared 100% identically across Principal & Accountant Portals)
+export const demoConcessions = [
+  {
+    _id: 'conc_1',
+    student: demoStudents[0] || { firstName: 'Rohan', lastName: 'Sharma', grade: '1', section: 'A' },
+    studentId: 'st_1_A_1',
+    fee: { description: 'Tuition & Academic Fee (Term 1 - Grade 1)', amount: 43500 },
+    concessionAmount: 8000,
+    reason: 'Academic Merit Scholarship (95%+ in Term Exams)',
+    grantedBy: 'Dr. Kumar (Principal)',
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'Approved'
+  },
+  {
+    _id: 'conc_2',
+    student: demoStudents[1] || { firstName: 'Ananya', lastName: 'Mehta', grade: '1', section: 'A' },
+    studentId: 'st_1_A_2',
+    fee: { description: 'Annual Administrative & Campus Facility Fee', amount: 12000 },
+    concessionAmount: 3500,
+    reason: 'Sibling Discount Concession',
+    grantedBy: 'Dr. Kumar (Principal)',
+    createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'Approved'
+  },
+  {
+    _id: 'conc_3',
+    student: demoStudents[12] || { firstName: 'Kabir', lastName: 'Patel', grade: '2', section: 'A' },
+    studentId: 'st_2_A_3',
+    fee: { description: 'Tuition & Academic Fee (Term 1 - Grade 2)', amount: 45000 },
+    concessionAmount: 15000,
+    reason: 'EWS / Financial Hardship Waiver',
+    grantedBy: 'Dr. Kumar (Principal)',
+    createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'Approved'
+  },
+  {
+    _id: 'conc_4',
+    student: demoStudents[24] || { firstName: 'Diya', lastName: 'Gupta', grade: '3', section: 'B' },
+    studentId: 'st_3_B_5',
+    fee: { description: 'Computer Lab, Science STEM & Digital Learning Fee', amount: 6500 },
+    concessionAmount: 3250,
+    reason: 'Special Talent in Robotics / STEM Scholarship',
+    grantedBy: 'Dr. Kumar (Principal)',
+    createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'Approved'
+  },
+  {
+    _id: 'conc_5',
+    student: demoStudents[40] || { firstName: 'Vihaan', lastName: 'Singh', grade: '5', section: 'A' },
+    studentId: 'st_5_A_1',
+    fee: { description: 'Tuition & Academic Fee (Term 1 - Grade 5)', amount: 49500 },
+    concessionAmount: 10000,
+    reason: 'National Sports & Athletics Championship Award',
+    grantedBy: 'Dr. Kumar (Principal)',
+    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'Approved'
+  },
+  {
+    _id: 'conc_6',
+    student: demoStudents[65] || { firstName: 'Ishita', lastName: 'Verma', grade: '6', section: 'C' },
+    studentId: 'st_6_C_6',
+    fee: { description: 'Tuition & Academic Fee (Term 1 - Grade 6)', amount: 51000 },
+    concessionAmount: 12000,
+    reason: 'Staff Ward Educational Benefit (Faculty Concession)',
+    grantedBy: 'Dr. Kumar (Principal)',
+    createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'Approved'
+  }
+];
+
+
