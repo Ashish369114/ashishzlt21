@@ -398,16 +398,35 @@ const seedDataFn = async () => {
 
   const examRecords = [];
   const types = ['Unit Test', 'Half-Yearly', 'Quarterly', 'Annual', 'Mid-Term', 'Final', 'Practical'];
+  
+  // Helper to ensure exam dates never fall on Sundays (working days Monday to Saturday only)
+  const getNextWorkingExamDate = (baseDate, offsetDays) => {
+    const d = new Date(baseDate);
+    let added = 0;
+    while (added < offsetDays) {
+      d.setDate(d.getDate() + 1);
+      // Skip Sunday (0)
+      if (d.getDay() !== 0) {
+        added++;
+      }
+    }
+    if (d.getDay() === 0) {
+      d.setDate(d.getDate() + 1);
+    }
+    return d;
+  };
+
   for (const classItem of classes) {
     for (let i = 0; i < types.length; i++) {
       const type = types[i];
       for (let j = 0; j < subjects.length; j++) {
         const subject = subjects[j];
+        const examDate = getNextWorkingExamDate(new Date('2026-08-10'), (i * 3) + (j * 2));
         examRecords.push({
           name: `${type} - ${subject.name}`,
           classId: classItem.id,
           subjectId: subject.id,
-          examDate: j === 0 ? new Date() : new Date(Date.now() + (i + 1) * 3 * 24 * 60 * 60 * 1000 + j * 24 * 60 * 60 * 1000),
+          examDate: examDate,
           examType: type,
           startTime: '09:00',
           endTime: '11:00',

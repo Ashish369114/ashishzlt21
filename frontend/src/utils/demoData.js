@@ -195,29 +195,49 @@ const generateNonTeachingEmployees = Array.from({ length: 28 }, (_, idx) => {
 
 export const demoEmployees = [...generateTeachingEmployees, ...generateNonTeachingEmployees];
 
-// 4. Generate Exams for all grades & subjects
-const examTypes = ['Mid-Term Examination 2026', 'Unit Test 1', 'Annual Final Examination', 'Quarterly Assessment'];
-const subjectsList = ['Mathematics', 'Science', 'English', 'Social Studies', 'Computer Science'];
+// 4. Generate Exams for all grades & subjects (Strictly Monday - Saturday, No Exams on Sunday)
+const examTypes = ['Annual Final Examination', 'Mid-Term Examination 2026', 'Unit Test 1', 'Quarterly Assessment'];
+const subjectsList = ['Mathematics', 'Science', 'Social Studies', 'English', 'Telugu', 'Hindi', 'Environmental Science (EVS)'];
+
+// Helper to guarantee valid school exam days strictly skipping Sunday
+const getValidExamDateString = (dayOffset) => {
+  const base = new Date('2026-08-10'); // Monday
+  let addedDays = 0;
+  let cursor = new Date(base);
+  
+  while (addedDays < dayOffset) {
+    cursor.setDate(cursor.getDate() + 1);
+    // Skip Sunday (0)
+    if (cursor.getDay() !== 0) {
+      addedDays++;
+    }
+  }
+  return cursor.toISOString().split('T')[0];
+};
 
 export const demoExams = Array.from({ length: 10 }, (_, i) => {
   const gradeNum = String(i + 1);
   return ['A', 'B', 'C'].map((section) => {
-    return subjectsList.map((subj, subIdx) => ({
-      _id: `ex_${gradeNum}_${section.toLowerCase()}_${subIdx + 1}`,
-      name: examTypes[subIdx % examTypes.length],
-      examName: examTypes[subIdx % examTypes.length],
-      examType: subIdx % 2 === 0 ? 'Mid-Term' : 'Unit Test',
-      grade: gradeNum,
-      section: section,
-      class: { grade: gradeNum, section: section },
-      subject: subj,
-      examDate: `2026-08-${10 + (subIdx * 2)}`,
-      startTime: '09:00 AM',
-      endTime: '12:00 PM',
-      totalMarks: 100,
-      passingMarks: 35,
-      roomNo: `Room ${100 + i * 3 + (subIdx % 3) + 1}`
-    }));
+    return subjectsList.map((subj, subIdx) => {
+      const examDateStr = getValidExamDateString(subIdx * 2);
+      return {
+        _id: `ex_${gradeNum}_${section.toLowerCase()}_${subIdx + 1}`,
+        name: examTypes[subIdx % examTypes.length],
+        examName: examTypes[subIdx % examTypes.length],
+        examType: subIdx % 2 === 0 ? 'Annual' : 'Mid-Term',
+        grade: gradeNum,
+        section: section,
+        class: { grade: gradeNum, section: section },
+        subject: subj,
+        examDate: examDateStr,
+        startTime: '09:00 AM',
+        endTime: '11:00 AM',
+        totalMarks: 100,
+        passingMarks: 35,
+        roomNo: `Room ${100 + i * 3 + (subIdx % 3) + 1}`,
+        room: `Room ${100 + i * 3 + (subIdx % 3) + 1}`
+      };
+    });
   }).flat();
 }).flat();
 

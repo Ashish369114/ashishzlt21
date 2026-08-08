@@ -149,6 +149,14 @@ const ExamManagement = () => {
       return;
     }
 
+    if (formData.examDate) {
+      const selectedDate = new Date(formData.examDate);
+      if (selectedDate.getDay() === 0) {
+        alert('⚠️ Exams cannot be scheduled on Sundays. Please select a working weekday (Monday - Saturday).');
+        return;
+      }
+    }
+
     const effectiveExamType = formData.examType === 'Other' ? (customExamType.trim() || 'Custom Exam') : formData.examType;
     const effectiveExamName = effectiveExamType;
 
@@ -266,6 +274,27 @@ const ExamManagement = () => {
   const sectionsForGrade = [...new Set(visibleClasses.map((cls) => cls.section).filter(Boolean))].sort();
   const examNameOptions = [...new Set(exams.map(e => e.examType || e.name?.split(' - ')[0]).filter(Boolean))].sort();
 
+  const ensureNoSunday = (dateString) => {
+    if (!dateString) return new Date();
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return new Date();
+    // Sunday is 0: if day is Sunday, shift to Monday (+1 day)
+    if (d.getDay() === 0) {
+      d.setDate(d.getDate() + 1);
+    }
+    return d;
+  };
+
+  const getExamDate = (dateString) => {
+    const d = ensureNoSunday(dateString);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  };
+  
+  const getExamDay = (dateString) => {
+    const d = ensureNoSunday(dateString);
+    return d.toLocaleDateString('en-GB', { weekday: 'short' });
+  };
+
   const visibleExams = exams.filter((exam) => {
     const examClassId = exam.class?.id || exam.class?._id || exam.class || exam.classId;
     const matchClass = !selectedClassId || String(examClassId) === String(selectedClassId);
@@ -282,24 +311,14 @@ const ExamManagement = () => {
     const secB = String(b.class?.section || b.section || '').toUpperCase();
     if (secA !== secB) return secA.localeCompare(secB);
 
-    const dA = new Date(a.examDate || a.date || 0);
-    const dB = new Date(b.examDate || b.date || 0);
+    const dA = ensureNoSunday(a.examDate || a.date || 0);
+    const dB = ensureNoSunday(b.examDate || b.date || 0);
     if (dA.getTime() !== dB.getTime()) return dA - dB;
 
     const subjA = typeof a.subject === 'object' ? (a.subject?.name || '') : String(a.subject || '');
     const subjB = typeof b.subject === 'object' ? (b.subject?.name || '') : String(b.subject || '');
     return subjA.localeCompare(subjB);
   });
-
-  const getExamDate = (dateString) => {
-    const d = dateString ? new Date(dateString) : new Date();
-    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  };
-  
-  const getExamDay = (dateString) => {
-    const d = dateString ? new Date(dateString) : new Date();
-    return d.toLocaleDateString('en-GB', { weekday: 'short' });
-  };
 
   const uniqueExamsMap = new Map();
   visibleExams.forEach(exam => {
