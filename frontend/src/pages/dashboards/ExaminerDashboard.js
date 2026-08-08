@@ -6,7 +6,7 @@ import ExamManagement from '../components/ExamManagement';
 import SchoolCalendarManagement from '../components/SchoolCalendarManagement';
 import InteractiveGoogleCalendar from '../../components/common/InteractiveGoogleCalendar';
 import CalendarAndEventsSection from '../../components/common/CalendarAndEventsSection';
-import { subscribeToDataChanges } from '../../services/syncService';
+import { subscribeToDataChanges, getUnifiedExams } from '../../services/syncService';
 import ZaynLeviLogo from '../../components/ZaynLeviLogo';
 import { exportToPDF } from '../../utils/exportUtils';
 import '../../styles/ManagementStyles.css';
@@ -28,7 +28,9 @@ const ExaminerDashboard = ({ user, onLogout }) => {
 
   useEffect(() => {
     const unsubscribe = subscribeToDataChanges((data) => {
-      console.log('Realtime sync in Examiner:', data);
+      if (data && (data.actionType === 'EXAM_SCHEDULE_CHANGED' || data.actionType === 'DATA_UPDATED')) {
+        fetchExamsAndTeachers();
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -328,7 +330,7 @@ const ExaminerDashboard = ({ user, onLogout }) => {
         classService.getAll().catch(() => ({ data: [] })),
         studentService.getAll().catch(() => ({ data: [] }))
       ]);
-      const fetchedExams = (examsRes.data && examsRes.data.length) ? examsRes.data : demoExams;
+      const fetchedExams = getUnifiedExams(examsRes.data || []);
       const fetchedClasses = (classesRes.data && classesRes.data.length) ? classesRes.data : demoClasses;
       const fetchedTeachers = (teachersRes.data && teachersRes.data.length) ? teachersRes.data : demoEmployees;
       const fetchedStudents = (studentsRes.data && studentsRes.data.length) ? studentsRes.data : demoStudents;
@@ -344,7 +346,7 @@ const ExaminerDashboard = ({ user, onLogout }) => {
       setError('');
     } catch (err) {
       console.warn('Using demo data for ExaminerDashboard:', err);
-      setExams(demoExams);
+      setExams(getUnifiedExams([]));
       setTeachers(demoEmployees);
       setClasses(demoClasses);
       setStudents(demoStudents);

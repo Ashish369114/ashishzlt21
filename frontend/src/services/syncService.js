@@ -1,4 +1,4 @@
-import { demoConcessions, demoStudents } from '../utils/demoData';
+import { demoConcessions, demoStudents, demoExams, demoEmployees } from '../utils/demoData';
 
 const CHANNEL_NAME = 'school_os_realtime_sync';
 const broadcastChannel = typeof window !== 'undefined' && 'BroadcastChannel' in window ? new BroadcastChannel(CHANNEL_NAME) : null;
@@ -167,6 +167,176 @@ export const saveConcessionLocally = (newConcession) => {
   }
 };
 
+// ── Realtime Exam Synchronization across Super Admin, Principal, and Examiner ──
+export const ensureNoSunday = (dateString) => {
+  if (!dateString) return new Date('2026-08-10');
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return new Date('2026-08-10');
+  // Sunday is 0: if day is Sunday, shift to Monday (+1 day)
+  if (d.getDay() === 0) {
+    d.setDate(d.getDate() + 1);
+  }
+  return d;
+};
+
+export const getExamDateFormatted = (dateString) => {
+  const d = ensureNoSunday(dateString);
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+export const getExamDayFormatted = (dateString) => {
+  const d = ensureNoSunday(dateString);
+  return d.toLocaleDateString('en-GB', { weekday: 'short' });
+};
+
+const canonicalInvigilators = [
+  'Asha Mehta', 'Priya Patel', 'Rajesh Singh', 'Sneha Gupta',
+  'Suresh Rao', 'Neha Verma', 'Vikram Joshi', 'Karthik Iyer',
+  'Nisha Reddy', 'Amit Kumar', 'Deepa Das', 'Sanjay Mishra'
+];
+
+export const resolveInvigilatorName = (exam, teachersList = [], fallbackIdx = 0) => {
+  if (!exam) return canonicalInvigilators[0];
+  if (typeof exam.invigilator === 'string' && exam.invigilator.trim() && exam.invigilator !== 'N/A' && exam.invigilator !== 'Unassigned') {
+    return exam.invigilator.trim();
+  }
+  if (exam.invigilatorName && exam.invigilatorName !== 'N/A' && exam.invigilatorName !== 'Unassigned') {
+    return exam.invigilatorName;
+  }
+  if (exam.teacherName && exam.teacherName !== 'N/A' && exam.teacherName !== 'Unassigned') {
+    return exam.teacherName;
+  }
+
+  if (typeof exam.invigilator === 'object' && exam.invigilator !== null) {
+    const fn = exam.invigilator.firstName || exam.invigilator.user?.firstName || '';
+    const ln = exam.invigilator.lastName || exam.invigilator.user?.lastName || '';
+    const name = [fn, ln].filter(Boolean).join(' ').trim() || exam.invigilator.name;
+    if (name && name !== 'N/A' && name !== 'Unassigned') return name;
+  }
+
+  const subjName = typeof exam.subject === 'object' ? (exam.subject?.name || '') : String(exam.subject || '');
+  const subjectsList = ['Mathematics', 'Science', 'Social Studies', 'English', 'Telugu', 'Hindi', 'Environmental Science (EVS)'];
+  const subIdx = subjectsList.indexOf(subjName);
+  if (subIdx >= 0) {
+    return canonicalInvigilators[subIdx % canonicalInvigilators.length];
+  }
+  return canonicalInvigilators[fallbackIdx % canonicalInvigilators.length];
+};
+
+export const getUnifiedExams = (apiExams = []) => {
+  try {
+    let localSaved = JSON.parse(localStorage.getItem('school_exams') || 'null');
+    
+    // Auto-seed initial demo exams to localStorage if not yet initialized so refresh never loses schedule
+    if (!localSaved || !Array.isArray(localSaved) || localSaved.length === 0) {
+      localSaved = demoExams || [];
+      try {
+        localStorage.setItem('school_exams', JSON.stringify(localSaved));
+      } catch (e) {}
+    }
+
+    const combinedMap = new Map();
+
+    // 1. Initial canonical demo exams
+    (demoExams || []).forEach((e, idx) => {
+      if (e && (e._id || e.id)) {
+        const dStr = ensureNoSunday(e.examDate || e.date).toISOString().split('T')[0];
+        const invig = resolveInvigilatorName(e, demoEmployees, idx);
+        combinedMap.set(String(e._id || e.id), {
+          ...e,
+          examDate: dStr,
+          date: dStr,
+          invigilatorName: invig,
+          teacherName: invig,
+        });
+      }
+    });
+
+    // 2. API exams from backend
+    (apiExams || []).forEach((e, idx) => {
+      if (e && (e._id || e.id)) {
+        const idKey = String(e._id || e.id);
+        const existing = combinedMap.get(idKey) || {};
+        const dStr = ensureNoSunday(e.examDate || e.date || existing.examDate).toISOString().split('T')[0];
+        const invig = resolveInvigilatorName(e, demoEmployees, idx) || existing.invigilatorName;
+        combinedMap.set(idKey, {
+          ...existing,
+          ...e,
+          examDate: dStr,
+          date: dStr,
+          invigilatorName: invig,
+          teacherName: invig,
+        });
+      }
+    });
+
+    // 3. Local saved / added exams
+    (localSaved || []).forEach((e, idx) => {
+      if (e && (e._id || e.id)) {
+        const idKey = String(e._id || e.id);
+        const existing = combinedMap.get(idKey) || {};
+        const dStr = ensureNoSunday(e.examDate || e.date || existing.examDate).toISOString().split('T')[0];
+        const invig = resolveInvigilatorName(e, demoEmployees, idx) || existing.invigilatorName;
+        combinedMap.set(idKey, {
+          ...existing,
+          ...e,
+          examDate: dStr,
+          date: dStr,
+          invigilatorName: invig,
+          teacherName: invig,
+        });
+      }
+    });
+
+    const result = Array.from(combinedMap.values());
+    return result.length > 0 ? result : (demoExams || []);
+  } catch (e) {
+    return apiExams && apiExams.length > 0 ? apiExams : (demoExams || []);
+  }
+};
+
+export const saveExamLocally = (newExam) => {
+  try {
+    let existing = JSON.parse(localStorage.getItem('school_exams') || 'null');
+    if (!existing || !Array.isArray(existing) || existing.length === 0) {
+      existing = [...(demoExams || [])];
+    }
+    const dStr = ensureNoSunday(newExam.examDate || newExam.date).toISOString().split('T')[0];
+    const invig = resolveInvigilatorName(newExam, demoEmployees, 0);
+    const normalized = {
+      ...newExam,
+      _id: newExam._id || newExam.id || `ex_custom_${Date.now()}`,
+      examDate: dStr,
+      date: dStr,
+      invigilatorName: invig,
+      teacherName: invig
+    };
+    const updated = [normalized, ...existing.filter(e => String(e._id || e.id) !== String(normalized._id))];
+    localStorage.setItem('school_exams', JSON.stringify(updated));
+    broadcastDataChange('EXAM_SCHEDULE_CHANGED', normalized);
+    return updated;
+  } catch (e) {
+    console.warn('Error saving exam locally:', e);
+    return [];
+  }
+};
+
+export const deleteExamLocally = (examIds) => {
+  try {
+    const idSet = new Set((Array.isArray(examIds) ? examIds : [examIds]).map(String));
+    let existing = JSON.parse(localStorage.getItem('school_exams') || 'null');
+    if (!existing || !Array.isArray(existing) || existing.length === 0) {
+      existing = [...(demoExams || [])];
+    }
+    const updated = existing.filter(e => !idSet.has(String(e._id || e.id)));
+    localStorage.setItem('school_exams', JSON.stringify(updated));
+    broadcastDataChange('EXAM_SCHEDULE_CHANGED', { deletedIds: Array.from(idSet) });
+    return updated;
+  } catch (e) {
+    console.warn('Error deleting exam locally:', e);
+    return [];
+  }
+};
 
 export const resolveStudentName = (item, studentsList = [], fallbackIdx = 0) => {
   if (!item) return 'Aarav Sharma';

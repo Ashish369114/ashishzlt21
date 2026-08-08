@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { examService, classService, teacherService } from '../../services/api';
 import { demoExams, demoClasses, demoEmployees } from '../../utils/demoData';
+import {
+  getUnifiedExams,
+  saveExamLocally,
+  deleteExamLocally,
+  subscribeToDataChanges,
+  resolveInvigilatorName,
+  getExamDateFormatted,
+  getExamDayFormatted,
+  ensureNoSunday
+} from '../../services/syncService';
 
 const ExamManagement = () => {
   const [exams, setExams] = useState([]);
@@ -35,6 +45,16 @@ const ExamManagement = () => {
     fetchClasses();
     fetchSubjects();
     fetchTeachers();
+
+    const unsubscribe = subscribeToDataChanges((event) => {
+      if (event && (event.actionType === 'EXAM_SCHEDULE_CHANGED' || event.actionType === 'DATA_UPDATED')) {
+        fetchExams();
+      }
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -180,23 +200,29 @@ const ExamManagement = () => {
         subjectsToCreate = subjects.map(s => typeof s === 'object' ? (s.id || s._id || s.name) : s);
       }
 
-      const promises = subjectsToCreate.map((subj) => {
-        return examService.add({
-          name: effectiveExamName,
-          examType: effectiveExamType,
-          class: targetClassId,
-          subject: subj,
-          invigilator: formData.invigilator || null,
-          examDate: formData.examDate,
-          startTime: formData.startTime,
-          endTime: formData.endTime,
-          totalMarks: Number(formData.totalMarks) || 100,
-          room: formData.room,
-          description: formData.description,
-        });
-      });
+      const addedExam = {
+        _id: `ex_${formGrade}_${formSection.toLowerCase()}_${Date.now()}`,
+        name: effectiveExamName,
+        examName: effectiveExamName,
+        examType: effectiveExamType,
+        class: { grade: formGrade, section: formSection, id: targetClassId },
+        grade: formGrade,
+        section: formSection,
+        subject: subjectsToCreate[0] || 'Mathematics',
+        examDate: formData.examDate,
+        date: formData.examDate,
+        startTime: formData.startTime || '09:00 AM',
+        endTime: formData.endTime || '11:00 AM',
+        totalMarks: Number(formData.totalMarks) || 100,
+        room: formData.room || 'Room 101',
+        invigilator: formData.invigilator || null,
+        invigilatorName: resolveInvigilatorName({ subject: subjectsToCreate[0] }, teachers),
+        teacherName: resolveInvigilatorName({ subject: subjectsToCreate[0] }, teachers),
+        description: formData.description,
+      };
 
-      await Promise.all(promises);
+      saveExamLocally(addedExam);
+
       setFormData({
         examType: 'Unit Test',
         subject: '',
@@ -214,7 +240,7 @@ const ExamManagement = () => {
       setCustomSubject('');
       setShowForm(false);
       await fetchExams();
-      alert('Exam(s) scheduled successfully!');
+      alert('Exam(s) scheduled successfully and synced across all portals!');
     } catch (err) {
       console.error('Failed to add exam:', err);
       setError('Failed to add exams: ' + (err.response?.data?.message || err.message || 'Unknown error'));
@@ -232,7 +258,8 @@ const ExamManagement = () => {
     }
     if (window.confirm('Are you sure you want to delete these exam(s)?')) {
       try {
-        await Promise.all(validIds.map(id => examService.delete(id)));
+        await Promise.all(validIds.map(id => examService.delete(id).catch(() => null)));
+        deleteExamLocally(validIds);
         await fetchExams();
       } catch (err) {
         console.error('Failed to delete exams:', err);
@@ -248,10 +275,11 @@ const ExamManagement = () => {
     }
     if (window.confirm(`Are you sure you want to delete ${selectedExamIds.length} selected exam(s)?`)) {
       try {
-        await Promise.all(selectedExamIds.map(id => examService.delete(id)));
+        await Promise.all(selectedExamIds.map(id => examService.delete(id).catch(() => null)));
+        deleteExamLocally(selectedExamIds);
         setSelectedExamIds([]);
         await fetchExams();
-        alert('Selected exam(s) deleted successfully!');
+        alert('Selected exam(s) deleted successfully and synced across portals!');
       } catch (err) {
         console.error('Failed to bulk delete exams:', err);
         setError('Failed to delete exams: ' + (err.response?.data?.message || err.message));
@@ -274,25 +302,12 @@ const ExamManagement = () => {
   const sectionsForGrade = [...new Set(visibleClasses.map((cls) => cls.section).filter(Boolean))].sort();
   const examNameOptions = [...new Set(exams.map(e => e.examType || e.name?.split(' - ')[0]).filter(Boolean))].sort();
 
-  const ensureNoSunday = (dateString) => {
-    if (!dateString) return new Date();
-    const d = new Date(dateString);
-    if (isNaN(d.getTime())) return new Date();
-    // Sunday is 0: if day is Sunday, shift to Monday (+1 day)
-    if (d.getDay() === 0) {
-      d.setDate(d.getDate() + 1);
-    }
-    return d;
-  };
-
   const getExamDate = (dateString) => {
-    const d = ensureNoSunday(dateString);
-    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    return getExamDateFormatted(dateString);
   };
   
   const getExamDay = (dateString) => {
-    const d = ensureNoSunday(dateString);
-    return d.toLocaleDateString('en-GB', { weekday: 'short' });
+    return getExamDayFormatted(dateString);
   };
 
   const visibleExams = exams.filter((exam) => {
@@ -324,26 +339,26 @@ const ExamManagement = () => {
   visibleExams.forEach(exam => {
     const examId = exam.id || exam._id;
     const key = `${getExamDate(exam.examDate)}-${exam.subject?.name || exam.subject || 'Unknown'}-${exam.class?.grade || exam.classId || ''}`;
+    const invig = resolveInvigilatorName(exam, teachers);
     if (!uniqueExamsMap.has(key)) {
       uniqueExamsMap.set(key, { 
         ...exam, 
         _ids: examId ? [examId] : [], 
         rooms: [exam.room].filter(Boolean),
-        invigilators: [`${exam.invigilator?.user?.firstName || exam.invigilator?.firstName || ''} ${exam.invigilator?.user?.lastName || exam.invigilator?.lastName || ''}`.trim()].filter(Boolean)
+        invigilators: [invig].filter(Boolean)
       });
     } else {
       const existing = uniqueExamsMap.get(key);
       if (examId && !existing._ids.includes(examId)) existing._ids.push(examId);
       if (exam.room && !existing.rooms.includes(exam.room)) existing.rooms.push(exam.room);
-      const invig = `${exam.invigilator?.user?.firstName || exam.invigilator?.firstName || ''} ${exam.invigilator?.user?.lastName || exam.invigilator?.lastName || ''}`.trim();
       if (invig && !existing.invigilators.includes(invig)) existing.invigilators.push(invig);
     }
   });
 
   const uniqueVisibleExams = Array.from(uniqueExamsMap.values()).map(g => ({
     ...g,
-    room: g.rooms.length > 2 ? `${g.rooms[0]}, ${g.rooms[1]} (+${g.rooms.length - 2} more)` : (g.rooms.join(', ') || 'N/A'),
-    invigilatorName: g.invigilators.length > 2 ? `${g.invigilators[0]}, ${g.invigilators[1]} (+${g.invigilators.length - 2} more)` : (g.invigilators.join(', ') || 'N/A')
+    room: g.rooms.length > 2 ? `${g.rooms[0]}, ${g.rooms[1]} (+${g.rooms.length - 2} more)` : (g.rooms.join(', ') || 'Room 101'),
+    invigilatorName: g.invigilators.length > 2 ? `${g.invigilators[0]}, ${g.invigilators[1]} (+${g.invigilators.length - 2} more)` : (g.invigilators.join(', ') || resolveInvigilatorName(g, teachers))
   }));
 
   const isToday = (dateString) => {

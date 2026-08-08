@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { examService, marksService, teacherService, studentService, classService } from '../../services/api';
 import { demoExams, demoClasses, demoStudents, demoEmployees } from '../../utils/demoData';
+import {
+  getUnifiedExams,
+  subscribeToDataChanges,
+  resolveInvigilatorName,
+  getExamDateFormatted,
+  getExamDayFormatted,
+  ensureNoSunday
+} from '../../services/syncService';
 
 const PrincipalExamManagement = () => {
   const [exams, setExams] = useState([]);
@@ -38,6 +46,16 @@ const PrincipalExamManagement = () => {
 
   useEffect(() => {
     fetchData();
+
+    const unsubscribe = subscribeToDataChanges((event) => {
+      if (event && (event.actionType === 'EXAM_SCHEDULE_CHANGED' || event.actionType === 'DATA_UPDATED')) {
+        fetchData();
+      }
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   const fetchData = async () => {
@@ -51,7 +69,7 @@ const PrincipalExamManagement = () => {
         classService.getAll().catch(() => ({ data: [] })),
         classService.getSubjects().catch(() => ({ data: [] })),
       ]);
-      const fetchedExams = (examsRes.data && examsRes.data.length) ? examsRes.data : demoExams;
+      const fetchedExams = getUnifiedExams(examsRes.data || []);
       const fetchedClasses = (classesRes.data && classesRes.data.length) ? classesRes.data : demoClasses;
       const fetchedStudents = (studentsRes.data && studentsRes.data.length) ? studentsRes.data : demoStudents;
       const fetchedTeachers = (teachersRes.data && teachersRes.data.length) ? teachersRes.data : demoEmployees;
@@ -69,13 +87,13 @@ const PrincipalExamManagement = () => {
         setSelectedSection(defaultClass.section);
       }
       if (fetchedExams.length > 0) {
-        const firstType = fetchedExams[0].examType || 'Mid-Term';
+        const firstType = fetchedExams[0].examType || 'Annual';
         setSelectedExamType(firstType);
       }
       setError('');
     } catch (err) {
       console.warn('Using demo data for principal exam management:', err);
-      setExams(demoExams);
+      setExams(getUnifiedExams([]));
       setClasses(demoClasses);
       setStudents(demoStudents);
       setTeachers(demoEmployees);
@@ -192,27 +210,27 @@ const PrincipalExamManagement = () => {
   };
 
   const uniqueFilteredExamsMap = new Map();
-  rawFilteredExams.forEach(exam => {
-    const formattedDate = exam.date ? new Date(exam.date).toLocaleDateString('en-GB') : 'N/A';
+  rawFilteredExams.forEach((exam, idx) => {
+    const formattedDate = getExamDateFormatted(exam.examDate || exam.date);
     const key = `${formattedDate}-${exam.subject?.name || exam.subject}`;
+    const invig = resolveInvigilatorName(exam, teachers, idx) || getExamTeacher(exam);
     if (!uniqueFilteredExamsMap.has(key)) {
       uniqueFilteredExamsMap.set(key, {
         ...exam,
         rooms: [exam.room].filter(Boolean),
-        invigilators: [getExamTeacher(exam)].filter(t => t !== 'Unassigned')
+        invigilators: [invig].filter(t => t && t !== 'Unassigned' && t !== 'N/A')
       });
     } else {
       const existing = uniqueFilteredExamsMap.get(key);
       if (exam.room && !existing.rooms.includes(exam.room)) existing.rooms.push(exam.room);
-      const invig = getExamTeacher(exam);
-      if (invig !== 'Unassigned' && !existing.invigilators.includes(invig)) existing.invigilators.push(invig);
+      if (invig && invig !== 'Unassigned' && invig !== 'N/A' && !existing.invigilators.includes(invig)) existing.invigilators.push(invig);
     }
   });
 
   const filteredExams = Array.from(uniqueFilteredExamsMap.values()).map(g => ({
     ...g,
-    room: g.rooms.length > 2 ? `${g.rooms[0]}, ${g.rooms[1]} (+${g.rooms.length - 2} more)` : (g.rooms.join(', ') || 'N/A'),
-    teacherName: g.invigilators.length > 2 ? `${g.invigilators[0]}, ${g.invigilators[1]} (+${g.invigilators.length - 2} more)` : (g.invigilators.join(', ') || 'Unassigned')
+    room: g.rooms.length > 2 ? `${g.rooms[0]}, ${g.rooms[1]} (+${g.rooms.length - 2} more)` : (g.rooms.join(', ') || 'Room 101'),
+    teacherName: g.invigilators.length > 2 ? `${g.invigilators[0]}, ${g.invigilators[1]} (+${g.invigilators.length - 2} more)` : (g.invigilators.join(', ') || resolveInvigilatorName(g, teachers))
   }));
 
   // ── CSV Download ──────────────────────────────────────────────────────────────
@@ -369,19 +387,20 @@ const PrincipalExamManagement = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredExams.map(exam => {
+                      {filteredExams.map((exam, idx) => {
                         const status = getExamStatus(exam);
                         const isHighlight = status === 'Today';
-                        const examDate = exam.date ? new Date(exam.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
-                        const examDay = exam.date ? new Date(exam.date).toLocaleDateString('en-GB', { weekday: 'short' }) : 'N/A';
+                        const examDate = getExamDateFormatted(exam.examDate || exam.date);
+                        const examDay = getExamDayFormatted(exam.examDate || exam.date);
+                        const invig = exam.teacherName || resolveInvigilatorName(exam, teachers, idx);
                         
                         return (
-                          <tr key={exam._id} style={{ borderBottom: '1px solid #e2e8f0', background: isHighlight ? '#eff6ff' : '#fff', transition: 'background 0.2s' }}>
+                          <tr key={exam._id || `ex_${idx}`} style={{ borderBottom: '1px solid #e2e8f0', background: isHighlight ? '#eff6ff' : '#fff', transition: 'background 0.2s' }}>
                             <td style={{ padding: '14px 16px', color: '#0f172a', fontWeight: '500', whiteSpace: 'nowrap' }}>{examDate}</td>
                             <td style={{ padding: '14px 16px', color: '#64748b' }}>{examDay}</td>
-                            <td style={{ padding: '14px 16px', color: '#3b82f6', fontWeight: '600' }}>{exam.subject?.name || 'N/A'}</td>
-                            <td style={{ padding: '14px 16px', color: '#475569' }}>{exam.room}</td>
-                            <td style={{ padding: '14px 16px', color: '#475569' }}>{exam.teacherName}</td>
+                            <td style={{ padding: '14px 16px', color: '#3b82f6', fontWeight: '600' }}>{typeof exam.subject === 'object' ? (exam.subject?.name || 'Unknown') : (exam.subject || 'Unknown')}</td>
+                            <td style={{ padding: '14px 16px', color: '#475569' }}>{exam.room || 'Room 101'}</td>
+                            <td style={{ padding: '14px 16px', color: '#475569' }}>{invig}</td>
                           </tr>
                         );
                       })}
