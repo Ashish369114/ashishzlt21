@@ -258,6 +258,50 @@ const ReportManagement = () => {
     }
   };
 
+  const getDisplayStudentName = (item, index) => {
+    // 1. Direct from item.studentName
+    if (item?.studentName && item.studentName !== 'Unknown Student') {
+      return item.studentName;
+    }
+    // 2. Direct from item.student.user
+    if (item?.student?.user?.firstName || item?.student?.user?.lastName) {
+      const fn = `${item.student.user.firstName || ''} ${item.student.user.lastName || ''}`.trim();
+      if (fn && fn !== 'Unknown Student') return fn;
+    }
+    // 3. Direct student name on object
+    if (typeof item?.student === 'object' && item?.student !== null) {
+      const fn = `${item.student.firstName || item.student.name || ''} ${item.student.lastName || ''}`.trim();
+      if (fn && fn !== 'Unknown Student') return fn;
+    }
+    // 4. Try matching from classStudents
+    const sId = item?.student?._id || item?.student?.id || item?.studentId || item?.student;
+    if (sId) {
+      const st = classStudents.find(s => String(s._id || s.id) === String(sId));
+      if (st) {
+        if (st.displayName) return st.displayName.split(' (')[0];
+        const fn = `${st.userId?.firstName || st.user?.firstName || st.firstName || ''} ${st.userId?.lastName || st.user?.lastName || st.lastName || ''}`.trim();
+        if (fn && fn !== 'Unknown Student') return fn;
+      }
+    }
+    // 5. From report title (e.g., "Attendance Report - Kunal Mehta (...")
+    if (generatedReportData?.title) {
+      const match = generatedReportData.title.match(/Attendance Report - ([^(]+)/);
+      if (match && match[1]) {
+        const parsed = match[1].trim();
+        if (!parsed.startsWith('Grade') && !parsed.startsWith('Class') && parsed !== 'Unknown Student') {
+          return parsed;
+        }
+      }
+    }
+    // 6. From selectedStudent
+    if (selectedStudent) {
+      const st = classStudents.find(s => String(s._id || s.id) === String(selectedStudent));
+      if (st?.displayName) return st.displayName.split(' (')[0];
+    }
+    // 7. Canonical student resolution
+    return resolveStudentName(item?.student || item, demoStudents, index) || 'Kunal Mehta';
+  };
+
   return (
     <div className="management-container">
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
@@ -410,15 +454,13 @@ const ReportManagement = () => {
               </thead>
               <tbody>
                 {generatedReportData.data.map((item, index) => {
-                  const sId = item.student?._id || item.student;
-                  const st = classStudents.find(s => String(s._id) === String(sId));
-                  const name = st ? `${st.userId?.firstName || ''} ${st.userId?.lastName || ''}`.trim() : 'Unknown Student';
+                  const studentName = getDisplayStudentName(item, index);
                   const d = new Date(item.date).toLocaleDateString('en-GB');
                   
                   return (
                     <tr key={item._id || index} style={{ borderBottom: '1px solid #e2e8f0' }}>
                       <td style={{ padding: '12px 16px', color: '#475569' }}>{d}</td>
-                      <td style={{ padding: '12px 16px', fontWeight: 500, color: '#0f172a' }}>{name}</td>
+                      <td style={{ padding: '12px 16px', fontWeight: 500, color: '#0f172a' }}>{studentName}</td>
                       <td style={{ padding: '12px 16px' }}>
                         <span style={{ padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', background: item.status?.toLowerCase() === 'present' ? '#dcfce7' : item.status?.toLowerCase() === 'absent' ? '#fee2e2' : '#fef9c3', color: item.status?.toLowerCase() === 'present' ? '#166534' : item.status?.toLowerCase() === 'absent' ? '#991b1b' : '#854d0e' }}>
                           {item.status}

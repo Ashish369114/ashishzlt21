@@ -90,9 +90,9 @@ const generateAttendanceReport = async (req, res) => {
       const s = new Date(startDate);
       const e = new Date(endDate);
       const daysCount = Math.max(1, Math.min(31, Math.round((e - s) / (1000 * 60 * 60 * 24)) + 1));
-      const sFullName = resolvedStudentName || 'Meera Menon';
+      const sFullName = resolvedStudentName || 'Kunal Mehta';
       const [fName, ...lParts] = sFullName.split(' ');
-      const lName = lParts.join(' ') || 'Student';
+      const lName = lParts.join(' ') || '';
 
       const synthesized = [];
       for (let i = 0; i < daysCount; i++) {
@@ -105,10 +105,13 @@ const generateAttendanceReport = async (req, res) => {
           id: i + 1,
           date: curDate.toISOString().split('T')[0],
           status,
+          lateMinutes: 0,
           remarks: status === 'Present' ? 'On time' : status === 'Leave' ? 'Medical leave approved' : 'Absent without notice',
+          studentName: sFullName,
           student: {
             admissionId: 'G2-001',
             rollNumber: 'G2-001',
+            name: sFullName,
             user: {
               firstName: fName,
               lastName: lName,
