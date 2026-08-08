@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api, { classService, studentService } from '../../services/api';
 import { demoStudents } from '../../utils/demoData';
+import { getUnifiedStudents, resolveStudentName } from '../../services/syncService';
 import '../../styles/ManagementStyles.css';
 
 const ReportManagement = () => {
@@ -44,18 +45,9 @@ const ReportManagement = () => {
       try {
         const response = await studentService.getAll().catch(() => ({ data: [] }));
         const apiData = Array.isArray(response?.data) ? response.data : [];
-        let loadedStudents = [...apiData];
+        const unified = getUnifiedStudents(apiData);
 
-        if (apiData.length < demoStudents.length) {
-          const existingIds = new Set(apiData.map(s => String(s._id || s.id)));
-          demoStudents.forEach(demoSt => {
-            if (!existingIds.has(String(demoSt._id))) {
-              loadedStudents.push(demoSt);
-            }
-          });
-        }
-
-        const filtered = loadedStudents.filter(st => {
+        const filtered = unified.filter(st => {
           const g = String(st.grade || st.class?.grade || '');
           const s = String(st.section || st.class?.section || '');
           return g === String(selectedGrade) && s === String(selectedSection);
@@ -65,12 +57,11 @@ const ReportManagement = () => {
         const formattedList = filtered.map((st, idx) => {
           const seq = idx + 1;
           const roll = `G${gNum}-${String(seq).padStart(3, '0')}`;
-          const firstName = st.firstName || st.userId?.firstName || 'Student';
-          const lastName = st.lastName || st.userId?.lastName || `${seq}`;
+          const fullName = resolveStudentName(st, demoStudents, idx);
           return {
             ...st,
             formattedRollNumber: roll,
-            displayName: `${firstName} ${lastName} (${roll})`
+            displayName: `${fullName} (${roll})`
           };
         });
 
@@ -87,12 +78,11 @@ const ReportManagement = () => {
         const formattedList = demoFiltered.map((st, idx) => {
           const seq = idx + 1;
           const roll = `G${gNum}-${String(seq).padStart(3, '0')}`;
-          const firstName = st.firstName || st.userId?.firstName || 'Student';
-          const lastName = st.lastName || st.userId?.lastName || `${seq}`;
+          const fullName = resolveStudentName(st, demoStudents, idx);
           return {
             ...st,
             formattedRollNumber: roll,
-            displayName: `${firstName} ${lastName} (${roll})`
+            displayName: `${fullName} (${roll})`
           };
         });
         setClassStudents(formattedList);
