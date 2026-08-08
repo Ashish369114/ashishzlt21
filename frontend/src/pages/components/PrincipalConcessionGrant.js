@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { concessionService, feeService, studentService } from '../../services/api';
 import { formatCurrency } from '../../utils/currencyFormatter';
 import { demoStudents, demoClasses } from '../../utils/demoData';
-import { resolveStudentName, broadcastDataChange, subscribeToDataChanges, getUnifiedConcessions } from '../../services/syncService';
+import { resolveStudentName, broadcastDataChange, subscribeToDataChanges, getUnifiedConcessions, getUnifiedStudents, saveConcessionLocally } from '../../services/syncService';
 
 const rupee = formatCurrency;
 
@@ -141,13 +141,7 @@ const GrantModal = ({ students, fees, onClose, onGranted }) => {
     }
 
     // Persist to localStorage for realtime cross-portal sync
-    try {
-      const stored = JSON.parse(localStorage.getItem('school_concessions') || '[]');
-      localStorage.setItem('school_concessions', JSON.stringify([newConcession, ...stored]));
-      broadcastDataChange('CONCESSION_GRANTED', newConcession);
-    } catch (e) {
-      console.warn('LocalStorage save error:', e);
-    }
+    saveConcessionLocally(newConcession);
 
     setResultMsg(`₹${numAmount.toLocaleString('en-IN')} Concession granted to ${stdName} (Grade ${targetStudent?.grade || selectedGrade}-${targetStudent?.section || selectedSection})!`);
     setDone(true);

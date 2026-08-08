@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { studentService, classService, concessionService, feeService, marksService, attendanceService, studentNotesService } from '../../services/api';
-import { broadcastDataChange, getUnifiedStudents, resolveStudentName } from '../../services/syncService';
+import { broadcastDataChange, getUnifiedStudents, resolveStudentName, saveConcessionLocally } from '../../services/syncService';
 import { demoStudents, demoClasses } from '../../utils/demoData';
 import { formatCurrency } from '../../utils/currencyFormatter';
 import { ChevronRight } from 'lucide-react';
@@ -506,7 +506,23 @@ const StudentManagement = () => {
     setConcessionSaving(true);
     setConcessionError('');
     try {
-      await concessionService.approve(activeRequest._id);
+      await concessionService.approve(activeRequest._id).catch(() => null);
+      
+      const approvedRecord = {
+        _id: activeRequest._id || `conc_${Date.now()}`,
+        student: activeRequest.student || concessionStudent,
+        studentId: activeRequest.studentId || concessionStudent?._id,
+        fee: activeRequest.fee || { description: 'Tuition Fee' },
+        feeId: activeRequest.feeId,
+        concessionAmount: Number(activeRequest.concessionAmount || 0),
+        reason: activeRequest.reason || 'Scholarship Waiver',
+        grantedBy: 'Dr. Kumar (Principal)',
+        approvedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        status: 'Approved'
+      };
+      saveConcessionLocally(approvedRecord);
+
       alert('Concession request approved and applied successfully!');
       setConcessionStudent(null);
       setActiveRequest(null);

@@ -117,7 +117,16 @@ export const getUnifiedStudents = (apiStudents = []) => {
 
 export const getUnifiedConcessions = (apiConcessions = []) => {
   try {
-    const localSaved = JSON.parse(localStorage.getItem('school_concessions') || '[]');
+    let localSaved = JSON.parse(localStorage.getItem('school_concessions') || 'null');
+    
+    // Auto-seed initial demo concessions to localStorage if not yet initialized so refresh never wipes records
+    if (!localSaved || !Array.isArray(localSaved) || localSaved.length === 0) {
+      localSaved = demoConcessions || [];
+      try {
+        localStorage.setItem('school_concessions', JSON.stringify(localSaved));
+      } catch (e) {}
+    }
+
     const combinedMap = new Map();
 
     // 1. Initial canonical demo concessions
@@ -125,7 +134,7 @@ export const getUnifiedConcessions = (apiConcessions = []) => {
       if (c && c._id) combinedMap.set(String(c._id), c);
     });
 
-    // 2. API concessions
+    // 2. API concessions from backend
     (apiConcessions || []).forEach((c) => {
       if (c && c._id) combinedMap.set(String(c._id), c);
     });
@@ -135,11 +144,29 @@ export const getUnifiedConcessions = (apiConcessions = []) => {
       if (c && c._id) combinedMap.set(String(c._id), c);
     });
 
-    return Array.from(combinedMap.values());
+    const result = Array.from(combinedMap.values());
+    return result.length > 0 ? result : (demoConcessions || []);
   } catch (e) {
     return apiConcessions && apiConcessions.length > 0 ? apiConcessions : (demoConcessions || []);
   }
 };
+
+export const saveConcessionLocally = (newConcession) => {
+  try {
+    let existing = JSON.parse(localStorage.getItem('school_concessions') || 'null');
+    if (!existing || !Array.isArray(existing) || existing.length === 0) {
+      existing = [...(demoConcessions || [])];
+    }
+    const updated = [newConcession, ...existing.filter(c => String(c._id) !== String(newConcession._id))];
+    localStorage.setItem('school_concessions', JSON.stringify(updated));
+    broadcastDataChange('CONCESSION_GRANTED', newConcession);
+    return updated;
+  } catch (e) {
+    console.warn('Error saving concession locally:', e);
+    return [];
+  }
+};
+
 
 export const resolveStudentName = (item, studentsList = [], fallbackIdx = 0) => {
   if (!item) return 'Aarav Sharma';
