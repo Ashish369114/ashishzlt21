@@ -65,6 +65,7 @@ const GrantModal = ({ students, fees, onClose, onGranted }) => {
   const [done,            setDone]            = useState(false);
   const [resultMsg,       setResultMsg]       = useState('');
 
+  // 1. Filter students by chosen Grade & Section
   const filteredStudents = students.filter(s => {
     const stdGrade = String(s.grade || s.class?.grade || '');
     const stdSection = String(s.section || s.class?.section || '');
@@ -73,33 +74,20 @@ const GrantModal = ({ students, fees, onClose, onGranted }) => {
     return matchG && matchS;
   });
 
-  // Auto-select first student when filtered list changes or initial load
-  useEffect(() => {
-    if (filteredStudents.length > 0 && (!studentId || !filteredStudents.some(s => String(s._id || s.id) === String(studentId)))) {
-      const firstStd = filteredStudents[0];
-      const newStdId = String(firstStd._id || firstStd.id);
-      setStudentId(newStdId);
-    }
-  }, [selectedGrade, selectedSection, filteredStudents]);
+  // 2. Derive active student reliably
+  const activeStudent = filteredStudents.find(s => String(s._id || s.id) === String(studentId)) || filteredStudents[0] || null;
+  const activeStudentId = activeStudent ? String(activeStudent._id || activeStudent.id) : '';
 
+  // 3. Derive active student's fee records
   const studentFees = fees.filter(f => {
     const sId = f.student?._id || f.student?.id || f.student || f.studentId;
-    return sId && String(sId) === String(studentId) && !f.isPaid;
+    return sId && String(sId) === String(activeStudentId) && !f.isPaid;
   });
 
-  // Auto-select first fee record when student changes
-  useEffect(() => {
-    if (studentFees.length > 0) {
-      if (!feeId || !studentFees.some(f => f._id === feeId)) {
-        setFeeId(studentFees[0]._id);
-      }
-    } else {
-      setFeeId('');
-    }
-  }, [studentId, studentFees]);
-
-  const selectedFee = fees.find(f => f._id === feeId);
-  const maxAmount   = selectedFee ? Number(selectedFee.dueAmount || selectedFee.amount || 0) : 0;
+  // 4. Derive selected fee reliably (defaults to first fee for this student)
+  const selectedFee = studentFees.find(f => f._id === feeId) || studentFees[0] || null;
+  const selectedFeeId = selectedFee ? selectedFee._id : '';
+  const maxAmount = selectedFee ? Number(selectedFee.dueAmount || selectedFee.amount || 0) : 0;
 
   const quickReasons = [
     'Academic Merit Scholarship (90%+)',
@@ -111,8 +99,8 @@ const GrantModal = ({ students, fees, onClose, onGranted }) => {
   ];
 
   const handleGrant = async () => {
-    if (!studentId || !feeId || !amount || !reason.trim()) {
-      setError('Please select student, fee record, amount, and reason.');
+    if (!activeStudentId || !selectedFeeId || !amount || !reason.trim()) {
+      setError('Please select a student, fee record, enter concession amount and reason.');
       return;
     }
     const numAmount = Number(amount);
@@ -124,15 +112,15 @@ const GrantModal = ({ students, fees, onClose, onGranted }) => {
     setSaving(true);
     setError('');
 
-    const targetStudent = students.find(s => String(s._id || s.id) === String(studentId)) || filteredStudents[0];
+    const targetStudent = activeStudent;
     const stdName = `${targetStudent?.firstName || ''} ${targetStudent?.lastName || ''}`.trim() || resolveStudentName(targetStudent, students);
 
     const newConcession = {
       _id: `conc_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
       student: targetStudent,
-      studentId: studentId,
+      studentId: activeStudentId,
       fee: selectedFee || { description: 'Tuition Fee', amount: maxAmount },
-      feeId: feeId,
+      feeId: selectedFeeId,
       concessionAmount: numAmount,
       reason: reason.trim(),
       grantedBy: 'Dr. Kumar (Principal)',
@@ -143,13 +131,13 @@ const GrantModal = ({ students, fees, onClose, onGranted }) => {
 
     try {
       await concessionService.create({
-        studentId,
-        feeId,
+        studentId: activeStudentId,
+        feeId: selectedFeeId,
         concessionAmount: numAmount,
         reason: reason.trim(),
       }).catch(() => null);
     } catch (e) {
-      // Fallback to local sync
+      // Local sync fallback
     }
 
     // Persist to localStorage for realtime cross-portal sync
@@ -200,7 +188,7 @@ const GrantModal = ({ students, fees, onClose, onGranted }) => {
                 <label style={lbl}>Grade</label>
                 <select
                   value={selectedGrade}
-                  onChange={e => setSelectedGrade(e.target.value)}
+                  onChange={e => { setSelectedGrade(e.target.value); setStudentId(''); setFeeId(''); setAmount(''); }}
                   style={inp}
                 >
                   <option value="">All Grades (1–10)</option>
@@ -214,7 +202,7 @@ const GrantModal = ({ students, fees, onClose, onGranted }) => {
                 <label style={lbl}>Section</label>
                 <select
                   value={selectedSection}
-                  onChange={e => setSelectedSection(e.target.value)}
+                  onChange={e => { setSelectedSection(e.target.value); setStudentId(''); setFeeId(''); setAmount(''); }}
                   style={inp}
                 >
                   <option value="">All Sections (A–C)</option>
@@ -228,16 +216,15 @@ const GrantModal = ({ students, fees, onClose, onGranted }) => {
             {/* Student Dropdown */}
             <label style={lbl}>Student ({filteredStudents.length} available) *</label>
             <select
-              value={studentId}
-              onChange={e => setStudentId(e.target.value)}
+              value={activeStudentId}
+              onChange={e => { setStudentId(e.target.value); setFeeId(''); setAmount(''); }}
               style={{ ...inp, marginBottom: '12px', fontWeight: 600 }}
             >
-              <option value="">— Select student —</option>
               {filteredStudents.map((s, idx) => {
                 const sName = `${s.firstName || ''} ${s.lastName || ''}`.trim() || resolveStudentName(s, students, idx);
                 const sGrade = s.grade || s.class?.grade || selectedGrade || '1';
                 const sSec = s.section || s.class?.section || selectedSection || 'A';
-                const roll = s.rollNumber || s.rollNo || `${Number(sGrade) * 100 + idx + 1}`;
+                const roll = s.rollNumber || s.rollNo || `G${sGrade}-${String(idx + 1).padStart(3, '0')}`;
                 return (
                   <option key={s._id || s.id || idx} value={s._id || s.id}>
                     {sName} (Roll: {roll} · Grade {sGrade}-{sSec})
@@ -245,26 +232,25 @@ const GrantModal = ({ students, fees, onClose, onGranted }) => {
                 );
               })}
               {filteredStudents.length === 0 && (
-                <option disabled>No students found in selected Grade & Section</option>
+                <option value="" disabled>No students found in selected Grade & Section</option>
               )}
             </select>
 
             {/* Fee Record Dropdown */}
             <label style={lbl}>Fee Record *</label>
             <select
-              value={feeId}
-              onChange={e => setFeeId(e.target.value)}
+              value={selectedFeeId}
+              onChange={e => { setFeeId(e.target.value); setAmount(''); }}
               style={{ ...inp, marginBottom: '12px', fontWeight: 500 }}
-              disabled={!studentId}
+              disabled={!activeStudentId || studentFees.length === 0}
             >
-              <option value="">— Select fee record —</option>
               {studentFees.map(f => (
                 <option key={f._id} value={f._id}>
                   {f.description} — {rupee(f.dueAmount || f.amount)} due
                 </option>
               ))}
-              {studentId && studentFees.length === 0 && (
-                <option disabled>No unpaid fee records for this student</option>
+              {studentFees.length === 0 && (
+                <option value="" disabled>No unpaid fee records for this student</option>
               )}
             </select>
 
@@ -313,7 +299,7 @@ const GrantModal = ({ students, fees, onClose, onGranted }) => {
               max={maxAmount}
               onChange={e => setAmount(e.target.value)}
               style={{ ...inp, marginBottom: '12px', fontWeight: 700, fontSize: '0.95rem', color: '#15803d' }}
-              placeholder={selectedFee ? `Enter amount up to ${rupee(maxAmount)}` : 'Select a fee record first'}
+              placeholder={selectedFee ? `Enter amount up to ${rupee(maxAmount)}` : 'Select a student fee first'}
             />
 
             {/* Quick Reason Chips */}
@@ -352,8 +338,8 @@ const GrantModal = ({ students, fees, onClose, onGranted }) => {
               <button onClick={onClose} style={btnSec}>Cancel</button>
               <button
                 onClick={handleGrant}
-                disabled={saving || !studentId || !feeId || !amount || !reason}
-                style={btnPrimary('#15803d', saving || !studentId || !feeId || !amount || !reason)}
+                disabled={saving || !activeStudentId || !selectedFeeId || !amount || !reason.trim()}
+                style={btnPrimary('#15803d', saving || !activeStudentId || !selectedFeeId || !amount || !reason.trim())}
               >
                 {saving ? '⏳ Applying…' : '✅ Grant Concession'}
               </button>
