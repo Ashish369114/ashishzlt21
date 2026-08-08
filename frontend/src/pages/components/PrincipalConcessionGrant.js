@@ -382,11 +382,9 @@ const PrincipalConcessionGrant = () => {
       ]);
 
       const apiConcessions = Array.isArray(cRes?.data) ? cRes.data : [];
-      const apiStudents    = (Array.isArray(sRes?.data) && sRes.data.length > 0) ? sRes.data : demoStudents;
-      const apiFees        = Array.isArray(fRes?.data) ? fRes.data : [];
-
+      const apiStudents    = getUnifiedStudents(Array.isArray(sRes?.data) ? sRes.data : []);
       const allConcessions = getUnifiedConcessions(apiConcessions);
-      const allFees = apiFees.length > 0 ? apiFees : generateStudentFees(apiStudents);
+      const allFees        = generateStudentFees(apiStudents);
 
       setConcessions(allConcessions);
       setStudents(apiStudents);

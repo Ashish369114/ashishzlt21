@@ -1,5 +1,4 @@
-// Realtime Sync Service across Portals (Teacher, Principal, Super Admin, Accountant, AO, Librarian, Examiner, Parent, Student)
-import { demoConcessions } from '../utils/demoData';
+import { demoConcessions, demoStudents } from '../utils/demoData';
 
 const CHANNEL_NAME = 'school_os_realtime_sync';
 const broadcastChannel = typeof window !== 'undefined' && 'BroadcastChannel' in window ? new BroadcastChannel(CHANNEL_NAME) : null;
@@ -63,30 +62,56 @@ export const getUnifiedStudents = (apiStudents = []) => {
     const localSaved = JSON.parse(localStorage.getItem('school_students') || '[]');
     const combinedMap = new Map();
 
-    // Load canonical (api/demo) students first — these have proper firstName/lastName
-    apiStudents.forEach((s) => {
+    // 1. Load canonical demo students (300 students, 10 per class across all 30 classes)
+    (demoStudents || []).forEach((s) => {
       const id = s._id || s.id;
       if (id) combinedMap.set(String(id), s);
     });
 
-    // Merge localStorage data — but ONLY update if the canonical record doesn't already have a name
-    localSaved.forEach((s) => {
+    // 2. Merge API students from backend
+    (apiStudents || []).forEach((s) => {
       const id = s._id || s.id;
       if (!id) return;
       const key = String(id);
       const existing = combinedMap.get(key);
       if (existing) {
-        // Existing canonical record — merge only non-name fields from local to avoid clobbering names
-        const hasName = (existing.firstName || existing.userId?.firstName);
-        combinedMap.set(key, hasName ? { ...s, ...existing } : { ...existing, ...s });
+        combinedMap.set(key, { ...existing, ...s });
       } else {
         combinedMap.set(key, s);
       }
     });
 
-    return Array.from(combinedMap.values());
+    // 3. Merge localStorage saved students
+    (localSaved || []).forEach((s) => {
+      const id = s._id || s.id;
+      if (!id) return;
+      const key = String(id);
+      const existing = combinedMap.get(key);
+      if (existing) {
+        combinedMap.set(key, { ...existing, ...s });
+      } else {
+        combinedMap.set(key, s);
+      }
+    });
+
+    const allStudents = Array.from(combinedMap.values());
+
+    // Group and guarantee all 10 students per section (Grade 1-A, 1-B, ..., 10-C)
+    const sectionGroups = {};
+    allStudents.forEach(st => {
+      const g = String(st.grade || st.class?.grade || '1');
+      const s = String(st.section || st.class?.section || 'A');
+      const key = `${g}_${s}`;
+      if (!sectionGroups[key]) sectionGroups[key] = [];
+      if (sectionGroups[key].length < 10) {
+        sectionGroups[key].push(st);
+      }
+    });
+
+    const final10PerSection = Object.values(sectionGroups).flat();
+    return final10PerSection.length > 0 ? final10PerSection : demoStudents;
   } catch (e) {
-    return apiStudents;
+    return demoStudents || apiStudents;
   }
 };
 
