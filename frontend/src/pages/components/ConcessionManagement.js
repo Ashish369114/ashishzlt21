@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { concessionService } from '../../services/api';
 import { formatCurrency } from '../../utils/currencyFormatter';
 import { demoStudents } from '../../utils/demoData';
-import { resolveStudentName, subscribeToDataChanges } from '../../services/syncService';
+import { resolveStudentName, subscribeToDataChanges, getUnifiedConcessions } from '../../services/syncService';
 
 const fmt   = d => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 const rupee = formatCurrency;
@@ -19,48 +19,8 @@ const ConcessionManagement = () => {
     try {
       const res = await concessionService.getAll().catch(() => ({ data: [] }));
       const apiData = Array.isArray(res.data) ? res.data : [];
-
-      const storedConcessions = JSON.parse(localStorage.getItem('school_concessions') || '[]');
-
-      const initialDemoConcessions = [
-        {
-          _id: 'conc_1',
-          student: demoStudents[0] || { firstName: 'Rohan', lastName: 'Sharma', grade: '1', section: 'A' },
-          fee: { description: 'Tuition & Academic Fee (Term 1 - Grade 1)', amount: 43500 },
-          concessionAmount: 8000,
-          reason: 'Academic Merit Scholarship (95%+ in Term Exams)',
-          grantedBy: 'Dr. Kumar (Principal)',
-          createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'Approved'
-        },
-        {
-          _id: 'conc_2',
-          student: demoStudents[1] || { firstName: 'Ananya', lastName: 'Mehta', grade: '1', section: 'A' },
-          fee: { description: 'Annual Administrative & Campus Facility Fee', amount: 12000 },
-          concessionAmount: 3500,
-          reason: 'Sibling Discount Concession',
-          grantedBy: 'Dr. Kumar (Principal)',
-          createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'Approved'
-        },
-        {
-          _id: 'conc_3',
-          student: demoStudents[12] || { firstName: 'Kabir', lastName: 'Patel', grade: '2', section: 'A' },
-          fee: { description: 'Tuition & Academic Fee (Term 1 - Grade 2)', amount: 45000 },
-          concessionAmount: 15000,
-          reason: 'EWS / Financial Hardship Waiver',
-          grantedBy: 'Dr. Kumar (Principal)',
-          createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'Approved'
-        }
-      ];
-
-      const combinedMap = new Map();
-      [...storedConcessions, ...apiData, ...initialDemoConcessions].forEach(c => {
-        if (c && c._id) combinedMap.set(c._id, c);
-      });
-
-      setConcessions(Array.from(combinedMap.values()));
+      const unified = getUnifiedConcessions(apiData);
+      setConcessions(unified);
     } catch (err) {
       setError('Failed to load concession records.');
     } finally {

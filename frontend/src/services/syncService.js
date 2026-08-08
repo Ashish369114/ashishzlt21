@@ -1,4 +1,5 @@
 // Realtime Sync Service across Portals (Teacher, Principal, Super Admin, Accountant, AO, Librarian, Examiner, Parent, Student)
+import { demoConcessions } from '../utils/demoData';
 
 const CHANNEL_NAME = 'school_os_realtime_sync';
 const broadcastChannel = typeof window !== 'undefined' && 'BroadcastChannel' in window ? new BroadcastChannel(CHANNEL_NAME) : null;
@@ -83,9 +84,14 @@ export const getUnifiedStudents = (apiStudents = []) => {
       }
     });
 
+    return Array.from(combinedMap.values());
+  } catch (e) {
+    return apiStudents;
+  }
+};
+
 export const getUnifiedConcessions = (apiConcessions = []) => {
   try {
-    const { demoConcessions } = require('../utils/demoData');
     const localSaved = JSON.parse(localStorage.getItem('school_concessions') || '[]');
     const combinedMap = new Map();
 
@@ -106,10 +112,9 @@ export const getUnifiedConcessions = (apiConcessions = []) => {
 
     return Array.from(combinedMap.values());
   } catch (e) {
-    return apiConcessions;
+    return apiConcessions && apiConcessions.length > 0 ? apiConcessions : (demoConcessions || []);
   }
 };
-
 
 export const resolveStudentName = (item, studentsList = [], fallbackIdx = 0) => {
   if (!item) return 'Aarav Sharma';

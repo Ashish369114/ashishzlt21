@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { concessionService, feeService, studentService } from '../../services/api';
 import { formatCurrency } from '../../utils/currencyFormatter';
 import { demoStudents, demoClasses } from '../../utils/demoData';
-import { resolveStudentName, broadcastDataChange, subscribeToDataChanges } from '../../services/syncService';
+import { resolveStudentName, broadcastDataChange, subscribeToDataChanges, getUnifiedConcessions } from '../../services/syncService';
 
 const rupee = formatCurrency;
 
@@ -399,50 +399,7 @@ const PrincipalConcessionGrant = () => {
       const apiStudents    = (Array.isArray(sRes?.data) && sRes.data.length > 0) ? sRes.data : demoStudents;
       const apiFees        = Array.isArray(fRes?.data) ? fRes.data : [];
 
-      // Local storage saved concessions
-      const storedConcessions = JSON.parse(localStorage.getItem('school_concessions') || '[]');
-
-      // Rich seed concessions
-      const initialDemoConcessions = [
-        {
-          _id: 'conc_1',
-          student: demoStudents[0] || { firstName: 'Rohan', lastName: 'Sharma', grade: '1', section: 'A' },
-          fee: { description: 'Tuition & Academic Fee (Term 1 - Grade 1)', amount: 43500 },
-          concessionAmount: 8000,
-          reason: 'Academic Merit Scholarship (95%+ in Term Exams)',
-          grantedBy: 'Dr. Kumar (Principal)',
-          createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'Approved'
-        },
-        {
-          _id: 'conc_2',
-          student: demoStudents[1] || { firstName: 'Ananya', lastName: 'Mehta', grade: '1', section: 'A' },
-          fee: { description: 'Annual Administrative & Campus Facility Fee', amount: 12000 },
-          concessionAmount: 3500,
-          reason: 'Sibling Discount Concession',
-          grantedBy: 'Dr. Kumar (Principal)',
-          createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'Approved'
-        },
-        {
-          _id: 'conc_3',
-          student: demoStudents[12] || { firstName: 'Kabir', lastName: 'Patel', grade: '2', section: 'A' },
-          fee: { description: 'Tuition & Academic Fee (Term 1 - Grade 2)', amount: 45000 },
-          concessionAmount: 15000,
-          reason: 'EWS / Financial Hardship Waiver',
-          grantedBy: 'Dr. Kumar (Principal)',
-          createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'Approved'
-        }
-      ];
-
-      // Merge stored + api + demo concessions without duplicate IDs
-      const combinedConcessionsMap = new Map();
-      [...storedConcessions, ...apiConcessions, ...initialDemoConcessions].forEach(c => {
-        if (c && c._id) combinedConcessionsMap.set(c._id, c);
-      });
-
-      const allConcessions = Array.from(combinedConcessionsMap.values());
+      const allConcessions = getUnifiedConcessions(apiConcessions);
       const allFees = apiFees.length > 0 ? apiFees : generateStudentFees(apiStudents);
 
       setConcessions(allConcessions);
