@@ -182,21 +182,29 @@ const ReportManagement = () => {
     
     if (reportFilters.reportType === 'academic') {
       if (!reportFilters.term) {
-        setError('Please select a Term');
+        setError('Please select an Exam Type / Term');
         return;
       }
     }
     
     if (reportFilters.reportType === 'performance') {
-      if (!reportFilters.classId) {
-        setError('Please select a Class');
+      if (!reportFilters.classId && !selectedGrade) {
+        setError('Please select a Grade');
         return;
       }
     }
     
     try {
       setError('');
-      const response = await api.post(`/reports/generate/${reportFilters.reportType}`, reportFilters);
+      const selectedStudentObj = classStudents.find(s => String(s._id || s.id) === String(selectedStudent));
+      const payload = {
+        ...reportFilters,
+        grade: selectedGrade,
+        section: selectedSection,
+        studentName: selectedStudentObj?.displayName ? selectedStudentObj.displayName.split(' (')[0] : (selectedStudentObj?.name || ''),
+      };
+
+      const response = await api.post(`/reports/generate/${reportFilters.reportType}`, payload);
       fetchReports();
       setGeneratedReportData(response.data);
       alert('Report generated successfully!');
@@ -315,8 +323,14 @@ const ReportManagement = () => {
           <select
             value={selectedStudent}
             onChange={e => {
-              setSelectedStudent(e.target.value);
-              setReportFilters(prev => ({ ...prev, studentId: e.target.value }));
+              const val = e.target.value;
+              setSelectedStudent(val);
+              const foundSt = classStudents.find(s => String(s._id || s.id) === String(val));
+              setReportFilters(prev => ({ 
+                ...prev, 
+                studentId: val,
+                studentName: foundSt ? (foundSt.displayName ? foundSt.displayName.split(' (')[0] : foundSt.name) : ''
+              }));
             }}
             style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.95rem', marginBottom: '10px' }}
           >
