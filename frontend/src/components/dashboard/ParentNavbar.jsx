@@ -66,8 +66,8 @@ const ParentNavbar = ({
             >
               {students.map((st) => {
                 const id = st._id || st.userId?._id || st.userId;
-                const name = st.name || `${st.userId?.firstName || ''} ${st.userId?.lastName || ''}`.trim() || 'Child';
-                const grade = st.grade || st.class?.grade || '5';
+                const name = st.name || `${st.userId?.firstName || ''} ${st.userId?.lastName || ''}`.trim() || 'Ramesh Kumar';
+                const grade = st.grade || st.class?.grade || '1';
                 const section = st.section || st.class?.section || 'A';
                 return (
                   <option key={id} value={id}>
@@ -78,7 +78,7 @@ const ParentNavbar = ({
             </select>
           ) : students.length === 1 ? (
             <span className="text-xs font-black text-[#0C4A86] bg-white px-3 py-1.5 rounded-xl border border-slate-200">
-              {students[0]?.name || `${students[0]?.userId?.firstName || 'Aarav'} ${students[0]?.userId?.lastName || ''}`.trim()} (Grade {students[0]?.grade || '5'}, Section {students[0]?.section || 'A'})
+              {students[0]?.name || `${students[0]?.userId?.firstName || 'Ramesh'} ${students[0]?.userId?.lastName || 'Kumar'}`.trim()} (Grade {students[0]?.grade || '1'}, Section {students[0]?.section || 'A'})
             </span>
           ) : null}
         </div>

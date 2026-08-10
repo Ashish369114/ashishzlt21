@@ -71,19 +71,19 @@ const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStuden
   const activeStudent = students.find(
     (s) => (s._id || s.userId?._id || s.userId) === selectedStudentId
   ) || students[0] || {
-    name: 'Aarav Singh',
-    grade: '6',
+    name: 'Ramesh Kumar',
+    grade: '1',
     section: 'A',
-    rollNumber: '09',
-    admissionNo: 'ADM-2026-0914',
+    rollNumber: 'G1-001',
+    admissionNo: 'ADM-2026-0512',
     classTeacher: 'Ramesh Sharma'
   };
 
   const activeStudentName = activeStudent.userId?.firstName
     ? `${activeStudent.userId.firstName} ${activeStudent.userId.lastName || ''}`.trim()
-    : activeStudent.name || 'Aarav Singh';
+    : activeStudent.name || 'Ramesh Kumar';
 
-  const studentGradeDisplay = activeStudent.grade || activeStudent.class?.grade || '6';
+  const studentGradeDisplay = activeStudent.grade || activeStudent.class?.grade || '1';
   const studentSectionDisplay = activeStudent.section || activeStudent.class?.section || 'A';
 
   // 1. Summary Cards tailored to active student
@@ -174,11 +174,17 @@ const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStuden
                 onChange={(e) => onSelectStudent(e.target.value)}
                 className="rounded-lg bg-white px-2.5 py-1 font-black text-[#0C4A86] focus:outline-none cursor-pointer text-xs"
               >
-                {students.map((st) => (
-                  <option key={st._id || st.userId?._id} value={st._id || st.userId?._id}>
-                    {st.userId?.firstName || st.name} (Class {st.grade || '5'}{st.section || 'A'})
-                  </option>
-                ))}
+                {students.map((st) => {
+                  const id = st._id || st.userId?._id || st.userId;
+                  const name = st.name || `${st.userId?.firstName || ''} ${st.userId?.lastName || ''}`.trim() || 'Ramesh Kumar';
+                  const grade = st.grade || st.class?.grade || '1';
+                  const section = st.section || st.class?.section || 'A';
+                  return (
+                    <option key={id} value={id}>
+                      {name} (Class {grade}{section})
+                    </option>
+                  );
+                })}
               </select>
             )}
           </div>
@@ -190,7 +196,7 @@ const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStuden
             <div>
               <p className="font-black text-white text-sm">{activeStudentName}</p>
               <p className="text-[11px] text-sky-100 font-semibold">
-                Class {studentGradeDisplay} - Sec {studentSectionDisplay} • Roll No: {activeStudent.rollNumber || '05'} • Teacher: {activeStudent.classTeacher || 'Ramesh Sharma'}
+                Class {studentGradeDisplay} - Sec {studentSectionDisplay} • Roll No: {activeStudent.rollNumber || 'G1-001'} • Teacher: {activeStudent.classTeacher || 'Ramesh Sharma'}
               </p>
             </div>
           </div>

@@ -25,12 +25,12 @@ const mockChildrenList = [
     _id: 's1',
     userId: { _id: 'u1', firstName: 'Ramesh', lastName: 'Kumar' },
     name: 'Ramesh Kumar',
-    grade: '5',
+    grade: '1',
     section: 'A',
-    rollNumber: '05',
+    rollNumber: 'G1-001',
     admissionNo: 'ADM-2026-0512',
     classTeacher: 'Ramesh Sharma',
-    dob: '2016-08-05'
+    dob: '2019-08-05'
   },
   {
     _id: 's2',
@@ -38,7 +38,7 @@ const mockChildrenList = [
     name: 'Anjali Kumar',
     grade: '8',
     section: 'B',
-    rollNumber: '14',
+    rollNumber: 'G8-014',
     admissionNo: 'ADM-2026-0814',
     classTeacher: 'Sunita Verma',
     dob: '2013-03-12'

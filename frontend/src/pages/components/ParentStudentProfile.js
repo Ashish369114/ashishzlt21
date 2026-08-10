@@ -10,12 +10,12 @@ const ParentStudentProfile = ({ user, students = [], selectedStudentId, student 
     (s) => (s._id || s.userId?._id || s.userId) === selectedStudentId
   ) || students[0] || {
     name: 'Ramesh Kumar',
-    grade: 'Grade 5',
-    section: 'Section A',
-    rollNumber: '05',
+    grade: '1',
+    section: 'A',
+    rollNumber: 'G1-001',
     admissionNo: 'ADM-2026-0512',
     classTeacher: 'Ramesh Sharma',
-    dob: '2016-08-05'
+    dob: '2019-08-05'
   };
 
   const name = activeStudent.userId?.firstName
@@ -25,6 +25,9 @@ const ParentStudentProfile = ({ user, students = [], selectedStudentId, student 
   const primaryParentName = user?.firstName
     ? `${user.firstName} ${user.lastName || ''}`.trim()
     : (user?.name || activeStudent.parentName || 'Rajesh Sharma');
+
+  const studentGradeStr = String(activeStudent.grade || '1').replace(/^Grade\s*/i, '');
+  const studentSectionStr = String(activeStudent.section || 'A').replace(/^Section\s*/i, '');
 
   return (
     <div className="space-y-6">
@@ -61,7 +64,7 @@ const ParentStudentProfile = ({ user, students = [], selectedStudentId, student 
               </span>
             </div>
             <p className="text-xs font-bold text-[#0096DA]">
-              Grade {activeStudent.grade || '5'} - Section {activeStudent.section || 'A'} • Roll No: {activeStudent.rollNumber || '05'}
+              Grade {studentGradeStr} - Section {studentSectionStr} • Roll No: {activeStudent.rollNumber || 'G1-001'}
             </p>
             <p className="text-xs text-slate-500 font-semibold">
               Admission No: <strong className="text-slate-800">{activeStudent.admissionNo || 'ADM-2026-0512'}</strong> • Academic Year: <strong className="text-slate-800">2026-2027</strong>
