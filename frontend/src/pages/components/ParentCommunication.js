@@ -102,11 +102,17 @@ const ParentCommunication = () => {
               <label>Child</label>
               <select value={selectedStudent} onChange={(e) => setSelectedStudent(e.target.value)}>
                 <option value="">Select a child</option>
-                {students.map((student) => (
-                  <option key={student._id || student.userId} value={student._id || student.userId}>
-                    {student.userId?.firstName} {student.userId?.lastName}
-                  </option>
-                ))}
+                {students.map((student) => {
+                  const id = student._id || student.userId?._id || student.userId;
+                  const name = student.name || `${student.userId?.firstName || ''} ${student.userId?.lastName || ''}`.trim() || 'Ramesh Kumar';
+                  const grade = student.grade || student.class?.grade || '1';
+                  const section = student.section || student.class?.section || 'A';
+                  return (
+                    <option key={id} value={id}>
+                      {name} — Grade {grade}, Section {section}
+                    </option>
+                  );
+                })}
               </select>
             </div>
           </div>

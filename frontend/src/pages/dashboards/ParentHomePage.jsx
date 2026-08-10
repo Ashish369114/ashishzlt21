@@ -181,7 +181,7 @@ const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStuden
                   const section = st.section || st.class?.section || 'A';
                   return (
                     <option key={id} value={id}>
-                      {name} (Class {grade}{section})
+                      {name} — Grade {grade}, Section {section}
                     </option>
                   );
                 })}
