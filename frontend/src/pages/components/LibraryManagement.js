@@ -329,36 +329,46 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
   const fetchBooks = async () => {
     try {
       setLoading(true);
-      const savedBooks = localStorage.getItem('library_books_list');
+      const savedBooksStr = localStorage.getItem('library_books_list');
+      const savedBooks = savedBooksStr ? JSON.parse(savedBooksStr) : [];
+
       const [libRes, stuRes] = await Promise.all([
         libraryService.getAll().catch(() => ({ data: [] })),
         studentService.getAll().catch(() => ({ data: [] }))
       ]);
 
-      let fetchedBooks;
-      if (savedBooks) {
-        fetchedBooks = JSON.parse(savedBooks);
-      } else if (libRes.data && libRes.data.length > 0) {
-        fetchedBooks = libRes.data;
-        localStorage.setItem('library_books_list', JSON.stringify(fetchedBooks));
-      } else {
-        fetchedBooks = demoLibraryBooks;
-        localStorage.setItem('library_books_list', JSON.stringify(demoLibraryBooks));
+      const apiBooks = Array.isArray(libRes?.data) ? libRes.data : [];
+
+      let combinedBooks = [...apiBooks];
+      const apiIsbns = new Set(apiBooks.map(b => (b.isbn || '').replace(/\D/g, '')).filter(Boolean));
+      const apiIds = new Set(apiBooks.map(b => String(b._id || b.id)));
+
+      savedBooks.forEach(sb => {
+        const sbIsbn = (sb.isbn || '').replace(/\D/g, '');
+        const sbId = String(sb._id || sb.id);
+        if ((!sbIsbn || !apiIsbns.has(sbIsbn)) && (!sbId || !apiIds.has(sbId))) {
+          combinedBooks.push(sb);
+        }
+      });
+
+      if (combinedBooks.length === 0) {
+        combinedBooks = demoLibraryBooks;
       }
 
-      const fetchedStudents = (stuRes.data && stuRes.data.length > 0) ? stuRes.data : demoStudents;
-      
-      setBooks(fetchedBooks);
-      const avail = fetchedBooks.reduce((acc, b) => acc + (b.availableCopies !== undefined ? b.availableCopies : (b.totalCopies || 0)), 0);
-      const total = fetchedBooks.reduce((acc, b) => acc + (b.totalCopies || 0), 0);
-      setAvailableBooks(avail);
+      setBooks(combinedBooks);
+      localStorage.setItem('library_books_list', JSON.stringify(combinedBooks));
+
+      const fetchedStudents = (stuRes?.data && stuRes.data.length > 0) ? stuRes.data : demoStudents;
       setStudents(fetchedStudents);
 
+      const avail = combinedBooks.reduce((acc, b) => acc + (b.availableCopies !== undefined ? b.availableCopies : (b.totalCopies || 0)), 0);
+      const total = combinedBooks.reduce((acc, b) => acc + (b.totalCopies || 0), 0);
+      setAvailableBooks(avail);
       localStorage.setItem('library_stats', JSON.stringify({ total, available: avail, borrowed: total - avail }));
     } catch (err) {
       console.warn('Error fetching books, using demo/saved books:', err);
-      const savedBooks = localStorage.getItem('library_books_list');
-      const fallback = savedBooks ? JSON.parse(savedBooks) : demoLibraryBooks;
+      const savedBooksStr = localStorage.getItem('library_books_list');
+      const fallback = savedBooksStr ? JSON.parse(savedBooksStr) : demoLibraryBooks;
       setBooks(fallback);
       setStudents(demoStudents);
       const avail = fallback.reduce((acc, b) => acc + (b.availableCopies !== undefined ? b.availableCopies : 0), 0);
@@ -375,7 +385,7 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
   };
 
   const handleEditBook = (book) => {
-    setEditingBookId(book._id);
+    setEditingBookId(book._id || book.id);
     setNewBook({
       title: book.title,
       isbn: book.isbn,
@@ -433,19 +443,58 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
         ...newBook,
         totalCopies: parseInt(newBook.totalCopies, 10) || 1,
       };
+
+      let response;
       if (editingBookId) {
-        await libraryService.update(editingBookId, bookPayload);
-        alert('Book updated successfully!');
+        response = await libraryService.update(editingBookId, bookPayload).catch(err => {
+          console.warn('Library update API failed, saving locally:', err);
+          return null;
+        });
       } else {
-        await libraryService.add(bookPayload);
-        alert('Book added successfully!');
+        response = await libraryService.add(bookPayload).catch(err => {
+          console.warn('Library add API failed, saving locally:', err);
+          return null;
+        });
       }
-      fetchBooks();
+
+      const returnedBook = response?.data;
+      const newBookObj = {
+        _id: returnedBook?._id || returnedBook?.id || editingBookId || `bk_${Date.now()}`,
+        id: returnedBook?.id || returnedBook?._id || editingBookId || `bk_${Date.now()}`,
+        title: returnedBook?.title || bookPayload.title,
+        isbn: returnedBook?.isbn || bookPayload.isbn,
+        author: returnedBook?.author || bookPayload.author,
+        publisher: returnedBook?.publisher || bookPayload.publisher || '',
+        category: returnedBook?.category || bookPayload.category || 'textbook',
+        totalCopies: returnedBook?.totalCopies || bookPayload.totalCopies,
+        availableCopies: returnedBook?.availableCopies ?? bookPayload.totalCopies,
+        borrowHistory: returnedBook?.borrowHistory || [],
+        status: returnedBook?.status || 'available',
+        ebookUrl: returnedBook?.ebookUrl || bookPayload.ebookUrl || ''
+      };
+
+      // Immediately update local books state & localStorage
+      let updatedBooksList;
+      if (editingBookId) {
+        updatedBooksList = books.map(b => String(b._id || b.id) === String(editingBookId) ? { ...b, ...newBookObj } : b);
+      } else {
+        updatedBooksList = [newBookObj, ...books.filter(b => String(b._id || b.id) !== String(newBookObj.id))];
+      }
+
+      setBooks(updatedBooksList);
+      localStorage.setItem('library_books_list', JSON.stringify(updatedBooksList));
+
+      const totalCopiesSum = updatedBooksList.reduce((acc, b) => acc + (b.totalCopies || 0), 0);
+      const totalAvailSum = updatedBooksList.reduce((acc, b) => acc + (b.availableCopies !== undefined ? b.availableCopies : (b.totalCopies || 0)), 0);
+      setAvailableBooks(totalAvailSum);
+      localStorage.setItem('library_stats', JSON.stringify({ total: totalCopiesSum, available: totalAvailSum, borrowed: totalCopiesSum - totalAvailSum }));
+
+      alert(editingBookId ? 'Book updated successfully!' : 'Book added successfully!');
       resetBookForm();
+      fetchBooks();
     } catch (err) {
       console.error('Error saving book:', err);
-      const rawMsg = err.response?.data?.message || err.response?.data?.error || 'Error saving book';
-      // Make the error message clear, even if backend returns generic text
+      const rawMsg = err.response?.data?.message || err.response?.data?.error || err.message || 'Error saving book';
       const friendlyMsg = rawMsg.toLowerCase().includes('unique') || rawMsg.toLowerCase().includes('already exists')
         ? `❌ ISBN "${newBook.isbn}" is already registered in the library. Please use a unique ISBN.`
         : rawMsg;
