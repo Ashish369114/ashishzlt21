@@ -300,8 +300,8 @@ const ParentResults = ({ selectedStudentId, student }) => {
         examName={activeExamConfig.name}
         studentData={{
           name: studentName,
-          rollNo: student?.rollNumber || '05',
-          grade: student?.grade ? `Grade ${student.grade}` : 'Grade 5',
+          rollNo: student?.rollNumber || 'G1-001',
+          grade: student?.grade ? (String(student.grade).startsWith('Grade') ? student.grade : `Grade ${student.grade}`) : 'Grade 1',
           section: student?.section || 'A',
           admissionNo: student?.admissionNo || 'ADM-2026-0512'
         }}

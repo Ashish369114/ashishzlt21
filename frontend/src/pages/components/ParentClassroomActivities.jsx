@@ -3,6 +3,53 @@ import { useNavigate } from 'react-router-dom';
 import { Sparkles, Calendar, Clock, MapPin, Tag, Play, Image as ImageIcon, X, Video, Film, Eye } from 'lucide-react';
 
 const sampleClassroomActivities = [
+  // Grade 1 Section A Classroom Activities
+  {
+    id: 101,
+    title: 'Grade 1 Phonics & Alphabet Recitation Activity',
+    grade: '1',
+    section: 'A',
+    className: 'Grade 1 - A',
+    subject: 'English',
+    date: 'August 1, 2026',
+    teacher: 'Ananya Roy',
+    description: 'Interactive letter phonics sound storytelling and flashcard recitation activity for Grade 1 students.',
+    mediaType: 'image',
+    mediaUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80',
+    thumbUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=600&q=80',
+    mediaCount: '5 Classroom Photos'
+  },
+  {
+    id: 102,
+    title: 'Drawing, Painting & Color Recognition Workshop',
+    grade: '1',
+    section: 'A',
+    className: 'Grade 1 - A',
+    subject: 'Art & Craft',
+    date: 'July 29, 2026',
+    teacher: 'S. Kulkarni',
+    description: 'Hands-on finger painting, primary color mixing, and creative animal sketching session for Grade 1 children.',
+    mediaType: 'video',
+    mediaUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    thumbUrl: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=600&q=80',
+    mediaCount: '1 HD Activity Video (2 mins)'
+  },
+  {
+    id: 103,
+    title: 'Outdoor PE Fun Games & Physical Coordination',
+    grade: '1',
+    section: 'A',
+    className: 'Grade 1 - A',
+    subject: 'Sports & PE',
+    date: 'July 25, 2026',
+    teacher: 'Coach Arjun',
+    description: 'Fun obstacle game course and rhythmic coordination drills on the junior school playground.',
+    mediaType: 'image',
+    mediaUrl: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=1200&q=80',
+    thumbUrl: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=600&q=80',
+    mediaCount: '4 Playground Photos'
+  },
+  // Grade 5 Section A Classroom Activities
   {
     id: 1,
     title: 'Mental Math & Speed Algebra Classroom Competition',
@@ -86,7 +133,7 @@ const ParentClassroomActivities = ({ selectedStudentId, student }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedVideo, setSelectedVideo] = useState(null);
 
-  const studentGrade = student?.grade || '5';
+  const studentGrade = student?.grade || '1';
   const studentSection = student?.section || 'A';
   const studentName = student?.userId?.firstName
     ? `${student.userId.firstName} ${student.userId.lastName || ''}`.trim()

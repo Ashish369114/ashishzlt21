@@ -4,6 +4,47 @@ import { BookOpen, Clock, Paperclip, Download, CheckCircle2, Filter, Calendar, U
 import { homeworkService } from '../../services/api';
 
 const sampleHomeworks = [
+  // Grade 1 Homeworks
+  {
+    id: 'hw-101',
+    title: 'English Phonics Worksheet: Vowel Sound Tracing & Matching',
+    subject: 'English',
+    description: 'Trace uppercase and lowercase letters A to Z and match 3-letter vowel words with picture drawings.',
+    assignedDate: '2026-08-01',
+    dueDate: '2026-08-08',
+    teacherName: 'Ananya Roy',
+    fileName: 'Grade1_English_Phonics_Worksheet.pdf',
+    fileUrl: '',
+    grade: '1',
+    section: 'A'
+  },
+  {
+    id: 'hw-102',
+    title: 'Mathematics Number Fun: Counting 1 to 50 & Basic Addition',
+    subject: 'Mathematics',
+    description: 'Complete page 12 and 13 in junior workbook counting objects and writing sums up to 10.',
+    assignedDate: '2026-08-02',
+    dueDate: '2026-08-09',
+    teacherName: 'Ramesh Sharma',
+    fileName: 'Grade1_Math_Counting_Workbook.pdf',
+    fileUrl: '',
+    grade: '1',
+    section: 'A'
+  },
+  {
+    id: 'hw-103',
+    title: 'Environmental Science: Drawing & Coloring Healthy Fruits',
+    subject: 'Science',
+    description: 'Color the fruit chart on page 8 and write names of 5 healthy fruits in your notebook.',
+    assignedDate: '2026-08-03',
+    dueDate: '2026-08-10',
+    teacherName: 'Sunita Verma',
+    fileName: 'Grade1_Science_Fruit_Chart.pdf',
+    fileUrl: '',
+    grade: '1',
+    section: 'A'
+  },
+  // Grade 5 Homeworks
   {
     id: 'hw-1',
     title: 'Mathematics Chapter 5: Quadratic Equations Practice Sheet',
@@ -140,7 +181,7 @@ const ParentHomework = ({ selectedStudentId, student }) => {
   const [homeworkList, setHomeworkList] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const studentGrade = student?.grade || '5';
+  const studentGrade = student?.grade || '1';
   const studentSection = student?.section || 'A';
   const studentName = student?.userId?.firstName
     ? `${student.userId.firstName} ${student.userId.lastName || ''}`.trim()

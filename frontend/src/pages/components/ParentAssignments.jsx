@@ -4,6 +4,47 @@ import { FileText, CheckCircle2, Clock, AlertCircle, Paperclip, Download, BookOp
 import { schoolDataService } from '../../services/schoolDataStore';
 
 const sampleAssignments = [
+  // Grade 1 Assignments
+  {
+    id: 'asg-101',
+    title: 'Junior Picture Storybook & Reading Activity',
+    subject: 'English',
+    description: 'Read the illustrated storybook "The Helpful Elephant" and draw your favorite scene on A4 paper.',
+    startDate: '2026-08-01',
+    dueDate: '2026-08-15',
+    teacherName: 'Ananya Roy',
+    fileName: 'Grade1_Picture_Storybook_Activity.pdf',
+    fileUrl: '',
+    grade: '1',
+    section: 'A'
+  },
+  {
+    id: 'asg-102',
+    title: 'Math Craft: Number Caterpillar & Clock Model',
+    subject: 'Mathematics',
+    description: 'Build a paper caterpillar with numbers 1 to 20 written on colorful circles with parent assistance.',
+    startDate: '2026-08-02',
+    dueDate: '2026-08-18',
+    teacherName: 'Ramesh Sharma',
+    fileName: 'Grade1_Math_Caterpillar_Craft.pdf',
+    fileUrl: '',
+    grade: '1',
+    section: 'A'
+  },
+  {
+    id: 'asg-103',
+    title: 'Nature Explorers: Leaf & Flower Pressing Journal',
+    subject: 'Science',
+    description: 'Collect 3 different fallen leaves from your garden, press them in a notebook, and color their outlines.',
+    startDate: '2026-08-03',
+    dueDate: '2026-08-20',
+    teacherName: 'Sunita Verma',
+    fileName: 'Grade1_Nature_Explorers_Journal.pdf',
+    fileUrl: '',
+    grade: '1',
+    section: 'A'
+  },
+  // Grade 5 Assignments
   {
     id: 'asg-1',
     title: 'Mathematics Term Project: Geometry & Architecture Models',
@@ -63,7 +104,7 @@ const ParentAssignments = ({ selectedStudentId, student }) => {
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const studentGrade = student?.grade || '5';
+  const studentGrade = student?.grade || '1';
   const studentSection = student?.section || 'A';
   const studentName = student?.userId?.firstName
     ? `${student.userId.firstName} ${student.userId.lastName || ''}`.trim()

@@ -3,6 +3,43 @@ import { useNavigate } from 'react-router-dom';
 import { FileCode, Download, BookOpen, Clock, Paperclip, FileText } from 'lucide-react';
 
 const defaultStudyNotesList = [
+  // Grade 1 Study Notes
+  {
+    id: 101,
+    title: 'Grade 1 English: Alphabets, Phonics & Easy Words Notes',
+    subject: 'English',
+    teacher: 'Ananya Roy',
+    date: 'August 2, 2026',
+    topic: 'Phonics & Reading',
+    fileName: 'Grade1_English_Phonics.pdf',
+    fileType: 'PDF Document',
+    description: 'Fun phonics sounds, letter tracing guides, and 3-letter word reading exercises for Grade 1 beginners.',
+    grade: '1'
+  },
+  {
+    id: 102,
+    title: 'Grade 1 Mathematics: Number Counting & Shapes Guide',
+    subject: 'Mathematics',
+    teacher: 'Ramesh Sharma',
+    date: 'July 30, 2026',
+    topic: 'Numbers 1-100 & Shapes',
+    fileName: 'Grade1_Math_Counting_Shapes.pdf',
+    fileType: 'PDF Document',
+    description: 'Illustrated guide on counting numbers 1 to 100, basic addition using picture objects, and 2D geometric shapes.',
+    grade: '1'
+  },
+  {
+    id: 103,
+    title: 'Grade 1 Science: Living Things & Plant World Notes',
+    subject: 'Science',
+    teacher: 'Sunita Verma',
+    date: 'July 26, 2026',
+    topic: 'Plants & Animals',
+    fileName: 'Grade1_Science_Plants_Animals.pdf',
+    fileType: 'PDF Document',
+    description: 'Easy notes explaining parts of a plant, domestic animals, and healthy habits for Grade 1 students.',
+    grade: '1'
+  },
   // Grade 5 Study Notes
   {
     id: 1,
@@ -71,7 +108,7 @@ const ParentStudyNotes = ({ selectedStudentId, student }) => {
   const navigate = useNavigate();
   const [selectedSubject, setSelectedSubject] = useState('All');
 
-  const studentGrade = student?.grade || '5';
+  const studentGrade = student?.grade || '1';
   const studentName = student?.userId?.firstName
     ? `${student.userId.firstName} ${student.userId.lastName || ''}`.trim()
     : (student?.name || 'Child');

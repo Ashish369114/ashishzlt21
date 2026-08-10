@@ -4,6 +4,18 @@ import { Clock, Calendar, BookOpen, MapPin, User, CheckCircle2, ChevronLeft, Che
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+// Grade 1 Section A Timetable Schedule
+const grade1Timetable = [
+  { time: '08:30 AM - 09:15 AM', period: 'Period 1', monday: { subject: 'English Alphabets & Phonics', teacher: 'Ananya Roy', room: 'Room 1A' }, tuesday: { subject: 'Basic Mathematics & Numbers', teacher: 'Ramesh Sharma', room: 'Room 1A' }, wednesday: { subject: 'English Reading', teacher: 'Ananya Roy', room: 'Room 1A' }, thursday: { subject: 'Environmental Studies', teacher: 'Sunita Verma', room: 'Room 1A' }, friday: { subject: 'Basic Mathematics', teacher: 'Ramesh Sharma', room: 'Room 1A' }, saturday: { subject: 'Rhymes & Story Telling', teacher: 'K. Rajesh', room: 'Activity Room' } },
+  { time: '09:15 AM - 10:00 AM', period: 'Period 2', monday: { subject: 'Environmental Studies', teacher: 'Sunita Verma', room: 'Room 1A' }, tuesday: { subject: 'Drawing & Coloring', teacher: 'S. Kulkarni', room: 'Art Room' }, wednesday: { subject: 'Basic Science & Nature', teacher: 'Sunita Verma', room: 'Room 1A' }, thursday: { subject: 'Telugu / Regional Lang', teacher: 'P. Subbarao', room: 'Room 1A' }, friday: { subject: 'English Writing', teacher: 'Ananya Roy', room: 'Room 1A' }, saturday: { subject: 'Fun Games & PE', teacher: 'Coach Arjun', room: 'Play Ground' } },
+  { time: '10:00 AM - 10:15 AM', period: 'Interval Break', isBreak: true, isInterval: true, monday: { subject: '☕ Interval / Recess', teacher: 'School Courtyard / Break', room: 'Campus' }, tuesday: { subject: '☕ Interval / Recess', teacher: 'School Courtyard / Break', room: 'Campus' }, wednesday: { subject: '☕ Interval / Recess', teacher: 'School Courtyard / Break', room: 'Campus' }, thursday: { subject: '☕ Interval / Recess', teacher: 'School Courtyard / Break', room: 'Campus' }, friday: { subject: '☕ Interval / Recess', teacher: 'School Courtyard / Break', room: 'Campus' }, saturday: { subject: '☕ Interval / Recess', teacher: 'School Courtyard / Break', room: 'Campus' } },
+  { time: '10:15 AM - 11:00 AM', period: 'Period 3', monday: { subject: 'General Science & Plants', teacher: 'Sunita Verma', room: 'Room 1A' }, tuesday: { subject: 'Basic Mathematics', teacher: 'Ramesh Sharma', room: 'Room 1A' }, wednesday: { subject: 'English Storytime', teacher: 'Ananya Roy', room: 'Room 1A' }, thursday: { subject: 'Hindi / Vernacular', teacher: 'Meena Sharma', room: 'Room 1A' }, friday: { subject: 'Social Habits', teacher: 'Vikram Joshi', room: 'Room 1A' }, saturday: { subject: 'Craft & Origami', teacher: 'S. Kulkarni', room: 'Craft Room' } },
+  { time: '11:00 AM - 11:45 AM', period: 'Period 4', monday: { subject: 'Social Studies & World', teacher: 'Vikram Joshi', room: 'Room 1A' }, tuesday: { subject: 'Telugu / Regional Lang', teacher: 'P. Subbarao', room: 'Room 1A' }, wednesday: { subject: 'Moral Stories', teacher: 'Vikram Joshi', room: 'Room 1A' }, thursday: { subject: 'Math Counting & Games', teacher: 'Ramesh Sharma', room: 'Room 1A' }, friday: { subject: 'Rhymes & Music', teacher: 'P. Subbarao', room: 'Room 1A' }, saturday: { subject: 'Picture Library Hour', teacher: 'Librarian', room: 'Junior Library' } },
+  { time: '11:45 AM - 12:30 PM', period: 'Lunch Break', isBreak: true, isInterval: false, monday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, tuesday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, wednesday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, thursday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, friday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, saturday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' } },
+  { time: '12:30 PM - 01:15 PM', period: 'Period 5', monday: { subject: 'Telugu / Regional Lang', teacher: 'P. Subbarao', room: 'Room 1A' }, tuesday: { subject: 'Hindi Basics', teacher: 'Meena Sharma', room: 'Room 1A' }, wednesday: { subject: 'Hindi Alphabet', teacher: 'Meena Sharma', room: 'Room 1A' }, thursday: { subject: 'Science Activity', teacher: 'Sunita Verma', room: 'Room 1A' }, friday: { subject: 'Hindi Songs', teacher: 'Meena Sharma', room: 'Room 1A' }, saturday: { subject: 'Value Education', teacher: 'Principal', room: 'Auditorium' } },
+  { time: '01:15 PM - 02:00 PM', period: 'Period 6', monday: { subject: 'Hindi Recitation', teacher: 'Meena Sharma', room: 'Room 1A' }, tuesday: { subject: 'Art & Color Painting', teacher: 'S. Kulkarni', room: 'Art Room' }, wednesday: { subject: 'Computer Basics & Cartoons', teacher: 'K. Rajesh', room: 'Junior Comp Lab' }, thursday: { subject: 'Outdoor PE & Play', teacher: 'Coach Arjun', room: 'Play Ground' }, friday: { subject: 'Good Manners & Science', teacher: 'Ananya Roy', room: 'Room 1A' }, saturday: { subject: 'Kids Club Activity', teacher: 'Activity In-charge', room: 'Campus' } }
+];
+
 // Grade 5 Section A Timetable Schedule
 const grade5Timetable = [
   { time: '08:30 AM - 09:15 AM', period: 'Period 1', monday: { subject: 'Mathematics', teacher: 'Ramesh Sharma', room: 'Room 5A' }, tuesday: { subject: 'Science', teacher: 'Sunita Verma', room: 'Science Lab 1' }, wednesday: { subject: 'Mathematics', teacher: 'Ramesh Sharma', room: 'Room 5A' }, thursday: { subject: 'English', teacher: 'Ananya Roy', room: 'Room 5A' }, friday: { subject: 'Mathematics', teacher: 'Ramesh Sharma', room: 'Room 5A' }, saturday: { subject: 'Computer Science', teacher: 'K. Rajesh', room: 'Computer Lab' } },
@@ -40,13 +52,17 @@ const ParentTimetable = ({ selectedStudentId, student }) => {
   const [viewMode, setViewMode] = useState('daily'); // 'daily' or 'weekly'
   const [selectedDay, setSelectedDay] = useState(getCurrentDayName());
 
-  const studentGrade = student?.grade || '5';
+  const studentGrade = student?.grade || '1';
   const studentSection = student?.section || 'A';
   const studentName = student?.userId?.firstName
     ? `${student.userId.firstName} ${student.userId.lastName || ''}`.trim()
     : (student?.name || 'Child');
 
-  const timetableData = String(studentGrade) === '8' ? grade8Timetable : grade5Timetable;
+  const timetableData = String(studentGrade) === '8'
+    ? grade8Timetable
+    : String(studentGrade) === '1'
+    ? grade1Timetable
+    : grade5Timetable;
 
   const currentDayKey = selectedDay.toLowerCase();
 
