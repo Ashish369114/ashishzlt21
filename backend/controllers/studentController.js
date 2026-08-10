@@ -1,4 +1,6 @@
 const { User, Student, Class, Attendance, Marks, Fee, Remark, ConcessionRequest } = require('../models');
+const { Op } = require('sequelize');
+const { sequelize } = require('../config/db');
 
 const getStudents = async (req, res) => {
   try {
@@ -351,40 +353,59 @@ const updateStudent = async (req, res) => {
 };
 
 const deleteStudent = async (req, res) => {
+  const t = await sequelize.transaction();
   try {
-    const studentId = req.params.id;
-    let student = await Student.findByPk(studentId);
-    if (!student) {
-      student = await Student.findOne({ where: { userId: studentId } });
+    const studentIdParam = req.params.id;
+    let student = await Student.findByPk(studentIdParam, { transaction: t });
+    if (!student && !isNaN(parseInt(studentIdParam))) {
+      student = await Student.findByPk(parseInt(studentIdParam), { transaction: t });
     }
     if (!student) {
-      const user = await User.findOne({ where: { userId: studentId } });
+      student = await Student.findOne({ where: { userId: studentIdParam }, transaction: t });
+    }
+    if (!student) {
+      const user = await User.findOne({ where: { userId: studentIdParam }, transaction: t });
       if (user) {
-        student = await Student.findOne({ where: { userId: user.id } });
+        student = await Student.findOne({ where: { userId: user.id }, transaction: t });
       }
     }
 
     if (!student) {
+      await t.rollback();
       return res.status(404).json({ message: 'Student not found' });
     }
 
-    const userId = student.userId;
+    const sId = student.id;
+    const uId = student.userId;
 
-    // Clean up related records in DB to prevent foreign key errors
-    await Attendance.destroy({ where: { studentId: student.id } }).catch(() => null);
-    await Marks.destroy({ where: { studentId: student.id } }).catch(() => null);
-    await Fee.destroy({ where: { studentId: student.id } }).catch(() => null);
-    await Remark.destroy({ where: { studentId: student.id } }).catch(() => null);
-    await ConcessionRequest.destroy({ where: { studentId: student.id } }).catch(() => null);
+    const studentIdentifiers = Array.from(new Set([
+      sId,
+      !isNaN(parseInt(sId)) ? parseInt(sId) : null,
+      String(sId),
+      uId,
+      uId && !isNaN(parseInt(uId)) ? parseInt(uId) : null,
+      uId ? String(uId) : null
+    ].filter(v => v !== null && v !== undefined && !Number.isNaN(v))));
 
-    await student.destroy();
+    // Delete child records first within transaction to satisfy foreign key constraints
+    await ConcessionRequest.destroy({ where: { studentId: { [Op.in]: studentIdentifiers } }, transaction: t });
+    await Attendance.destroy({ where: { studentId: { [Op.in]: studentIdentifiers } }, transaction: t });
+    await Marks.destroy({ where: { studentId: { [Op.in]: studentIdentifiers } }, transaction: t });
+    await Fee.destroy({ where: { studentId: { [Op.in]: studentIdentifiers } }, transaction: t });
+    await Remark.destroy({ where: { studentId: { [Op.in]: studentIdentifiers } }, transaction: t });
 
-    if (userId) {
-      await User.destroy({ where: { id: userId } }).catch(() => null);
+    // Destroy student record
+    await student.destroy({ transaction: t });
+
+    // Destroy associated user record if present
+    if (uId) {
+      await User.destroy({ where: { id: uId }, transaction: t });
     }
 
+    await t.commit();
     res.json({ success: true, message: 'Student deleted successfully' });
   } catch (error) {
+    await t.rollback();
     console.error('Error in deleteStudent:', error);
     res.status(500).json({ message: error.message || 'Failed to delete student' });
   }
