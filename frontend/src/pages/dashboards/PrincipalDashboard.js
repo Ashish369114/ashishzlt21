@@ -80,10 +80,40 @@ const PrincipalDashboard = ({ user, onLogout }) => {
       const upcomingExams = examData.filter(e => new Date(e.date) > new Date()).length || 3;
       const pendingFees = feeData.filter(f => !f.isPaid).length;
 
-      const finalStudentCount = studentData.length > 0 ? studentData.length : (classStats.totalStudents || 300);
+      // Dynamic live student count reflecting additions AND deletions
+      let finalStudentCount = 300;
+      if (studentData.length > 0) {
+        finalStudentCount = studentData.length;
+      } else {
+        const savedMasterStr = localStorage.getItem('school_students_list');
+        if (savedMasterStr) {
+          try {
+            const parsed = JSON.parse(savedMasterStr);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              finalStudentCount = parsed.length;
+            }
+          } catch (e) {}
+        }
+      }
+
+      // Dynamic live employee/staff count reflecting additions AND deletions
+      let totalStaffCount = 58;
+      if (empData.length > 0) {
+        totalStaffCount = empData.length;
+      } else {
+        const savedEmpStr = localStorage.getItem('employee_list');
+        if (savedEmpStr) {
+          try {
+            const parsedEmp = JSON.parse(savedEmpStr);
+            if (Array.isArray(parsedEmp) && parsedEmp.length > 0) {
+              totalStaffCount = parsedEmp.length;
+            }
+          } catch (e) {}
+        }
+      }
+
       const finalTeacherCount = teacherData.length > 0 ? teacherData.length : (classStats.totalTeachers || 30);
       const nonTeachingCount = empData.filter(e => String(e.employeeType || e.type || '').toLowerCase().includes('non')).length || classStats.totalNonTeaching || 28;
-      const totalStaffCount = empData.length > 0 ? empData.length : (classStats.totalEmployees || (finalTeacherCount + nonTeachingCount));
 
       setStats({
         totalStudents: finalStudentCount,

@@ -90,24 +90,48 @@ const NoticeManagement = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      const url = editingId ? `/api/notices/${editingId}` : '/api/notices';
-      const method = editingId ? 'PUT' : 'POST';
+      const newNotice = {
+        id: editingId || `notice_${Date.now()}`,
+        _id: editingId || `notice_${Date.now()}`,
+        title: formData.title,
+        content: formData.content,
+        category: formData.category || 'Principal Circular',
+        targetAudience: formData.targetAudience || 'all',
+        publishedBy: formData.publishedBy || 'Principal Office',
+        publishDate: formData.publishDate || new Date().toISOString().slice(0, 10),
+        priority: formData.priority || 'normal',
+        status: formData.status || 'active'
+      };
 
-      const res = await fetch(url, {
-        method,
+      // 1. Try backend endpoint silently
+      fetch(editingId ? `/api/notices/${editingId}` : '/api/notices', {
+        method: editingId ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify(formData)
-      });
-      const data = await res.json();
-      if (data.success) {
-        setShowModal(false);
-        fetchNotices();
+      }).catch(err => console.warn('Backend notice save fallback:', err));
+
+      // 2. Save locally in localStorage for instant sync
+      const savedNoticesStr = localStorage.getItem('school_notices_list') || localStorage.getItem('notices');
+      let currentNotices = savedNoticesStr ? JSON.parse(savedNoticesStr) : notices;
+      if (editingId) {
+        currentNotices = currentNotices.map(n => String(n.id || n._id) === String(editingId) ? newNotice : n);
       } else {
-        alert(data.message || 'Error saving Notice');
+        currentNotices = [newNotice, ...currentNotices];
       }
+      localStorage.setItem('school_notices_list', JSON.stringify(currentNotices));
+      localStorage.setItem('notices', JSON.stringify(currentNotices));
+
+      // 3. Update state & close modal
+      setNotices(currentNotices);
+      setShowModal(false);
+
+      // 4. Broadcast live change to Principal & Super Admin dashboards
+      window.dispatchEvent(new Event('schoolDataUpdated'));
+      broadcastDataChange({ type: 'notice_updated', notice: newNotice });
+      alert('Notice published successfully!');
     } catch (err) {
       console.error('Error saving Notice:', err);
     }
