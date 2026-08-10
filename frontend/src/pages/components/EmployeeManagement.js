@@ -101,7 +101,33 @@ const EmployeeManagement = () => {
       setLoading(true);
       const response = await api.get('/employees').catch(() => ({ data: [] }));
       const apiData = Array.isArray(response?.data) ? response.data : [];
-      setEmployees(apiData.length > 0 ? apiData : demoEmployees);
+      let list = apiData.length > 0 ? apiData : demoEmployees;
+      const hasRamesh = list.some(e => 
+        (e.firstName === 'Ramesh' && e.lastName === 'Sharma') ||
+        (e.user && e.user.firstName === 'Ramesh' && e.user.lastName === 'Sharma')
+      );
+      if (!hasRamesh) {
+        list = [
+          {
+            _id: 'emp_ramesh_sharma',
+            employeeId: 'EMP-T-001',
+            firstName: 'Ramesh',
+            lastName: 'Sharma',
+            employeeType: 'teaching',
+            designation: 'Mathematics Senior PGT & Grade 9 Class Teacher',
+            department: 'Academics',
+            email: 'ramesh.sharma@school.com',
+            phone: '9876543210',
+            salary: 65000,
+            status: 'Active',
+            employeeStatus: 'Working',
+            dateOfJoining: '2019-06-01',
+            assignedClasses: [{ className: '9-A', grade: '9', section: 'A' }]
+          },
+          ...list
+        ];
+      }
+      setEmployees(list);
     } catch (error) {
       console.warn('Error fetching employees, using demo employees:', error);
       setEmployees(demoEmployees);

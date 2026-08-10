@@ -112,9 +112,9 @@ const nonTeachingDesignations = [
 ];
 
 const generateTeachingEmployees = Array.from({ length: 30 }, (_, idx) => {
-  const fn = firstNames[(idx + 10) % firstNames.length];
-  const ln = lastNames[(idx + 3) % lastNames.length];
-  const designation = teachingDesignations[idx % teachingDesignations.length];
+  const fn = idx === 0 ? 'Ramesh' : firstNames[(idx + 10) % firstNames.length];
+  const ln = idx === 0 ? 'Sharma' : lastNames[(idx + 3) % lastNames.length];
+  const designation = idx === 0 ? 'Mathematics Senior PGT & Grade 9 Class Teacher' : teachingDesignations[idx % teachingDesignations.length];
   const joinYear = 2019 + (idx % 5);
   const joinMonth = String((idx % 12) + 1).padStart(2, '0');
   const joinDay = String((idx % 25) + 1).padStart(2, '0');

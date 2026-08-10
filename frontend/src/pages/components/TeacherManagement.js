@@ -97,7 +97,30 @@ const TeacherManagement = () => {
     try {
       setLoading(true);
       const response = await teacherService.getAll().catch(err => ({ data: [] }));
-      setTeachers(response?.data && response.data.length ? response.data : demoEmployees);
+      let list = response?.data && response.data.length ? response.data : demoEmployees;
+      const hasRamesh = list.some(t => 
+        (t.firstName === 'Ramesh' && t.lastName === 'Sharma') ||
+        (t.user && t.user.firstName === 'Ramesh' && t.user.lastName === 'Sharma')
+      );
+      if (!hasRamesh) {
+        list = [
+          {
+            _id: 'teacher_ramesh_sharma',
+            employeeId: 'EMP-T-001',
+            firstName: 'Ramesh',
+            lastName: 'Sharma',
+            subject: 'Mathematics',
+            email: 'ramesh.sharma@school.com',
+            phone: '9876543210',
+            gender: 'Male',
+            qualifications: 'M.Sc. Mathematics, B.Ed.',
+            experience: 8,
+            assignedClasses: [{ className: '9-A', grade: '9', section: 'A' }]
+          },
+          ...list
+        ];
+      }
+      setTeachers(list);
       setError('');
     } catch (err) {
       console.warn('API error, using demo teachers:', err);
