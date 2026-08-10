@@ -33,11 +33,33 @@ const getEmployeeById = async (req, res) => {
   }
 };
 
+const normalizeEmployeeType = (rawType) => {
+  if (!rawType) return 'teaching';
+  const str = String(rawType).trim();
+  
+  const validEnumValues = [
+    'Pre-Primary', 'Junior School', 'High School', 'Non-Teaching Staff', 
+    'teaching', 'non_teaching', 'staff', 'admin', 'support', 'maintenance'
+  ];
+
+  if (validEnumValues.includes(str)) return str;
+
+  const lower = str.toLowerCase();
+  if (lower.includes('junior')) return 'Junior School';
+  if (lower.includes('pre')) return 'Pre-Primary';
+  if (lower.includes('high')) return 'High School';
+  if (lower.includes('non') || lower.includes('clerk') || lower.includes('admin') || lower.includes('librarian')) return 'Non-Teaching Staff';
+  if (lower.includes('teach')) return 'teaching';
+  if (lower.includes('staff')) return 'staff';
+  if (lower.includes('support')) return 'support';
+  if (lower.includes('maint')) return 'maintenance';
+  
+  return 'teaching';
+};
+
 const addEmployee = async (req, res) => {
   try {
-    let typeVal = req.body.employeeType || 'Non-Teaching Staff';
-    if (typeVal === 'teaching') typeVal = 'Teaching Staff';
-    if (typeVal === 'non_teaching' || typeVal === 'staff') typeVal = 'Non-Teaching Staff';
+    const typeVal = normalizeEmployeeType(req.body.employeeType);
 
     const employeeData = {
       ...req.body,
@@ -76,6 +98,9 @@ const updateEmployee = async (req, res) => {
       return res.status(404).json({ message: 'Employee not found' });
     }
     Object.assign(employee, req.body);
+    if (req.body.employeeType) {
+      employee.employeeType = normalizeEmployeeType(req.body.employeeType);
+    }
     await employee.save();
     
     const populatedEmployee = await Employee.findByPk(employee.id, {
