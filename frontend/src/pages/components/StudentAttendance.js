@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { attendanceService } from '../../services/api';
-import { CheckCircle2, XCircle, Calendar, AlertCircle, Filter, Clock, ChevronLeft, ChevronRight, Sparkles, Sun, Info } from 'lucide-react';
+import { CheckCircle2, XCircle, Calendar, AlertCircle, Filter, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 
 const sampleAttendanceRecords = [
   // August 2026
@@ -316,7 +316,7 @@ const StudentAttendance = ({ userId }) => {
           </div>
         </div>
 
-        {/* 7 Academic Year Summary Cards (Req 1 & 10) */}
+        {/* 4 Academic Year Summary Cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Card 1: Total Working Days */}
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-1">
@@ -348,33 +348,6 @@ const StudentAttendance = ({ userId }) => {
               <XCircle className="h-6 w-6" /> {yearStats.absentDays} Days
             </p>
             <p className="text-xs font-semibold text-rose-700">Absences recorded</p>
-          </div>
-
-          {/* Card 5: Half Days */}
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 space-y-1">
-            <p className="text-[11px] font-extrabold uppercase tracking-wider text-amber-800">Half Days</p>
-            <p className="text-3xl font-black text-amber-600 flex items-center gap-2">
-              <Clock className="h-6 w-6 text-amber-600" /> 0 Days
-            </p>
-            <p className="text-xs font-semibold text-amber-700">Half-day sessions attended</p>
-          </div>
-
-          {/* Card 6: Off Days / Holidays */}
-          <div className="rounded-2xl border border-purple-200 bg-purple-50/50 p-4 space-y-1">
-            <p className="text-[11px] font-extrabold uppercase tracking-wider text-purple-800">Off Days / Holidays</p>
-            <p className="text-3xl font-black text-purple-700 flex items-center gap-2">
-              <Sun className="h-6 w-6 text-purple-600" /> {yearStats.offDays} Days
-            </p>
-            <p className="text-xs font-semibold text-purple-700">Weekends & official school holidays</p>
-          </div>
-
-          {/* Card 7: Remaining / Unrecorded Days */}
-          <div className="rounded-2xl border border-slate-200 bg-slate-100/60 p-4 space-y-1 sm:col-span-2 lg:col-span-1">
-            <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">Remaining / Unrecorded Days</p>
-            <p className="text-3xl font-black text-slate-800 flex items-center gap-2">
-              <Info className="h-6 w-6 text-slate-600" /> {yearStats.remainingDays} Days
-            </p>
-            <p className="text-xs font-semibold text-slate-500">Working days remaining in {academicYear}</p>
           </div>
         </div>
       </div>
@@ -437,7 +410,7 @@ const StudentAttendance = ({ userId }) => {
         </div>
 
         {/* Monthly Summary Metrics Bar */}
-        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6 text-center text-xs">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 text-center text-xs">
           <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200">
             <span className="text-slate-400 font-bold block text-[10px] uppercase">Working Days</span>
             <span className="text-lg font-black text-slate-800">{totalWorkingDaysMonthly}</span>
@@ -453,10 +426,6 @@ const StudentAttendance = ({ userId }) => {
           <div className="bg-rose-50 p-3 rounded-2xl border border-rose-200">
             <span className="text-rose-800 font-bold block text-[10px] uppercase">Absent Days</span>
             <span className="text-lg font-black text-rose-700">{absentDaysCount}</span>
-          </div>
-          <div className="bg-purple-50 p-3 rounded-2xl border border-purple-200">
-            <span className="text-purple-800 font-bold block text-[10px] uppercase">Off Days</span>
-            <span className="text-lg font-black text-purple-700">{offDaysMonthly}</span>
           </div>
           <div className="bg-[#0C4A86] p-3 rounded-2xl text-white">
             <span className="text-sky-200 font-bold block text-[10px] uppercase">Attendance %</span>
