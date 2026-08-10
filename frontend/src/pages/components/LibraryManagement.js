@@ -262,8 +262,10 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
   const periodOptions = [
     { label: 'Period 1 (08:30 AM - 09:15 AM)', name: 'Period 1', time: '08:30 AM - 09:15 AM', type: 'Morning' },
     { label: 'Period 2 (09:15 AM - 10:00 AM)', name: 'Period 2', time: '09:15 AM - 10:00 AM', type: 'Morning' },
+    { label: 'Interval Break (10:00 AM - 10:15 AM)', name: 'Interval', time: '10:00 AM - 10:15 AM', type: 'Morning', isBreak: true },
     { label: 'Period 3 (10:15 AM - 11:00 AM)', name: 'Period 3', time: '10:15 AM - 11:00 AM', type: 'Morning' },
     { label: 'Period 4 (11:00 AM - 11:45 AM)', name: 'Period 4', time: '11:00 AM - 11:45 AM', type: 'Mid-Day' },
+    { label: 'Lunch Break (11:45 AM - 12:30 PM)', name: 'Lunch Break', time: '11:45 AM - 12:30 PM', type: 'Mid-Day', isBreak: true },
     { label: 'Period 5 (12:30 PM - 01:15 PM)', name: 'Period 5', time: '12:30 PM - 01:15 PM', type: 'Mid-Day' },
     { label: 'Period 6 (01:15 PM - 02:00 PM)', name: 'Period 6', time: '01:15 PM - 02:00 PM', type: 'Afternoon' },
     { label: 'Period 7 (02:00 PM - 02:45 PM)', name: 'Period 7', time: '02:00 PM - 02:45 PM', type: 'Afternoon' },

@@ -70,7 +70,13 @@ const TeacherClassTimetable = ({ teacherId, user }) => {
   };
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-  const times = ['09:00 - 10:00', '10:00 - 11:00', '11:00 - 12:00', '12:00 - 13:00'];
+  const times = [
+    '09:00 - 10:00',
+    '10:00 - 11:00',
+    '11:00 - 11:15 (Interval Break)',
+    '11:15 - 12:15',
+    '12:15 - 01:00 (Lunch Break)',
+  ];
   const classes = [...new Set(timetable.map(t => t.class))];
 
   // Create timetable grid
@@ -174,41 +180,59 @@ const TeacherClassTimetable = ({ teacherId, user }) => {
                 </tr>
               </thead>
               <tbody>
-                {times.map((time) => (
-                  <tr key={time} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                    <td style={{ padding: '12px', fontWeight: '500', backgroundColor: '#f9fafb' }}>
-                      {time}
-                    </td>
-                    {days.map((day, index) => {
-                      const cell = getTimetableCell(day, time);
-                      return (
-                        <td
-                          key={`${day}-${time}`}
-                          style={{
-                            padding: '12px',
-                            textAlign: 'center',
-                            backgroundColor: index === todayIndex ? 'rgba(254, 243, 199, 0.3)' : 'transparent'
-                          }}
-                        >
-                          {cell ? (
-                            <div style={{
-                              padding: '8px',
-                              backgroundColor: getClassColor(cell.class),
-                              borderRadius: '4px',
-                              fontSize: '0.9em'
-                            }}>
-                              <div style={{ fontWeight: 'bold' }}>{cell.class}</div>
-                              <div style={{ fontSize: '0.85em', color: '#374151' }}>{cell.subject}</div>
-                              <div style={{ fontSize: '0.75em', color: '#6b7280' }}>{cell.room}</div>
-                            </div>
-                          ) : (
-                            <span style={{ color: '#d1d5db' }}>—</span>
-                          )}
+                {times.map((time) => {
+                  const isInterval = time.includes('Interval');
+                  const isLunch = time.includes('Lunch');
+
+                  if (isInterval || isLunch) {
+                    return (
+                      <tr key={time} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: isInterval ? '#e0f2fe' : '#fef3c7' }}>
+                        <td style={{ padding: '10px 12px', fontWeight: '700', color: isInterval ? '#0369a1' : '#b45309', fontSize: '0.85em' }}>
+                          {time}
                         </td>
-                      );
-                    })}
-                  </tr>
-                ))}
+                        <td colSpan={5} style={{ padding: '10px 12px', textAlign: 'center', fontWeight: '800', color: isInterval ? '#0369a1' : '#92400e', fontSize: '0.85em' }}>
+                          {isInterval ? '☕ Interval / Recess Break (School Courtyard)' : '🍱 Lunch Break (School Dining Hall)'}
+                        </td>
+                      </tr>
+                    );
+                  }
+
+                  return (
+                    <tr key={time} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                      <td style={{ padding: '12px', fontWeight: '500', backgroundColor: '#f9fafb' }}>
+                        {time}
+                      </td>
+                      {days.map((day, index) => {
+                        const cell = getTimetableCell(day, time);
+                        return (
+                          <td
+                            key={`${day}-${time}`}
+                            style={{
+                              padding: '12px',
+                              textAlign: 'center',
+                              backgroundColor: index === todayIndex ? 'rgba(254, 243, 199, 0.3)' : 'transparent'
+                            }}
+                          >
+                            {cell ? (
+                              <div style={{
+                                padding: '8px',
+                                backgroundColor: getClassColor(cell.class),
+                                borderRadius: '4px',
+                                fontSize: '0.9em'
+                              }}>
+                                <div style={{ fontWeight: 'bold' }}>{cell.class}</div>
+                                <div style={{ fontSize: '0.85em', color: '#374151' }}>{cell.subject}</div>
+                                <div style={{ fontSize: '0.75em', color: '#6b7280' }}>{cell.room}</div>
+                              </div>
+                            ) : (
+                              <span style={{ color: '#d1d5db' }}>—</span>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
