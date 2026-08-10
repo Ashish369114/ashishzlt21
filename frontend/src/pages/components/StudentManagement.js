@@ -309,12 +309,17 @@ const StudentManagement = () => {
       const returnedClassGrade = returnedStudent?.class?.grade;
       const returnedClassSection = returnedStudent?.class?.section;
 
+      const selectedClassObj = classes.find(c => String(c.id || c._id) === String(formData.classId));
+      const targetGrade = String(returnedClassGrade || selectedClassObj?.grade || selectedGrade || '9');
+      const targetSec = String(returnedClassSection || selectedClassObj?.section || selectedSection || 'A');
+
       alert(editingId ? 'Student updated successfully!' : 'Student created successfully!');
 
       // Format student object for cross-portal sync
       const admNo = `ADM-2026-${rNo}`;
       const newStudentObj = {
         _id: editingId || response?.data?.id || response?.data?._id || `std_${Date.now()}`,
+        id: editingId || response?.data?.id || response?.data?._id || `std_${Date.now()}`,
         studentId: admNo,
         admissionNo: admNo,
         firstName: fn,
@@ -322,17 +327,17 @@ const StudentManagement = () => {
         name: `${fn} ${ln}`,
         rollNumber: rNo,
         rollNo: rNo,
-        grade: returnedClassGrade || selectedGrade || '9',
-        section: returnedClassSection || selectedSection || 'A',
-        className: `Grade ${returnedClassGrade || selectedGrade || '9'} - ${returnedClassSection || selectedSection || 'A'}`,
+        grade: targetGrade,
+        section: targetSec,
+        class: selectedClassObj || { grade: targetGrade, section: targetSec },
+        classId: formData.classId,
+        className: `Grade ${targetGrade} - ${targetSec}`,
         parentName: `${formData.parentFirstName || 'Suresh'} ${formData.parentLastName || ln}`,
         parentPhone: formData.parentPhone || '+91 98765 20000',
         phone: formData.phone || '+91 98765 10000'
       };
 
       // Target class store update
-      const targetGrade = String(returnedClassGrade || selectedGrade || '9');
-      const targetSec = String(returnedClassSection || selectedSection || 'A');
       const targetClassId = (targetGrade === '9' && targetSec === 'A') ? 'c1' : `c_${targetGrade}_${targetSec.toLowerCase()}`;
       const storeKey = `students_${targetClassId}`;
       const existing = JSON.parse(localStorage.getItem(storeKey) || '[]');
@@ -348,12 +353,8 @@ const StudentManagement = () => {
       broadcastDataChange({ type: 'student_list_updated', student: newStudentObj });
 
       resetForm();
-      if (returnedClassGrade) {
-        setSelectedGrade(String(returnedClassGrade));
-        if (returnedClassSection) {
-          setSelectedSection(String(returnedClassSection));
-        }
-      }
+      setSelectedGrade(targetGrade);
+      setSelectedSection(targetSec);
       fetchStudents();
     } catch (err) {
       const rawData = err.response?.data;
@@ -564,6 +565,27 @@ const StudentManagement = () => {
     }
   };
 
+  const resolveStudentGradeAndSection = (student) => {
+    let grade = student?.class?.grade || student?.grade;
+    let section = student?.class?.section || student?.section;
+
+    if ((!grade || !section) && (student?.classId || student?.class)) {
+      const targetCId = student.classId || (typeof student.class === 'number' || typeof student.class === 'string' ? student.class : student.class?.id || student.class?._id);
+      if (targetCId) {
+        const foundCls = classes.find(c => String(c.id || c._id) === String(targetCId));
+        if (foundCls) {
+          grade = grade || foundCls.grade;
+          section = section || foundCls.section;
+        }
+      }
+    }
+
+    return {
+      grade: grade ? String(grade) : '',
+      section: section ? String(section).toUpperCase() : ''
+    };
+  };
+
   const gradeOptions = [...new Set(classes.map((cls) => String(cls.grade)).filter(Boolean))].sort((a, b) => Number(a) - Number(b));
   
   const sectionsForGrade = selectedGrade 
@@ -571,24 +593,22 @@ const StudentManagement = () => {
     : [];
 
   let filteredStudentsForSelect = students.filter((student) => {
-    if (selectedGrade && (!student.class || String(student.class.grade) !== String(selectedGrade))) {
+    const { grade: stGrade, section: stSec } = resolveStudentGradeAndSection(student);
+    if (selectedGrade && stGrade !== String(selectedGrade)) {
       return false;
     }
-    if (selectedSection && (!student.class || String(student.class.section) !== String(selectedSection))) {
+    if (selectedSection && stSec !== String(selectedSection).toUpperCase()) {
       return false;
     }
     return true;
   });
 
-  if (selectedGrade && selectedSection) {
-    filteredStudentsForSelect = filteredStudentsForSelect.slice(0, 10);
-  }
-
   let visibleStudents = students.filter((student, idx) => {
-    if (selectedGrade && (!student.class || String(student.class.grade) !== String(selectedGrade))) {
+    const { grade: stGrade, section: stSec } = resolveStudentGradeAndSection(student);
+    if (selectedGrade && stGrade !== String(selectedGrade)) {
       return false;
     }
-    if (selectedSection && (!student.class || String(student.class.section) !== String(selectedSection))) {
+    if (selectedSection && stSec !== String(selectedSection).toUpperCase()) {
       return false;
     }
     if (selectedStudentId) {
@@ -639,10 +659,9 @@ const StudentManagement = () => {
     }
   }
 
-
-
   visibleStudents = visibleStudents.map((st, idx) => {
-    const grade = st?.grade || st?.class?.grade || selectedGrade || '1';
+    const { grade: stGrade } = resolveStudentGradeAndSection(st);
+    const grade = stGrade || selectedGrade || '1';
     const gNum = String(grade).replace(/\D/g, '') || '1';
     const seq = idx + 1;
     return {
