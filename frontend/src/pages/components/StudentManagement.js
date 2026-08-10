@@ -354,9 +354,10 @@ const StudentManagement = () => {
       resetForm();
       fetchStudents();
     } catch (err) {
-      const message = err.response?.data?.message || err.message || 'Unknown error';
+      const rawData = err.response?.data;
+      const message = typeof rawData === 'string' ? rawData : rawData?.message || rawData?.error || (rawData ? JSON.stringify(rawData) : err.message || 'Unknown error');
       setError(`Failed to save student: ${message}`);
-      console.error('Student save failed:', err.response?.data || err);
+      console.error('Student save failed details:', message, rawData);
       alert(`Failed to save student: ${message}`);
     }
   };

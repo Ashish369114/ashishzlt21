@@ -91,6 +91,11 @@ const addStudent = async (req, res) => {
     const cleanDob = dateOfBirth && typeof dateOfBirth === 'string' && dateOfBirth.trim() !== '' ? dateOfBirth : null;
     const cleanAdmDate = admissionDate && typeof admissionDate === 'string' && admissionDate.trim() !== '' ? admissionDate : null;
     const cleanPassword = password && typeof password === 'string' && password.trim().length >= 6 ? password : 'Student@123';
+    const cleanParentPassword = parentPassword && typeof parentPassword === 'string' && parentPassword.trim().length >= 6 ? parentPassword : 'Parent@123';
+
+    const validGenders = ['Male', 'Female', 'Other'];
+    const cleanGender = validGenders.includes(gender) ? gender : 'Male';
+    const cleanParentGender = validGenders.includes(parentGender) ? parentGender : 'Male';
 
     if (!rollNumber || typeof rollNumber !== 'string' || rollNumber.trim() === '') {
       rollNumber = `${Date.now().toString().slice(-4)}`;
@@ -115,7 +120,6 @@ const addStudent = async (req, res) => {
     if (existingUser) {
       const existingStudentProfile = await Student.findOne({ where: { userId: existingUser.id } });
       if (existingStudentProfile) {
-        // If student profile already linked to this user ID, generate unique suffix
         userId = `${userId}_${Date.now().toString().slice(-3)}`;
         user = await User.create({
           userId,
@@ -124,8 +128,8 @@ const addStudent = async (req, res) => {
           firstName: firstName || 'New',
           lastName: lastName || 'Student',
           dateOfBirth: cleanDob,
-          phone,
-          gender: gender || 'Male',
+          phone: phone || null,
+          gender: cleanGender,
           email: cleanEmail,
         });
       } else {
@@ -133,7 +137,7 @@ const addStudent = async (req, res) => {
         existingUser.lastName = lastName || existingUser.lastName;
         existingUser.dateOfBirth = cleanDob || existingUser.dateOfBirth;
         existingUser.phone = phone || existingUser.phone;
-        existingUser.gender = gender || existingUser.gender;
+        existingUser.gender = cleanGender;
         if (cleanPassword) {
           existingUser.password = cleanPassword;
         }
@@ -147,8 +151,8 @@ const addStudent = async (req, res) => {
         firstName: firstName || 'New',
         lastName: lastName || 'Student',
         dateOfBirth: cleanDob,
-        phone,
-        gender: gender || 'Male',
+        phone: phone || null,
+        gender: cleanGender,
         email: cleanEmail,
       });
     }
@@ -158,27 +162,19 @@ const addStudent = async (req, res) => {
     if (!parentUserId && (parentFirstName || parentLastName || parentEmail || parentPhone || parentAddress || parentRelationship)) {
       parentUserId = `PAR-${rollNumber}`;
     }
-    if (parentUserId && !parentPassword) {
-      parentPassword = 'Parent@123';
-    }
 
     if (parentUserId || parentPassword) {
-      if (!parentUserId || !parentPassword) {
-        return res.status(400).json({ message: 'Both Parent User ID and Parent Password are required when creating a parent account.' });
-      }
-
       const existingParentUser = await User.findOne({ where: { userId: parentUserId } });
       if (existingParentUser) {
-        if (existingParentUser.role !== 'parent') {
-          return res.status(400).json({ message: `Specified parent user ID '${parentUserId}' is already in use.` });
+        if (existingParentUser.role === 'parent') {
+          if (parentFirstName) existingParentUser.firstName = parentFirstName;
+          if (parentLastName) existingParentUser.lastName = parentLastName;
+          if (cleanParentEmail) existingParentUser.email = cleanParentEmail;
+          if (parentPhone) existingParentUser.phone = parentPhone;
+          existingParentUser.gender = cleanParentGender;
+          await existingParentUser.save();
+          parentIdObj = existingParentUser.id;
         }
-        if (parentFirstName) existingParentUser.firstName = parentFirstName;
-        if (parentLastName) existingParentUser.lastName = parentLastName;
-        if (parentEmail) existingParentUser.email = parentEmail;
-        if (parentPhone) existingParentUser.phone = parentPhone;
-        if (parentGender) existingParentUser.gender = parentGender;
-        await existingParentUser.save();
-        parentIdObj = existingParentUser.id;
       } else {
         const pFirstName = parentFirstName || 'Parent of';
         const pLastName = parentLastName || firstName || 'Student';
@@ -190,13 +186,14 @@ const addStudent = async (req, res) => {
           firstName: pFirstName,
           lastName: pLastName,
           email: cleanParentEmail,
-          phone: parentPhone,
-          gender: parentGender,
+          phone: parentPhone || null,
+          gender: cleanParentGender,
         });
         parentIdObj = parentUser.id;
       }
     } else if (parentId) {
-      parentIdObj = parentId;
+      const parsedParentId = parseInt(parentId);
+      parentIdObj = isNaN(parsedParentId) ? null : parsedParentId;
     }
 
     let validClassId = parseInt(classId);
@@ -231,7 +228,7 @@ const addStudent = async (req, res) => {
     if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(400).json({ message: `Duplicate value error: ${error.errors?.[0]?.message || error.message}` });
     }
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: error.message || 'Failed to create student' });
   }
 };
 
