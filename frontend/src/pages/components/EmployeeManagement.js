@@ -5,7 +5,7 @@ import api, { schoolService, classService, studentService, complaintService } fr
 import '../../styles/ManagementStyles.css';
 import { formatCurrency } from '../../utils/currencyFormatter';
 import { demoEmployees, demoClasses } from '../../utils/demoData';
-import { broadcastDataChange } from '../../utils/realtimeSync';
+import { broadcastDataChange } from '../../services/syncService';
 
 const EmployeeManagement = () => {
   const navigate = useNavigate();
