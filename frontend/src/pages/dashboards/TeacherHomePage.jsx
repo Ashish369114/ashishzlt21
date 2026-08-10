@@ -152,6 +152,74 @@ const TeacherHomePage = ({ user, openActivityModal = false }) => {
     alert('New activity posted successfully!');
   };
 
+  // Self Attendance State & Handler
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const [selfAttendance, setSelfAttendance] = useState(() => {
+    const saved = localStorage.getItem(`teacher_attendance_${todayStr}_${teacherName}`);
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    const masterStr = localStorage.getItem('teacher_attendance_records');
+    if (masterStr) {
+      try {
+        const records = JSON.parse(masterStr);
+        const match = records.find(r => r.date === todayStr && (r.teacherName === teacherName || r.name === teacherName));
+        if (match) return match;
+      } catch (e) {}
+    }
+    return null;
+  });
+
+  const handleMarkSelfAttendance = (status) => {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const record = {
+      id: `att_${Date.now()}`,
+      date: todayStr,
+      teacherName: teacherName || 'Ramesh Sharma',
+      name: teacherName || 'Ramesh Sharma',
+      status: status,
+      time: timeStr,
+      timestamp: now.getTime(),
+      markedAt: timeStr,
+    };
+
+    setSelfAttendance(record);
+    localStorage.setItem(`teacher_attendance_${todayStr}_${teacherName}`, JSON.stringify(record));
+
+    // Update master teacher attendance list for Super Admin & Principal & Accountant
+    const masterStr = localStorage.getItem('teacher_attendance_records');
+    let masterRecords = [];
+    if (masterStr) {
+      try { masterRecords = JSON.parse(masterStr); } catch (e) {}
+    }
+    masterRecords = masterRecords.filter(r => !(r.date === todayStr && (r.teacherName === teacherName || r.name === teacherName)));
+    masterRecords.unshift(record);
+    localStorage.setItem('teacher_attendance_records', JSON.stringify(masterRecords));
+
+    // Update employee status record in employee_list if found
+    try {
+      const savedEmps = JSON.parse(localStorage.getItem('employee_list') || '[]');
+      if (savedEmps.length > 0) {
+        const updatedEmps = savedEmps.map(emp => {
+          const empName = `${emp.firstName || ''} ${emp.lastName || ''}`.trim();
+          if (empName.toLowerCase() === (teacherName || '').toLowerCase() || emp.name?.toLowerCase() === (teacherName || '').toLowerCase()) {
+            return {
+              ...emp,
+              todayAttendance: status,
+              status: status === 'Present' ? 'active' : status === 'Absent' ? 'Absent' : status === 'On Leave' ? 'Notice Period' : emp.status
+            };
+          }
+          return emp;
+        });
+        localStorage.setItem('employee_list', JSON.stringify(updatedEmps));
+      }
+    } catch (e) {}
+
+    window.dispatchEvent(new Event('schoolDataUpdated'));
+    alert(`Attendance marked as ${status} (${timeStr}) successfully!`);
+  };
+
   if (isLoading) {
     return <div className="rounded-2xl border border-[#BFDBFE] bg-white p-8 text-center text-sm text-[#736B63]">Loading teacher dashboard…</div>;
   }
@@ -181,6 +249,57 @@ const TeacherHomePage = ({ user, openActivityModal = false }) => {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            {/* Teacher Self-Attendance Check-In Widget */}
+            {selfAttendance ? (
+              <div className="flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50/90 px-3.5 py-2 text-xs font-bold text-emerald-900 shadow-sm">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                <span>
+                  Status Today: <span className="font-black text-emerald-800">{selfAttendance.status}</span>
+                  {selfAttendance.time && <span className="ml-1 text-[11px] font-semibold text-emerald-700">({selfAttendance.time})</span>}
+                </span>
+                <div className="ml-1 flex gap-1">
+                  {['Present', 'Absent', 'On Leave'].map(s => (
+                    <button
+                      key={s}
+                      onClick={() => handleMarkSelfAttendance(s)}
+                      className={`px-2 py-0.5 rounded-lg text-[10px] font-extrabold transition-all cursor-pointer ${
+                        selfAttendance.status === s
+                          ? 'bg-emerald-700 text-white shadow-xs'
+                          : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-3.5 py-2 text-xs font-bold text-amber-900 shadow-sm">
+                <span className="text-amber-700 font-extrabold">⏰ Check-In:</span>
+                <button
+                  onClick={() => handleMarkSelfAttendance('Present')}
+                  className="rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-black text-white hover:bg-emerald-700 shadow-sm transition-all cursor-pointer"
+                >
+                  ✅ Present
+                </button>
+                <button
+                  onClick={() => handleMarkSelfAttendance('Absent')}
+                  className="rounded-xl bg-rose-600 px-3 py-1.5 text-xs font-black text-white hover:bg-rose-700 shadow-sm transition-all cursor-pointer"
+                >
+                  ❌ Absent
+                </button>
+                <button
+                  onClick={() => handleMarkSelfAttendance('On Leave')}
+                  className="rounded-xl bg-amber-600 px-3 py-1.5 text-xs font-black text-white hover:bg-amber-700 shadow-sm transition-all cursor-pointer"
+                >
+                  🏥 On Leave
+                </button>
+              </div>
+            )}
+
             <button
               onClick={() => navigate('/dashboard/communications')}
               className="flex items-center gap-2 rounded-2xl bg-[#0C4A86] px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition hover:bg-black"

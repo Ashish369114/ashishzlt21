@@ -508,10 +508,35 @@ const AttendanceManagement = () => {
                         let bg = '#dcfce7';
                         let fg = '#166534';
 
+                        const stName = `${st.firstName || ''} ${st.lastName || ''}`.trim() || st.name || '';
+                        const dateKey = `${year}-${String(selectedMonth || '08').padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                        
+                        let customRecord = null;
+                        try {
+                          const masterStr = localStorage.getItem('teacher_attendance_records');
+                          if (masterStr) {
+                            const recs = JSON.parse(masterStr);
+                            customRecord = recs.find(r => r.date === dateKey && (
+                              r.teacherName?.toLowerCase() === stName.toLowerCase() ||
+                              r.name?.toLowerCase() === stName.toLowerCase()
+                            ));
+                          }
+                        } catch (e) {}
+
                         if (isSunday || isSecondSaturday) {
                           char = 'H';
                           bg = '#f8fafc';
                           fg = '#94a3b8';
+                        } else if (customRecord) {
+                          if (customRecord.status === 'Present') {
+                            char = 'P'; bg = '#dcfce7'; fg = '#166534'; pCount++;
+                          } else if (customRecord.status === 'Absent') {
+                            char = 'A'; bg = '#fee2e2'; fg = '#991b1b'; aCount++;
+                          } else if (customRecord.status === 'On Leave' || customRecord.status === 'Leave') {
+                            char = 'L'; bg = '#fef9c3'; fg = '#854d0e';
+                          } else {
+                            pCount++;
+                          }
                         } else if ((idx + d) % 17 === 0) {
                           char = 'A';
                           bg = '#fee2e2';
