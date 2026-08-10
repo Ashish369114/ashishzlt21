@@ -10,6 +10,7 @@ const StudentTimetable = () => {
     Monday: [
       { period: '1', time: '08:30 AM - 09:15 AM', subject: 'Mathematics', teacher: 'Mr. Sharma', room: 'Room 201' },
       { period: '2', time: '09:15 AM - 10:00 AM', subject: 'Physics', teacher: 'Dr. Anitha', room: 'Physics Lab' },
+      { period: 'Interval', time: '10:00 AM - 10:15 AM', subject: 'Interval / Recess', teacher: '-', room: 'Campus Grounds' },
       { period: '3', time: '10:15 AM - 11:00 AM', subject: 'English Literature', teacher: 'Ms. Elizabeth', room: 'Room 201' },
       { period: '4', time: '11:00 AM - 11:45 AM', subject: 'Chemistry', teacher: 'Mr. Kapoor', room: 'Chemistry Lab' },
       { period: 'Lunch', time: '11:45 AM - 12:30 PM', subject: 'Lunch Break', teacher: '-', room: 'Cafeteria' },
@@ -19,6 +20,7 @@ const StudentTimetable = () => {
     Tuesday: [
       { period: '1', time: '08:30 AM - 09:15 AM', subject: 'Physics', teacher: 'Dr. Anitha', room: 'Physics Lab' },
       { period: '2', time: '09:15 AM - 10:00 AM', subject: 'Mathematics', teacher: 'Mr. Sharma', room: 'Room 201' },
+      { period: 'Interval', time: '10:00 AM - 10:15 AM', subject: 'Interval / Recess', teacher: '-', room: 'Campus Grounds' },
       { period: '3', time: '10:15 AM - 11:00 AM', subject: 'Biology', teacher: 'Dr. Mehta', room: 'Bio Lab' },
       { period: '4', time: '11:00 AM - 11:45 AM', subject: 'English', teacher: 'Ms. Elizabeth', room: 'Room 201' },
       { period: 'Lunch', time: '11:45 AM - 12:30 PM', subject: 'Lunch Break', teacher: '-', room: 'Cafeteria' },
@@ -28,6 +30,7 @@ const StudentTimetable = () => {
     Wednesday: [
       { period: '1', time: '08:30 AM - 09:15 AM', subject: 'English Language', teacher: 'Ms. Elizabeth', room: 'Room 201' },
       { period: '2', time: '09:15 AM - 10:00 AM', subject: 'Social Studies', teacher: 'Mrs. Verma', room: 'Room 201' },
+      { period: 'Interval', time: '10:00 AM - 10:15 AM', subject: 'Interval / Recess', teacher: '-', room: 'Campus Grounds' },
       { period: '3', time: '10:15 AM - 11:00 AM', subject: 'Mathematics', teacher: 'Mr. Sharma', room: 'Room 201' },
       { period: '4', time: '11:00 AM - 11:45 AM', subject: 'Computer Science', teacher: 'Mr. Rajesh', room: 'Computer Lab' },
       { period: 'Lunch', time: '11:45 AM - 12:30 PM', subject: 'Lunch Break', teacher: '-', room: 'Cafeteria' },
@@ -37,6 +40,7 @@ const StudentTimetable = () => {
     Thursday: [
       { period: '1', time: '08:30 AM - 09:15 AM', subject: 'Chemistry', teacher: 'Mr. Kapoor', room: 'Chemistry Lab' },
       { period: '2', time: '09:15 AM - 10:00 AM', subject: 'Mathematics', teacher: 'Mr. Sharma', room: 'Room 201' },
+      { period: 'Interval', time: '10:00 AM - 10:15 AM', subject: 'Interval / Recess', teacher: '-', room: 'Campus Grounds' },
       { period: '3', time: '10:15 AM - 11:00 AM', subject: 'Physics', teacher: 'Dr. Anitha', room: 'Room 201' },
       { period: '4', time: '11:00 AM - 11:45 AM', subject: 'Biology', teacher: 'Dr. Mehta', room: 'Bio Lab' },
       { period: 'Lunch', time: '11:45 AM - 12:30 PM', subject: 'Lunch Break', teacher: '-', room: 'Cafeteria' },
@@ -46,6 +50,7 @@ const StudentTimetable = () => {
     Friday: [
       { period: '1', time: '08:30 AM - 09:15 AM', subject: 'Mathematics', teacher: 'Mr. Sharma', room: 'Room 201' },
       { period: '2', time: '09:15 AM - 10:00 AM', subject: 'Computer Science', teacher: 'Mr. Rajesh', room: 'Computer Lab' },
+      { period: 'Interval', time: '10:00 AM - 10:15 AM', subject: 'Interval / Recess', teacher: '-', room: 'Campus Grounds' },
       { period: '3', time: '10:15 AM - 11:00 AM', subject: 'English', teacher: 'Ms. Elizabeth', room: 'Room 201' },
       { period: '4', time: '11:00 AM - 11:45 AM', subject: 'Social Studies', teacher: 'Mrs. Verma', room: 'Room 201' },
       { period: 'Lunch', time: '11:45 AM - 12:30 PM', subject: 'Lunch Break', teacher: '-', room: 'Cafeteria' },
@@ -67,7 +72,7 @@ const StudentTimetable = () => {
             <Calendar className="h-3.5 w-3.5" /> Class Schedule
           </div>
           <h1 className="text-2xl font-bold">Class Timetable</h1>
-          <p className="text-purple-100 text-sm">Weekly period distribution, subject teachers & room locations.</p>
+          <p className="text-purple-100 text-sm">Weekly period distribution, interval breaks, lunch & room locations.</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -107,7 +112,7 @@ const StudentTimetable = () => {
               <Clock className="h-5 w-5 text-indigo-600" /> Today's Class Schedule (Monday)
             </h3>
             <span className="rounded-full bg-indigo-50 text-indigo-700 font-semibold px-3 py-1 text-xs">
-              7 Periods
+              6 Periods + Interval & Lunch
             </span>
           </div>
 
@@ -117,15 +122,21 @@ const StudentTimetable = () => {
                 key={idx}
                 className={`rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 border transition-all ${
                   item.period === 'Lunch'
-                    ? 'bg-amber-50/50 border-amber-200 text-amber-900'
+                    ? 'bg-amber-50/70 border-amber-300 text-amber-900'
+                    : item.period === 'Interval'
+                    ? 'bg-sky-50/70 border-sky-300 text-sky-900'
                     : 'bg-slate-50 border-slate-200 text-slate-800 hover:border-indigo-300'
                 }`}
               >
                 <div className="flex items-center gap-4">
                   <span className={`h-10 w-10 flex items-center justify-center rounded-xl font-extrabold text-sm ${
-                    item.period === 'Lunch' ? 'bg-amber-200 text-amber-900' : 'bg-indigo-600 text-white'
+                    item.period === 'Lunch'
+                      ? 'bg-amber-200 text-amber-900'
+                      : item.period === 'Interval'
+                      ? 'bg-sky-200 text-sky-900'
+                      : 'bg-indigo-600 text-white'
                   }`}>
-                    {item.period === 'Lunch' ? '🍱' : item.period}
+                    {item.period === 'Lunch' ? '🍱' : item.period === 'Interval' ? '☕' : item.period}
                   </span>
                   <div>
                     <h4 className="font-bold text-base">{item.subject}</h4>
@@ -135,7 +146,7 @@ const StudentTimetable = () => {
                   </div>
                 </div>
 
-                {item.period !== 'Lunch' && (
+                {item.period !== 'Lunch' && item.period !== 'Interval' ? (
                   <div className="flex items-center gap-6 text-xs text-slate-600">
                     <span className="flex items-center gap-1.5 font-medium">
                       <User className="h-3.5 w-3.5 text-slate-400" /> {item.teacher}
@@ -143,6 +154,10 @@ const StudentTimetable = () => {
                     <span className="flex items-center gap-1.5 font-medium rounded-full bg-white px-3 py-1 border border-slate-200">
                       <MapPin className="h-3.5 w-3.5 text-indigo-500" /> {item.room}
                     </span>
+                  </div>
+                ) : (
+                  <div className="text-xs font-extrabold text-slate-600">
+                    <span>{item.room}</span>
                   </div>
                 )}
               </div>
@@ -158,9 +173,10 @@ const StudentTimetable = () => {
                 <th className="p-4 font-bold rounded-tl-3xl">Day / Period</th>
                 <th className="p-4 font-bold">P1 (08:30)</th>
                 <th className="p-4 font-bold">P2 (09:15)</th>
+                <th className="p-4 font-bold bg-sky-900/60 text-sky-200">Interval (10:00)</th>
                 <th className="p-4 font-bold">P3 (10:15)</th>
                 <th className="p-4 font-bold">P4 (11:00)</th>
-                <th className="p-4 font-bold bg-amber-900/40 text-amber-200">Lunch</th>
+                <th className="p-4 font-bold bg-amber-900/60 text-amber-200">Lunch (11:45)</th>
                 <th className="p-4 font-bold">P5 (12:30)</th>
                 <th className="p-4 font-bold rounded-tr-3xl">P6 (01:15)</th>
               </tr>
@@ -173,11 +189,15 @@ const StudentTimetable = () => {
                     <td
                       key={idx}
                       className={`p-3 text-xs border-r border-slate-100 ${
-                        slot.period === 'Lunch' ? 'bg-amber-50/40 text-amber-900 font-semibold text-center' : ''
+                        slot.period === 'Lunch'
+                          ? 'bg-amber-50/70 text-amber-900 font-semibold text-center'
+                          : slot.period === 'Interval'
+                          ? 'bg-sky-50/70 text-sky-900 font-semibold text-center'
+                          : ''
                       }`}
                     >
                       <div className="font-bold text-slate-800">{slot.subject}</div>
-                      {slot.period !== 'Lunch' && (
+                      {slot.period !== 'Lunch' && slot.period !== 'Interval' && (
                         <div className="text-[11px] text-slate-400 mt-1">
                           {slot.teacher} • <span className="text-indigo-600 font-semibold">{slot.room}</span>
                         </div>

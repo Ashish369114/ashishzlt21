@@ -8,9 +8,10 @@ const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat
 const grade5Timetable = [
   { time: '08:30 AM - 09:15 AM', period: 'Period 1', monday: { subject: 'Mathematics', teacher: 'Ramesh Sharma', room: 'Room 5A' }, tuesday: { subject: 'Science', teacher: 'Sunita Verma', room: 'Science Lab 1' }, wednesday: { subject: 'Mathematics', teacher: 'Ramesh Sharma', room: 'Room 5A' }, thursday: { subject: 'English', teacher: 'Ananya Roy', room: 'Room 5A' }, friday: { subject: 'Mathematics', teacher: 'Ramesh Sharma', room: 'Room 5A' }, saturday: { subject: 'Computer Science', teacher: 'K. Rajesh', room: 'Computer Lab' } },
   { time: '09:15 AM - 10:00 AM', period: 'Period 2', monday: { subject: 'English', teacher: 'Ananya Roy', room: 'Room 5A' }, tuesday: { subject: 'Social Studies', teacher: 'Vikram Joshi', room: 'Room 5A' }, wednesday: { subject: 'Science', teacher: 'Sunita Verma', room: 'Room 5A' }, thursday: { subject: 'Telugu', teacher: 'P. Subbarao', room: 'Room 5A' }, friday: { subject: 'English', teacher: 'Ananya Roy', room: 'Room 5A' }, saturday: { subject: 'Sports & PE', teacher: 'Coach Arjun', room: 'Sports Ground' } },
+  { time: '10:00 AM - 10:15 AM', period: 'Interval Break', isBreak: true, isInterval: true, monday: { subject: '☕ Interval / Recess', teacher: 'School Courtyard / Break', room: 'Campus' }, tuesday: { subject: '☕ Interval / Recess', teacher: 'School Courtyard / Break', room: 'Campus' }, wednesday: { subject: '☕ Interval / Recess', teacher: 'School Courtyard / Break', room: 'Campus' }, thursday: { subject: '☕ Interval / Recess', teacher: 'School Courtyard / Break', room: 'Campus' }, friday: { subject: '☕ Interval / Recess', teacher: 'School Courtyard / Break', room: 'Campus' }, saturday: { subject: '☕ Interval / Recess', teacher: 'School Courtyard / Break', room: 'Campus' } },
   { time: '10:15 AM - 11:00 AM', period: 'Period 3', monday: { subject: 'Science', teacher: 'Sunita Verma', room: 'Science Lab 1' }, tuesday: { subject: 'Mathematics', teacher: 'Ramesh Sharma', room: 'Room 5A' }, wednesday: { subject: 'English', teacher: 'Ananya Roy', room: 'Room 5A' }, thursday: { subject: 'Hindi', teacher: 'Meena Sharma', room: 'Room 5A' }, friday: { subject: 'Social Studies', teacher: 'Vikram Joshi', room: 'Room 5A' }, saturday: { subject: 'Art & Craft', teacher: 'S. Kulkarni', room: 'Art Studio' } },
   { time: '11:00 AM - 11:45 AM', period: 'Period 4', monday: { subject: 'Social Studies', teacher: 'Vikram Joshi', room: 'Room 5A' }, tuesday: { subject: 'Telugu', teacher: 'P. Subbarao', room: 'Room 5A' }, wednesday: { subject: 'Social Studies', teacher: 'Vikram Joshi', room: 'Room 5A' }, thursday: { subject: 'Mathematics', teacher: 'Ramesh Sharma', room: 'Room 5A' }, friday: { subject: 'Telugu', teacher: 'P. Subbarao', room: 'Room 5A' }, saturday: { subject: 'Library Hour', teacher: 'Librarian', room: 'Central Library' } },
-  { time: '11:45 AM - 12:30 PM', period: 'Lunch Break', isBreak: true, monday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, tuesday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, wednesday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, thursday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, friday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, saturday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' } },
+  { time: '11:45 AM - 12:30 PM', period: 'Lunch Break', isBreak: true, isInterval: false, monday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, tuesday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, wednesday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, thursday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, friday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, saturday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' } },
   { time: '12:30 PM - 01:15 PM', period: 'Period 5', monday: { subject: 'Telugu', teacher: 'P. Subbarao', room: 'Room 5A' }, tuesday: { subject: 'Hindi', teacher: 'Meena Sharma', room: 'Room 5A' }, wednesday: { subject: 'Hindi', teacher: 'Meena Sharma', room: 'Room 5A' }, thursday: { subject: 'Science Lab', teacher: 'Sunita Verma', room: 'Science Lab 2' }, friday: { subject: 'Hindi', teacher: 'Meena Sharma', room: 'Room 5A' }, saturday: { subject: 'Value Education', teacher: 'Principal', room: 'Auditorium' } },
   { time: '01:15 PM - 02:00 PM', period: 'Period 6', monday: { subject: 'Hindi', teacher: 'Meena Sharma', room: 'Room 5A' }, tuesday: { subject: 'Art & Music', teacher: 'S. Kulkarni', room: 'Music Room' }, wednesday: { subject: 'Computer Lab', teacher: 'K. Rajesh', room: 'Computer Lab' }, thursday: { subject: 'Sports', teacher: 'Coach Arjun', room: 'Ground' }, friday: { subject: 'Moral Science', teacher: 'Ananya Roy', room: 'Room 5A' }, saturday: { subject: 'Club Activity', teacher: 'Activity In-charge', room: 'Campus' } }
 ];
@@ -19,9 +20,10 @@ const grade5Timetable = [
 const grade8Timetable = [
   { time: '08:30 AM - 09:15 AM', period: 'Period 1', monday: { subject: 'Physics', teacher: 'Sunita Verma', room: 'Physics Lab' }, tuesday: { subject: 'Algebra', teacher: 'Ramesh Sharma', room: 'Room 8B' }, wednesday: { subject: 'Chemistry', teacher: 'Dr. Patel', room: 'Chem Lab' }, thursday: { subject: 'Physics', teacher: 'Sunita Verma', room: 'Room 8B' }, friday: { subject: 'Algebra', teacher: 'Ramesh Sharma', room: 'Room 8B' }, saturday: { subject: 'Coding & AI', teacher: 'K. Rajesh', room: 'Computer Lab' } },
   { time: '09:15 AM - 10:00 AM', period: 'Period 2', monday: { subject: 'English Lit', teacher: 'Ananya Roy', room: 'Room 8B' }, tuesday: { subject: 'Biology', teacher: 'Dr. Gupta', room: 'Bio Lab' }, wednesday: { subject: 'English Lit', teacher: 'Ananya Roy', room: 'Room 8B' }, thursday: { subject: 'Biology', teacher: 'Dr. Gupta', room: 'Room 8B' }, friday: { subject: 'English Lit', teacher: 'Ananya Roy', room: 'Room 8B' }, saturday: { subject: 'Basketball', teacher: 'Coach Arjun', room: 'Sports Complex' } },
+  { time: '10:00 AM - 10:15 AM', period: 'Interval Break', isBreak: true, isInterval: true, monday: { subject: '☕ Interval / Recess', teacher: 'School Courtyard / Break', room: 'Campus' }, tuesday: { subject: '☕ Interval / Recess', teacher: 'School Courtyard / Break', room: 'Campus' }, wednesday: { subject: '☕ Interval / Recess', teacher: 'School Courtyard / Break', room: 'Campus' }, thursday: { subject: '☕ Interval / Recess', teacher: 'School Courtyard / Break', room: 'Campus' }, friday: { subject: '☕ Interval / Recess', teacher: 'School Courtyard / Break', room: 'Campus' }, saturday: { subject: '☕ Interval / Recess', teacher: 'School Courtyard / Break', room: 'Campus' } },
   { time: '10:15 AM - 11:00 AM', period: 'Period 3', monday: { subject: 'History', teacher: 'Vikram Joshi', room: 'Room 8B' }, tuesday: { subject: 'Civics', teacher: 'Vikram Joshi', room: 'Room 8B' }, wednesday: { subject: 'Geography', teacher: 'Vikram Joshi', room: 'Room 8B' }, thursday: { subject: 'History', teacher: 'Vikram Joshi', room: 'Room 8B' }, friday: { subject: 'Civics', teacher: 'Vikram Joshi', room: 'Room 8B' }, saturday: { subject: 'Robotics Workshop', teacher: 'K. Rajesh', room: 'STEM Lab' } },
   { time: '11:00 AM - 11:45 AM', period: 'Period 4', monday: { subject: 'Advanced Math', teacher: 'Ramesh Sharma', room: 'Room 8B' }, tuesday: { subject: 'Hindi Lit', teacher: 'Meena Sharma', room: 'Room 8B' }, wednesday: { subject: 'Telugu Lit', teacher: 'P. Subbarao', room: 'Room 8B' }, thursday: { subject: 'Advanced Math', teacher: 'Ramesh Sharma', room: 'Room 8B' }, friday: { subject: 'Telugu Lit', teacher: 'P. Subbarao', room: 'Room 8B' }, saturday: { subject: 'General Knowledge', teacher: 'Ananya Roy', room: 'Room 8B' } },
-  { time: '11:45 AM - 12:30 PM', period: 'Lunch Break', isBreak: true, monday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, tuesday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, wednesday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, thursday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, friday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, saturday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' } },
+  { time: '11:45 AM - 12:30 PM', period: 'Lunch Break', isBreak: true, isInterval: false, monday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, tuesday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, wednesday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, thursday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, friday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' }, saturday: { subject: '🍱 Lunch Break', teacher: 'School Cafeteria / Rest', room: 'Dining Hall' } },
   { time: '12:30 PM - 01:15 PM', period: 'Period 5', monday: { subject: 'Telugu', teacher: 'P. Subbarao', room: 'Room 8B' }, tuesday: { subject: 'Hindi', teacher: 'Meena Sharma', room: 'Room 8B' }, wednesday: { subject: 'Hindi', teacher: 'Meena Sharma', room: 'Room 8B' }, thursday: { subject: 'Science Lab', teacher: 'Sunita Verma', room: 'Science Lab 2' }, friday: { subject: 'Hindi', teacher: 'Meena Sharma', room: 'Room 8B' }, saturday: { subject: 'Value Education', teacher: 'Principal', room: 'Auditorium' } },
   { time: '01:15 PM - 02:00 PM', period: 'Period 6', monday: { subject: 'Hindi', teacher: 'Meena Sharma', room: 'Room 8B' }, tuesday: { subject: 'Art & Music', teacher: 'S. Kulkarni', room: 'Music Room' }, wednesday: { subject: 'Computer Lab', teacher: 'K. Rajesh', room: 'Computer Lab' }, thursday: { subject: 'Sports', teacher: 'Coach Arjun', room: 'Ground' }, friday: { subject: 'Moral Science', teacher: 'Ananya Roy', room: 'Room 8B' }, saturday: { subject: 'Club Activity', teacher: 'Activity In-charge', room: 'Campus' } }
 ];
@@ -143,24 +145,31 @@ const ParentTimetable = ({ selectedStudentId, student }) => {
               if (!periodInfo) return null;
 
               if (row.isBreak) {
+                const isInt = row.isInterval;
                 return (
                   <div
                     key={idx}
-                    className="rounded-2xl border border-amber-300 bg-amber-50 p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-900"
+                    className={`rounded-2xl border p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                      isInt
+                        ? 'border-sky-300 bg-sky-50 text-sky-900'
+                        : 'border-amber-300 bg-amber-50 text-amber-900'
+                    }`}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500 text-white font-black text-xs shadow-2xs">
-                        Lunch
+                      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl text-white font-black text-xs shadow-2xs ${
+                        isInt ? 'bg-sky-600' : 'bg-amber-500'
+                      }`}>
+                        {isInt ? 'Interval' : 'Lunch'}
                       </div>
                       <div>
-                        <span className="text-xs font-bold text-amber-700 flex items-center gap-1">
-                          <Clock className="h-3.5 w-3.5 text-amber-600" /> {row.time}
+                        <span className={`text-xs font-bold flex items-center gap-1 ${isInt ? 'text-sky-700' : 'text-amber-700'}`}>
+                          <Clock className="h-3.5 w-3.5" /> {row.time}
                         </span>
-                        <h4 className="text-base font-black text-amber-900">{periodInfo.subject}</h4>
+                        <h4 className="text-base font-black">{periodInfo.subject}</h4>
                       </div>
                     </div>
-                    <div className="text-xs font-extrabold text-amber-800">
-                      <span>Dining Hall • School Cafeteria / Break</span>
+                    <div className="text-xs font-extrabold">
+                      <span>{isInt ? 'Campus Courtyard • Recess Break' : 'Dining Hall • School Cafeteria / Break'}</span>
                     </div>
                   </div>
                 );
@@ -222,14 +231,15 @@ const ParentTimetable = ({ selectedStudentId, student }) => {
               <tbody className="divide-y divide-slate-200 font-semibold text-slate-800">
                 {timetableData.map((row, i) => {
                   if (row.isBreak) {
+                    const isInt = row.isInterval;
                     return (
-                      <tr key={i} className="bg-amber-50/90 font-bold border-y border-amber-300">
-                        <td className="p-3.5 font-black text-amber-900 bg-amber-100/80 border-r border-amber-200 text-left">
-                          <div className="font-extrabold text-xs text-amber-900">🍱 {row.period}</div>
-                          <div className="text-[10px] text-amber-800 font-bold whitespace-nowrap">{row.time}</div>
+                      <tr key={i} className={`font-bold border-y ${isInt ? 'bg-sky-50/90 border-sky-300' : 'bg-amber-50/90 border-amber-300'}`}>
+                        <td className={`p-3.5 font-black text-left border-r ${isInt ? 'text-sky-900 bg-sky-100/80 border-sky-200' : 'text-amber-900 bg-amber-100/80 border-amber-200'}`}>
+                          <div className="font-extrabold text-xs">{isInt ? '☕ ' + row.period : '🍱 ' + row.period}</div>
+                          <div className="text-[10px] font-bold whitespace-nowrap">{row.time}</div>
                         </td>
-                        <td colSpan={6} className="p-3.5 text-center font-black text-amber-900 uppercase tracking-wider text-xs bg-amber-50">
-                          🍱 Lunch Break (11:45 AM - 12:30 PM) — School Cafeteria / Dining Hall
+                        <td colSpan={6} className={`p-3.5 text-center font-black uppercase tracking-wider text-xs ${isInt ? 'text-sky-900 bg-sky-50' : 'text-amber-900 bg-amber-50'}`}>
+                          {isInt ? '☕ Interval Break (10:00 AM - 10:15 AM) — School Courtyard & Rest' : '🍱 Lunch Break (11:45 AM - 12:30 PM) — School Cafeteria / Dining Hall'}
                         </td>
                       </tr>
                     );

@@ -4,16 +4,20 @@ import { Calendar, Clock, ChevronDown } from 'lucide-react';
 const defaultWeeklyData = [
   { time: '08:30 AM - 09:15 AM', monday: 'Grade 9A • Maths', tuesday: 'Grade 10B • Maths', wednesday: 'Grade 9A • Maths', thursday: 'Grade 10B • Maths', friday: 'Grade 9A • Maths', saturday: 'Lab Session' },
   { time: '09:15 AM - 10:00 AM', monday: 'Grade 10A • Algebra', tuesday: 'Grade 9B • Geometry', wednesday: 'Grade 10A • Algebra', thursday: 'Grade 9B • Geometry', friday: 'Grade 10A • Algebra', saturday: 'Staff Sync' },
+  { time: '10:00 AM - 10:15 AM', isBreak: true, breakType: 'interval', monday: '☕ Interval Break', tuesday: '☕ Interval Break', wednesday: '☕ Interval Break', thursday: '☕ Interval Break', friday: '☕ Interval Break', saturday: '☕ Interval Break' },
   { time: '10:15 AM - 11:00 AM', monday: 'Grade 8C • Maths', tuesday: 'Grade 8C • Maths', wednesday: 'Free Period', thursday: 'Grade 8C • Maths', friday: 'Free Period', saturday: 'Remedial Class' },
   { time: '11:00 AM - 11:45 AM', monday: 'Grade 9B • Geometry', tuesday: 'Grade 10A • Algebra', wednesday: 'Grade 9B • Geometry', thursday: 'Grade 10A • Algebra', friday: 'Grade 9B • Geometry', saturday: 'Activity Hour' },
+  { time: '11:45 AM - 12:30 PM', isBreak: true, breakType: 'lunch', monday: '🍱 Lunch Break', tuesday: '🍱 Lunch Break', wednesday: '🍱 Lunch Break', thursday: '🍱 Lunch Break', friday: '🍱 Lunch Break', saturday: '🍱 Lunch Break' },
   { time: '12:30 PM - 01:15 PM', monday: 'Grade 10B • Advanced', tuesday: 'Grade 9A • Revision', wednesday: 'Grade 10B • Advanced', thursday: 'Grade 9A • Revision', friday: 'Grade 10B • Advanced', saturday: 'Club Meeting' },
 ];
 
 const todayScheduleData = [
   { period: 'Period 1', time: '08:30 AM - 09:15 AM', subject: 'Mathematics', classSection: 'Grade 9 - Section A', room: 'Room 204', status: 'Completed' },
   { period: 'Period 2', time: '09:15 AM - 10:00 AM', subject: 'Algebra & Functions', classSection: 'Grade 10 - Section B', room: 'Room 302', status: 'Ongoing' },
+  { period: 'Interval', time: '10:00 AM - 10:15 AM', subject: '☕ Interval / Recess Break', classSection: 'All Grades', room: 'Campus Courtyard', status: 'Upcoming', isBreak: true },
   { period: 'Period 3', time: '10:15 AM - 11:00 AM', subject: 'Geometry Basics', classSection: 'Grade 8 - Section C', room: 'Room 105', status: 'Upcoming' },
   { period: 'Period 4', time: '11:00 AM - 11:45 AM', subject: 'Applied Mathematics', classSection: 'Grade 9 - Section B', room: 'Room 204', status: 'Upcoming' },
+  { period: 'Lunch', time: '11:45 AM - 12:30 PM', subject: '🍱 Lunch Break', classSection: 'All Staff & Students', room: 'School Cafeteria', status: 'Upcoming', isBreak: true },
   { period: 'Period 5', time: '12:30 PM - 01:15 PM', subject: 'Advanced Calculus', classSection: 'Grade 10 - Section A', room: 'Lab 2', status: 'Upcoming' },
 ];
 
@@ -57,16 +61,26 @@ const TeacherTimetable = ({ timetable = [], currentTime = new Date() }) => {
               <div
                 key={idx}
                 className={`flex items-center justify-between rounded-xl border p-3.5 transition-all ${
-                  item.status === 'Ongoing'
+                  item.period === 'Lunch'
+                    ? 'border-amber-300 bg-amber-50/70 shadow-2xs'
+                    : item.period === 'Interval'
+                    ? 'border-sky-300 bg-sky-50/70 shadow-2xs'
+                    : item.status === 'Ongoing'
                     ? 'border-amber-300 bg-amber-50/50 shadow-2xs'
                     : 'border-[#BFDBFE] bg-[#EBF5FF] hover:bg-white'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <span className={`text-xs font-black px-2.5 py-1 rounded-lg ${
-                    item.status === 'Ongoing' ? 'bg-amber-600 text-white' : 'bg-[#EFEAE4] text-[#334155]'
+                    item.period === 'Lunch'
+                      ? 'bg-amber-200 text-amber-900'
+                      : item.period === 'Interval'
+                      ? 'bg-sky-200 text-sky-900'
+                      : item.status === 'Ongoing'
+                      ? 'bg-amber-600 text-white'
+                      : 'bg-[#EFEAE4] text-[#334155]'
                   }`}>
-                    {item.period}
+                    {item.period === 'Lunch' ? '🍱 Lunch' : item.period === 'Interval' ? '☕ Interval' : item.period}
                   </span>
                   <div>
                     <p className="text-sm font-bold text-[#0C4A86]">{item.subject}</p>
@@ -76,13 +90,17 @@ const TeacherTimetable = ({ timetable = [], currentTime = new Date() }) => {
 
                 <div className="text-right">
                   <span className={`inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
-                    item.status === 'Ongoing'
+                    item.period === 'Lunch'
+                      ? 'bg-amber-100 text-amber-800'
+                      : item.period === 'Interval'
+                      ? 'bg-sky-100 text-sky-800'
+                      : item.status === 'Ongoing'
                       ? 'bg-emerald-100 text-emerald-800'
                       : item.status === 'Completed'
                       ? 'bg-slate-200 text-slate-700'
                       : 'bg-amber-100 text-amber-800'
                   }`}>
-                    {item.status}
+                    {item.isBreak ? 'Recess Break' : item.status}
                   </span>
                   <p className="mt-1 flex items-center justify-end gap-1 text-xs font-medium text-[#736B63]">
                     <Clock className="h-3 w-3" /> {item.time}
@@ -108,7 +126,16 @@ const TeacherTimetable = ({ timetable = [], currentTime = new Date() }) => {
               </thead>
               <tbody className="divide-y divide-[#BFDBFE] font-medium text-[#0C4A86]">
                 {defaultWeeklyData.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-[#EBF5FF]">
+                  <tr
+                    key={idx}
+                    className={
+                      row.breakType === 'lunch'
+                        ? 'bg-amber-50/80 font-bold border-y border-amber-300'
+                        : row.breakType === 'interval'
+                        ? 'bg-sky-50/80 font-bold border-y border-sky-300'
+                        : 'hover:bg-[#EBF5FF]'
+                    }
+                  >
                     <td className="p-3 font-bold text-[#736B63] whitespace-nowrap bg-[#EBF5FF]/50">{row.time}</td>
                     <td className="p-3">{row.monday}</td>
                     <td className="p-3">{row.tuesday}</td>
