@@ -318,6 +318,49 @@ const TeacherHomePage = ({ user, openActivityModal = false }) => {
         </div>
       </div>
 
+      {/* 2. Prominent Teacher Daily Self-Attendance Card */}
+      <div className="rounded-3xl border border-indigo-100 bg-gradient-to-r from-blue-50 via-indigo-50/70 to-slate-50 p-5 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0C4A86] text-white shadow-sm font-black text-lg">
+              ⏰
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold text-[#0C4A86]">Faculty Daily Self-Attendance Check-In</h3>
+              <p className="text-xs font-semibold text-slate-500">
+                Mark your daily presence to update school staff registers & attendance records in real-time.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            {['Present', 'Absent', 'On Leave'].map(statusOption => {
+              const isActive = selfAttendance?.status === statusOption;
+              const isPres = statusOption === 'Present';
+              const isAbs = statusOption === 'Absent';
+              
+              let bgClass = isActive 
+                ? (isPres ? 'bg-emerald-600 text-white shadow-md' : isAbs ? 'bg-rose-600 text-white shadow-md' : 'bg-amber-600 text-white shadow-md')
+                : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200';
+
+              return (
+                <button
+                  key={statusOption}
+                  onClick={() => handleMarkSelfAttendance(statusOption)}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer ${bgClass}`}
+                >
+                  <span>{isPres ? '✅' : isAbs ? '❌' : '🏥'}</span>
+                  <span>{statusOption}</span>
+                  {isActive && selfAttendance?.time && (
+                    <span className="ml-1 text-[10px] opacity-90">({selfAttendance.time})</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
       {/* 3. Main Dashboard Grid: Calendar & Upcoming Events (Equal Box Size & Scrollable) */}
       <div className="grid gap-6 lg:grid-cols-12 items-stretch">
         {/* Monthly Calendar View */}
