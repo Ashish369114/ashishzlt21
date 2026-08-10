@@ -1170,7 +1170,7 @@ Password: ${cred.parentPassword}
           </button>
           <h2 style={{ margin: 0 }}>👨‍🎓 {isAccountant ? 'Student Fee Management' : 'Student Management'}</h2>
         </div>
-        {!isAccountant && currentUser && ['super_admin', 'principal'].includes(currentUser.role) && (
+        {!isAccountant && (
           <button className="btn btn-primary" onClick={() => { if (showForm) resetForm(); else openAddStudentForm(); }} style={{ width: 'auto', marginTop: '0', padding: '10px 24px' }}>
             {showForm ? 'Cancel' : '➕ Add Student'}
           </button>
