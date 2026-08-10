@@ -12,6 +12,13 @@ const StudentResults = ({ userId, user, student }) => {
   const [isReportCardOpen, setIsReportCardOpen] = useState(false);
   const [breakdownModalSubject, setBreakdownModalSubject] = useState(null);
 
+  const rawGrade = student?.class?.grade || student?.grade || '9';
+  const gradeStr = String(rawGrade).toLowerCase().startsWith('grade') ? rawGrade : `Grade ${rawGrade}`;
+  const rawSection = student?.class?.section || student?.section || 'A';
+  const sectionStr = String(rawSection).toLowerCase().startsWith('section') ? rawSection : `Section ${rawSection}`;
+  const rollNo = student?.rollNumber || student?.rollNo || '901';
+  const admissionNo = student?.admissionNo || student?.admissionNumber || 'ADM-2026-901';
+
   useEffect(() => {
     const handleStorageSync = () => {
       const stored = localStorage.getItem('student_selected_exam');
@@ -145,7 +152,7 @@ const StudentResults = ({ userId, user, student }) => {
         <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-1">
           <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Selected Exam Report</p>
           <p className="text-2xl font-black text-emerald-600 truncate">{activeExamConfig.shortLabel}</p>
-          <p className="text-xs font-semibold text-slate-500">Grade 9 - Sec A</p>
+          <p className="text-xs font-semibold text-slate-500">{gradeStr} - {sectionStr}</p>
         </div>
       </div>
 
@@ -285,10 +292,11 @@ const StudentResults = ({ userId, user, student }) => {
         onClose={() => setIsReportCardOpen(false)}
         examName={activeExamConfig.name}
         studentData={{
-          name: `${user?.firstName || 'Student'} ${user?.lastName || ''}`,
-          rollNo: student?.rollNumber || '901',
-          grade: student?.class?.grade || 'Grade 9',
-          section: student?.class?.section || 'A',
+          name: `${user?.firstName || student?.userId?.firstName || student?.firstName || 'Student'} ${user?.lastName || student?.userId?.lastName || student?.lastName || ''}`.trim(),
+          rollNo: rollNo,
+          grade: gradeStr,
+          section: sectionStr.replace(/^Section\s*/i, ''),
+          admissionNo: admissionNo
         }}
         marksData={displayedMarks}
         attendancePct={96}

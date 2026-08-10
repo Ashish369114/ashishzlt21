@@ -36,7 +36,14 @@ const getDailyQuoteIndex = () => {
 
 const StudentHomePage = ({ user, student, stats }) => {
   const navigate = useNavigate();
-  const studentName = `${user?.firstName || 'Aro'} ${user?.lastName || 'Patel'}`.trim();
+  const studentName = `${user?.firstName || student?.userId?.firstName || student?.firstName || 'Aarav'} ${user?.lastName || student?.userId?.lastName || student?.lastName || 'Patel'}`.trim();
+
+  const rawGrade = student?.class?.grade || student?.grade || '9';
+  const gradeStr = String(rawGrade).toLowerCase().startsWith('grade') ? rawGrade : `Grade ${rawGrade}`;
+  const rawSection = student?.class?.section || student?.section || 'A';
+  const sectionStr = String(rawSection).toLowerCase().startsWith('section') ? rawSection : `Section ${rawSection}`;
+  const rollNo = student?.rollNumber || student?.rollNo || '901';
+  const admissionNo = student?.admissionNo || student?.admissionNumber || 'ADM-2026-901';
 
   // Avatar state
   const [profileAvatar, setProfileAvatar] = useState(() => {
@@ -105,7 +112,7 @@ const StudentHomePage = ({ user, student, stats }) => {
               </div>
               <h1 className="text-2xl md:text-3xl font-black text-[#1A1817]">Good Morning, {studentName} 👋</h1>
               <p className="text-xs md:text-sm font-semibold text-[#736B63]">
-                Grade 9 - Section A • Student Admission No: <span className="font-extrabold text-[#0C4A86]">ADM-2026-901</span> • Roll No: <span className="font-extrabold text-[#0C4A86]">901</span>
+                {gradeStr} - {sectionStr} • Student Admission No: <span className="font-extrabold text-[#0C4A86]">{admissionNo}</span> • Roll No: <span className="font-extrabold text-[#0C4A86]">{rollNo}</span>
               </p>
             </div>
           </div>
