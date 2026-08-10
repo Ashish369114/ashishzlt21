@@ -181,6 +181,8 @@ export const libraryService = {
   add: (data) => api.post('/library', data),
   update: (id, data) => api.put(`/library/${id}`, data),
   borrow: (bookId, data) => api.post(`/library/${bookId}/borrow`, data),
+  returnBook: (bookId, data) => api.post(`/library/${bookId}/return`, data),
+  renew: (bookId, data) => api.post(`/library/${bookId}/renew`, data),
   delete: (id) => api.delete(`/library/${id}`),
 };
 

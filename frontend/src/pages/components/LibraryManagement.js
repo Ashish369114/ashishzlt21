@@ -429,11 +429,15 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
 
     try {
       setError('');
+      const bookPayload = {
+        ...newBook,
+        totalCopies: parseInt(newBook.totalCopies, 10) || 1,
+      };
       if (editingBookId) {
-        await libraryService.update(editingBookId, newBook);
+        await libraryService.update(editingBookId, bookPayload);
         alert('Book updated successfully!');
       } else {
-        await libraryService.add(newBook);
+        await libraryService.add(bookPayload);
         alert('Book added successfully!');
       }
       fetchBooks();
