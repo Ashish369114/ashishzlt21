@@ -320,16 +320,15 @@ const StudentManagement = () => {
         }
       }
 
-      // 2. Create unified list
+      // 1. Seed with demoStudents (guaranteed 10 distinct students per section A, B, C across Grade 1-10)
       const unifiedMap = new Map();
 
-      // Seed with demoStudents
       demoStudents.forEach(st => {
         const key = `demo_${st.grade}_${st.section}_${st.rollNumber}`;
         unifiedMap.set(key, st);
       });
 
-      // Merge API data
+      // 2. Merge API data
       apiData.forEach(st => {
         const g = st.grade || st.class?.grade;
         const s = st.section || st.class?.section;
@@ -339,9 +338,9 @@ const StudentManagement = () => {
         unifiedMap.set(key, { ...unifiedMap.get(key), ...st });
       });
 
-      // Merge newly created custom local students (never drop them!)
+      // 3. Merge ONLY manually created custom students (IDs starting with 'std_')
       customSavedStudents.forEach(st => {
-        if (st && (st.id || st._id)) {
+        if (st && (st.id || st._id) && String(st.id || st._id).startsWith('std_')) {
           const key = `id_${st.id || st._id}`;
           unifiedMap.set(key, st);
         }
@@ -973,12 +972,17 @@ Password: ${cred.parentPassword}
   }
 
   visibleStudents = visibleStudents.map((st, idx) => {
-    const grade = st?.grade || st?.class?.grade || selectedGrade || '10';
-    const gNum = String(grade).replace(/\D/g, '') || '10';
+    const grade = st?.grade || st?.class?.grade || selectedGrade || '1';
+    const sec = String(st?.section || st?.class?.section || selectedSection || 'A').toUpperCase();
+    const gNum = String(grade).replace(/\D/g, '') || '1';
     const rawRoll = String(st?.rollNumber || st?.rollNo || '');
-    let formatted = rawRoll.startsWith(`G${gNum}-`) ? rawRoll : `G${gNum}-${String(idx + 1).padStart(3, '0')}`;
+    let formatted = (rawRoll.startsWith(`G${gNum}${sec}-`) || rawRoll.startsWith(`G${gNum}-`))
+      ? rawRoll
+      : `G${gNum}${sec}-${String(idx + 1).padStart(3, '0')}`;
     return {
       ...st,
+      grade,
+      section: sec,
       rollSequence: idx + 1,
       formattedRollNumber: formatted
     };
