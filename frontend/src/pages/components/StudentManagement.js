@@ -64,6 +64,7 @@ const StudentManagement = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    parentName: '',
     grade: '9',
     section: 'A',
     userId: '',
@@ -87,9 +88,9 @@ const StudentManagement = () => {
   });
 
   const computeAutoCredentials = (targetGrade, targetSection, fName = '', lName = '', currentStudents = students) => {
-    const gStr = String(targetGrade || '10');
+    const gStr = String(targetGrade || '1');
     const sStr = String(targetSection || 'A').toUpperCase();
-    const gNum = parseInt(gStr, 10) || 10;
+    const gNum = parseInt(gStr, 10) || 1;
 
     const studentsInClass = (currentStudents || []).filter(s => {
       const sg = String(s.grade || s.class?.grade || '');
@@ -100,26 +101,19 @@ const StudentManagement = () => {
     let maxSeq = 0;
     studentsInClass.forEach((s, idx) => {
       const r = String(s.rollNumber || s.rollNo || s.formattedRollNumber || '');
-      const match = r.match(/G\d+-(\d+)/i);
+      const match = r.match(/(\d+)$/);
       if (match) {
         const seq = parseInt(match[1], 10);
         if (!isNaN(seq) && seq > maxSeq) maxSeq = seq;
-      } else {
-        const digits = r.replace(/\D/g, '');
-        if (digits) {
-          const num = parseInt(digits, 10);
-          const seq = (num % 100) || (idx + 1);
-          if (seq > maxSeq) maxSeq = seq;
-        }
       }
     });
 
     const nextSeq = Math.max(maxSeq + 1, studentsInClass.length + 1);
     const seqStr = String(nextSeq).padStart(3, '0');
-    const rollStr = `G${gNum}-${seqStr}`;
+    const rollStr = `G${gNum}${sStr}-${seqStr}`;
     const userId = `STU-G${gNum}${sStr}-${seqStr}`;
     const password = 'Student@123';
-    const parentUserId = `PAR-G${gNum}-${seqStr}`;
+    const parentUserId = `PAR-G${gNum}${sStr}-${seqStr}`;
     const parentPassword = 'Parent@123';
 
     return {
@@ -542,7 +536,7 @@ const StudentManagement = () => {
         section: finalSec,
         class: { grade: parseInt(finalGrade, 10) || finalGrade, section: finalSec },
         className: `Grade ${finalGrade} - Section ${finalSec}`,
-        parentName: `${formData.parentFirstName || 'Parent of'} ${formData.parentLastName || ln}`,
+        parentName: (formData.parentName && formData.parentName.trim()) || (formData.parentFirstName ? `${formData.parentFirstName} ${formData.parentLastName || ''}`.trim() : `Suresh ${ln}`),
         parentPhone: formData.parentPhone || '',
         phone: formData.phone || '',
         email: formData.email || '',
@@ -1321,6 +1315,18 @@ Password: ${cred.parentPassword}
                   name="lastName"
                   placeholder="e.g. Sharma"
                   value={formData.lastName}
+                  onChange={handleInputChange}
+                  required
+                  style={{ fontSize: '1rem', padding: '10px 14px' }}
+                />
+              </div>
+              <div className="form-group" style={{ flex: '1 1 220px' }}>
+                <label style={{ fontWeight: 700, color: '#1e293b' }}>Parent / Guardian Name <span style={{ color: '#ef4444' }}>*</span></label>
+                <input
+                  type="text"
+                  name="parentName"
+                  placeholder="e.g. Ramesh Sharma"
+                  value={formData.parentName}
                   onChange={handleInputChange}
                   required
                   style={{ fontSize: '1rem', padding: '10px 14px' }}
