@@ -70,6 +70,8 @@ const addStudent = async (req, res) => {
       password,
       rollNumber,
       classId,
+      grade,
+      section,
       parentId,
       parentUserId,
       parentPassword,
@@ -87,86 +89,113 @@ const addStudent = async (req, res) => {
       admissionDate,
     } = req.body;
 
+    const fn = (firstName && typeof firstName === 'string' && firstName.trim()) ? firstName.trim() : 'New';
+    const ln = (lastName && typeof lastName === 'string' && lastName.trim()) ? lastName.trim() : 'Student';
+
     // Sanitize optional fields to avoid empty string validation & unique constraint failures
     const cleanEmail = email && typeof email === 'string' && email.trim() !== '' ? email.trim() : null;
     const cleanParentEmail = parentEmail && typeof parentEmail === 'string' && parentEmail.trim() !== '' ? parentEmail.trim() : null;
     const cleanDob = dateOfBirth && typeof dateOfBirth === 'string' && dateOfBirth.trim() !== '' ? dateOfBirth : null;
     const cleanAdmDate = admissionDate && typeof admissionDate === 'string' && admissionDate.trim() !== '' ? admissionDate : null;
-    const cleanPassword = password && typeof password === 'string' && password.trim().length >= 6 ? password : 'Student@123';
-    const cleanParentPassword = parentPassword && typeof parentPassword === 'string' && parentPassword.trim().length >= 6 ? parentPassword : 'Parent@123';
+    const cleanPassword = password && typeof password === 'string' && password.trim().length >= 6 ? password.trim() : 'Student@123';
+    const cleanParentPassword = parentPassword && typeof parentPassword === 'string' && parentPassword.trim().length >= 6 ? parentPassword.trim() : 'Parent@123';
 
     const validGenders = ['Male', 'Female', 'Other'];
     const cleanGender = validGenders.includes(gender) ? gender : 'Male';
     const cleanParentGender = validGenders.includes(parentGender) ? parentGender : 'Male';
 
+    // 1. Resolve Class / Grade / Section
+    let targetGrade = parseInt(grade);
+    let targetSection = (section || 'A').toString().toUpperCase();
+
+    if (isNaN(targetGrade) || targetGrade < 1 || targetGrade > 12) {
+      if (typeof classId === 'string' && classId.includes('_')) {
+        const parts = classId.split('_');
+        for (let i = 0; i < parts.length; i++) {
+          const num = parseInt(parts[i]);
+          if (!isNaN(num)) targetGrade = num;
+          else if (parts[i].length === 1 && /[a-zA-Z]/.test(parts[i])) targetSection = parts[i].toUpperCase();
+        }
+      } else if (classId === 'c1') {
+        targetGrade = 9; targetSection = 'A';
+      } else if (classId === 'c2') {
+        targetGrade = 9; targetSection = 'B';
+      } else {
+        targetGrade = 9;
+      }
+    }
+
+    let validClassId = parseInt(classId);
+    let foundClass = null;
+    if (!isNaN(validClassId)) {
+      foundClass = await Class.findByPk(validClassId);
+    }
+    if (!foundClass) {
+      foundClass = await Class.findOne({ where: { grade: targetGrade, section: targetSection } });
+      if (!foundClass) {
+        foundClass = await Class.create({ grade: targetGrade, section: targetSection });
+      }
+    }
+    validClassId = foundClass.id;
+
+    // 2. Auto-generate Roll Number if missing or occupied
     if (!rollNumber || typeof rollNumber !== 'string' || rollNumber.trim() === '') {
-      rollNumber = `${Date.now().toString().slice(-4)}`;
+      const existingInClass = await Student.findAll({ where: { classId: validClassId } });
+      const nextNum = (existingInClass.length + 1);
+      rollNumber = `${targetGrade * 100 + nextNum}`;
     }
 
-    const existingStudent = await Student.findOne({ where: { rollNumber } });
-    if (existingStudent) {
-      rollNumber = `${rollNumber}_${Date.now().toString().slice(-3)}`;
+    let existingStudent = await Student.findOne({ where: { rollNumber } });
+    let rollCandidate = rollNumber;
+    let rCounter = 1;
+    while (existingStudent) {
+      rollCandidate = `${rollNumber}_${rCounter++}`;
+      existingStudent = await Student.findOne({ where: { rollNumber: rollCandidate } });
     }
+    rollNumber = rollCandidate;
 
+    // 3. Auto-generate User ID if missing or occupied
     if (!userId || typeof userId !== 'string' || userId.trim() === '') {
-      userId = `STD-${rollNumber}`;
+      const numPart = rollNumber.replace(/\D/g, '').slice(-3) || Date.now().toString().slice(-3);
+      userId = `STU${targetGrade}${targetSection}-${numPart}`;
     }
 
     let existingUser = await User.findOne({ where: { userId } });
-    if (existingUser && existingUser.role !== 'student') {
-      userId = `${userId}_${Date.now().toString().slice(-3)}`;
-      existingUser = null;
+    let uCandidate = userId;
+    let uCounter = 1;
+    while (existingUser) {
+      uCandidate = `${userId}_${uCounter++}`;
+      existingUser = await User.findOne({ where: { userId: uCandidate } });
     }
+    userId = uCandidate;
 
-    let user = existingUser;
-    if (existingUser) {
-      const existingStudentProfile = await Student.findOne({ where: { userId: existingUser.id } });
-      if (existingStudentProfile) {
-        userId = `${userId}_${Date.now().toString().slice(-3)}`;
-        user = await User.create({
-          userId,
-          password: cleanPassword,
-          role: 'student',
-          firstName: firstName || 'New',
-          lastName: lastName || 'Student',
-          dateOfBirth: cleanDob,
-          phone: phone || null,
-          gender: cleanGender,
-          email: cleanEmail,
-        });
-      } else {
-        existingUser.firstName = firstName || existingUser.firstName;
-        existingUser.lastName = lastName || existingUser.lastName;
-        existingUser.dateOfBirth = cleanDob || existingUser.dateOfBirth;
-        existingUser.phone = phone || existingUser.phone;
-        existingUser.gender = cleanGender;
-        if (cleanPassword) {
-          existingUser.password = cleanPassword;
-        }
-        await existingUser.save();
-      }
-    } else {
-      user = await User.create({
-        userId,
-        password: cleanPassword,
-        role: 'student',
-        firstName: firstName || 'New',
-        lastName: lastName || 'Student',
-        dateOfBirth: cleanDob,
-        phone: phone || null,
-        gender: cleanGender,
-        email: cleanEmail,
-      });
-    }
+    // 4. Create or reuse User account for student
+    const user = await User.create({
+      userId,
+      password: cleanPassword,
+      role: 'student',
+      firstName: fn,
+      lastName: ln,
+      dateOfBirth: cleanDob,
+      phone: phone || null,
+      gender: cleanGender,
+      email: cleanEmail,
+    });
 
+    // 5. Parent Account Auto-Creation or Link
     let parentIdObj = null;
 
-    if (!parentUserId && (parentFirstName || parentLastName || parentEmail || parentPhone || parentAddress || parentRelationship)) {
-      parentUserId = `PAR-${rollNumber}`;
+    if (parentId) {
+      const parsedParentId = parseInt(parentId);
+      parentIdObj = isNaN(parsedParentId) ? null : parsedParentId;
     }
 
-    if (parentUserId || parentPassword) {
-      const existingParentUser = await User.findOne({ where: { userId: parentUserId } });
+    if (!parentIdObj) {
+      if (!parentUserId || typeof parentUserId !== 'string' || parentUserId.trim() === '') {
+        parentUserId = `PAR-${rollNumber}`;
+      }
+
+      let existingParentUser = await User.findOne({ where: { userId: parentUserId } });
       if (existingParentUser) {
         if (existingParentUser.role === 'parent') {
           if (parentFirstName) existingParentUser.firstName = parentFirstName;
@@ -179,7 +208,7 @@ const addStudent = async (req, res) => {
         }
       } else {
         const pFirstName = parentFirstName || 'Parent of';
-        const pLastName = parentLastName || firstName || 'Student';
+        const pLastName = parentLastName || `${fn} ${ln}`;
 
         const parentUser = await User.create({
           userId: parentUserId,
@@ -188,45 +217,22 @@ const addStudent = async (req, res) => {
           firstName: pFirstName,
           lastName: pLastName,
           email: cleanParentEmail,
-          phone: parentPhone || null,
+          phone: parentPhone || phone || null,
           gender: cleanParentGender,
+          address: parentAddress || null,
+          relationship: parentRelationship || 'Parent'
         });
         parentIdObj = parentUser.id;
       }
-    } else if (parentId) {
-      const parsedParentId = parseInt(parentId);
-      parentIdObj = isNaN(parsedParentId) ? null : parsedParentId;
     }
 
-    let validClassId = parseInt(classId);
-    if (isNaN(validClassId)) {
-      let targetGrade = 1;
-      let targetSection = 'A';
-      if (typeof classId === 'string') {
-        if (classId === 'c1') { targetGrade = 9; targetSection = 'A'; }
-        else if (classId === 'c2') { targetGrade = 9; targetSection = 'B'; }
-        else if (classId.includes('_')) {
-          const parts = classId.split('_');
-          for (let i = 0; i < parts.length; i++) {
-            const num = parseInt(parts[i]);
-            if (!isNaN(num)) targetGrade = num;
-            else if (parts[i].length === 1 && /[a-zA-Z]/.test(parts[i])) targetSection = parts[i].toUpperCase();
-          }
-        }
-      }
-      let foundClass = await Class.findOne({ where: { grade: targetGrade, section: targetSection } });
-      if (!foundClass) {
-        foundClass = await Class.create({ grade: targetGrade, section: targetSection });
-      }
-      validClassId = foundClass.id;
-    }
-
+    // 6. Create Student Record
     const student = await Student.create({
       userId: user.id,
       rollNumber,
       classId: validClassId,
       parentId: parentIdObj,
-      admissionDate: cleanAdmDate,
+      admissionDate: cleanAdmDate || new Date().toISOString().slice(0, 10),
     });
 
     const populatedStudent = await Student.findByPk(student.id, {

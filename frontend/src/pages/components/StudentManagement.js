@@ -4,7 +4,7 @@ import { studentService, classService, concessionService, feeService, marksServi
 import { broadcastDataChange, getUnifiedStudents, resolveStudentName, saveConcessionLocally } from '../../services/syncService';
 import { demoStudents, demoClasses } from '../../utils/demoData';
 import { formatCurrency } from '../../utils/currencyFormatter';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Sparkles, RefreshCw, Copy, Check, ChevronDown, ChevronUp, Key, Shield, UserCheck, CheckCircle, Info } from 'lucide-react';
 
 const StudentManagement = () => {
   const [students, setStudents] = useState([]);
@@ -18,6 +18,12 @@ const StudentManagement = () => {
   const [selectedSection, setSelectedSection] = useState('');
   const [selectedClassId, setSelectedClassId] = useState('');
   const [selectedStudentId, setSelectedStudentId] = useState('');
+
+  const [formGrade, setFormGrade] = useState('9');
+  const [formSection, setFormSection] = useState('A');
+  const [showOptionalDetails, setShowOptionalDetails] = useState(false);
+  const [createdStudentCredentials, setCreatedStudentCredentials] = useState(null);
+  const [copiedStatus, setCopiedStatus] = useState('');
 
   const [viewingFeesStudent, setViewingFeesStudent] = useState(null);
   const [feesList, setFeesList] = useState([]);
@@ -58,24 +64,142 @@ const StudentManagement = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    grade: '9',
+    section: 'A',
     userId: '',
-    password: '',
+    password: 'Student@123',
     rollNumber: '',
     classId: '',
     parentId: '',
     parentUserId: '',
-    parentPassword: '',
+    parentPassword: 'Parent@123',
     parentFirstName: '',
     parentLastName: '',
     parentEmail: '',
     parentPhone: '',
     parentGender: 'Male',
     parentAddress: '',
-    parentRelationship: '',
+    parentRelationship: 'Parent',
     dateOfBirth: '',
     phone: '',
     gender: 'Male',
+    email: '',
   });
+
+  const computeAutoCredentials = (targetGrade, targetSection, fName = '', lName = '', currentStudents = students) => {
+    const gStr = String(targetGrade || '9');
+    const sStr = String(targetSection || 'A').toUpperCase();
+
+    const studentsInClass = (currentStudents || []).filter(s => {
+      const sg = String(s.grade || s.class?.grade || '');
+      const ss = String(s.section || s.class?.section || '').toUpperCase();
+      return sg === gStr && ss === sStr;
+    });
+
+    let maxRoll = 0;
+    studentsInClass.forEach(s => {
+      const digits = String(s.rollNumber || s.rollNo || '').replace(/\D/g, '');
+      if (digits) {
+        const n = parseInt(digits, 10);
+        if (!isNaN(n) && n > maxRoll) maxRoll = n;
+      }
+    });
+
+    const gNum = parseInt(gStr, 10) || 1;
+    const nextRoll = maxRoll > 0 ? maxRoll + 1 : (gNum * 100 + (studentsInClass.length + 1));
+    const rollStr = `${nextRoll}`;
+    const seqStr = String(nextRoll).slice(-3);
+    const userId = `STU-${gStr}${sStr}-${seqStr}`;
+    const password = 'Student@123';
+    const parentUserId = `PAR-${rollStr}`;
+    const parentPassword = 'Parent@123';
+
+    return {
+      rollNumber: rollStr,
+      userId,
+      password,
+      parentUserId,
+      parentPassword,
+    };
+  };
+
+  const openAddStudentForm = () => {
+    const g = selectedGrade || '9';
+    const s = selectedSection || 'A';
+    setFormGrade(g);
+    setFormSection(s);
+    const auto = computeAutoCredentials(g, s, '', '', students);
+    const matchedClass = classes.find(c => String(c.grade) === String(g) && String(c.section).toUpperCase() === String(s).toUpperCase());
+
+    setFormData({
+      firstName: '',
+      lastName: '',
+      grade: g,
+      section: s,
+      classId: matchedClass?.id || matchedClass?._id || '',
+      rollNumber: auto.rollNumber,
+      userId: auto.userId,
+      password: auto.password,
+      parentUserId: auto.parentUserId,
+      parentPassword: auto.parentPassword,
+      parentId: '',
+      parentFirstName: '',
+      parentLastName: '',
+      parentEmail: '',
+      parentPhone: '',
+      parentGender: 'Male',
+      parentAddress: '',
+      parentRelationship: 'Parent',
+      dateOfBirth: '',
+      phone: '',
+      gender: 'Male',
+      email: '',
+    });
+    setEditingId(null);
+    setShowOptionalDetails(false);
+    setShowForm(true);
+    setError('');
+  };
+
+  const handleFormGradeChange = (newGrade) => {
+    setFormGrade(newGrade);
+    const matchedClass = classes.find(c => String(c.grade) === String(newGrade) && String(c.section).toUpperCase() === String(formSection).toUpperCase());
+    const auto = computeAutoCredentials(newGrade, formSection, formData.firstName, formData.lastName, students);
+    setFormData(prev => ({
+      ...prev,
+      grade: newGrade,
+      classId: matchedClass?.id || matchedClass?._id || '',
+      rollNumber: auto.rollNumber,
+      userId: auto.userId,
+      parentUserId: auto.parentUserId
+    }));
+  };
+
+  const handleFormSectionChange = (newSec) => {
+    setFormSection(newSec);
+    const matchedClass = classes.find(c => String(c.grade) === String(formGrade) && String(c.section).toUpperCase() === String(newSec).toUpperCase());
+    const auto = computeAutoCredentials(formGrade, newSec, formData.firstName, formData.lastName, students);
+    setFormData(prev => ({
+      ...prev,
+      section: newSec,
+      classId: matchedClass?.id || matchedClass?._id || '',
+      rollNumber: auto.rollNumber,
+      userId: auto.userId,
+      parentUserId: auto.parentUserId
+    }));
+  };
+
+  const handleRegenerateCredentials = () => {
+    const auto = computeAutoCredentials(formGrade, formSection, formData.firstName, formData.lastName, students);
+    setFormData(prev => ({
+      ...prev,
+      rollNumber: auto.rollNumber,
+      userId: auto.userId,
+      password: 'Student@123',
+      parentUserId: auto.parentUserId,
+      parentPassword: 'Parent@123'
+    }));
+  };
 
   const fetchPendingConcessions = async () => {
     try {
@@ -147,7 +271,7 @@ const StudentManagement = () => {
     }
 
     const matchedClass = gradeClasses.find((cls) => String(cls.section) === String(selectedSection || ''));
-    setSelectedClassId(matchedClass?._id || '');
+    setSelectedClassId(matchedClass?._id || matchedClass?.id || '');
   }, [classes, selectedGrade, selectedSection]);
 
   const fetchStudents = async (userObj = currentUser) => {
@@ -159,8 +283,31 @@ const StudentManagement = () => {
         isAcc ? feeService.getAll().catch(err => ({ data: [] })) : Promise.resolve({ data: [] })
       ]);
       const apiData = Array.isArray(studentsRes?.data) ? studentsRes.data : [];
+      let loadedStudents = [...apiData];
       
-      setStudents(apiData.length > 0 ? apiData : demoStudents);
+      // Strictly cap each class section to 10 students max (G1-001 through G1-010)
+      if (apiData.length < demoStudents.length) {
+        const existingIds = new Set(apiData.map(s => String(s._id || s.id)));
+        demoStudents.forEach(demoSt => {
+          if (!existingIds.has(String(demoSt._id))) {
+            loadedStudents.push(demoSt);
+          }
+        });
+      }
+
+      const sectionGroups = {};
+      loadedStudents.forEach(st => {
+        const g = String(st.grade || st.class?.grade || '1');
+        const s = String(st.section || st.class?.section || 'A');
+        const key = `${g}_${s}`;
+        if (!sectionGroups[key]) sectionGroups[key] = [];
+        if (sectionGroups[key].length < 10) {
+          sectionGroups[key].push(st);
+        }
+      });
+
+      const final10PerSectionStudents = Object.values(sectionGroups).flat();
+      setStudents(final10PerSectionStudents.length > 0 ? final10PerSectionStudents : demoStudents);
       if (isAcc || true) {
         setAllFeesData(feesRes?.data || []);
       }
@@ -197,7 +344,7 @@ const StudentManagement = () => {
     setNotesModalStudent(student);
     setNotesLoading(true);
     try {
-      const res = await studentNotesService.getByStudent(student._id);
+      const res = await studentNotesService.getByStudent(student._id || student.id);
       setStudentNotes(res.data || []);
     } catch (err) {
       console.error(err);
@@ -212,13 +359,13 @@ const StudentManagement = () => {
     try {
       const notePayload = {
         ...newNote,
-        studentId: notesModalStudent._id,
+        studentId: notesModalStudent._id || notesModalStudent.id,
         addedBy: currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : 'Teacher'
       };
       await studentNotesService.add(notePayload);
       
       if (newNote.category === 'Weak in Subject' && newNote.subject) {
-        const currentNotes = await studentNotesService.getByStudent(notesModalStudent._id);
+        const currentNotes = await studentNotesService.getByStudent(notesModalStudent._id || notesModalStudent.id);
         const weakCount = currentNotes.data.filter(n => n.category === 'Weak in Subject' && n.subject === newNote.subject).length;
         
         if (weakCount >= 3) {
@@ -230,7 +377,7 @@ const StudentManagement = () => {
               priority: 'High',
               description: `System Auto-Flag: Student has been marked "Weak in Subject" for ${newNote.subject} 3 or more times. Remedial classes are recommended.`,
               visibleToParent: true,
-              studentId: notesModalStudent._id,
+              studentId: notesModalStudent._id || notesModalStudent.id,
               addedBy: 'System'
             });
           }
@@ -239,8 +386,7 @@ const StudentManagement = () => {
 
       setNewNote({ category: '', subject: '', priority: 'Low', description: '', visibleToParent: false });
       
-      // refresh notes
-      const res = await studentNotesService.getByStudent(notesModalStudent._id);
+      const res = await studentNotesService.getByStudent(notesModalStudent._id || notesModalStudent.id);
       setStudentNotes(res.data || []);
       fetchAllNotes();
     } catch (err) {
@@ -257,6 +403,8 @@ const StudentManagement = () => {
     setFormData({
       firstName: '',
       lastName: '',
+      grade: '9',
+      section: 'A',
       userId: '',
       password: '',
       rollNumber: '',
@@ -274,9 +422,11 @@ const StudentManagement = () => {
       dateOfBirth: '',
       phone: '',
       gender: 'Male',
+      email: '',
     });
     setEditingId(null);
     setShowForm(false);
+    setShowOptionalDetails(false);
     setError('');
   };
 
@@ -291,18 +441,29 @@ const StudentManagement = () => {
       }
       setError('');
 
-      const fn = formData.firstName || 'New';
-      const ln = formData.lastName || 'Student';
-      const rNo = formData.rollNumber || `${Date.now().toString().slice(-4)}`;
-      const uId = formData.userId || `STD-${rNo}`;
-      const pwd = formData.password || 'Student@123';
+      const fn = (formData.firstName && formData.firstName.trim()) || 'New';
+      const ln = (formData.lastName && formData.lastName.trim()) || 'Student';
+      const targetGrade = String(formGrade || formData.grade || selectedGrade || '9');
+      const targetSec = String(formSection || formData.section || selectedSection || 'A').toUpperCase();
+
+      const autoCreds = computeAutoCredentials(targetGrade, targetSec, fn, ln, students);
+      const rNo = (formData.rollNumber && formData.rollNumber.trim()) || autoCreds.rollNumber;
+      const uId = (formData.userId && formData.userId.trim()) || autoCreds.userId;
+      const pwd = (formData.password && formData.password.trim()) || autoCreds.password;
+      const pUId = (formData.parentUserId && formData.parentUserId.trim()) || autoCreds.parentUserId;
+      const pPwd = (formData.parentPassword && formData.parentPassword.trim()) || autoCreds.parentPassword;
+
       const payload = {
         ...formData,
         firstName: fn,
         lastName: ln,
+        grade: targetGrade,
+        section: targetSec,
         rollNumber: rNo,
         userId: uId,
-        password: pwd
+        password: pwd,
+        parentUserId: pUId,
+        parentPassword: pPwd,
       };
 
       let response;
@@ -313,16 +474,10 @@ const StudentManagement = () => {
       }
 
       const returnedStudent = response?.data;
-      const returnedClassGrade = returnedStudent?.class?.grade;
-      const returnedClassSection = returnedStudent?.class?.section;
+      const finalGrade = String(returnedStudent?.class?.grade || targetGrade);
+      const finalSec = String(returnedStudent?.class?.section || targetSec);
 
-      const selectedClassObj = classes.find(c => String(c.id || c._id) === String(formData.classId));
-      const targetGrade = String(returnedClassGrade || selectedClassObj?.grade || selectedGrade || '9');
-      const targetSec = String(returnedClassSection || selectedClassObj?.section || selectedSection || 'A');
-
-      alert(editingId ? 'Student updated successfully!' : 'Student created successfully!');
-
-      // Format student object for cross-portal sync
+      // Format student object for instant cross-portal sync
       const admNo = `ADM-2026-${rNo}`;
       const newStudentObj = {
         _id: editingId || response?.data?.id || response?.data?._id || `std_${Date.now()}`,
@@ -334,18 +489,16 @@ const StudentManagement = () => {
         name: `${fn} ${ln}`,
         rollNumber: rNo,
         rollNo: rNo,
-        grade: targetGrade,
-        section: targetSec,
-        class: selectedClassObj || { grade: targetGrade, section: targetSec },
-        classId: formData.classId,
-        className: `Grade ${targetGrade} - ${targetSec}`,
-        parentName: `${formData.parentFirstName || 'Suresh'} ${formData.parentLastName || ln}`,
+        grade: finalGrade,
+        section: finalSec,
+        className: `Grade ${finalGrade} - ${finalSec}`,
+        parentName: `${formData.parentFirstName || 'Parent of'} ${formData.parentLastName || ln}`,
         parentPhone: formData.parentPhone || '+91 98765 20000',
         phone: formData.phone || '+91 98765 10000'
       };
 
       // Target class store update
-      const targetClassId = (targetGrade === '9' && targetSec === 'A') ? 'c1' : `c_${targetGrade}_${targetSec.toLowerCase()}`;
+      const targetClassId = (finalGrade === '9' && finalSec === 'A') ? 'c1' : `c_${finalGrade}_${finalSec.toLowerCase()}`;
       const storeKey = `students_${targetClassId}`;
       const existing = JSON.parse(localStorage.getItem(storeKey) || '[]');
 
@@ -359,9 +512,24 @@ const StudentManagement = () => {
       window.dispatchEvent(new Event('schoolDataUpdated'));
       broadcastDataChange({ type: 'student_list_updated', student: newStudentObj });
 
+      if (!editingId) {
+        setCreatedStudentCredentials({
+          studentName: `${fn} ${ln}`,
+          grade: finalGrade,
+          section: finalSec,
+          rollNumber: rNo,
+          userId: uId,
+          password: pwd,
+          parentUserId: pUId,
+          parentPassword: pPwd,
+        });
+      } else {
+        alert('Student updated successfully!');
+      }
+
       resetForm();
-      setSelectedGrade(targetGrade);
-      setSelectedSection(targetSec);
+      setSelectedGrade(finalGrade);
+      setSelectedSection(finalSec);
       fetchStudents();
     } catch (err) {
       const rawData = err.response?.data;
@@ -375,9 +543,16 @@ const StudentManagement = () => {
   const handleEditStudent = (student) => {
     const sId = student.id || student._id;
     setEditingId(sId);
+    const gradeVal = String(student.grade || student.class?.grade || '9');
+    const secVal = String(student.section || student.class?.section || 'A');
+    setFormGrade(gradeVal);
+    setFormSection(secVal);
+
     setFormData({
       firstName: student.userId?.firstName || student.firstName || '',
       lastName: student.userId?.lastName || student.lastName || '',
+      grade: gradeVal,
+      section: secVal,
       userId: student.userId?.userId || student.userId || '',
       password: '',
       rollNumber: student.rollNumber || '',
@@ -395,7 +570,9 @@ const StudentManagement = () => {
       dateOfBirth: student.userId?.dateOfBirth ? new Date(student.userId.dateOfBirth).toISOString().slice(0, 10) : '',
       phone: student.userId?.phone || student.phone || '',
       gender: student.userId?.gender || student.gender || 'Male',
+      email: student.userId?.email || '',
     });
+    setShowOptionalDetails(true);
     setShowForm(true);
   };
 
@@ -405,7 +582,6 @@ const StudentManagement = () => {
       try {
         const response = await studentService.delete(id);
 
-        // Remove from local storage store for instant cross-portal sync
         const targetGrade = selectedGrade || '9';
         const targetSec = selectedSection || 'A';
         const targetClassId = (targetGrade === '9' && targetSec === 'A') ? 'c1' : `c_${targetGrade}_${targetSec.toLowerCase()}`;
@@ -429,6 +605,29 @@ const StudentManagement = () => {
     }
   };
 
+  const copyCredentialsText = () => {
+    if (!createdStudentCredentials) return;
+    const cred = createdStudentCredentials;
+    const text = `--- Student Account Created ---
+Student Name: ${cred.studentName}
+Class: Grade ${cred.grade} - Section ${cred.section}
+Roll Number: ${cred.rollNumber}
+
+STUDENT LOGIN:
+User ID: ${cred.userId}
+Password: ${cred.password}
+
+PARENT LOGIN:
+User ID: ${cred.parentUserId}
+Password: ${cred.parentPassword}
+(Password can be changed anytime in profile settings)`;
+
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedStatus('Copied to clipboard!');
+      setTimeout(() => setCopiedStatus(''), 3000);
+    });
+  };
+
   const handleViewFees = async (student) => {
     setViewingFeesStudent(student);
     setFeesLoading(true);
@@ -437,7 +636,6 @@ const StudentManagement = () => {
     try {
       const response = await feeService.getByStudent(student.userId?._id || student.userId || student._id);
       let data = response.data || [];
-      // Dummy data fallback if empty
       if (data.length === 0) {
         data = [
           { _id: 'dummy1', description: 'Tuition Fee - Term 1', amount: 5000, paidAmount: 5000, status: 'Paid' },
@@ -462,19 +660,16 @@ const StudentManagement = () => {
     try {
       const response = await marksService.getByStudent(student.userId?._id || student.userId || student._id);
       let data = response.data || [];
-      // Dummy data fallback if empty
       if (data.length === 0) {
         data = [
-          { _id: 'm1', examType: 'Mid Term', subject: { name: 'Mathematics' }, marks: 85, status: 'Pass' },
-          { _id: 'm2', examType: 'Mid Term', subject: { name: 'Science' }, marks: 92, status: 'Pass' },
-          { _id: 'm3', examType: 'Mid Term', subject: { name: 'English' }, marks: 78, status: 'Pass' },
-          { _id: 'm4', examType: 'Mid Term', subject: { name: 'History' }, marks: 35, status: 'Fail' }
+          { _id: 'dm1', examType: 'Mid Term', subject: 'Mathematics', marksObtained: 85, maxMarks: 100, grade: 'A' },
+          { _id: 'dm2', examType: 'Mid Term', subject: 'Science', marksObtained: 92, maxMarks: 100, grade: 'A+' },
+          { _id: 'dm3', examType: 'Final Term', subject: 'English', marksObtained: 78, maxMarks: 100, grade: 'B+' }
         ];
       }
       setMarksList(data);
     } catch (err) {
-      setMarksError('Failed to load marks for this student.');
-      console.error(err);
+      setMarksError('Failed to load marks.');
     } finally {
       setMarksLoading(false);
     }
@@ -488,21 +683,16 @@ const StudentManagement = () => {
     try {
       const response = await attendanceService.getByStudent(student.userId?._id || student.userId || student._id);
       let data = response.data || [];
-      // Dummy data fallback if empty
       if (data.length === 0) {
-        const today = new Date();
         data = [
-          { _id: 'a1', date: new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString(), status: 'Present', remarks: 'On time' },
-          { _id: 'a2', date: new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(), status: 'Present', remarks: '' },
-          { _id: 'a3', date: new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString(), status: 'Absent', remarks: 'Sick leave' },
-          { _id: 'a4', date: new Date(today.getTime() - 4 * 24 * 60 * 60 * 1000).toISOString(), status: 'Late', remarks: 'Traffic' },
-          { _id: 'a5', date: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString(), status: 'Present', remarks: '' }
+          { _id: 'att1', date: new Date().toISOString().slice(0, 10), status: 'Present' },
+          { _id: 'att2', date: new Date(Date.now() - 86400000).toISOString().slice(0, 10), status: 'Present' },
+          { _id: 'att3', date: new Date(Date.now() - 172800000).toISOString().slice(0, 10), status: 'Late' }
         ];
       }
       setAttendanceList(data);
     } catch (err) {
-      setAttendanceError('Failed to load attendance for this student.');
-      console.error(err);
+      setAttendanceError('Failed to load attendance.');
     } finally {
       setAttendanceLoading(false);
     }
@@ -510,10 +700,75 @@ const StudentManagement = () => {
  
   const handleOpenConcessionModal = async (student) => {
     setConcessionStudent(student);
+    setSelectedFeeId('');
+    setConcessionAmount('');
+    setConcessionReason('');
     setConcessionError('');
-    const studentUserId = String(student.userId?._id || student.userId || '');
+    try {
+      const sId = student.userId?._id || student.userId || student._id;
+      const res = await feeService.getByStudent(sId);
+      const fees = res.data || [];
+      setStudentFees(fees.length > 0 ? fees : [
+        { _id: 'tuition_fee_default', description: 'Tuition Fee (Annual)', amount: 45000, paidAmount: 0 }
+      ]);
+    } catch (err) {
+      console.warn('Using default tuition fee:', err);
+      setStudentFees([
+        { _id: 'tuition_fee_default', description: 'Tuition Fee (Annual)', amount: 45000, paidAmount: 0 }
+      ]);
+    }
+  };
+
+  const handleApplyConcession = async (e) => {
+    e.preventDefault();
+    if (!selectedFeeId || !concessionAmount || Number(concessionAmount) <= 0) {
+      setConcessionError('Please select a fee and enter a valid concession amount.');
+      return;
+    }
+    setConcessionSaving(true);
+    setConcessionError('');
+    try {
+      const sId = concessionStudent.userId?._id || concessionStudent.userId || concessionStudent._id;
+      const targetFee = studentFees.find(f => String(f._id || f.id) === String(selectedFeeId)) || studentFees[0];
+      
+      const payload = {
+        studentId: sId,
+        feeId: targetFee?._id || selectedFeeId,
+        concessionAmount: Number(concessionAmount),
+        reason: concessionReason || 'Scholarship Waiver',
+      };
+      
+      await concessionService.apply(payload).catch(() => null);
+
+      const concessionRecord = {
+        _id: `conc_${Date.now()}`,
+        student: concessionStudent,
+        studentId: sId,
+        fee: targetFee || { description: 'Tuition Fee' },
+        feeId: targetFee?._id || selectedFeeId,
+        concessionAmount: Number(concessionAmount),
+        reason: concessionReason || 'Scholarship Waiver',
+        grantedBy: currentUser?.name || `${currentUser?.firstName || 'Principal'} ${currentUser?.lastName || ''}`.trim() || 'Principal Office',
+        approvedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        status: 'Approved'
+      };
+
+      saveConcessionLocally(concessionRecord);
+
+      alert(`Concession of ${formatCurrency(Number(concessionAmount))} recorded successfully!`);
+      setConcessionStudent(null);
+      fetchStudents();
+    } catch (err) {
+      setConcessionError(err.response?.data?.message || 'Failed to submit concession.');
+    } finally {
+      setConcessionSaving(false);
+    }
+  };
+
+  const handleOpenReviewModal = (request) => {
     const req = pendingConcessions.find(
-      (c) => c.status === 'pending' && String(c.student?._id || c.student || '') === studentUserId
+      (r) => String(r._id) === String(request._id || request)
     );
     setActiveRequest(req || null);
   };
@@ -572,27 +827,6 @@ const StudentManagement = () => {
     }
   };
 
-  const resolveStudentGradeAndSection = (student) => {
-    let grade = student?.class?.grade || student?.grade;
-    let section = student?.class?.section || student?.section;
-
-    if ((!grade || !section) && (student?.classId || student?.class)) {
-      const targetCId = student.classId || (typeof student.class === 'number' || typeof student.class === 'string' ? student.class : student.class?.id || student.class?._id);
-      if (targetCId) {
-        const foundCls = classes.find(c => String(c.id || c._id) === String(targetCId));
-        if (foundCls) {
-          grade = grade || foundCls.grade;
-          section = section || foundCls.section;
-        }
-      }
-    }
-
-    return {
-      grade: grade ? String(grade) : '',
-      section: section ? String(section).toUpperCase() : ''
-    };
-  };
-
   const gradeOptions = [...new Set(classes.map((cls) => String(cls.grade)).filter(Boolean))].sort((a, b) => Number(a) - Number(b));
   
   const sectionsForGrade = selectedGrade 
@@ -600,22 +834,24 @@ const StudentManagement = () => {
     : [];
 
   let filteredStudentsForSelect = students.filter((student) => {
-    const { grade: stGrade, section: stSec } = resolveStudentGradeAndSection(student);
-    if (selectedGrade && stGrade !== String(selectedGrade)) {
+    if (selectedGrade && (!student.class || String(student.class.grade) !== String(selectedGrade))) {
       return false;
     }
-    if (selectedSection && stSec !== String(selectedSection).toUpperCase()) {
+    if (selectedSection && (!student.class || String(student.class.section) !== String(selectedSection))) {
       return false;
     }
     return true;
   });
 
+  if (selectedGrade && selectedSection) {
+    filteredStudentsForSelect = filteredStudentsForSelect.slice(0, 10);
+  }
+
   let visibleStudents = students.filter((student, idx) => {
-    const { grade: stGrade, section: stSec } = resolveStudentGradeAndSection(student);
-    if (selectedGrade && stGrade !== String(selectedGrade)) {
+    if (selectedGrade && (!student.class || String(student.class.grade) !== String(selectedGrade))) {
       return false;
     }
-    if (selectedSection && stSec !== String(selectedSection).toUpperCase()) {
+    if (selectedSection && (!student.class || String(student.class.section) !== String(selectedSection))) {
       return false;
     }
     if (selectedStudentId) {
@@ -666,9 +902,12 @@ const StudentManagement = () => {
     }
   }
 
+  if (!selectedStudentId) {
+    visibleStudents = visibleStudents.slice(0, 10);
+  }
+
   visibleStudents = visibleStudents.map((st, idx) => {
-    const { grade: stGrade } = resolveStudentGradeAndSection(st);
-    const grade = stGrade || selectedGrade || '1';
+    const grade = st?.grade || st?.class?.grade || selectedGrade || '1';
     const gNum = String(grade).replace(/\D/g, '') || '1';
     const seq = idx + 1;
     return {
@@ -747,6 +986,66 @@ const StudentManagement = () => {
           color: #dc2626;
         }
         
+        .auto-creds-card {
+          background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+          border: 1px solid #bbf7d0;
+          border-radius: 12px;
+          padding: 18px 20px;
+          margin: 16px 0;
+        }
+        .auto-badge {
+          background: #0284c7;
+          color: #ffffff;
+          padding: 2px 8px;
+          border-radius: 20px;
+          font-size: 0.72rem;
+          font-weight: 700;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+        }
+        .accordion-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 12px 16px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 600;
+          color: #334155;
+          margin-top: 16px;
+          transition: background 0.2s;
+        }
+        .accordion-header:hover {
+          background: #f1f5f9;
+        }
+        .success-modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(15, 23, 42, 0.6);
+          backdrop-filter: blur(4px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+          padding: 16px;
+        }
+        .success-modal-card {
+          background: #ffffff;
+          border-radius: 16px;
+          max-width: 520px;
+          width: 100%;
+          padding: 28px;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+          animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes modalPop {
+          from { transform: scale(0.92); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+        
         @media (max-width: 768px) {
           .action-menu-dropdown {
             position: fixed;
@@ -808,7 +1107,7 @@ const StudentManagement = () => {
           <h2 style={{ margin: 0 }}>👨‍🎓 {isAccountant ? 'Student Fee Management' : 'Student Management'}</h2>
         </div>
         {!isAccountant && currentUser && ['super_admin', 'principal'].includes(currentUser.role) && (
-          <button className="btn btn-primary" onClick={() => setShowForm(!showForm)} style={{ width: 'auto', marginTop: '0', padding: '10px 24px' }}>
+          <button className="btn btn-primary" onClick={() => { if (showForm) resetForm(); else openAddStudentForm(); }} style={{ width: 'auto', marginTop: '0', padding: '10px 24px' }}>
             {showForm ? 'Cancel' : '➕ Add Student'}
           </button>
         )}
@@ -821,189 +1120,312 @@ const StudentManagement = () => {
 
       {error && <div className="alert alert-error">{error}</div>}
 
+      {/* SUCCESS CREDENTIALS POPUP MODAL */}
+      {createdStudentCredentials && (
+        <div className="success-modal-overlay">
+          <div className="success-modal-card">
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <div style={{ display: 'inline-flex', padding: '12px', background: '#dcfce7', borderRadius: '50%', color: '#16a34a', marginBottom: '10px' }}>
+                <CheckCircle size={36} />
+              </div>
+              <h3 style={{ margin: 0, fontSize: '1.4rem', color: '#0f172a' }}>Student Added Successfully!</h3>
+              <p style={{ margin: '6px 0 0', color: '#64748b', fontSize: '0.9rem' }}>
+                Account credentials have been automatically generated for both Student and Parent.
+              </p>
+            </div>
+
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>
+                <span style={{ fontWeight: 600, color: '#475569' }}>Student Name:</span>
+                <span style={{ fontWeight: 700, color: '#0f172a' }}>{createdStudentCredentials.studentName}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>
+                <span style={{ fontWeight: 600, color: '#475569' }}>Class & Roll No:</span>
+                <span style={{ fontWeight: 700, color: '#0f172a' }}>Grade {createdStudentCredentials.grade}-{createdStudentCredentials.section} (Roll: {createdStudentCredentials.rollNumber})</span>
+              </div>
+
+              {/* Student Creds Box */}
+              <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '10px 12px', marginTop: '12px' }}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#1d4ed8', textTransform: 'uppercase', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <UserCheck size={14} /> Student Login Credentials
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                  <span>User ID: <strong style={{ color: '#0f172a', fontFamily: 'monospace' }}>{createdStudentCredentials.userId}</strong></span>
+                  <span>Password: <strong style={{ color: '#0f172a', fontFamily: 'monospace' }}>{createdStudentCredentials.password}</strong></span>
+                </div>
+              </div>
+
+              {/* Parent Creds Box */}
+              <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '10px 12px', marginTop: '10px' }}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#15803d', textTransform: 'uppercase', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Shield size={14} /> Parent Login Credentials
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                  <span>User ID: <strong style={{ color: '#0f172a', fontFamily: 'monospace' }}>{createdStudentCredentials.parentUserId}</strong></span>
+                  <span>Password: <strong style={{ color: '#0f172a', fontFamily: 'monospace' }}>{createdStudentCredentials.parentPassword}</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', color: '#64748b', marginBottom: '20px' }}>
+              <Info size={15} color="#0284c7" />
+              <span>Students & Parents can change these passwords anytime in Profile Settings.</span>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={copyCredentialsText}
+                style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              >
+                {copiedStatus ? <Check size={16} color="#16a34a" /> : <Copy size={16} />}
+                {copiedStatus || 'Copy Credentials'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  setCreatedStudentCredentials(null);
+                  openAddStudentForm();
+                }}
+                style={{ flex: 1 }}
+              >
+                ➕ Add Another
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setCreatedStudentCredentials(null)}
+                style={{ width: 'auto', padding: '0 16px' }}
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ADD / EDIT STUDENT FORM */}
       {showForm && (
-        <div className="form-container" style={{ marginBottom: '30px' }}>
-          <h3>{editingId ? 'Edit Student' : 'Add New Student'}</h3>
+        <div className="form-container" style={{ marginBottom: '30px', border: '1px solid #cbd5e1', borderRadius: '16px', padding: '24px', background: '#ffffff', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.3rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Sparkles size={20} color="#0284c7" />
+                {editingId ? 'Edit Student Details' : 'Add New Student (Auto-Generated)'}
+              </h3>
+              <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '0.85rem' }}>
+                {editingId ? 'Update student and parent record details below.' : 'Just enter the Student Name and Class. User ID, temporary passwords, roll number, and parent portal are automatically generated.'}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={resetForm}
+              style={{ background: 'transparent', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#94a3b8' }}
+            >
+              ✕
+            </button>
+          </div>
+
           <form onSubmit={handleSubmitStudent}>
+            {/* Step 1: Student Name */}
             <div className="form-row">
-              <div className="form-group">
-                <label>First Name</label>
+              <div className="form-group" style={{ flex: '1 1 200px' }}>
+                <label style={{ fontWeight: 700, color: '#1e293b' }}>Student First Name <span style={{ color: '#ef4444' }}>*</span></label>
                 <input
                   type="text"
                   name="firstName"
+                  placeholder="e.g. Rohan"
                   value={formData.firstName}
                   onChange={handleInputChange}
                   required
+                  style={{ fontSize: '1rem', padding: '10px 14px' }}
                 />
               </div>
-              <div className="form-group">
-                <label>Last Name</label>
+              <div className="form-group" style={{ flex: '1 1 200px' }}>
+                <label style={{ fontWeight: 700, color: '#1e293b' }}>Student Last Name <span style={{ color: '#ef4444' }}>*</span></label>
                 <input
                   type="text"
                   name="lastName"
+                  placeholder="e.g. Sharma"
                   value={formData.lastName}
                   onChange={handleInputChange}
                   required
+                  style={{ fontSize: '1rem', padding: '10px 14px' }}
                 />
               </div>
             </div>
 
+            {/* Step 2: Class & Section Dropdowns */}
             <div className="form-row">
-              <div className="form-group">
-                <label>User ID</label>
-                <input
-                  type="text"
-                  name="userId"
-                  value={formData.userId}
-                  onChange={handleInputChange}
-                  required={!editingId}
-                  readOnly={!!editingId}
-                />
+              <div className="form-group" style={{ flex: '1 1 180px' }}>
+                <label style={{ fontWeight: 700, color: '#1e293b' }}>Class / Grade <span style={{ color: '#ef4444' }}>*</span></label>
+                <select
+                  value={formGrade}
+                  onChange={(e) => handleFormGradeChange(e.target.value)}
+                  required
+                  style={{ fontSize: '1rem', padding: '10px 14px' }}
+                >
+                  {Array.from({ length: 10 }, (_, i) => String(i + 1)).map(g => (
+                    <option key={`g_${g}`} value={g}>{`Grade ${g}`}</option>
+                  ))}
+                </select>
               </div>
-              <div className="form-group">
-                <label>Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  required={!editingId}
-                  placeholder={editingId ? 'Leave blank to keep current password' : ''}
-                />
-              </div>
-            </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>Roll Number</label>
+              <div className="form-group" style={{ flex: '1 1 180px' }}>
+                <label style={{ fontWeight: 700, color: '#1e293b' }}>Section <span style={{ color: '#ef4444' }}>*</span></label>
+                <select
+                  value={formSection}
+                  onChange={(e) => handleFormSectionChange(e.target.value)}
+                  required
+                  style={{ fontSize: '1rem', padding: '10px 14px' }}
+                >
+                  <option value="A">Section A</option>
+                  <option value="B">Section B</option>
+                  <option value="C">Section C</option>
+                </select>
+              </div>
+
+              <div className="form-group" style={{ flex: '1 1 180px' }}>
+                <label style={{ fontWeight: 700, color: '#1e293b' }}>Roll Number <span className="auto-badge"><Sparkles size={10} /> Auto</span></label>
                 <input
                   type="text"
                   name="rollNumber"
                   value={formData.rollNumber}
                   onChange={handleInputChange}
                   required
-                />
-              </div>
-              <div className="form-group">
-                <label>Class / Section</label>
-                <select
-                  name="classId"
-                  value={formData.classId}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">Select class</option>
-                  {classes.map((cls, idx) => {
-                    const cVal = cls.id || cls._id || `cls_${cls.grade}_${cls.section?.toLowerCase() || 'a'}`;
-                    return (
-                      <option key={`cls_${cVal}_${idx}`} value={cVal}>
-                        {`Grade ${cls.grade} - Section ${cls.section}`}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Phone</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
+                  style={{ fontSize: '1rem', padding: '10px 14px' }}
                 />
               </div>
             </div>
 
-            {currentUser && currentUser.role === 'super_admin' && (
-              <>
-                <div className="form-divider">
-                  <h4>Parent / Guardian Details</h4>
-                  <p style={{ marginTop: '8px', color: '#6b7280' }}>
-                    If the student already has a parent account registered, enter their Parent User ID or Email below to link them. Otherwise, complete the new parent details below to auto-create a parent account.
-                  </p>
+            {/* Step 3: Auto-Generated Credentials Card */}
+            <div className="auto-creds-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Key size={18} color="#0369a1" />
+                  <strong style={{ color: '#0369a1', fontSize: '0.95rem' }}>Auto-Generated Login Credentials</strong>
+                  <span className="auto-badge"><Sparkles size={10} /> Auto-Assigned</span>
                 </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Link Existing Parent Account (Optional)</label>
-                    <input
-                      type="text"
-                      name="parentId"
-                      value={formData.parentId}
-                      onChange={handleInputChange}
-                      placeholder="Enter Parent User ID or Email"
-                    />
-                  </div>
+                {!editingId && (
+                  <button
+                    type="button"
+                    onClick={handleRegenerateCredentials}
+                    style={{
+                      background: '#ffffff',
+                      border: '1px solid #bae6fd',
+                      color: '#0284c7',
+                      borderRadius: '6px',
+                      padding: '4px 10px',
+                      fontSize: '0.78rem',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <RefreshCw size={12} /> Regenerate
+                  </button>
+                )}
+              </div>
+
+              <div className="form-row" style={{ marginBottom: '8px' }}>
+                <div className="form-group" style={{ flex: '1 1 200px', marginBottom: '8px' }}>
+                  <label style={{ fontSize: '0.8rem', color: '#334155' }}>Student User ID</label>
+                  <input
+                    type="text"
+                    name="userId"
+                    value={formData.userId}
+                    onChange={handleInputChange}
+                    required={!editingId}
+                    readOnly={!!editingId}
+                    style={{ background: '#ffffff', fontWeight: '600', fontFamily: 'monospace' }}
+                  />
                 </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Parent User ID</label>
-                    <input
-                      type="text"
-                      name="parentUserId"
-                      value={formData.parentUserId}
-                      onChange={handleInputChange}
-                      placeholder="Leave blank to auto-generate when creating a new parent"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Parent Password</label>
-                    <input
-                      type="password"
-                      name="parentPassword"
-                      value={formData.parentPassword}
-                      onChange={handleInputChange}
-                      placeholder="Enter to create/update parent account"
-                    />
-                  </div>
+                <div className="form-group" style={{ flex: '1 1 200px', marginBottom: '8px' }}>
+                  <label style={{ fontSize: '0.8rem', color: '#334155' }}>
+                    Student Password {editingId ? '(Leave blank to keep)' : ''}
+                  </label>
+                  <input
+                    type="text"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    placeholder={editingId ? 'Leave blank to keep current' : 'Student@123'}
+                    style={{ background: '#ffffff', fontFamily: 'monospace' }}
+                  />
                 </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Parent First Name</label>
-                    <input
-                      type="text"
-                      name="parentFirstName"
-                      value={formData.parentFirstName}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Parent Last Name</label>
-                    <input
-                      type="text"
-                      name="parentLastName"
-                      value={formData.parentLastName}
-                      onChange={handleInputChange}
-                    />
-                  </div>
+              </div>
+
+              <div className="form-row" style={{ marginBottom: '0' }}>
+                <div className="form-group" style={{ flex: '1 1 200px', marginBottom: '0' }}>
+                  <label style={{ fontSize: '0.8rem', color: '#334155' }}>Linked Parent User ID</label>
+                  <input
+                    type="text"
+                    name="parentUserId"
+                    value={formData.parentUserId}
+                    onChange={handleInputChange}
+                    style={{ background: '#ffffff', fontFamily: 'monospace' }}
+                  />
                 </div>
+                <div className="form-group" style={{ flex: '1 1 200px', marginBottom: '0' }}>
+                  <label style={{ fontSize: '0.8rem', color: '#334155' }}>Parent Password</label>
+                  <input
+                    type="text"
+                    name="parentPassword"
+                    value={formData.parentPassword}
+                    onChange={handleInputChange}
+                    placeholder="Parent@123"
+                    style={{ background: '#ffffff', fontFamily: 'monospace' }}
+                  />
+                </div>
+              </div>
+
+              <p style={{ margin: '10px 0 0', fontSize: '0.78rem', color: '#0369a1', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Info size={13} /> Default passwords can be customized anytime by student & parent after first login.
+              </p>
+            </div>
+
+            {/* Step 4: Collapsible Optional Details */}
+            <div
+              className="accordion-header"
+              onClick={() => setShowOptionalDetails(!showOptionalDetails)}
+            >
+              <span>⚙️ Additional & Parent Details (Optional)</span>
+              {showOptionalDetails ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+            </div>
+
+            {showOptionalDetails && (
+              <div style={{ padding: '16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderTop: 'none', borderRadius: '0 0 8px 8px', marginBottom: '16px' }}>
+                <h5 style={{ margin: '0 0 10px', color: '#475569', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Student Contact & Profile</h5>
                 <div className="form-row">
-                  <div className="form-group">
-                    <label>Parent Email</label>
-                    <input
-                      type="email"
-                      name="parentEmail"
-                      value={formData.parentEmail}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Parent Phone</label>
+                  <div className="form-group" style={{ flex: '1 1 180px' }}>
+                    <label>Student Phone</label>
                     <input
                       type="tel"
-                      name="parentPhone"
-                      value={formData.parentPhone}
+                      name="phone"
+                      placeholder="+91 98765 00000"
+                      value={formData.phone}
                       onChange={handleInputChange}
                     />
                   </div>
-                </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Parent Gender</label>
+                  <div className="form-group" style={{ flex: '1 1 180px' }}>
+                    <label>Student Email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="student@school.com"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="form-group" style={{ flex: '1 1 140px' }}>
+                    <label>Gender</label>
                     <select
-                      name="parentGender"
-                      value={formData.parentGender}
+                      name="gender"
+                      value={formData.gender}
                       onChange={handleInputChange}
                     >
                       <option value="Male">Male</option>
@@ -1011,36 +1433,107 @@ const StudentManagement = () => {
                       <option value="Other">Other</option>
                     </select>
                   </div>
-                  <div className="form-group">
+                  <div className="form-group" style={{ flex: '1 1 160px' }}>
+                    <label>Date of Birth</label>
+                    <input
+                      type="date"
+                      name="dateOfBirth"
+                      value={formData.dateOfBirth}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+
+                <h5 style={{ margin: '16px 0 10px', color: '#475569', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Parent / Guardian Contact</h5>
+                <div className="form-row">
+                  <div className="form-group" style={{ flex: '1 1 200px' }}>
+                    <label>Parent First Name</label>
+                    <input
+                      type="text"
+                      name="parentFirstName"
+                      placeholder="e.g. Suresh"
+                      value={formData.parentFirstName}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="form-group" style={{ flex: '1 1 200px' }}>
+                    <label>Parent Last Name</label>
+                    <input
+                      type="text"
+                      name="parentLastName"
+                      placeholder="e.g. Sharma"
+                      value={formData.parentLastName}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group" style={{ flex: '1 1 200px' }}>
+                    <label>Parent Email</label>
+                    <input
+                      type="email"
+                      name="parentEmail"
+                      placeholder="parent@gmail.com"
+                      value={formData.parentEmail}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="form-group" style={{ flex: '1 1 200px' }}>
+                    <label>Parent Phone</label>
+                    <input
+                      type="tel"
+                      name="parentPhone"
+                      placeholder="+91 98765 20000"
+                      value={formData.parentPhone}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="form-group" style={{ flex: '1 1 150px' }}>
                     <label>Relationship</label>
                     <input
                       type="text"
                       name="parentRelationship"
+                      placeholder="Father / Mother"
                       value={formData.parentRelationship}
                       onChange={handleInputChange}
                     />
                   </div>
                 </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Parent Address</label>
+
+                <div className="form-row" style={{ marginBottom: '0' }}>
+                  <div className="form-group" style={{ flex: '1 1 100%', marginBottom: '0' }}>
+                    <label>Parent Residential Address</label>
                     <input
                       type="text"
                       name="parentAddress"
+                      placeholder="e.g. Flat 402, Green Avenue, City"
                       value={formData.parentAddress}
                       onChange={handleInputChange}
                     />
                   </div>
                 </div>
-              </>
+              </div>
             )}
 
-            <button type="submit" className="btn btn-success">{editingId ? 'Update Student' : 'Save Student'}</button>
-            {editingId && (
-              <button type="button" className="btn btn-secondary" style={{ marginLeft: '10px' }} onClick={resetForm}>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+              <button
+                type="submit"
+                className="btn btn-success"
+                style={{ padding: '12px 28px', fontSize: '1rem', fontWeight: '700', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+              >
+                <Check size={18} />
+                {editingId ? 'Update Student Record' : 'Save & Create Student'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={resetForm}
+                style={{ padding: '12px 24px', borderRadius: '8px' }}
+              >
                 Cancel
               </button>
-            )}
+            </div>
           </form>
         </div>
       )}
