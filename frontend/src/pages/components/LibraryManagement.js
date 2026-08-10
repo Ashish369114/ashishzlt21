@@ -646,42 +646,38 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
     const targetTitle = (bookObj.title || '').trim().toLowerCase();
     const targetIsbn = (bookObj.isbn || '').trim().toLowerCase();
 
-    if (!window.confirm(`Are you sure you want to delete "${bookObj.title || 'this book'}" from the library?`)) {
-      return;
-    }
+    // Perform immediate local state and localStorage deletion
+    setBooks(prev => {
+      const updated = prev.filter(b => {
+        const bId = String(b._id || b.id || '');
+        const bTitle = (b.title || '').trim().toLowerCase();
+        const bIsbn = (b.isbn || '').trim().toLowerCase();
 
-    try {
-      if (targetId && !targetId.startsWith('bk_')) {
-        await libraryService.delete(targetId).catch(err => {
-          console.warn('API delete book failed, deleting locally:', err);
-        });
-      }
-    } catch (err) {
-      console.warn('Delete book error:', err);
-    } finally {
-      setBooks(prev => {
-        const updated = prev.filter(b => {
-          const bId = String(b._id || b.id || '');
-          const bTitle = (b.title || '').trim().toLowerCase();
-          const bIsbn = (b.isbn || '').trim().toLowerCase();
-
-          if (targetId && bId && bId === targetId) return false;
-          if (targetIsbn && bIsbn && bIsbn === targetIsbn) return false;
-          if (targetTitle && bTitle && bTitle === targetTitle) return false;
-          return true;
-        });
-
-        localStorage.setItem('library_books_list', JSON.stringify(updated));
-
-        const totalCopiesSum = updated.reduce((acc, b) => acc + (b.totalCopies || 0), 0);
-        const totalAvailSum = updated.reduce((acc, b) => acc + (b.availableCopies !== undefined ? b.availableCopies : (b.totalCopies || 0)), 0);
-        setAvailableBooks(totalAvailSum);
-        localStorage.setItem('library_stats', JSON.stringify({ total: totalCopiesSum, available: totalAvailSum, borrowed: totalCopiesSum - totalAvailSum }));
-
-        return updated;
+        if (targetId && bId && bId === targetId) return false;
+        if (targetIsbn && bIsbn && bIsbn === targetIsbn) return false;
+        if (targetTitle && bTitle && bTitle === targetTitle) return false;
+        return true;
       });
 
-      alert('Book deleted successfully!');
+      localStorage.setItem('library_books_list', JSON.stringify(updated));
+
+      const totalCopiesSum = updated.reduce((acc, b) => acc + (b.totalCopies || 0), 0);
+      const totalAvailSum = updated.reduce((acc, b) => acc + (b.availableCopies !== undefined ? b.availableCopies : (b.totalCopies || 0)), 0);
+      setAvailableBooks(totalAvailSum);
+      localStorage.setItem('library_stats', JSON.stringify({ total: totalCopiesSum, available: totalAvailSum, borrowed: totalCopiesSum - totalAvailSum }));
+
+      return updated;
+    });
+
+    // Notify backend if valid numeric ID exists
+    if (targetId && !targetId.startsWith('bk_')) {
+      try {
+        await libraryService.delete(targetId).catch(err => {
+          console.warn('API delete book failed, deleted locally:', err);
+        });
+      } catch (err) {
+        console.warn('Delete book error:', err);
+      }
     }
   };
 
