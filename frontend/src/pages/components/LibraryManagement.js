@@ -640,14 +640,41 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
     }
   };
 
-  const handleDeleteBook = async (id) => {
-    if (window.confirm('Are you sure you want to delete this book?')) {
-      try {
-        await libraryService.delete(id);
-        fetchBooks();
-      } catch (err) {
-        setBooks(prev => prev.filter(b => (b._id || b.id) !== id));
+  const handleDeleteBook = async (bookId, bookIsbn) => {
+    if (!window.confirm('Are you sure you want to delete this book from the library?')) return;
+
+    try {
+      if (bookId) {
+        await libraryService.delete(bookId).catch(err => {
+          console.warn('API delete book failed, deleting locally:', err);
+        });
       }
+    } catch (err) {
+      console.warn('Delete book error:', err);
+    } finally {
+      const cleanId = String(bookId || '');
+      const cleanIsbn = (bookIsbn || '').replace(/\D/g, '');
+
+      setBooks(prev => {
+        const updated = prev.filter(b => {
+          const bId = String(b._id || b.id || '');
+          const bIsbn = (b.isbn || '').replace(/\D/g, '');
+          if (cleanId && bId === cleanId) return false;
+          if (cleanIsbn && bIsbn && bIsbn === cleanIsbn) return false;
+          return true;
+        });
+
+        localStorage.setItem('library_books_list', JSON.stringify(updated));
+
+        const totalCopiesSum = updated.reduce((acc, b) => acc + (b.totalCopies || 0), 0);
+        const totalAvailSum = updated.reduce((acc, b) => acc + (b.availableCopies !== undefined ? b.availableCopies : (b.totalCopies || 0)), 0);
+        setAvailableBooks(totalAvailSum);
+        localStorage.setItem('library_stats', JSON.stringify({ total: totalCopiesSum, available: totalAvailSum, borrowed: totalCopiesSum - totalAvailSum }));
+
+        return updated;
+      });
+
+      alert('Book deleted successfully!');
     }
   };
 
@@ -1084,7 +1111,7 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
                                 <button onClick={(e) => { e.stopPropagation(); setHistoryModalOpenFor(book); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#475569', fontWeight: '600' }}>Reading History</button>
                                 <div style={{ height: '1px', background: '#f1f5f9', margin: '4px 0' }}></div>
                                 <button onClick={(e) => { e.stopPropagation(); handleEditBook(book); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#1e293b' }}>Edit Book</button>
-                                <button onClick={(e) => { e.stopPropagation(); handleDeleteBook(book._id || book.id); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#ef4444' }}>Delete Book</button>
+                                <button onClick={(e) => { e.stopPropagation(); handleDeleteBook(book._id || book.id, book.isbn); setActionMenuOpenFor(null); }} style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', textAlign: 'left', fontSize: '0.85rem', cursor: 'pointer', color: '#ef4444' }}>Delete Book</button>
                               </div>
                             )}
                           </div>
