@@ -82,20 +82,46 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
       const apiEmployees = Array.isArray(employeesRes?.data) ? employeesRes.data : [];
       const fetchedStats = classStatsRes.data || {};
 
-      const studentCount = apiStudents.length > 0 ? apiStudents.length : (fetchedStats.totalStudents || 300);
-      
-      const teachingEmployees = apiEmployees.filter(e => {
-        const type = String(e.employeeType || e.type || '').toLowerCase();
-        return type.includes('teaching') || type.includes('school') || type.includes('primary');
-      });
-      const nonTeachingEmployees = apiEmployees.filter(e => {
-        const type = String(e.employeeType || e.type || '').toLowerCase();
-        return type.includes('non');
-      });
+      // 1. Total Students Count (Dynamic API + local storage fallback)
+      let studentCount = 0;
+      if (apiStudents.length > 0) {
+        studentCount = apiStudents.length;
+      } else {
+        const savedStudentsStr = localStorage.getItem('school_students_list');
+        const savedStudents = savedStudentsStr ? JSON.parse(savedStudentsStr) : [];
+        studentCount = savedStudents.length > 0 ? savedStudents.length : 150;
+      }
 
-      const teachingCount = teachingEmployees.length > 0 ? teachingEmployees.length : (fetchedStats.totalTeaching || fetchedStats.totalTeachers || 30);
-      const nonTeachingCount = nonTeachingEmployees.length > 0 ? nonTeachingEmployees.length : (fetchedStats.totalNonTeaching || 28);
-      const totalEmpCount = apiEmployees.length > 0 ? apiEmployees.length : (fetchedStats.totalEmployees || (teachingCount + nonTeachingCount));
+      // 2. Teaching & Non-Teaching Staff Counts (Dynamic API + local storage fallback)
+      let activeEmployees = apiEmployees;
+      if (activeEmployees.length === 0) {
+        const savedEmpStr = localStorage.getItem('employee_list');
+        const savedEmps = savedEmpStr ? JSON.parse(savedEmpStr) : [];
+        activeEmployees = savedEmps.length > 0 ? savedEmps : [];
+      }
+
+      let teachingCount = 0;
+      let nonTeachingCount = 0;
+
+      if (activeEmployees.length > 0) {
+        const nonTeachingEmployees = activeEmployees.filter(e => {
+          const type = String(e.employeeType || e.type || e.designation || '').toLowerCase();
+          return type.includes('non') || type.includes('admin') || type.includes('clerk') || type.includes('librarian') || type.includes('receptionist') || type.includes('officer') || type.includes('assistant');
+        });
+
+        const teachingEmployees = activeEmployees.filter(e => {
+          const type = String(e.employeeType || e.type || e.designation || '').toLowerCase();
+          return !type.includes('non') && (type.includes('teaching') || type.includes('teacher') || type.includes('tgt') || type.includes('pgt') || type.includes('school') || type.includes('primary') || type.includes('junior') || type.includes('high') || type.includes('nursery') || type.includes('pre-primary') || type.includes('faculty'));
+        });
+
+        teachingCount = teachingEmployees.length;
+        nonTeachingCount = nonTeachingEmployees.length;
+      } else {
+        teachingCount = fetchedStats.totalTeaching || fetchedStats.totalTeachers || 15;
+        nonTeachingCount = fetchedStats.totalNonTeaching || 6;
+      }
+
+      const totalEmpCount = activeEmployees.length > 0 ? activeEmployees.length : (teachingCount + nonTeachingCount);
 
       setStats({
         ...fetchedStats,

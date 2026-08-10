@@ -521,6 +521,16 @@ const StudentManagement = () => {
         localStorage.setItem(storeKey, JSON.stringify([...existing, newStudentObj]));
       }
 
+      // Sync master students list in localStorage
+      const savedMasterStr = localStorage.getItem('school_students_list');
+      let currentMaster = savedMasterStr ? JSON.parse(savedMasterStr) : (students || []);
+      if (editingId) {
+        currentMaster = currentMaster.map(s => String(s._id || s.id) === String(editingId) ? { ...s, ...newStudentObj } : s);
+      } else {
+        currentMaster = [newStudentObj, ...currentMaster.filter(s => String(s._id || s.id) !== String(newStudentObj.id))];
+      }
+      localStorage.setItem('school_students_list', JSON.stringify(currentMaster));
+
       window.dispatchEvent(new Event('schoolDataUpdated'));
       broadcastDataChange({ type: 'student_list_updated', student: newStudentObj });
 
@@ -594,7 +604,10 @@ const StudentManagement = () => {
     if (!id) return;
     if (window.confirm('Are you sure you want to delete this student?')) {
       try {
-        const response = await studentService.delete(id);
+        const response = await studentService.delete(id).catch(err => {
+          console.warn('API delete student failed, deleting locally:', err);
+          return null;
+        });
 
         const targetGrade = selectedGrade || '9';
         const targetSec = selectedSection || 'A';
@@ -603,6 +616,14 @@ const StudentManagement = () => {
         const existing = JSON.parse(localStorage.getItem(storeKey) || '[]');
         const filtered = existing.filter(s => String(s._id || s.id) !== String(id));
         localStorage.setItem(storeKey, JSON.stringify(filtered));
+
+        // Sync master students list in localStorage
+        const savedMasterStr = localStorage.getItem('school_students_list');
+        if (savedMasterStr) {
+          const masterList = JSON.parse(savedMasterStr);
+          const filteredMaster = masterList.filter(s => String(s._id || s.id) !== String(id));
+          localStorage.setItem('school_students_list', JSON.stringify(filteredMaster));
+        }
 
         window.dispatchEvent(new Event('schoolDataUpdated'));
         broadcastDataChange({ type: 'student_deleted', studentId: id });
