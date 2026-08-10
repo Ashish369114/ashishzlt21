@@ -765,7 +765,7 @@ const EmployeeManagement = () => {
                               >
                                 ✏️ Edit
                               </button>
-                              {canViewSalary && (
+                              {isPrincipal && (
                                 <button
                                   onClick={() => setEditingEmployeePayroll(employee)}
                                   style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', borderRadius: '6px', padding: '4px 10px', fontSize: '0.78rem', fontWeight: '600', cursor: 'pointer' }}
@@ -996,7 +996,7 @@ const EmployeeManagement = () => {
                     <th style={{ whiteSpace: 'nowrap' }}>Subject / Role</th>
                     <th style={{ whiteSpace: 'nowrap' }}>Experience</th>
                     <th style={{ whiteSpace: 'nowrap' }}>Base Salary</th>
-                    <th style={{ width: '150px', textAlign: 'center', whiteSpace: 'nowrap' }}>Action</th>
+                    {isPrincipal && <th style={{ width: '150px', textAlign: 'center', whiteSpace: 'nowrap' }}>Action</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -1023,14 +1023,16 @@ const EmployeeManagement = () => {
                       })()}</td>
                       <td>{getYearsWorked(teacher.dateOfJoining)} yrs</td>
                       <td>{formatCurrency(typeof teacher.salary === 'object' && teacher.salary !== null ? (teacher.salary?.baseSalary || 0) : (Number(teacher.salary) || 45000))}</td>
-                      <td style={{ textAlign: 'center' }}>
-                        <button
-                          onClick={() => setEditingTeacher(teacher)}
-                          className="btn btn-primary btn-small"
-                        >
-                          💼 Set Pay
-                        </button>
-                      </td>
+                      {isPrincipal && (
+                        <td style={{ textAlign: 'center' }}>
+                          <button
+                            onClick={() => setEditingTeacher(teacher)}
+                            className="btn btn-primary btn-small"
+                          >
+                            💼 Set Pay
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -1047,7 +1049,7 @@ const EmployeeManagement = () => {
                     <th style={{ whiteSpace: 'nowrap' }}>Experience</th>
                     <th style={{ whiteSpace: 'nowrap' }}>Joining Date</th>
                     <th style={{ whiteSpace: 'nowrap' }}>Base Salary</th>
-                    <th style={{ width: '150px', textAlign: 'center', whiteSpace: 'nowrap' }}>Action</th>
+                    {isPrincipal && <th style={{ width: '150px', textAlign: 'center', whiteSpace: 'nowrap' }}>Action</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -1058,14 +1060,16 @@ const EmployeeManagement = () => {
                       <td>{getYearsWorked(emp.dateOfJoining)} yrs</td>
                       <td>{formatJoiningDate(emp.dateOfJoining)}</td>
                       <td>{formatCurrency(typeof emp.salary === 'object' && emp.salary !== null ? (emp.salary?.baseSalary || 0) : (Number(emp.salary) || 35000))}</td>
-                      <td style={{ textAlign: 'center' }}>
-                        <button
-                          onClick={() => setEditingEmployeePayroll(emp)}
-                          className="btn btn-primary btn-small"
-                        >
-                          💼 Set Pay
-                        </button>
-                      </td>
+                      {isPrincipal && (
+                        <td style={{ textAlign: 'center' }}>
+                          <button
+                            onClick={() => setEditingEmployeePayroll(emp)}
+                            className="btn btn-primary btn-small"
+                          >
+                            💼 Set Pay
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
