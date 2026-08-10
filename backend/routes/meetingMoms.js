@@ -45,15 +45,16 @@ router.get('/', auth, async (req, res) => {
 });
 
 // POST /api/meeting-moms (Create MOM)
-router.post('/', auth, roleMiddleware(['super_admin', 'principal', 'teacher']), auditLogger('CREATE', 'Meeting MOM'), async (req, res) => {
+router.post('/', auth, roleMiddleware(['super_admin', 'principal', 'teacher', 'admin']), auditLogger('CREATE', 'Meeting MOM'), async (req, res) => {
   try {
     const mom = await MeetingMom.create({
       ...req.body,
-      organizer: req.body.organizer || `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || req.user.userId,
-      schoolId: req.user.school || null,
+      organizer: req.body.organizer || `${req.user?.firstName || ''} ${req.user?.lastName || ''}`.trim() || req.user?.userId || 'Super Admin',
+      schoolId: req.user?.school || null,
     });
-    res.status(21).json({ success: true, mom });
+    res.status(201).json({ success: true, mom });
   } catch (error) {
+    console.error('Error creating Meeting MOM:', error);
     res.status(400).json({ success: false, message: error.message });
   }
 });
