@@ -68,9 +68,17 @@ const ParentHomePage = ({ user, students = [], selectedStudentId, onSelectStuden
     ? `${user.firstName} ${user.lastName || ''}`.trim()
     : 'Priya Sharma';
 
-  const activeStudent = students.find(
-    (s) => (s._id || s.userId?._id || s.userId) === selectedStudentId
-  ) || students[0] || {
+  const activeStudent = students.find((s) => {
+    const targetId = String(selectedStudentId || '');
+    if (!targetId) return false;
+    const stId = String(s._id || s.id || '');
+    const usrId = s.userId
+      ? typeof s.userId === 'string'
+        ? String(s.userId)
+        : String(s.userId._id || s.userId.id || '')
+      : '';
+    return stId === targetId || usrId === targetId;
+  }) || students[0] || {
     name: 'Ramesh Kumar',
     grade: '1',
     section: 'A',

@@ -56,8 +56,10 @@ const ParentDashboard = ({ user, onLogout }) => {
   const [stats, setStats] = useState(null);
 
   const handleSelectStudent = (id) => {
-    setSelectedStudentId(id);
-    localStorage.setItem('parent_selected_student_id', id);
+    if (!id) return;
+    const strId = String(id);
+    setSelectedStudentId(strId);
+    localStorage.setItem('parent_selected_student_id', strId);
   };
 
   useEffect(() => {
@@ -73,14 +75,29 @@ const ParentDashboard = ({ user, onLogout }) => {
             ? studentResponse.data
             : [...studentResponse.data, mockChildrenList[1]];
           setStudents(list);
+
           const savedId = localStorage.getItem('parent_selected_student_id');
-          const validSaved = list.some(
-            (st) => (st._id || st.userId?._id || st.userId) === savedId
-          );
-          if (!validSaved) {
-            const firstId = list[0]._id || list[0].userId?._id;
-            setSelectedStudentId(firstId);
-            localStorage.setItem('parent_selected_student_id', firstId);
+          if (savedId) {
+            const validStudent = list.find((st) => {
+              const targetId = String(savedId);
+              const stId = String(st._id || st.id || '');
+              const usrId = st.userId
+                ? typeof st.userId === 'string'
+                  ? String(st.userId)
+                  : String(st.userId._id || st.userId.id || '')
+                : '';
+              return stId === targetId || usrId === targetId;
+            });
+
+            if (validStudent) {
+              const validId = String(validStudent._id || validStudent.id || validStudent.userId?._id || validStudent.userId);
+              setSelectedStudentId(validId);
+              localStorage.setItem('parent_selected_student_id', validId);
+            } else {
+              const firstId = String(list[0]._id || list[0].id || list[0].userId?._id || list[0].userId);
+              setSelectedStudentId(firstId);
+              localStorage.setItem('parent_selected_student_id', firstId);
+            }
           }
         }
       } catch (error) {
@@ -98,9 +115,17 @@ const ParentDashboard = ({ user, onLogout }) => {
     navigate('/login');
   };
 
-  const activeStudent = students.find(
-    (s) => (s._id || s.userId?._id || s.userId) === selectedStudentId
-  ) || students[0];
+  const activeStudent = students.find((s) => {
+    const targetId = String(selectedStudentId || '');
+    if (!targetId) return false;
+    const stId = String(s._id || s.id || '');
+    const usrId = s.userId
+      ? typeof s.userId === 'string'
+        ? String(s.userId)
+        : String(s.userId._id || s.userId.id || '')
+      : '';
+    return stId === targetId || usrId === targetId;
+  }) || students[0];
 
   return (
     <div className="min-h-screen bg-[#FDFBF7]">
@@ -189,7 +214,7 @@ const ParentDashboard = ({ user, onLogout }) => {
                     user={user}
                     students={students}
                     selectedStudentId={selectedStudentId}
-                    onSelectStudent={setSelectedStudentId}
+                    onSelectStudent={handleSelectStudent}
                     stats={stats}
                   />
                 }
