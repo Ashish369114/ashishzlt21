@@ -43,6 +43,7 @@ const meetingMomsRoutes = require('./routes/meetingMoms');
 const noticesRoutes = require('./routes/notices');
 const systemAdminRoutes = require('./routes/systemAdmin');
 const lessonPlansRoutes = require('./routes/lessonPlans');
+const notificationRoutes = require('./routes/notifications');
 
 const app = express();
 
@@ -135,6 +136,7 @@ const startServer = async () => {
     app.use('/api/notices', noticesRoutes);
     app.use('/api/system-admin', systemAdminRoutes);
     app.use('/api/lesson-plans', lessonPlansRoutes);
+    app.use('/api/notifications', notificationRoutes);
 
     // Health check
     app.get('/api/health', (req, res) => {

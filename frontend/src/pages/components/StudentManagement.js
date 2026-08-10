@@ -307,17 +307,28 @@ const StudentManagement = () => {
       }
       setError('');
 
+      const fn = formData.firstName || 'New';
+      const ln = formData.lastName || 'Student';
+      const rNo = formData.rollNumber || `${Date.now().toString().slice(-4)}`;
+      const uId = formData.userId || `STD-${rNo}`;
+      const pwd = formData.password || 'Student@123';
+      const payload = {
+        ...formData,
+        firstName: fn,
+        lastName: ln,
+        rollNumber: rNo,
+        userId: uId,
+        password: pwd
+      };
+
       let response;
       if (editingId) {
-        response = await studentService.update(editingId, formData);
+        response = await studentService.update(editingId, payload);
       } else {
-        response = await studentService.add(formData);
+        response = await studentService.add(payload);
       }
 
       // Format student object for cross-portal sync
-      const fn = formData.firstName || 'New';
-      const ln = formData.lastName || 'Student';
-      const rNo = formData.rollNumber || `${Date.now().toString().slice(-3)}`;
       const admNo = `ADM-2026-${rNo}`;
       const newStudentObj = {
         _id: editingId || response?.data?._id || `std_${Date.now()}`,
@@ -1063,7 +1074,7 @@ const StudentManagement = () => {
               const gNum = String(st?.grade || st?.class?.grade || selectedGrade || '1').replace(/\D/g, '') || '1';
               const rollStr = `G${gNum}-${String(sIdx + 1).padStart(3, '0')}`;
               return (
-                <option key={stVal} value={stVal}>
+                <option key={`st_${stVal}_${sIdx}`} value={stVal}>
                   {stName} ({rollStr})
                 </option>
               );
