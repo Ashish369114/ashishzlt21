@@ -1,4 +1,4 @@
-const { User, Student, Class } = require('../models');
+const { User, Student, Class, Attendance, Marks, Fee, Remark, ConcessionRequest } = require('../models');
 
 const getStudents = async (req, res) => {
   try {
@@ -200,11 +200,16 @@ const addStudent = async (req, res) => {
     if (isNaN(validClassId)) {
       let targetGrade = 1;
       let targetSection = 'A';
-      if (typeof classId === 'string' && classId.includes('_')) {
-        const parts = classId.split('_');
-        if (parts.length >= 3) {
-          targetGrade = parseInt(parts[1]) || 1;
-          targetSection = parts[2].toUpperCase();
+      if (typeof classId === 'string') {
+        if (classId === 'c1') { targetGrade = 9; targetSection = 'A'; }
+        else if (classId === 'c2') { targetGrade = 9; targetSection = 'B'; }
+        else if (classId.includes('_')) {
+          const parts = classId.split('_');
+          for (let i = 0; i < parts.length; i++) {
+            const num = parseInt(parts[i]);
+            if (!isNaN(num)) targetGrade = num;
+            else if (parts[i].length === 1 && /[a-zA-Z]/.test(parts[i])) targetSection = parts[i].toUpperCase();
+          }
         }
       }
       let foundClass = await Class.findOne({ where: { grade: targetGrade, section: targetSection } });
@@ -222,7 +227,15 @@ const addStudent = async (req, res) => {
       admissionDate: cleanAdmDate,
     });
 
-    res.status(201).json(student);
+    const populatedStudent = await Student.findByPk(student.id, {
+      include: [
+        { model: User, as: 'user', attributes: { exclude: ['password'] } },
+        { model: Class, as: 'class' },
+        { model: User, as: 'parent', attributes: { exclude: ['password'] } }
+      ]
+    });
+
+    res.status(201).json(populatedStudent || student);
   } catch (error) {
     console.error('Add student error:', error);
     if (error.name === 'SequelizeUniqueConstraintError') {
@@ -339,14 +352,41 @@ const updateStudent = async (req, res) => {
 
 const deleteStudent = async (req, res) => {
   try {
-    const student = await Student.findByPk(req.params.id);
+    const studentId = req.params.id;
+    let student = await Student.findByPk(studentId);
+    if (!student) {
+      student = await Student.findOne({ where: { userId: studentId } });
+    }
+    if (!student) {
+      const user = await User.findOne({ where: { userId: studentId } });
+      if (user) {
+        student = await Student.findOne({ where: { userId: user.id } });
+      }
+    }
+
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
     }
+
+    const userId = student.userId;
+
+    // Clean up related records in DB to prevent foreign key errors
+    await Attendance.destroy({ where: { studentId: student.id } }).catch(() => null);
+    await Marks.destroy({ where: { studentId: student.id } }).catch(() => null);
+    await Fee.destroy({ where: { studentId: student.id } }).catch(() => null);
+    await Remark.destroy({ where: { studentId: student.id } }).catch(() => null);
+    await ConcessionRequest.destroy({ where: { studentId: student.id } }).catch(() => null);
+
     await student.destroy();
-    res.json({ message: 'Student deleted' });
+
+    if (userId) {
+      await User.destroy({ where: { id: userId } }).catch(() => null);
+    }
+
+    res.json({ success: true, message: 'Student deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error in deleteStudent:', error);
+    res.status(500).json({ message: error.message || 'Failed to delete student' });
   }
 };
 

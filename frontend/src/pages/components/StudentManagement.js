@@ -154,18 +154,8 @@ const StudentManagement = () => {
         isAcc ? feeService.getAll().catch(err => ({ data: [] })) : Promise.resolve({ data: [] })
       ]);
       const apiData = Array.isArray(studentsRes?.data) ? studentsRes.data : [];
-      let loadedStudents = [...apiData];
       
-      if (apiData.length < demoStudents.length) {
-        const existingIds = new Set(apiData.map(s => String(s._id || s.id)));
-        demoStudents.forEach(demoSt => {
-          if (!existingIds.has(String(demoSt._id))) {
-            loadedStudents.push(demoSt);
-          }
-        });
-      }
-
-      setStudents(loadedStudents.length > 0 ? loadedStudents : demoStudents);
+      setStudents(apiData.length > 0 ? apiData : demoStudents);
       if (isAcc || true) {
         setAllFeesData(feesRes?.data || []);
       }
@@ -315,10 +305,16 @@ const StudentManagement = () => {
         response = await studentService.add(payload);
       }
 
+      const returnedStudent = response?.data;
+      const returnedClassGrade = returnedStudent?.class?.grade;
+      const returnedClassSection = returnedStudent?.class?.section;
+
+      alert(editingId ? 'Student updated successfully!' : 'Student created successfully!');
+
       // Format student object for cross-portal sync
       const admNo = `ADM-2026-${rNo}`;
       const newStudentObj = {
-        _id: editingId || response?.data?._id || `std_${Date.now()}`,
+        _id: editingId || response?.data?.id || response?.data?._id || `std_${Date.now()}`,
         studentId: admNo,
         admissionNo: admNo,
         firstName: fn,
@@ -326,17 +322,17 @@ const StudentManagement = () => {
         name: `${fn} ${ln}`,
         rollNumber: rNo,
         rollNo: rNo,
-        grade: selectedGrade || '9',
-        section: selectedSection || 'A',
-        className: `Grade ${selectedGrade || '9'} - ${selectedSection || 'A'}`,
+        grade: returnedClassGrade || selectedGrade || '9',
+        section: returnedClassSection || selectedSection || 'A',
+        className: `Grade ${returnedClassGrade || selectedGrade || '9'} - ${returnedClassSection || selectedSection || 'A'}`,
         parentName: `${formData.parentFirstName || 'Suresh'} ${formData.parentLastName || ln}`,
         parentPhone: formData.parentPhone || '+91 98765 20000',
         phone: formData.phone || '+91 98765 10000'
       };
 
       // Target class store update
-      const targetGrade = selectedGrade || '9';
-      const targetSec = selectedSection || 'A';
+      const targetGrade = String(returnedClassGrade || selectedGrade || '9');
+      const targetSec = String(returnedClassSection || selectedSection || 'A');
       const targetClassId = (targetGrade === '9' && targetSec === 'A') ? 'c1' : `c_${targetGrade}_${targetSec.toLowerCase()}`;
       const storeKey = `students_${targetClassId}`;
       const existing = JSON.parse(localStorage.getItem(storeKey) || '[]');
@@ -352,6 +348,12 @@ const StudentManagement = () => {
       broadcastDataChange({ type: 'student_list_updated', student: newStudentObj });
 
       resetForm();
+      if (returnedClassGrade) {
+        setSelectedGrade(String(returnedClassGrade));
+        if (returnedClassSection) {
+          setSelectedSection(String(returnedClassSection));
+        }
+      }
       fetchStudents();
     } catch (err) {
       const rawData = err.response?.data;
@@ -363,15 +365,16 @@ const StudentManagement = () => {
   };
 
   const handleEditStudent = (student) => {
-    setEditingId(student._id);
+    const sId = student.id || student._id;
+    setEditingId(sId);
     setFormData({
-      firstName: student.userId?.firstName || '',
-      lastName: student.userId?.lastName || '',
-      userId: student.userId?.userId || '',
+      firstName: student.userId?.firstName || student.firstName || '',
+      lastName: student.userId?.lastName || student.lastName || '',
+      userId: student.userId?.userId || student.userId || '',
       password: '',
       rollNumber: student.rollNumber || '',
-      classId: student.class?._id || '',
-      parentId: student.parentId?._id || '',
+      classId: student.class?.id || student.class?._id || student.classId || '',
+      parentId: student.parentId?.id || student.parentId?._id || student.parentId || '',
       parentUserId: student.parentId?.userId || '',
       parentPassword: '',
       parentFirstName: student.parentId?.firstName || '',
@@ -382,16 +385,17 @@ const StudentManagement = () => {
       parentAddress: student.parentId?.address || '',
       parentRelationship: student.parentId?.relationship || '',
       dateOfBirth: student.userId?.dateOfBirth ? new Date(student.userId.dateOfBirth).toISOString().slice(0, 10) : '',
-      phone: student.userId?.phone || '',
-      gender: student.userId?.gender || 'Male',
+      phone: student.userId?.phone || student.phone || '',
+      gender: student.userId?.gender || student.gender || 'Male',
     });
     setShowForm(true);
   };
 
   const handleDeleteStudent = async (id) => {
+    if (!id) return;
     if (window.confirm('Are you sure you want to delete this student?')) {
       try {
-        await studentService.delete(id).catch(() => null);
+        const response = await studentService.delete(id);
 
         // Remove from local storage store for instant cross-portal sync
         const targetGrade = selectedGrade || '9';
@@ -405,9 +409,14 @@ const StudentManagement = () => {
         window.dispatchEvent(new Event('schoolDataUpdated'));
         broadcastDataChange({ type: 'student_deleted', studentId: id });
 
+        setStudents(prev => prev.filter(s => String(s._id || s.id) !== String(id)));
+        alert(response?.data?.message || 'Student deleted successfully!');
         fetchStudents();
       } catch (err) {
-        setError('Failed to delete student');
+        const rawData = err.response?.data;
+        const msg = typeof rawData === 'string' ? rawData : rawData?.message || rawData?.error || err.message || 'Failed to delete student';
+        setError(`Failed to delete student: ${msg}`);
+        alert(`Failed to delete student: ${msg}`);
       }
     }
   };
@@ -630,10 +639,7 @@ const StudentManagement = () => {
     }
   }
 
-  // Enforce max 10 members per class section and assign unique sequential roll numbers (G1-001, G1-002... G1-010)
-  if (!selectedStudentId) {
-    visibleStudents = visibleStudents.slice(0, 10);
-  }
+
 
   visibleStudents = visibleStudents.map((st, idx) => {
     const grade = st?.grade || st?.class?.grade || selectedGrade || '1';
@@ -1170,7 +1176,7 @@ const StudentManagement = () => {
                                 <button className="action-menu-item" onClick={() => { setActionMenuOpenFor(null); handleEditStudent(student); }}>
                                   ✏️ Edit Student
                                 </button>
-                                <button className="action-menu-item danger" onClick={() => { setActionMenuOpenFor(null); handleDeleteStudent(student._id); }}>
+                                <button className="action-menu-item danger" onClick={() => { setActionMenuOpenFor(null); handleDeleteStudent(student.id || student._id); }}>
                                   🗑️ Delete Student
                                 </button>
                                 <button className="action-menu-item" onClick={() => { setActionMenuOpenFor(null); handleViewFees(student); }}>
