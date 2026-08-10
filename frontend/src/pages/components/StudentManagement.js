@@ -309,22 +309,54 @@ const StudentManagement = () => {
       const rawApiData = Array.isArray(studentsRes?.data) ? studentsRes.data : [];
       const apiData = rawApiData.map(normalizeApiStudent);
 
-      const existingIds = new Set(apiData.map(s => String(s.id)));
-      const combined = [...apiData];
-      demoStudents.forEach(demoSt => {
-        if (!existingIds.has(String(demoSt._id))) {
-          combined.push(demoSt);
+      // Create unified roster keyed by grade + section + rollNumber
+      const unifiedMap = new Map();
+
+      // Seed with demoStudents (10 per section, 30 sections = 300)
+      demoStudents.forEach(st => {
+        const key = `${st.grade}_${st.section}_${st.rollNumber}`;
+        unifiedMap.set(key, st);
+      });
+
+      // Merge API data
+      apiData.forEach(st => {
+        const g = st.grade || st.class?.grade;
+        const s = st.section || st.class?.section;
+        const r = st.rollNumber;
+        if (g && s && r) {
+          const key = `${g}_${s}_${r}`;
+          unifiedMap.set(key, { ...unifiedMap.get(key), ...st });
         }
       });
 
-      setStudents(combined.length > 0 ? combined : demoStudents);
+      const allList = Array.from(unifiedMap.values());
+
+      // Strictly cap each grade/section to max 10 students
+      const secCounts = {};
+      const cappedStudents = [];
+
+      allList.forEach(st => {
+        const g = String(st.grade || st.class?.grade || '1');
+        const s = String(st.section || st.class?.section || 'A').toUpperCase();
+        const secKey = `${g}_${s}`;
+        secCounts[secKey] = (secCounts[secKey] || 0) + 1;
+        if (secCounts[secKey] <= 10) {
+          cappedStudents.push({ ...st, grade: g, section: s });
+        }
+      });
+
+      setStudents(cappedStudents);
+      localStorage.setItem('school_students_list', JSON.stringify(cappedStudents));
+      window.dispatchEvent(new Event('schoolDataUpdated'));
+
       if (isAcc || true) {
         setAllFeesData(feesRes?.data || []);
       }
       setError('');
     } catch (err) {
       console.warn('Using demo students data:', err);
-      setStudents(getUnifiedStudents(demoStudents));
+      setStudents(demoStudents);
+      localStorage.setItem('school_students_list', JSON.stringify(demoStudents));
       setError('');
     } finally {
       setLoading(false);

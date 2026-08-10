@@ -82,15 +82,10 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
       const apiEmployees = Array.isArray(employeesRes?.data) ? employeesRes.data : [];
       const fetchedStats = classStatsRes.data || {};
 
-      // 1. Total Students Count (Dynamic API + local storage fallback)
-      let studentCount = 0;
-      if (apiStudents.length > 0) {
-        studentCount = apiStudents.length;
-      } else {
-        const savedStudentsStr = localStorage.getItem('school_students_list');
-        const savedStudents = savedStudentsStr ? JSON.parse(savedStudentsStr) : [];
-        studentCount = savedStudents.length > 0 ? savedStudents.length : 150;
-      }
+      // 1. Total Students Count (Dynamic API + local storage fallback, 300 total across 30 class sections capped at 10/sec)
+      const savedStudentsStr = localStorage.getItem('school_students_list');
+      const savedStudents = savedStudentsStr ? JSON.parse(savedStudentsStr) : [];
+      let studentCount = savedStudents.length > 0 ? savedStudents.length : (apiStudents.length >= 300 ? apiStudents.length : 300);
 
       // 2. Teaching & Non-Teaching Staff Counts (Dynamic API + local storage fallback)
       let activeEmployees = apiEmployees;
