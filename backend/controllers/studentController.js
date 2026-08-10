@@ -222,13 +222,14 @@ const addStudent = async (req, res) => {
       rollNumber,
       classId: validClassId,
       parentId: parentIdObj,
-      admissionDate,
+      admissionDate: cleanAdmDate,
     });
 
     res.status(201).json(student);
   } catch (error) {
+    console.error('Add student error:', error);
     if (error.name === 'SequelizeUniqueConstraintError') {
-      return res.status(400).json({ message: `Duplicate value error.` });
+      return res.status(400).json({ message: `Duplicate value error: ${error.errors?.[0]?.message || error.message}` });
     }
     res.status(400).json({ message: error.message });
   }
