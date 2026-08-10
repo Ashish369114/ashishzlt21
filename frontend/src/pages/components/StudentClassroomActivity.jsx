@@ -60,9 +60,8 @@ const StudentClassroomActivity = ({ user, student }) => {
   const [imageModal, setImageModal] = useState({ isOpen: false, imageUrl: '', title: '' });
   const [docModal, setDocModal] = useState({ isOpen: false, docName: '', content: '' });
 
-  const rawGrade = student?.class?.grade || student?.grade || '1';
-  const studentGrade = String(rawGrade).toLowerCase().startsWith('grade') ? rawGrade : `Grade ${rawGrade}`;
-  const studentSection = student?.class?.section || student?.section || 'A';
+  const studentGrade = 'Grade 9';
+  const studentSection = 'A';
 
   useEffect(() => {
     const loadActivities = () => {

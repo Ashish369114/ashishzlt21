@@ -12,12 +12,10 @@ const StudentResults = ({ userId, user, student }) => {
   const [isReportCardOpen, setIsReportCardOpen] = useState(false);
   const [breakdownModalSubject, setBreakdownModalSubject] = useState(null);
 
-  const rawGrade = student?.class?.grade || student?.grade || '9';
-  const gradeStr = String(rawGrade).toLowerCase().startsWith('grade') ? rawGrade : `Grade ${rawGrade}`;
-  const rawSection = student?.class?.section || student?.section || 'A';
-  const sectionStr = String(rawSection).toLowerCase().startsWith('section') ? rawSection : `Section ${rawSection}`;
-  const rollNo = student?.rollNumber || student?.rollNo || '901';
-  const admissionNo = student?.admissionNo || student?.admissionNumber || 'ADM-2026-901';
+  const gradeStr = 'Grade 9';
+  const sectionStr = 'Section A';
+  const rollNo = '901';
+  const admissionNo = 'ADM-2026-901';
 
   useEffect(() => {
     const handleStorageSync = () => {

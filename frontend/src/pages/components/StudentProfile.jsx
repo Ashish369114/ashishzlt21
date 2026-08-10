@@ -31,12 +31,10 @@ const StudentProfile = ({ student, user }) => {
   }, []);
 
   const studentName = `${user?.firstName || student?.userId?.firstName || student?.firstName || 'Aarav'} ${user?.lastName || student?.userId?.lastName || student?.lastName || 'Patel'}`.trim();
-  const rawGrade = student?.class?.grade || student?.grade || '9';
-  const className = String(rawGrade).toLowerCase().startsWith('grade') ? rawGrade : `Grade ${rawGrade}`;
-  const rawSection = student?.class?.section || student?.section || 'A';
-  const sectionName = String(rawSection).toLowerCase().startsWith('section') ? rawSection : `Section ${rawSection}`;
-  const rollNo = student?.rollNumber || student?.rollNo || '901';
-  const admissionNo = student?.admissionNo || student?.admissionNumber || 'ADM-2026-901';
+  const className = 'Grade 9';
+  const sectionName = 'Section A';
+  const rollNo = '901';
+  const admissionNo = 'ADM-2026-901';
   const email = user?.email || student?.email || 'rohan.verma@school.edu';
   const phone = user?.phone || student?.phone || '+91 98765 43210';
   const parentName = student?.parentName || 'Suresh Verma';

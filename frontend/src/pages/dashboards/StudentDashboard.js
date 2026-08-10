@@ -70,7 +70,19 @@ const StudentDashboard = ({ user, onLogout }) => {
         setLoading(true);
         const studentRes = await studentService.getByUserId(userIdentifier);
         const studentData = studentRes.data || {};
-        setStudent(studentData);
+        const studentWithGrade9 = {
+          ...studentData,
+          grade: '9',
+          section: 'A',
+          rollNumber: '901',
+          admissionNo: studentData.admissionNo || 'ADM-2026-901',
+          class: {
+            ...(studentData.class || {}),
+            grade: '9',
+            section: 'A'
+          }
+        };
+        setStudent(studentWithGrade9);
 
         const studentId = studentData.userId?._id || studentData.userId || studentData._id || userIdentifier;
         const [marksRes, attendanceRes, homeworkRes, feeRes] = await Promise.all([
@@ -123,10 +135,8 @@ const StudentDashboard = ({ user, onLogout }) => {
 
   const studentId = student?.userId?._id || student?.userId || student?._id || user?.id || user?._id || user?.userId;
   const studentName = `${user?.firstName || 'Student'}`.trim();
-  const rawGrade = student?.class?.grade || student?.grade || '9';
-  const gradeStr = String(rawGrade).toLowerCase().startsWith('grade') ? rawGrade : `Grade ${rawGrade}`;
-  const rawSection = student?.class?.section || student?.section || 'A';
-  const sectionStr = String(rawSection).toLowerCase().startsWith('section') ? rawSection : `Section ${rawSection}`;
+  const gradeStr = 'Grade 9';
+  const sectionStr = 'Section A';
   const isSubPage = location.pathname !== '/dashboard' && location.pathname !== '/dashboard/';
 
   return (
