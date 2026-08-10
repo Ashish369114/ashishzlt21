@@ -859,11 +859,14 @@ const StudentManagement = () => {
                   required
                 >
                   <option value="">Select class</option>
-                  {classes.map((cls) => (
-                    <option key={cls._id} value={cls._id}>
-                      {`Grade ${cls.grade} - Section ${cls.section}`}
-                    </option>
-                  ))}
+                  {classes.map((cls, idx) => {
+                    const cVal = cls._id || cls.id || `cls_${cls.grade}_${cls.section?.toLowerCase() || 'a'}`;
+                    return (
+                      <option key={`cls_${cVal}_${idx}`} value={cVal}>
+                        {`Grade ${cls.grade} - Section ${cls.section}`}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
             </div>

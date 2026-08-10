@@ -171,10 +171,28 @@ const addStudent = async (req, res) => {
       parentIdObj = parentId;
     }
 
+    let validClassId = parseInt(classId);
+    if (isNaN(validClassId)) {
+      let targetGrade = 1;
+      let targetSection = 'A';
+      if (typeof classId === 'string' && classId.includes('_')) {
+        const parts = classId.split('_');
+        if (parts.length >= 3) {
+          targetGrade = parseInt(parts[1]) || 1;
+          targetSection = parts[2].toUpperCase();
+        }
+      }
+      let foundClass = await Class.findOne({ where: { grade: targetGrade, section: targetSection } });
+      if (!foundClass) {
+        foundClass = await Class.create({ grade: targetGrade, section: targetSection });
+      }
+      validClassId = foundClass.id;
+    }
+
     const student = await Student.create({
       userId: user.id,
       rollNumber,
-      classId: classId,
+      classId: validClassId,
       parentId: parentIdObj,
       admissionDate,
     });
