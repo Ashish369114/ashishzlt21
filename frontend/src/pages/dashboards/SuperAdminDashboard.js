@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
-import { classService, studentService } from '../../services/api';
+import api, { classService, studentService } from '../../services/api';
 import { subscribeToDataChanges } from '../../services/syncService';
 import { demoStudents } from '../../utils/demoData';
 import TopBar from '../../components/dashboard/TopBar';
