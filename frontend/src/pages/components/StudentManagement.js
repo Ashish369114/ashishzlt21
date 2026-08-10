@@ -282,6 +282,22 @@ const StudentManagement = () => {
     setSelectedClassId(matchedClass?._id || matchedClass?.id || '');
   }, [classes, selectedGrade, selectedSection]);
 
+  // Normalize API student to have top-level grade/section/firstName/lastName
+  const normalizeApiStudent = (s) => ({
+    ...s,
+    _id: String(s.id || s._id || ''),
+    id: s.id || s._id,
+    firstName: s.user?.firstName || s.firstName || '',
+    lastName: s.user?.lastName || s.lastName || '',
+    name: `${s.user?.firstName || s.firstName || ''} ${s.user?.lastName || s.lastName || ''}`.trim(),
+    grade: String(s.class?.grade || ''),
+    section: String(s.class?.section || ''),
+    phone: s.user?.phone || s.phone || '',
+    email: s.user?.email || s.email || '',
+    userId: s.userId, // keep as-is (integer FK)
+    rollNumber: s.rollNumber || '',
+  });
+
   const fetchStudents = async (userObj = currentUser) => {
     try {
       setLoading(true);
@@ -290,17 +306,18 @@ const StudentManagement = () => {
         studentService.getAll().catch(err => ({ data: [] })),
         isAcc ? feeService.getAll().catch(err => ({ data: [] })) : Promise.resolve({ data: [] })
       ]);
-      const apiData = Array.isArray(studentsRes?.data) ? studentsRes.data : [];
-      let loadedStudents = [...apiData];
-      
-      const existingIds = new Set(apiData.map(s => String(s._id || s.id)));
+      const rawApiData = Array.isArray(studentsRes?.data) ? studentsRes.data : [];
+      const apiData = rawApiData.map(normalizeApiStudent);
+
+      const existingIds = new Set(apiData.map(s => String(s.id)));
+      const combined = [...apiData];
       demoStudents.forEach(demoSt => {
         if (!existingIds.has(String(demoSt._id))) {
-          loadedStudents.push(demoSt);
+          combined.push(demoSt);
         }
       });
 
-      setStudents(loadedStudents.length > 0 ? loadedStudents : demoStudents);
+      setStudents(combined.length > 0 ? combined : demoStudents);
       if (isAcc || true) {
         setAllFeesData(feesRes?.data || []);
       }
@@ -470,13 +487,13 @@ const StudentManagement = () => {
       const finalGrade = String(returnedStudent?.class?.grade || targetGrade);
       const finalSec = String(returnedStudent?.class?.section || targetSec);
 
-      // Format student object for instant cross-portal sync
-      const admNo = `ADM-2026-${rNo}`;
+      // Format student object for instant cross-portal sync (normalized shape)
+      const newId = response?.data?.id || response?.data?._id || editingId || `std_${Date.now()}`;
       const newStudentObj = {
-        _id: editingId || response?.data?.id || response?.data?._id || `std_${Date.now()}`,
-        id: editingId || response?.data?.id || response?.data?._id || `std_${Date.now()}`,
-        studentId: admNo,
-        admissionNo: admNo,
+        _id: String(newId),
+        id: newId,
+        studentId: `ADM-2026-${rNo}`,
+        admissionNo: `ADM-2026-${rNo}`,
         firstName: fn,
         lastName: ln,
         name: `${fn} ${ln}`,
@@ -484,10 +501,12 @@ const StudentManagement = () => {
         rollNo: rNo,
         grade: finalGrade,
         section: finalSec,
-        className: `Grade ${finalGrade} - ${finalSec}`,
+        class: { grade: parseInt(finalGrade, 10) || finalGrade, section: finalSec },
+        className: `Grade ${finalGrade} - Section ${finalSec}`,
         parentName: `${formData.parentFirstName || 'Parent of'} ${formData.parentLastName || ln}`,
-        parentPhone: formData.parentPhone || '+91 98765 20000',
-        phone: formData.phone || '+91 98765 10000'
+        parentPhone: formData.parentPhone || '',
+        phone: formData.phone || '',
+        email: formData.email || '',
       };
 
       // Target class store update
@@ -1652,7 +1671,7 @@ Password: ${cred.parentPassword}
                       </span>
                     )}
                   </td>
-                  <td>{student.class ? `Grade ${student.class.grade} - Section ${student.class.section}` : 'N/A'}</td>
+                  <td>{`Grade ${student.grade || student.class?.grade || '?'} - Section ${student.section || student.class?.section || '?'}`}</td>
                   <td>{student.formattedRollNumber}</td>
                   <td>{sPhone}</td>
                   <td>{sParent}</td>
