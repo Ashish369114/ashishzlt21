@@ -58,36 +58,63 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
 
   useEffect(() => {
     fetchStats();
+    window.addEventListener('schoolDataUpdated', fetchStats);
     // Subscribe to realtime cross-portal changes (from Teacher, Parent, etc.)
     const unsubscribe = subscribeToDataChanges((eventData) => {
       console.log('Realtime sync received in SuperAdmin:', eventData);
       fetchStats();
     });
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      window.removeEventListener('schoolDataUpdated', fetchStats);
+    };
   }, []);
 
   const fetchStats = async () => {
     try {
-      const [classStatsRes, studentsRes] = await Promise.all([
+      const [classStatsRes, studentsRes, employeesRes] = await Promise.all([
         classService.getStats().catch(() => ({ data: {} })),
-        studentService.getAll().catch(() => ({ data: [] }))
+        studentService.getAll().catch(() => ({ data: [] })),
+        api.get('/employees').catch(() => ({ data: [] }))
       ]);
 
-      const apiData = Array.isArray(studentsRes?.data) ? studentsRes.data : [];
+      const apiStudents = Array.isArray(studentsRes?.data) ? studentsRes.data : [];
+      const apiEmployees = Array.isArray(employeesRes?.data) ? employeesRes.data : [];
       const fetchedStats = classStatsRes.data || {};
-      const studentCount = Math.max(apiData.length, demoStudents.length, 300);
+
+      const studentCount = apiStudents.length > 0 ? apiStudents.length : (fetchedStats.totalStudents || 300);
+      
+      const teachingEmployees = apiEmployees.filter(e => {
+        const type = String(e.employeeType || e.type || '').toLowerCase();
+        return type.includes('teaching') || type.includes('school') || type.includes('primary');
+      });
+      const nonTeachingEmployees = apiEmployees.filter(e => {
+        const type = String(e.employeeType || e.type || '').toLowerCase();
+        return type.includes('non');
+      });
+
+      const teachingCount = teachingEmployees.length > 0 ? teachingEmployees.length : (fetchedStats.totalTeaching || fetchedStats.totalTeachers || 30);
+      const nonTeachingCount = nonTeachingEmployees.length > 0 ? nonTeachingEmployees.length : (fetchedStats.totalNonTeaching || 28);
+      const totalEmpCount = apiEmployees.length > 0 ? apiEmployees.length : (fetchedStats.totalEmployees || (teachingCount + nonTeachingCount));
 
       setStats({
         ...fetchedStats,
         totalStudents: studentCount,
-        totalTeachers: fetchedStats.totalTeachers || 30,
+        totalTeachers: teachingCount,
+        totalTeaching: teachingCount,
+        totalNonTeaching: nonTeachingCount,
+        totalEmployees: totalEmpCount,
+        totalStaff: totalEmpCount,
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
       setStats({
         totalStudents: 300,
         totalTeachers: 30,
-        totalStaff: 28,
+        totalTeaching: 30,
+        totalNonTeaching: 28,
+        totalEmployees: 58,
+        totalStaff: 58,
       });
     }
   };

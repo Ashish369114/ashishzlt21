@@ -35,9 +35,14 @@ const getEmployeeById = async (req, res) => {
 
 const addEmployee = async (req, res) => {
   try {
+    let typeVal = req.body.employeeType || 'Non-Teaching Staff';
+    if (typeVal === 'teaching') typeVal = 'Teaching Staff';
+    if (typeVal === 'non_teaching' || typeVal === 'staff') typeVal = 'Non-Teaching Staff';
+
     const employeeData = {
       ...req.body,
-      employeeId: `EMP-${Date.now()}`,
+      employeeType: typeVal,
+      employeeId: req.body.employeeId || `EMP-${Date.now()}`,
     };
     const newEmployee = await Employee.create(employeeData);
     

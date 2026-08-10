@@ -236,7 +236,7 @@ const PrincipalDashboardHome = ({ stats, user }) => {
           <div className="kpi-top">
             <div className="kpi-info">
               <h3>Non-Teaching Staff</h3>
-              <div className="kpi-value">24</div>
+              <div className="kpi-value">{stats?.totalNonTeaching ?? 28}</div>
             </div>
             <div className="kpi-icon-container" style={{ background: '#ecfdf5', color: '#10b981' }}>
               <Users size={22} />

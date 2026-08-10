@@ -101,8 +101,13 @@ const StudentManagement = () => {
     fetchAllNotes();
 
     const handleClickOutside = () => setActionMenuOpenFor(null);
+    const handleDataUpdated = () => fetchStudents(parsedUser);
     document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    window.addEventListener('schoolDataUpdated', handleDataUpdated);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      window.removeEventListener('schoolDataUpdated', handleDataUpdated);
+    };
   }, []);
 
   useEffect(() => {

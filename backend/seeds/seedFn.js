@@ -193,7 +193,7 @@ const seedDataFn = async () => {
   const studentFirstNames = ['Aarav', 'Anaya', 'Arjun', 'Aditi', 'Aditya', 'Aisha', 'Ajay', 'Amrita', 'Akshay', 'Alisha'];
   const studentLastNames = ['Singh', 'Sharma', 'Patel', 'Gupta', 'Kumar', 'Verma', 'Joshi', 'Rao', 'Reddy', 'Nair'];
 
-  const studentsPerClass = 5;
+  const studentsPerClass = 10;
   const studentRecords = [];
   let studentIndex = 0;
 
@@ -530,35 +530,62 @@ const seedDataFn = async () => {
   await Leave.bulkCreate(leaveSeeds);
   console.log(`Created ${leaveSeeds.length} demo leave requests`);
 
-  const employeeData = [
-    { firstName: 'Amit', lastName: 'Kumar', employeeType: 'High School', designation: 'Mathematics PGT', dateOfJoining: new Date('2020-07-15'), baseSalary: 45000 },
-    { firstName: 'Vikram', lastName: 'Rathore', employeeType: 'High School', designation: 'Physics PGT', dateOfJoining: new Date('2019-09-05'), baseSalary: 48000 },
-    { firstName: 'Meera', lastName: 'Nair', employeeType: 'High School', designation: 'Chemistry PGT', dateOfJoining: new Date('2020-11-20'), baseSalary: 47000 },
-    { firstName: 'Sunita', lastName: 'Rani', employeeType: 'Junior School', designation: 'Science TGT', dateOfJoining: new Date('2021-08-20'), baseSalary: 38000 },
-    { firstName: 'Rahul', lastName: 'Verma', employeeType: 'Junior School', designation: 'English Primary Teacher', dateOfJoining: new Date('2022-06-01'), baseSalary: 35000 },
-    { firstName: 'Preeti', lastName: 'Joshi', employeeType: 'Junior School', designation: 'Mathematics TGT', dateOfJoining: new Date('2021-04-18'), baseSalary: 37000 },
-    { firstName: 'Nisha', lastName: 'Sharma', employeeType: 'Pre-Primary', designation: 'Kindergarten Teacher', dateOfJoining: new Date('2023-01-10'), baseSalary: 28000 },
-    { firstName: 'Sanjana', lastName: 'Sen', employeeType: 'Pre-Primary', designation: 'Nursery Teacher', dateOfJoining: new Date('2024-02-15'), baseSalary: 27000 },
-    { firstName: 'Pooja', lastName: 'Mehta', employeeType: 'Pre-Primary', designation: 'Kindergarten Assistant', dateOfJoining: new Date('2025-05-10'), baseSalary: 22000 },
-    { firstName: 'Anil', lastName: 'Kapoor', employeeType: 'Non-Teaching Staff', designation: 'Accountant Clerk', dateOfJoining: new Date('2018-05-10'), baseSalary: 30000 },
-    { firstName: 'Geeta', lastName: 'Kumari', employeeType: 'Non-Teaching Staff', designation: 'Librarian', dateOfJoining: new Date('2019-11-01'), baseSalary: 32000 },
-    { firstName: 'Ravi', lastName: 'Teja', employeeType: 'Non-Teaching Staff', designation: 'IT Support Specialist', dateOfJoining: new Date('2022-03-12'), baseSalary: 35000 },
-    { firstName: 'Kiran', lastName: 'Bedi', employeeType: 'Non-Teaching Staff', designation: 'Administrative Officer', dateOfJoining: new Date('2015-06-01'), baseSalary: 55000 },
-    { firstName: 'Suresh', lastName: 'Raina', employeeType: 'Non-Teaching Staff', designation: 'Office Assistant', dateOfJoining: new Date('2023-08-01'), baseSalary: 25000 },
-    { firstName: 'Deepa', lastName: 'Rao', employeeType: 'Non-Teaching Staff', designation: 'Senior Receptionist', dateOfJoining: new Date('2017-03-15'), baseSalary: 29000 },
-  ];
-
-  const employeeDocs = employeeData.map((emp, i) => ({
-    firstName: emp.firstName,
-    lastName: emp.lastName,
-    employeeId: `EMP-${1000 + i}`,
-    employeeType: emp.employeeType,
-    designation: emp.designation,
-    dateOfJoining: emp.dateOfJoining,
-    salary: { baseSalary: emp.baseSalary },
-    userId: 1, // Linking to superadmin for simplicity
+  const teachingEmployees = teacherData.map((t, idx) => ({
+    firstName: t.firstName,
+    lastName: t.lastName,
+    employeeId: `EMP-T${String(idx + 1).padStart(3, '0')}`,
+    employeeType: t.grade >= 8 ? 'High School' : t.grade >= 4 ? 'Junior School' : 'Pre-Primary',
+    designation: `Grade ${t.grade}-${t.section} Teacher`,
+    dateOfJoining: new Date('2019-01-01'),
+    salary: { baseSalary: 45000 + t.grade * 2000 },
+    userId: teachers[idx]?.userId || 1,
     schoolId: defaultSchool.id,
   }));
+
+  const nonTeachingEmployeesData = [
+    { firstName: 'Anil', lastName: 'Kapoor', designation: 'Accountant Clerk', baseSalary: 30000 },
+    { firstName: 'Geeta', lastName: 'Kumari', designation: 'Librarian', baseSalary: 32000 },
+    { firstName: 'Ravi', lastName: 'Teja', designation: 'IT Support Specialist', baseSalary: 35000 },
+    { firstName: 'Kiran', lastName: 'Bedi', designation: 'Administrative Officer', baseSalary: 55000 },
+    { firstName: 'Suresh', lastName: 'Raina', designation: 'Office Assistant', baseSalary: 25000 },
+    { firstName: 'Deepa', lastName: 'Rao', designation: 'Senior Receptionist', baseSalary: 29000 },
+    { firstName: 'Manish', lastName: 'Sharma', designation: 'Lab Assistant (Physics)', baseSalary: 26000 },
+    { firstName: 'Sunil', lastName: 'Dutt', designation: 'Lab Assistant (Chemistry)', baseSalary: 26000 },
+    { firstName: 'Ramesh', lastName: 'Pawar', designation: 'Transport Bus Driver', baseSalary: 24000 },
+    { firstName: 'Krishna', lastName: 'Rao', designation: 'Transport Bus Driver', baseSalary: 24000 },
+    { firstName: 'Mahesh', lastName: 'Babu', designation: 'Head Security Officer', baseSalary: 27000 },
+    { firstName: 'Ganesh', lastName: 'Gaitonde', designation: 'Security Guard', baseSalary: 20000 },
+    { firstName: 'Lalitha', lastName: 'Prasad', designation: 'Girls Hostel Warden', baseSalary: 31000 },
+    { firstName: 'Satyendra', lastName: 'Nath', designation: 'Boys Hostel Warden', baseSalary: 31000 },
+    { firstName: 'Venkatesh', lastName: 'Prabhu', designation: 'Maintenance Supervisor', baseSalary: 28000 },
+    { firstName: 'Saroja', lastName: 'Devi', designation: 'Senior Nurse', baseSalary: 33000 },
+    { firstName: 'Bhaskar', lastName: 'Reddy', designation: 'Store Incharge', baseSalary: 27000 },
+    { firstName: 'Harish', lastName: 'Chand', designation: 'Campus Electrician', baseSalary: 25000 },
+    { firstName: 'Prakash', lastName: 'Raj', designation: 'Plumber & Sanitation Lead', baseSalary: 23000 },
+    { firstName: 'Kamala', lastName: 'Harris', designation: 'Assistant Accountant', baseSalary: 29000 },
+    { firstName: 'Sunita', lastName: 'Williams', designation: 'Assistant Librarian', baseSalary: 27000 },
+    { firstName: 'Raghav', lastName: 'Juyal', designation: 'Sports Equipment Manager', baseSalary: 25000 },
+    { firstName: 'Mohan', lastName: 'Lal', designation: 'Canteen Manager', baseSalary: 26000 },
+    { firstName: 'Devi', lastName: 'Sri', designation: 'Front Desk Executive', baseSalary: 24000 },
+    { firstName: 'Rajesh', lastName: 'Khanna', designation: 'Record Room Clerk', baseSalary: 25000 },
+    { firstName: 'Vijay', lastName: 'Sethupathi', designation: 'Hardware Engineer', baseSalary: 36000 },
+    { firstName: 'Nayani', lastName: 'Pavani', designation: 'Data Entry Operator', baseSalary: 22000 },
+    { firstName: 'Anand', lastName: 'Mahindra', designation: 'System Administrator', baseSalary: 42000 }
+  ];
+
+  const nonTeachingEmployees = nonTeachingEmployeesData.map((emp, i) => ({
+    firstName: emp.firstName,
+    lastName: emp.lastName,
+    employeeId: `EMP-NT${String(i + 1).padStart(3, '0')}`,
+    employeeType: 'Non-Teaching Staff',
+    designation: emp.designation,
+    dateOfJoining: new Date('2020-05-15'),
+    salary: { baseSalary: emp.baseSalary },
+    userId: 1,
+    schoolId: defaultSchool.id,
+  }));
+
+  const employeeDocs = [...teachingEmployees, ...nonTeachingEmployees];
 
   await Employee.bulkCreate(employeeDocs);
   console.log(`Created ${employeeDocs.length} employees`);

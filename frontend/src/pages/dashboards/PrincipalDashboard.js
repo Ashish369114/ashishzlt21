@@ -42,20 +42,26 @@ const PrincipalDashboard = ({ user, onLogout }) => {
 
   useEffect(() => {
     fetchData();
+    window.addEventListener('schoolDataUpdated', fetchData);
     const unsubscribe = subscribeToDataChanges((eventData) => {
       console.log('Realtime sync received in Principal:', eventData);
       fetchData();
     });
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      window.removeEventListener('schoolDataUpdated', fetchData);
+    };
   }, []);
 
   const isActive = (path) => location.pathname === path;
 
   const fetchData = async () => {
     try {
-      const [students, teachers, fees, attendance, exams] = await Promise.all([
+      const [students, teachers, employeesRes, classStatsRes, fees, attendance, exams] = await Promise.all([
         studentService.getAll().catch(() => ({ data: [] })),
         teacherService.getAll().catch(() => ({ data: [] })),
+        api.get('/employees').catch(() => ({ data: [] })),
+        classService.getStats().catch(() => ({ data: {} })),
         feeService.getAll().catch(() => ({ data: [] })),
         attendanceService.getAll().catch(() => ({ data: [] })),
         examService.getAll().catch(() => ({ data: [] })),
@@ -63,6 +69,8 @@ const PrincipalDashboard = ({ user, onLogout }) => {
 
       const studentData = Array.isArray(students.data) && students.data.length > 0 ? students.data : [];
       const teacherData = Array.isArray(teachers.data) && teachers.data.length > 0 ? teachers.data : [];
+      const empData = Array.isArray(employeesRes?.data) ? employeesRes.data : [];
+      const classStats = classStatsRes.data || {};
       const feeData = Array.isArray(fees.data) ? fees.data : [];
       const attendanceData = Array.isArray(attendance.data) ? attendance.data : [];
       const examData = Array.isArray(exams.data) ? exams.data : [];
@@ -72,14 +80,19 @@ const PrincipalDashboard = ({ user, onLogout }) => {
       const upcomingExams = examData.filter(e => new Date(e.date) > new Date()).length || 3;
       const pendingFees = feeData.filter(f => !f.isPaid).length;
 
-      const finalStudentCount = studentData.length > 0 ? studentData.length : 300;
-      const finalTeacherCount = teacherData.length > 0 ? teacherData.length : 30;
+      const finalStudentCount = studentData.length > 0 ? studentData.length : (classStats.totalStudents || 300);
+      const finalTeacherCount = teacherData.length > 0 ? teacherData.length : (classStats.totalTeachers || 30);
+      const nonTeachingCount = empData.filter(e => String(e.employeeType || e.type || '').toLowerCase().includes('non')).length || classStats.totalNonTeaching || 28;
+      const totalStaffCount = empData.length > 0 ? empData.length : (classStats.totalEmployees || (finalTeacherCount + nonTeachingCount));
 
       setStats({
         totalStudents: finalStudentCount,
         totalTeachers: finalTeacherCount,
+        totalTeaching: finalTeacherCount,
+        totalNonTeaching: nonTeachingCount,
         totalParents: Math.ceil(finalStudentCount / 2),
-        totalStaff: finalTeacherCount + 24,
+        totalStaff: totalStaffCount,
+        totalEmployees: totalStaffCount,
         todayAttendance,
         todayFees: feeData.filter(f => f.isPaid).length,
         upcomingExams,
@@ -92,8 +105,11 @@ const PrincipalDashboard = ({ user, onLogout }) => {
       setStats({
         totalStudents: 300,
         totalTeachers: 30,
+        totalTeaching: 30,
+        totalNonTeaching: 28,
         totalParents: 150,
-        totalStaff: 54,
+        totalStaff: 58,
+        totalEmployees: 58,
         todayAttendance: 28,
         todayFees: 12,
         upcomingExams: 3,

@@ -5,6 +5,7 @@ import api, { schoolService, classService, studentService, complaintService } fr
 import '../../styles/ManagementStyles.css';
 import { formatCurrency } from '../../utils/currencyFormatter';
 import { demoEmployees, demoClasses } from '../../utils/demoData';
+import { broadcastDataChange } from '../../utils/realtimeSync';
 
 const EmployeeManagement = () => {
   const navigate = useNavigate();
@@ -68,7 +69,10 @@ const EmployeeManagement = () => {
     fetchAllComplaints();
     setupSocket();
 
+    window.addEventListener('schoolDataUpdated', fetchEmployees);
+
     return () => {
+      window.removeEventListener('schoolDataUpdated', fetchEmployees);
       if (socketRef.current) {
         socketRef.current.disconnect();
       }
@@ -97,18 +101,7 @@ const EmployeeManagement = () => {
       setLoading(true);
       const response = await api.get('/employees').catch(() => ({ data: [] }));
       const apiData = Array.isArray(response?.data) ? response.data : [];
-      let loaded = [...apiData];
-      
-      if (apiData.length < demoEmployees.length) {
-        const existingIds = new Set(apiData.map(e => String(e._id || e.id)));
-        demoEmployees.forEach(demoEmp => {
-          if (!existingIds.has(String(demoEmp._id))) {
-            loaded.push(demoEmp);
-          }
-        });
-      }
-
-      setEmployees(loaded);
+      setEmployees(apiData.length > 0 ? apiData : demoEmployees);
     } catch (error) {
       console.warn('Error fetching employees, using demo employees:', error);
       setEmployees(demoEmployees);
@@ -258,6 +251,8 @@ const EmployeeManagement = () => {
       }
 
       fetchEmployees();
+      window.dispatchEvent(new Event('schoolDataUpdated'));
+      broadcastDataChange({ type: 'employee_list_updated' });
       resetForm();
       setShowAddForm(false);
       if (!editingEmployeeId && response && response.data) {
@@ -276,6 +271,8 @@ const EmployeeManagement = () => {
       try {
         await api.delete(`/employees/${id}`);
         fetchEmployees();
+        window.dispatchEvent(new Event('schoolDataUpdated'));
+        broadcastDataChange({ type: 'employee_list_updated' });
       } catch (error) {
         console.error('Error deleting employee:', error);
         alert('Error deleting employee');
