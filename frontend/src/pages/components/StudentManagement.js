@@ -104,7 +104,7 @@ const StudentManagement = () => {
       const match = r.match(/(\d+)$/);
       if (match) {
         const seq = parseInt(match[1], 10);
-        if (!isNaN(seq) && seq > maxSeq) maxSeq = seq;
+        if (!isNaN(seq) && seq <= 100 && seq > maxSeq) maxSeq = seq;
       }
     });
 
@@ -970,13 +970,25 @@ Password: ${cred.parentPassword}
     const sec = String(st?.section || st?.class?.section || selectedSection || 'A').toUpperCase();
     const gNum = String(grade).replace(/\D/g, '') || '1';
     const rawRoll = String(st?.rollNumber || st?.rollNo || '');
-    let formatted = (rawRoll.startsWith(`G${gNum}${sec}-`) || rawRoll.startsWith(`G${gNum}-`))
-      ? rawRoll
-      : `G${gNum}${sec}-${String(idx + 1).padStart(3, '0')}`;
+
+    let formatted = rawRoll;
+    if (!rawRoll || rawRoll.length > 9 || !rawRoll.startsWith(`G${gNum}${sec}-`)) {
+      const seqStr = String(idx + 1).padStart(3, '0');
+      formatted = `G${gNum}${sec}-${seqStr}`;
+    }
+
+    let pName = st.parentName;
+    if (!pName || pName.startsWith('Parent of ')) {
+      const sName = `${st.firstName || ''} ${st.lastName || ''}`.trim() || 'Student';
+      const surname = sName.split(' ')[1] || 'Sharma';
+      pName = `Suresh ${surname}`;
+    }
+
     return {
       ...st,
       grade,
       section: sec,
+      parentName: pName,
       rollSequence: idx + 1,
       formattedRollNumber: formatted
     };
