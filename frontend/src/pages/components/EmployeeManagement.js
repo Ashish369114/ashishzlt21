@@ -741,15 +741,21 @@ const EmployeeManagement = () => {
                           {canViewSalary && <td>{formatCurrency(employee.salary?.baseSalary || 0)}</td>}
                           <td>{formatJoiningDate(employee.dateOfJoining)}</td>
                           <td>
-                            {employee.status === 'Left' || employee.status === 'terminated' || employee.status === 'inactive' || employee.employeeStatus === 'Left' || employee.employeeStatus === 'Terminated' ? (
-                               <span style={{ color: '#ef4444', fontWeight: '600', padding: '4px 10px', background: '#fee2e2', borderRadius: '6px', fontSize: '0.82rem' }}>Left</span>
-                            ) : employee.inNoticePeriod || employee.status === 'Notice Period' || employee.employeeStatus === 'Serving Notice Period' || employee.employeeStatus === 'Notice Period' ? (
-                              <span style={{ color: '#d97706', fontWeight: '600', padding: '4px 10px', background: '#fef3c7', borderRadius: '6px', fontSize: '0.82rem' }}>Serving Notice Period</span>
-                            ) : employee.remarks ? (
-                              <span style={{ color: '#4b5563', fontSize: '0.85rem' }}>{employee.remarks}</span>
-                            ) : (
-                              <span style={{ color: '#059669', fontWeight: '600', padding: '4px 10px', background: '#d1fae5', borderRadius: '6px', fontSize: '0.82rem' }}>Working</span>
-                            )}
+                            {(() => {
+                              const isLeft = employee.status === 'Left' || employee.status === 'terminated' || employee.status === 'inactive' || employee.employeeStatus === 'Left' || employee.employeeStatus === 'Terminated' || employee.remarks === 'Left' || employee.remarks === 'Terminated';
+                              const isNotice = employee.inNoticePeriod || employee.status === 'Notice Period' || employee.employeeStatus === 'Serving Notice Period' || employee.employeeStatus === 'Notice Period' || employee.remarks === 'Serving Notice Period' || employee.remarks === 'Notice Period';
+
+                              if (isLeft) {
+                                return <span style={{ color: '#ef4444', fontWeight: '600', padding: '4px 10px', background: '#fee2e2', borderRadius: '6px', fontSize: '0.82rem', display: 'inline-block' }}>Left</span>;
+                              }
+                              if (isNotice) {
+                                return <span style={{ color: '#d97706', fontWeight: '600', padding: '4px 10px', background: '#fef3c7', borderRadius: '6px', fontSize: '0.82rem', display: 'inline-block' }}>Serving Notice Period</span>;
+                              }
+                              if (employee.remarks && !['working', 'active'].includes(String(employee.remarks).trim().toLowerCase())) {
+                                return <span style={{ color: '#4b5563', fontSize: '0.85rem' }}>{employee.remarks}</span>;
+                              }
+                              return <span style={{ color: '#059669', fontWeight: '600', padding: '4px 10px', background: '#d1fae5', borderRadius: '6px', fontSize: '0.82rem', display: 'inline-block' }}>Working</span>;
+                            })()}
                           </td>
                           <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                             <div style={{ display: 'inline-flex', gap: '6px' }}>
