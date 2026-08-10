@@ -11,9 +11,9 @@ const EmployeeManagement = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [employees, setEmployees] = useState([]);
-  const userRole = localStorage.getItem('role');
-  const isPrincipal = userRole === 'principal';
-  const canViewSalary = userRole === 'principal' || userRole === 'accountant' || userRole === 'accountant_admin';
+  const rawRole = (localStorage.getItem('role') || '').toLowerCase();
+  const isPrincipal = rawRole === 'principal';
+  const canViewSalary = ['principal', 'super_admin', 'superadmin', 'accountant', 'accountant_admin', 'admin'].includes(rawRole);
   const [schools, setSchools] = useState([]);
   const [socket, setSocket] = useState(null);
   const socketRef = useRef(null);
@@ -729,6 +729,7 @@ const EmployeeManagement = () => {
                         {canViewSalary && <th style={{ whiteSpace: 'nowrap' }}>Base Salary</th>}
                         <th style={{ whiteSpace: 'nowrap' }}>Joining Date</th>
                         <th style={{ whiteSpace: 'nowrap' }}>Remarks / Status</th>
+                        <th style={{ whiteSpace: 'nowrap', textAlign: 'center' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -749,6 +750,30 @@ const EmployeeManagement = () => {
                             ) : (
                               <span style={{ color: '#059669', fontWeight: '600', padding: '4px 10px', background: '#d1fae5', borderRadius: '6px', fontSize: '0.82rem' }}>Working</span>
                             )}
+                          </td>
+                          <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
+                            <div style={{ display: 'inline-flex', gap: '6px' }}>
+                              <button
+                                onClick={() => handleEditEmployee(employee)}
+                                style={{ background: '#f8fafc', color: '#334155', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '4px 10px', fontSize: '0.78rem', fontWeight: '600', cursor: 'pointer' }}
+                              >
+                                ✏️ Edit
+                              </button>
+                              {canViewSalary && (
+                                <button
+                                  onClick={() => setEditingEmployeePayroll(employee)}
+                                  style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', borderRadius: '6px', padding: '4px 10px', fontSize: '0.78rem', fontWeight: '600', cursor: 'pointer' }}
+                                >
+                                  💰 Set Pay
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleDeleteEmployee(employee._id || employee.id)}
+                                style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: '6px', padding: '4px 10px', fontSize: '0.78rem', fontWeight: '600', cursor: 'pointer' }}
+                              >
+                                🗑️ Delete
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -1120,84 +1145,88 @@ const SalaryModal = ({ employee, onClose, onSave }) => {
   };
 
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-      <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', width: '90%', maxWidth: '550px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
-        <h2 style={{ marginBottom: '16px' }}>💰 Set Pay for {employee.firstName} {employee.lastName}</h2>
+    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '16px' }}>
+      <div style={{ background: '#fff', padding: '24px', borderRadius: '16px', width: '100%', maxWidth: '640px', maxHeight: '90vh', overflowY: 'auto', overflowX: 'hidden', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)', boxSizing: 'border-box' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
+          <h3 style={{ margin: 0, color: '#0f172a', fontSize: '1.2rem', fontWeight: '800' }}>💰 Set Pay for {employee.firstName} {employee.lastName}</h3>
+          <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.4rem', cursor: 'pointer', color: '#64748b' }}>&times;</button>
+        </div>
+
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>Base Salary</label>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', fontWeight: '700', color: '#1e293b', marginBottom: '8px', fontSize: '0.9rem' }}>Base Salary (₹)</label>
             <input
               type="number"
               value={baseSalary}
               onChange={e => setBaseSalary(e.target.value)}
-              style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #d1d5db' }}
+              style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid #cbd5e1', fontSize: '0.95rem', fontWeight: '700', boxSizing: 'border-box', outline: 'none' }}
               required
             />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px', marginBottom: '24px' }}>
             {/* Allowances section */}
-            <div>
-              <h4 style={{ margin: '0 0 10px 0', borderBottom: '1px solid #e5e7eb', paddingBottom: '4px' }}>🎁 Allowances</h4>
-              <div style={{ display: 'flex', gap: '5px', marginBottom: '10px' }}>
+            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <h4 style={{ margin: '0 0 12px 0', borderBottom: '1px solid #cbd5e1', paddingBottom: '6px', color: '#15803d', fontSize: '0.9rem', fontWeight: '800' }}>🎁 Allowances</h4>
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '12px' }}>
                 <input
                   type="text"
-                  placeholder="e.g. TA"
+                  placeholder="e.g. TA / HRA"
                   value={allowanceName}
                   onChange={e => setAllowanceName(e.target.value)}
-                  style={{ flex: 2, padding: '5px', fontSize: '0.82rem', borderRadius: '4px', border: '1px solid #d1d5db' }}
+                  style={{ flex: 1.5, padding: '7px 10px', fontSize: '0.82rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', minWidth: 0 }}
                 />
                 <input
                   type="number"
-                  placeholder="₹"
+                  placeholder="Amount"
                   value={allowanceVal}
                   onChange={e => setAllowanceVal(e.target.value)}
-                  style={{ flex: 1, padding: '5px', fontSize: '0.82rem', borderRadius: '4px', border: '1px solid #d1d5db' }}
+                  style={{ flex: 1, padding: '7px 8px', fontSize: '0.82rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', minWidth: 0 }}
                 />
-                <button type="button" onClick={handleAddAllowance} style={{ padding: '5px 8px', borderRadius: '4px', background: '#3b82f6', color: '#fff', border: 'none', cursor: 'pointer' }}>+</button>
+                <button type="button" onClick={handleAddAllowance} style={{ padding: '7px 12px', borderRadius: '8px', background: '#2563eb', color: '#fff', border: 'none', fontWeight: '800', cursor: 'pointer' }}>+</button>
               </div>
               <ul style={{ paddingLeft: '14px', margin: 0, fontSize: '0.84rem' }}>
                 {Object.entries(allowances).map(([k, v]) => (
-                  <li key={k} style={{ marginBottom: '4px' }}>
-                    {k}: {formatCurrency(v)} <span onClick={() => handleRemoveAllowance(k)} style={{ color: 'red', cursor: 'pointer', marginLeft: '6px', fontWeight: 'bold' }}>×</span>
+                  <li key={k} style={{ marginBottom: '6px', color: '#1e293b', fontWeight: '600' }}>
+                    {k}: {formatCurrency(v)} <span onClick={() => handleRemoveAllowance(k)} style={{ color: '#ef4444', cursor: 'pointer', marginLeft: '8px', fontWeight: 'bold' }}>×</span>
                   </li>
                 ))}
               </ul>
             </div>
 
             {/* Deductions section */}
-            <div>
-              <h4 style={{ margin: '0 0 10px 0', borderBottom: '1px solid #e5e7eb', paddingBottom: '4px' }}>💸 Deductions</h4>
-              <div style={{ display: 'flex', gap: '5px', marginBottom: '10px' }}>
+            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <h4 style={{ margin: '0 0 12px 0', borderBottom: '1px solid #cbd5e1', paddingBottom: '6px', color: '#b91c1c', fontSize: '0.9rem', fontWeight: '800' }}>💸 Deductions</h4>
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '12px' }}>
                 <input
                   type="text"
-                  placeholder="e.g. Tax"
+                  placeholder="e.g. Tax / PF"
                   value={deductionName}
                   onChange={e => setDeductionName(e.target.value)}
-                  style={{ flex: 2, padding: '5px', fontSize: '0.82rem', borderRadius: '4px', border: '1px solid #d1d5db' }}
+                  style={{ flex: 1.5, padding: '7px 10px', fontSize: '0.82rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', minWidth: 0 }}
                 />
                 <input
                   type="number"
-                  placeholder="₹"
+                  placeholder="Amount"
                   value={deductionVal}
                   onChange={e => setDeductionVal(e.target.value)}
-                  style={{ flex: 1, padding: '5px', fontSize: '0.82rem', borderRadius: '4px', border: '1px solid #d1d5db' }}
+                  style={{ flex: 1, padding: '7px 8px', fontSize: '0.82rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', minWidth: 0 }}
                 />
-                <button type="button" onClick={handleAddDeduction} style={{ padding: '5px 8px', borderRadius: '4px', background: '#ef4444', color: '#fff', border: 'none', cursor: 'pointer' }}>+</button>
+                <button type="button" onClick={handleAddDeduction} style={{ padding: '7px 12px', borderRadius: '8px', background: '#dc2626', color: '#fff', border: 'none', fontWeight: '800', cursor: 'pointer' }}>+</button>
               </div>
               <ul style={{ paddingLeft: '14px', margin: 0, fontSize: '0.84rem' }}>
                 {Object.entries(deductions).map(([k, v]) => (
-                  <li key={k} style={{ marginBottom: '4px' }}>
-                    {k}: {formatCurrency(v)} <span onClick={() => handleRemoveDeduction(k)} style={{ color: 'red', cursor: 'pointer', marginLeft: '6px', fontWeight: 'bold' }}>×</span>
+                  <li key={k} style={{ marginBottom: '6px', color: '#1e293b', fontWeight: '600' }}>
+                    {k}: {formatCurrency(v)} <span onClick={() => handleRemoveDeduction(k)} style={{ color: '#ef4444', cursor: 'pointer', marginLeft: '8px', fontWeight: 'bold' }}>×</span>
                   </li>
                 ))}
               </ul>
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
-            <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-            <button type="submit" className="btn btn-success">Save Salary Details</button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '12px', borderTop: '1px solid #e2e8f0' }}>
+            <button type="button" onClick={onClose} style={{ padding: '10px 20px', borderRadius: '10px', background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1', fontWeight: '700', cursor: 'pointer' }}>Cancel</button>
+            <button type="submit" style={{ padding: '10px 24px', borderRadius: '10px', background: '#0C4A86', color: '#ffffff', border: 'none', fontWeight: '800', cursor: 'pointer', boxShadow: '0 4px 12px rgba(12, 74, 134, 0.25)' }}>Save Salary Details</button>
           </div>
         </form>
       </div>
