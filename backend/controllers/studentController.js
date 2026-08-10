@@ -142,7 +142,7 @@ const addStudent = async (req, res) => {
     if (!rollNumber || typeof rollNumber !== 'string' || rollNumber.trim() === '') {
       const existingInClass = await Student.findAll({ where: { classId: validClassId } });
       const nextNum = (existingInClass.length + 1);
-      rollNumber = `${targetGrade * 100 + nextNum}`;
+      rollNumber = `G${targetGrade}-${String(nextNum).padStart(3, '0')}`;
     }
 
     let existingStudent = await Student.findOne({ where: { rollNumber } });
@@ -157,7 +157,7 @@ const addStudent = async (req, res) => {
     // 3. Auto-generate User ID if missing or occupied
     if (!userId || typeof userId !== 'string' || userId.trim() === '') {
       const numPart = rollNumber.replace(/\D/g, '').slice(-3) || Date.now().toString().slice(-3);
-      userId = `STU${targetGrade}${targetSection}-${numPart}`;
+      userId = `STU-G${targetGrade}${targetSection}-${numPart}`;
     }
 
     let existingUser = await User.findOne({ where: { userId } });

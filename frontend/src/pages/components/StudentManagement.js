@@ -87,8 +87,9 @@ const StudentManagement = () => {
   });
 
   const computeAutoCredentials = (targetGrade, targetSection, fName = '', lName = '', currentStudents = students) => {
-    const gStr = String(targetGrade || '9');
+    const gStr = String(targetGrade || '10');
     const sStr = String(targetSection || 'A').toUpperCase();
+    const gNum = parseInt(gStr, 10) || 10;
 
     const studentsInClass = (currentStudents || []).filter(s => {
       const sg = String(s.grade || s.class?.grade || '');
@@ -96,22 +97,29 @@ const StudentManagement = () => {
       return sg === gStr && ss === sStr;
     });
 
-    let maxRoll = 0;
-    studentsInClass.forEach(s => {
-      const digits = String(s.rollNumber || s.rollNo || '').replace(/\D/g, '');
-      if (digits) {
-        const n = parseInt(digits, 10);
-        if (!isNaN(n) && n > maxRoll) maxRoll = n;
+    let maxSeq = 0;
+    studentsInClass.forEach((s, idx) => {
+      const r = String(s.rollNumber || s.rollNo || s.formattedRollNumber || '');
+      const match = r.match(/G\d+-(\d+)/i);
+      if (match) {
+        const seq = parseInt(match[1], 10);
+        if (!isNaN(seq) && seq > maxSeq) maxSeq = seq;
+      } else {
+        const digits = r.replace(/\D/g, '');
+        if (digits) {
+          const num = parseInt(digits, 10);
+          const seq = (num % 100) || (idx + 1);
+          if (seq > maxSeq) maxSeq = seq;
+        }
       }
     });
 
-    const gNum = parseInt(gStr, 10) || 1;
-    const nextRoll = maxRoll > 0 ? maxRoll + 1 : (gNum * 100 + (studentsInClass.length + 1));
-    const rollStr = `${nextRoll}`;
-    const seqStr = String(nextRoll).slice(-3);
-    const userId = `STU-${gStr}${sStr}-${seqStr}`;
+    const nextSeq = Math.max(maxSeq + 1, studentsInClass.length + 1);
+    const seqStr = String(nextSeq).padStart(3, '0');
+    const rollStr = `G${gNum}-${seqStr}`;
+    const userId = `STU-G${gNum}${sStr}-${seqStr}`;
     const password = 'Student@123';
-    const parentUserId = `PAR-${rollStr}`;
+    const parentUserId = `PAR-G${gNum}-${seqStr}`;
     const parentPassword = 'Parent@123';
 
     return {
@@ -285,29 +293,14 @@ const StudentManagement = () => {
       const apiData = Array.isArray(studentsRes?.data) ? studentsRes.data : [];
       let loadedStudents = [...apiData];
       
-      // Strictly cap each class section to 10 students max (G1-001 through G1-010)
-      if (apiData.length < demoStudents.length) {
-        const existingIds = new Set(apiData.map(s => String(s._id || s.id)));
-        demoStudents.forEach(demoSt => {
-          if (!existingIds.has(String(demoSt._id))) {
-            loadedStudents.push(demoSt);
-          }
-        });
-      }
-
-      const sectionGroups = {};
-      loadedStudents.forEach(st => {
-        const g = String(st.grade || st.class?.grade || '1');
-        const s = String(st.section || st.class?.section || 'A');
-        const key = `${g}_${s}`;
-        if (!sectionGroups[key]) sectionGroups[key] = [];
-        if (sectionGroups[key].length < 10) {
-          sectionGroups[key].push(st);
+      const existingIds = new Set(apiData.map(s => String(s._id || s.id)));
+      demoStudents.forEach(demoSt => {
+        if (!existingIds.has(String(demoSt._id))) {
+          loadedStudents.push(demoSt);
         }
       });
 
-      const final10PerSectionStudents = Object.values(sectionGroups).flat();
-      setStudents(final10PerSectionStudents.length > 0 ? final10PerSectionStudents : demoStudents);
+      setStudents(loadedStudents.length > 0 ? loadedStudents : demoStudents);
       if (isAcc || true) {
         setAllFeesData(feesRes?.data || []);
       }
@@ -511,6 +504,8 @@ const StudentManagement = () => {
 
       window.dispatchEvent(new Event('schoolDataUpdated'));
       broadcastDataChange({ type: 'student_list_updated', student: newStudentObj });
+
+      setStudents(prev => [newStudentObj, ...prev.filter(s => String(s._id || s.id) !== String(newStudentObj.id))]);
 
       if (!editingId) {
         setCreatedStudentCredentials({
@@ -834,24 +829,24 @@ Password: ${cred.parentPassword}
     : [];
 
   let filteredStudentsForSelect = students.filter((student) => {
-    if (selectedGrade && (!student.class || String(student.class.grade) !== String(selectedGrade))) {
+    const sGrade = String(student.grade || student.class?.grade || '');
+    const sSec = String(student.section || student.class?.section || '').toUpperCase();
+    if (selectedGrade && sGrade !== String(selectedGrade)) {
       return false;
     }
-    if (selectedSection && (!student.class || String(student.class.section) !== String(selectedSection))) {
+    if (selectedSection && sSec !== String(selectedSection).toUpperCase()) {
       return false;
     }
     return true;
   });
 
-  if (selectedGrade && selectedSection) {
-    filteredStudentsForSelect = filteredStudentsForSelect.slice(0, 10);
-  }
-
   let visibleStudents = students.filter((student, idx) => {
-    if (selectedGrade && (!student.class || String(student.class.grade) !== String(selectedGrade))) {
+    const sGrade = String(student.grade || student.class?.grade || '');
+    const sSec = String(student.section || student.class?.section || '').toUpperCase();
+    if (selectedGrade && sGrade !== String(selectedGrade)) {
       return false;
     }
-    if (selectedSection && (!student.class || String(student.class.section) !== String(selectedSection))) {
+    if (selectedSection && sSec !== String(selectedSection).toUpperCase()) {
       return false;
     }
     if (selectedStudentId) {
@@ -902,18 +897,15 @@ Password: ${cred.parentPassword}
     }
   }
 
-  if (!selectedStudentId) {
-    visibleStudents = visibleStudents.slice(0, 10);
-  }
-
   visibleStudents = visibleStudents.map((st, idx) => {
-    const grade = st?.grade || st?.class?.grade || selectedGrade || '1';
-    const gNum = String(grade).replace(/\D/g, '') || '1';
-    const seq = idx + 1;
+    const grade = st?.grade || st?.class?.grade || selectedGrade || '10';
+    const gNum = String(grade).replace(/\D/g, '') || '10';
+    const rawRoll = String(st?.rollNumber || st?.rollNo || '');
+    let formatted = rawRoll.startsWith(`G${gNum}-`) ? rawRoll : `G${gNum}-${String(idx + 1).padStart(3, '0')}`;
     return {
       ...st,
-      rollSequence: seq,
-      formattedRollNumber: `G${gNum}-${String(seq).padStart(3, '0')}`
+      rollSequence: idx + 1,
+      formattedRollNumber: formatted
     };
   });
 

@@ -345,7 +345,7 @@ export const resolveStudentName = (item, studentsList = [], fallbackIdx = 0) => 
     const fn = item.firstName || item.userId?.firstName || '';
     const ln = item.lastName || item.userId?.lastName || '';
     const directName = [fn, ln].filter(Boolean).join(' ').trim() || item.name || item.studentName;
-    if (directName && directName !== 'Unknown Student' && directName !== 'Aarav Patel' && !/^student\s*\d*$/i.test(directName)) {
+    if (directName && directName !== 'Unknown Student' && !/^student\s*\d*$/i.test(directName)) {
       return directName;
     }
 
@@ -353,7 +353,7 @@ export const resolveStudentName = (item, studentsList = [], fallbackIdx = 0) => 
       const nestedFn = item.student.firstName || item.student.userId?.firstName || item.student.name || '';
       const nestedLn = item.student.lastName || item.student.userId?.lastName || '';
       const nestedName = [nestedFn, nestedLn].filter(Boolean).join(' ').trim();
-      if (nestedName && nestedName !== 'Unknown Student' && nestedName !== 'Aarav Patel' && !/^student\s*\d*$/i.test(nestedName)) {
+      if (nestedName && nestedName !== 'Unknown Student' && !/^student\s*\d*$/i.test(nestedName)) {
         return nestedName;
       }
     }
