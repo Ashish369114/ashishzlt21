@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Calendar, MessageSquare, GraduationCap, Users, 
   FileText, BookOpen, Bell, FileSpreadsheet, BarChart2, LogOut, ShieldCheck, Settings, Gift
 } from 'lucide-react';
-import { studentService, teacherService, feeService, attendanceService, examService } from '../../services/api';
+import api, { studentService, teacherService, feeService, attendanceService, examService, classService } from '../../services/api';
 import { subscribeToDataChanges } from '../../services/syncService';
 import StudentManagement from '../components/StudentManagement';
 import PrincipalDashboardHome from '../components/PrincipalDashboardHome';
