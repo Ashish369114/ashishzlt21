@@ -309,12 +309,23 @@ const StudentManagement = () => {
       const rawApiData = Array.isArray(studentsRes?.data) ? studentsRes.data : [];
       const apiData = rawApiData.map(normalizeApiStudent);
 
-      // Create unified roster keyed by grade + section + rollNumber
+      // 1. Load newly created custom students from localStorage
+      const savedMasterStr = localStorage.getItem('school_students_list');
+      let customSavedStudents = [];
+      if (savedMasterStr) {
+        try {
+          customSavedStudents = JSON.parse(savedMasterStr);
+        } catch (e) {
+          console.warn('Error reading school_students_list:', e);
+        }
+      }
+
+      // 2. Create unified list
       const unifiedMap = new Map();
 
-      // Seed with demoStudents (10 per section, 30 sections = 300)
+      // Seed with demoStudents
       demoStudents.forEach(st => {
-        const key = `${st.grade}_${st.section}_${st.rollNumber}`;
+        const key = `demo_${st.grade}_${st.section}_${st.rollNumber}`;
         unifiedMap.set(key, st);
       });
 
@@ -323,40 +334,33 @@ const StudentManagement = () => {
         const g = st.grade || st.class?.grade;
         const s = st.section || st.class?.section;
         const r = st.rollNumber;
-        if (g && s && r) {
-          const key = `${g}_${s}_${r}`;
-          unifiedMap.set(key, { ...unifiedMap.get(key), ...st });
+        const id = st._id || st.id;
+        const key = id ? `id_${id}` : `demo_${g}_${s}_${r}`;
+        unifiedMap.set(key, { ...unifiedMap.get(key), ...st });
+      });
+
+      // Merge newly created custom local students (never drop them!)
+      customSavedStudents.forEach(st => {
+        if (st && (st.id || st._id)) {
+          const key = `id_${st.id || st._id}`;
+          unifiedMap.set(key, st);
         }
       });
 
       const allList = Array.from(unifiedMap.values());
 
-      // Strictly cap each grade/section to max 10 students
-      const secCounts = {};
-      const cappedStudents = [];
-
-      allList.forEach(st => {
-        const g = String(st.grade || st.class?.grade || '1');
-        const s = String(st.section || st.class?.section || 'A').toUpperCase();
-        const secKey = `${g}_${s}`;
-        secCounts[secKey] = (secCounts[secKey] || 0) + 1;
-        if (secCounts[secKey] <= 10) {
-          cappedStudents.push({ ...st, grade: g, section: s });
-        }
-      });
-
-      setStudents(cappedStudents);
-      localStorage.setItem('school_students_list', JSON.stringify(cappedStudents));
-      window.dispatchEvent(new Event('schoolDataUpdated'));
+      setStudents(allList);
+      localStorage.setItem('school_students_list', JSON.stringify(allList));
 
       if (isAcc || true) {
         setAllFeesData(feesRes?.data || []);
       }
       setError('');
     } catch (err) {
-      console.warn('Using demo students data:', err);
-      setStudents(demoStudents);
-      localStorage.setItem('school_students_list', JSON.stringify(demoStudents));
+      console.warn('Using fallback students data:', err);
+      const savedMasterStr = localStorage.getItem('school_students_list');
+      const fallbackList = savedMasterStr ? JSON.parse(savedMasterStr) : demoStudents;
+      setStudents(fallbackList);
       setError('');
     } finally {
       setLoading(false);
