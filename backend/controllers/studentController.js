@@ -152,16 +152,15 @@ const addStudent = async (req, res) => {
         await existingParentUser.save();
         parentIdObj = existingParentUser.id;
       } else {
-        if (!parentFirstName || !parentLastName) {
-          return res.status(400).json({ message: 'Parent first name and last name are required when creating a new parent account.' });
-        }
+        const pFirstName = parentFirstName || 'Parent of';
+        const pLastName = parentLastName || firstName || 'Student';
 
         const parentUser = await User.create({
           userId: parentUserId,
           password: parentPassword,
           role: 'parent',
-          firstName: parentFirstName,
-          lastName: parentLastName,
+          firstName: pFirstName,
+          lastName: pLastName,
           email: parentEmail,
           phone: parentPhone,
           gender: parentGender,
