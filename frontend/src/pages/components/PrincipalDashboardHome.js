@@ -364,8 +364,8 @@ const PrincipalDashboardHome = ({ stats, user }) => {
                 </div>
               </div>
               <div className="leave-list">
-                {filteredLeaves.map(leave => (
-                  <div key={leave._id} className="leave-item">
+                {filteredLeaves.map((leave, lIdx) => (
+                  <div key={leave._id || leave.id || `leave_${lIdx}`} className="leave-item">
                     <div className="leave-avatar">{(leave.applicantName || 'U').charAt(0).toUpperCase()}</div>
                     <div className="leave-info">
                       <h4>{leave.applicantName || '—'}</h4>
@@ -374,8 +374,8 @@ const PrincipalDashboardHome = ({ stats, user }) => {
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       {leave.status === 'pending' ? (
                         <>
-                          <button onClick={() => handleApprove(leave._id)} style={{ padding: '4px 8px', background: '#dcfce7', color: '#15803d', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>Approve</button>
-                          <button onClick={() => handleReject(leave._id)} style={{ padding: '4px 8px', background: '#fee2e2', color: '#b91c1c', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>Reject</button>
+                          <button onClick={() => handleApprove(leave._id || leave.id)} style={{ padding: '4px 8px', background: '#dcfce7', color: '#15803d', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>Approve</button>
+                          <button onClick={() => handleReject(leave._id || leave.id)} style={{ padding: '4px 8px', background: '#fee2e2', color: '#b91c1c', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>Reject</button>
                         </>
                       ) : leave.status === 'approved' ? (
                         <CheckCircle size={16} color="#10b981" />
@@ -396,8 +396,8 @@ const PrincipalDashboardHome = ({ stats, user }) => {
             </div>
             <div className="card-body p-0">
               <ul className="list-group">
-                {notices.map(notice => (
-                  <li key={notice.id} className="list-item">
+                {notices.map((notice, nIdx) => (
+                  <li key={notice.id || notice._id || `notice_${nIdx}`} className="list-item">
                     <div className="item-content">
                       <h4>{notice.title}</h4>
                       <p>{notice.desc}</p>
@@ -421,10 +421,10 @@ const PrincipalDashboardHome = ({ stats, user }) => {
             </div>
             <div className="card-body p-0">
               <ul className="list-group">
-                {recentActivity.map(activity => {
+                {recentActivity.map((activity, aIdx) => {
                   const Icon = activity.icon;
                   return (
-                    <li key={activity.id} className="list-item">
+                    <li key={activity.id || `act_${aIdx}`} className="list-item">
                       <div className={`item-icon ${activity.color}`}>
                         <Icon size={18} />
                       </div>
