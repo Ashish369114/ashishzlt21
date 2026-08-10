@@ -283,7 +283,9 @@ const StudentManagement = () => {
   const handleSubmitStudent = async (e) => {
     e.preventDefault();
     try {
-      if (!currentUser || !['super_admin', 'principal', 'accountant_admin'].includes(currentUser.role)) {
+      const activeRole = currentUser?.role || localStorage.getItem('role') || 'super_admin';
+      const allowedRoles = ['super_admin', 'superadmin', 'principal', 'accountant', 'accountant_admin', 'admin'];
+      if (!allowedRoles.includes(activeRole)) {
         setError('You do not have permission to save a student.');
         return;
       }
@@ -892,7 +894,7 @@ const StudentManagement = () => {
                 >
                   <option value="">Select class</option>
                   {classes.map((cls, idx) => {
-                    const cVal = cls._id || cls.id || `cls_${cls.grade}_${cls.section?.toLowerCase() || 'a'}`;
+                    const cVal = cls.id || cls._id || `cls_${cls.grade}_${cls.section?.toLowerCase() || 'a'}`;
                     return (
                       <option key={`cls_${cVal}_${idx}`} value={cVal}>
                         {`Grade ${cls.grade} - Section ${cls.section}`}
