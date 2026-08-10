@@ -47,6 +47,14 @@ const addBook = async (req, res) => {
     });
     res.status(201).json(book);
   } catch (error) {
+    // Sequelize unique constraint / validation errors → user-friendly message
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(400).json({ message: `A book with ISBN "${req.body.isbn}" already exists in the library. Please use a different ISBN.` });
+    }
+    if (error.name === 'SequelizeValidationError') {
+      const msgs = error.errors.map(e => e.message).join(', ');
+      return res.status(400).json({ message: `Validation failed: ${msgs}` });
+    }
     res.status(400).json({ message: error.message });
   }
 };

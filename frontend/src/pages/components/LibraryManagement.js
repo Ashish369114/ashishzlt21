@@ -414,6 +414,19 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
       return;
     }
 
+    // Client-side duplicate ISBN check
+    if (!editingBookId) {
+      const isbnClean = (newBook.isbn || '').replace(/\D/g, '');
+      const duplicate = books.find(b => {
+        const existingIsbn = (b.isbn || '').replace(/\D/g, '');
+        return existingIsbn && existingIsbn === isbnClean;
+      });
+      if (duplicate) {
+        setError(`❌ ISBN "${newBook.isbn}" already exists in the library (Book: "${duplicate.title}"). Please use a different ISBN.`);
+        return;
+      }
+    }
+
     try {
       setError('');
       if (editingBookId) {
@@ -427,9 +440,13 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
       resetBookForm();
     } catch (err) {
       console.error('Error saving book:', err);
-      const msg = err.response?.data?.message || 'Error saving book';
-      setError(msg);
-      alert(msg);
+      const rawMsg = err.response?.data?.message || err.response?.data?.error || 'Error saving book';
+      // Make the error message clear, even if backend returns generic text
+      const friendlyMsg = rawMsg.toLowerCase().includes('unique') || rawMsg.toLowerCase().includes('already exists')
+        ? `❌ ISBN "${newBook.isbn}" is already registered in the library. Please use a unique ISBN.`
+        : rawMsg;
+      setError(friendlyMsg);
+      alert(friendlyMsg);
     }
   };
 
