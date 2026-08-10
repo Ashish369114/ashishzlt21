@@ -96,24 +96,36 @@ const PrincipalDashboard = ({ user, onLogout }) => {
         }
       }
 
-      // Dynamic live employee/staff count reflecting additions AND deletions
-      let totalStaffCount = 58;
-      if (empData.length > 0) {
-        totalStaffCount = empData.length;
-      } else {
+      // Dynamic live employee/staff count & categorization matching Staff & Employees
+      let activeEmployees = empData;
+      if (activeEmployees.length === 0) {
         const savedEmpStr = localStorage.getItem('employee_list');
         if (savedEmpStr) {
           try {
-            const parsedEmp = JSON.parse(savedEmpStr);
-            if (Array.isArray(parsedEmp) && parsedEmp.length > 0) {
-              totalStaffCount = parsedEmp.length;
-            }
+            activeEmployees = JSON.parse(savedEmpStr) || [];
           } catch (e) {}
         }
       }
 
-      const finalTeacherCount = teacherData.length > 0 ? teacherData.length : (classStats.totalTeachers || 30);
-      const nonTeachingCount = empData.filter(e => String(e.employeeType || e.type || '').toLowerCase().includes('non')).length || classStats.totalNonTeaching || 28;
+      let finalTeacherCount = 30;
+      let nonTeachingCount = 28;
+      let totalStaffCount = 58;
+
+      if (activeEmployees.length > 0) {
+        const nonTeachingEmployees = activeEmployees.filter(e => {
+          const type = String(e.employeeType || e.type || e.designation || '').toLowerCase();
+          return type.includes('non') || type.includes('admin') || type.includes('clerk') || type.includes('librarian') || type.includes('receptionist') || type.includes('officer') || type.includes('assistant');
+        });
+
+        const teachingEmployees = activeEmployees.filter(e => {
+          const type = String(e.employeeType || e.type || e.designation || '').toLowerCase();
+          return !type.includes('non') && (type.includes('teaching') || type.includes('teacher') || type.includes('tgt') || type.includes('pgt') || type.includes('school') || type.includes('primary') || type.includes('junior') || type.includes('high') || type.includes('nursery') || type.includes('pre-primary') || type.includes('faculty'));
+        });
+
+        finalTeacherCount = teachingEmployees.length;
+        nonTeachingCount = nonTeachingEmployees.length;
+        totalStaffCount = activeEmployees.length;
+      }
 
       setStats({
         totalStudents: finalStudentCount,
