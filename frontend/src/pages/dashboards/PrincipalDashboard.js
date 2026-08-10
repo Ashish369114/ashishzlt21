@@ -80,31 +80,30 @@ const PrincipalDashboard = ({ user, onLogout }) => {
       const upcomingExams = examData.filter(e => new Date(e.date) > new Date()).length || 3;
       const pendingFees = feeData.filter(f => !f.isPaid).length;
 
-      // Dynamic live student count reflecting additions AND deletions
+      // Dynamic live student count prioritizing master 300+ student list
       let finalStudentCount = 300;
-      if (studentData.length > 0) {
+      const savedMasterStr = localStorage.getItem('school_students_list');
+      if (savedMasterStr) {
+        try {
+          const parsed = JSON.parse(savedMasterStr);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            finalStudentCount = parsed.length;
+          }
+        } catch (e) {}
+      } else if (studentData.length > 0) {
         finalStudentCount = studentData.length;
-      } else {
-        const savedMasterStr = localStorage.getItem('school_students_list');
-        if (savedMasterStr) {
-          try {
-            const parsed = JSON.parse(savedMasterStr);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              finalStudentCount = parsed.length;
-            }
-          } catch (e) {}
-        }
       }
 
       // Dynamic live employee/staff count & categorization matching Staff & Employees
-      let activeEmployees = empData;
-      if (activeEmployees.length === 0) {
-        const savedEmpStr = localStorage.getItem('employee_list');
-        if (savedEmpStr) {
-          try {
-            activeEmployees = JSON.parse(savedEmpStr) || [];
-          } catch (e) {}
-        }
+      let activeEmployees = [];
+      const savedEmpStr = localStorage.getItem('employee_list');
+      if (savedEmpStr) {
+        try {
+          activeEmployees = JSON.parse(savedEmpStr) || [];
+        } catch (e) {}
+      }
+      if (activeEmployees.length === 0 && empData.length > 0) {
+        activeEmployees = empData;
       }
 
       let finalTeacherCount = 30;

@@ -82,32 +82,34 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
       const apiEmployees = Array.isArray(employeesRes?.data) ? employeesRes.data : [];
       const fetchedStats = classStatsRes.data || {};
 
-      // 1. Total Students Count (Dynamic API + local storage master list reflecting additions AND deletions)
+      // 1. Total Students Count (Dynamic local storage master list prioritizing full 300+ student roster)
       let studentCount = 300;
-      if (apiStudents.length > 0) {
+      const savedStudentsStr = localStorage.getItem('school_students_list');
+      if (savedStudentsStr) {
+        try {
+          const parsed = JSON.parse(savedStudentsStr);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            studentCount = parsed.length;
+          }
+        } catch (e) {}
+      } else if (apiStudents.length > 0) {
         studentCount = apiStudents.length;
-      } else {
-        const savedStudentsStr = localStorage.getItem('school_students_list');
-        if (savedStudentsStr) {
-          try {
-            const parsed = JSON.parse(savedStudentsStr);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              studentCount = parsed.length;
-            }
-          } catch (e) {}
-        }
       }
 
-      // 2. Teaching & Non-Teaching Staff Counts (Dynamic API + local storage fallback)
-      let activeEmployees = apiEmployees;
-      if (activeEmployees.length === 0) {
-        const savedEmpStr = localStorage.getItem('employee_list');
-        const savedEmps = savedEmpStr ? JSON.parse(savedEmpStr) : [];
-        activeEmployees = savedEmps.length > 0 ? savedEmps : [];
+      // 2. Teaching & Non-Teaching Staff Counts (Dynamic local storage employee list prioritizing full 58 staff roster)
+      let activeEmployees = [];
+      const savedEmpStr = localStorage.getItem('employee_list');
+      if (savedEmpStr) {
+        try {
+          activeEmployees = JSON.parse(savedEmpStr) || [];
+        } catch (e) {}
+      }
+      if (activeEmployees.length === 0 && apiEmployees.length > 0) {
+        activeEmployees = apiEmployees;
       }
 
-      let teachingCount = 0;
-      let nonTeachingCount = 0;
+      let teachingCount = 30;
+      let nonTeachingCount = 28;
 
       if (activeEmployees.length > 0) {
         const nonTeachingEmployees = activeEmployees.filter(e => {
@@ -122,9 +124,6 @@ const SuperAdminDashboard = ({ user, onLogout }) => {
 
         teachingCount = teachingEmployees.length;
         nonTeachingCount = nonTeachingEmployees.length;
-      } else {
-        teachingCount = fetchedStats.totalTeaching || fetchedStats.totalTeachers || 15;
-        nonTeachingCount = fetchedStats.totalNonTeaching || 6;
       }
 
       const totalEmpCount = activeEmployees.length > 0 ? activeEmployees.length : (teachingCount + nonTeachingCount);
