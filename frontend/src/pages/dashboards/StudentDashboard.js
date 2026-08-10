@@ -123,6 +123,10 @@ const StudentDashboard = ({ user, onLogout }) => {
 
   const studentId = student?.userId?._id || student?.userId || student?._id || user?.id || user?._id || user?.userId;
   const studentName = `${user?.firstName || 'Student'}`.trim();
+  const rawGrade = student?.class?.grade || student?.grade || '9';
+  const gradeStr = String(rawGrade).toLowerCase().startsWith('grade') ? rawGrade : `Grade ${rawGrade}`;
+  const rawSection = student?.class?.section || student?.section || 'A';
+  const sectionStr = String(rawSection).toLowerCase().startsWith('section') ? rawSection : `Section ${rawSection}`;
   const isSubPage = location.pathname !== '/dashboard' && location.pathname !== '/dashboard/';
 
   return (
@@ -141,25 +145,33 @@ const StudentDashboard = ({ user, onLogout }) => {
             </div>
           </div>
 
-          {/* Navigation Menu */}
-          <nav className="space-y-1 text-xs">
+          {/* Navigation Links */}
+          <nav className="space-y-1 text-sm font-semibold">
+            {/* Overview */}
             <NavLink
               to="/dashboard"
               end
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-xl px-3.5 py-2.5 font-bold transition-all ${
-                  isActive ? 'bg-[#EBF5FF] text-[#0C4A86] border border-[#0096DA] shadow-xs' : 'text-slate-700 hover:bg-[#F0F9FF] hover:text-[#0C4A86]'
+                  isActive ? 'bg-[#0C4A86] text-white shadow-md' : 'text-slate-700 hover:bg-[#F0F9FF] hover:text-[#0C4A86]'
                 }`
               }
             >
               <LayoutGrid className="h-4 w-4" />
-              <span>Dashboard</span>
+              <span>Overview</span>
             </NavLink>
+
+            {/* Academics Section Header */}
+            <div className="pt-3 pb-1">
+              <p className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-[#0C4A86]">
+                Academics & Learning
+              </p>
+            </div>
 
             <NavLink
               to="/dashboard/profile"
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-3.5 py-2.5 font-bold transition-all ${
+                `flex items-center gap-3 rounded-xl px-3.5 py-2 font-bold transition-all ${
                   isActive ? 'bg-[#EBF5FF] text-[#0C4A86] border border-[#0096DA] shadow-xs' : 'text-slate-700 hover:bg-[#F0F9FF] hover:text-[#0C4A86]'
                 }`
               }
@@ -167,13 +179,6 @@ const StudentDashboard = ({ user, onLogout }) => {
               <User className="h-4 w-4" />
               <span>My Profile</span>
             </NavLink>
-
-            {/* My Learning Header & Links */}
-            <div className="pt-3 pb-1">
-              <p className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-[#0C4A86]">
-                My Learning
-              </p>
-            </div>
 
             <NavLink
               to="/dashboard/classroom-activity"
@@ -323,7 +328,7 @@ const StudentDashboard = ({ user, onLogout }) => {
               }
             >
               <Bell className="h-4 w-4" />
-              <span>Communications</span>
+              <span>Messages</span>
             </NavLink>
 
             <NavLink
@@ -352,26 +357,39 @@ const StudentDashboard = ({ user, onLogout }) => {
           </nav>
         </div>
 
-        {/* Footer Logout Button */}
-        <div className="mt-6 pt-4 border-t border-slate-200">
+        {/* User Card & Logout */}
+        <div className="space-y-3 pt-4 border-t border-slate-200">
+          <div className="flex items-center gap-3 rounded-2xl bg-[#EBF5FF] p-3 border border-[#BFDBFE] shadow-2xs">
+            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#0C4A86] font-extrabold text-white text-sm">
+              {profileAvatar ? (
+                <img src={profileAvatar} alt={studentName} className="h-full w-full object-cover" />
+              ) : (
+                <span>{studentName.charAt(0)}</span>
+              )}
+            </div>
+            <div className="overflow-hidden">
+              <p className="truncate text-xs font-black text-slate-900">{studentName}</p>
+              <p className="truncate text-[10px] font-bold text-[#0C4A86]">Student</p>
+            </div>
+          </div>
+
           <button
-            type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-2xl bg-[#FEF2F2] border border-[#FECACA] px-4 py-3 text-sm font-bold text-[#DC2626] transition-all hover:bg-[#DC2626] hover:text-white"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-rose-50 px-3.5 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 transition-all border border-rose-200"
           >
             <LogOut className="h-4 w-4" />
-            <span>Logout</span>
+            <span>Log Out</span>
           </button>
         </div>
       </aside>
 
       {/* Main Content Container */}
-      <div className="flex-1 lg:pl-72 flex flex-col min-h-screen">
-        {/* Top bar with back navigation if viewing sub-page */}
+      <div className="flex flex-1 flex-col lg:pl-72">
+        {/* Top bar for subpages - "Back to Overview" */}
         {isSubPage && (
-          <div className="bg-white border-b border-[#BFDBFE] px-6 py-3.5 flex items-center justify-between shadow-xs">
+          <div className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-[#FAF6F0]/90 px-6 py-3.5 backdrop-blur-md">
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => navigate('/dashboard')}
               className="flex items-center gap-2 rounded-xl border border-[#BFDBFE] bg-[#EBF5FF] px-3.5 py-1.5 text-xs font-bold text-[#0C4A86] hover:bg-[#EFEAE4] transition"
             >
               <ArrowLeft className="h-4 w-4 text-[#0096DA]" />
@@ -379,7 +397,7 @@ const StudentDashboard = ({ user, onLogout }) => {
             </button>
 
             <div className="flex items-center gap-3 text-xs font-semibold text-[#736B63]">
-              <span>Grade 9 - Section A</span>
+              <span>{gradeStr} - {sectionStr}</span>
               <span>•</span>
               <span>Academic Year 2025-2026</span>
             </div>
