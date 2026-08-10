@@ -9,7 +9,7 @@ import {
 import CalendarAndEventsSection from '../../components/common/CalendarAndEventsSection';
 import { studentService } from '../../services/api';
 import { demoStudents } from '../../utils/demoData';
-import { resolveStudentName } from '../../services/syncService';
+import { resolveStudentName, getUnifiedStudents, subscribeToDataChanges } from '../../services/syncService';
 
 
 // CBSE Subject Mapping by Class
@@ -125,16 +125,8 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
     try {
       const response = await studentService.getAll().catch(() => ({ data: [] }));
       const apiData = Array.isArray(response?.data) ? response.data : [];
-      let loaded = [...apiData];
+      let loaded = getUnifiedStudents(apiData);
       
-      if (apiData.length < demoStudents.length) {
-        const existingIds = new Set(apiData.map(s => String(s._id || s.id)));
-        demoStudents.forEach(demoSt => {
-          if (!existingIds.has(String(demoSt._id))) {
-            loaded.push(demoSt);
-          }
-        });
-      }
       if (loaded && loaded.length > 0) {
         const mapped = loaded.map((s, idx) => {
           const rawName = resolveStudentName(s, loaded, idx);
@@ -148,7 +140,7 @@ const AoManagement = ({ activeSection, activeTab: activeTabProp }) => {
             name: rawName,
             grade: g,
             section: sec,
-            rollNo: s.rollNumber || s.rollNo || `G${g}-${idx + 1}`
+            rollNo: s.formattedRollNumber || s.rollNumber || s.rollNo || `G${g}-${idx + 1}`
           };
         });
         setStudentsList(mapped);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { libraryService, studentService } from '../../services/api';
 import { demoLibraryBooks, demoStudents } from '../../utils/demoData';
-import { resolveStudentName } from '../../services/syncService';
+import { resolveStudentName, getUnifiedStudents, subscribeToDataChanges } from '../../services/syncService';
 import '../../styles/ManagementStyles.css';
 import { 
   Bell, MoreVertical, BookOpen, Clock, AlertCircle, QrCode, Scan, 
@@ -360,7 +360,7 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
       setBooks(combinedBooks);
       localStorage.setItem('library_books_list', JSON.stringify(combinedBooks));
 
-      const fetchedStudents = (stuRes?.data && stuRes.data.length > 0) ? stuRes.data : demoStudents;
+      const fetchedStudents = getUnifiedStudents(stuRes?.data || []);
       setStudents(fetchedStudents);
 
       const avail = combinedBooks.reduce((acc, b) => acc + (b.availableCopies !== undefined ? b.availableCopies : (b.totalCopies || 0)), 0);
@@ -372,7 +372,7 @@ const LibraryManagement = ({ activeSection, initialTab }) => {
       const savedBooksStr = localStorage.getItem('library_books_list');
       const fallback = savedBooksStr ? JSON.parse(savedBooksStr) : demoLibraryBooks;
       setBooks(fallback);
-      setStudents(demoStudents);
+      setStudents(getUnifiedStudents([]));
       const avail = fallback.reduce((acc, b) => acc + (b.availableCopies !== undefined ? b.availableCopies : 0), 0);
       const total = fallback.reduce((acc, b) => acc + (b.totalCopies || 0), 0);
       setAvailableBooks(avail);

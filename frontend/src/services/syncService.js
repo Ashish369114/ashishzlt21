@@ -59,10 +59,17 @@ export const getSyncHistory = () => {
 
 export const getUnifiedStudents = (apiStudents = []) => {
   try {
-    const localSaved = JSON.parse(localStorage.getItem('school_students') || '[]');
+    const savedMasterStr = localStorage.getItem('school_students_list') || localStorage.getItem('school_students');
+    let localSaved = [];
+    if (savedMasterStr) {
+      try {
+        localSaved = JSON.parse(savedMasterStr);
+      } catch (e) {}
+    }
+
     const combinedMap = new Map();
 
-    // 1. Load canonical demo students (300 students, 10 per class across all 30 classes)
+    // 1. Load canonical demo students (300 baseline students)
     (demoStudents || []).forEach((s) => {
       const id = s._id || s.id;
       if (id) combinedMap.set(String(id), s);
@@ -81,7 +88,7 @@ export const getUnifiedStudents = (apiStudents = []) => {
       }
     });
 
-    // 3. Merge localStorage saved students
+    // 3. Merge localStorage master saved students (including custom newly added students)
     (localSaved || []).forEach((s) => {
       const id = s._id || s.id;
       if (!id) return;
@@ -95,23 +102,9 @@ export const getUnifiedStudents = (apiStudents = []) => {
     });
 
     const allStudents = Array.from(combinedMap.values());
-
-    // Group and guarantee all 10 students per section (Grade 1-A, 1-B, ..., 10-C)
-    const sectionGroups = {};
-    allStudents.forEach(st => {
-      const g = String(st.grade || st.class?.grade || '1');
-      const s = String(st.section || st.class?.section || 'A');
-      const key = `${g}_${s}`;
-      if (!sectionGroups[key]) sectionGroups[key] = [];
-      if (sectionGroups[key].length < 10) {
-        sectionGroups[key].push(st);
-      }
-    });
-
-    const final10PerSection = Object.values(sectionGroups).flat();
-    return final10PerSection.length > 0 ? final10PerSection : demoStudents;
+    return allStudents.length > 0 ? allStudents : demoStudents;
   } catch (e) {
-    return demoStudents || apiStudents;
+    return (demoStudents && demoStudents.length > 0) ? demoStudents : apiStudents;
   }
 };
 

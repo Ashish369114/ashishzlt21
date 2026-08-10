@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { feeService, classService, studentService } from '../../services/api';
 import { demoFees, demoStudents, demoClasses } from '../../utils/demoData';
+import { getUnifiedStudents, subscribeToDataChanges } from '../../services/syncService';
 
 const initialFormData = {
   student: '',
@@ -141,11 +142,11 @@ const FeeManagement = ({ user }) => {
 
   const fetchStudents = async () => {
     try {
-      const response = await studentService.getAll();
-      setStudents((response.data && response.data.length) ? response.data : demoStudents);
+      const response = await studentService.getAll().catch(() => null);
+      setStudents(getUnifiedStudents(response?.data || []));
     } catch (err) {
-      console.warn('Using demo students in fees:', err);
-      setStudents(demoStudents);
+      console.warn('Using unified demo students in fees:', err);
+      setStudents(getUnifiedStudents([]));
     }
   };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { feeService } from '../../services/api';
-import { subscribeToDataChanges } from '../../services/syncService';
+import { subscribeToDataChanges, getUnifiedStudents } from '../../services/syncService';
 import { demoStudents } from '../../utils/demoData';
 import { formatCurrency } from '../../utils/currencyFormatter';
 import { CreditCard, AlertCircle, Clock, CheckCircle2 } from 'lucide-react';
@@ -190,8 +190,8 @@ const AccountantPendingFees = () => {
       setLoading(true);
       const pendingRes = await feeService.getPending().catch(() => ({ data: [] }));
 
-      // Always use demoStudents for the dropdown — they have flat grade/section strings guaranteed
-      setStudents(demoStudents);
+      // Use unified master student list (including all newly added students)
+      setStudents(getUnifiedStudents([]));
 
       const list = Array.isArray(pendingRes.data) && pendingRes.data.length > 0
         ? pendingRes.data.map((fee, idx) => {

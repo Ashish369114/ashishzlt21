@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { attendanceService, studentService, classService, schoolService, teacherService, employeeService } from '../../services/api';
 import { demoAttendance, demoStudents, demoClasses, demoEmployees } from '../../utils/demoData';
+import { getUnifiedStudents, subscribeToDataChanges } from '../../services/syncService';
 
 const ModernKPICard = ({ title, value, icon, iconBg = '#F3F4F6', trend = '↑ 100%', trendText = 'vs last month' }) => (
   <div style={{
@@ -104,11 +105,11 @@ const AttendanceManagement = () => {
 
   const fetchStudents = async () => {
     try {
-      const response = await studentService.getAll();
-      setStudents(response.data && response.data.length ? response.data : demoStudents);
+      const response = await studentService.getAll().catch(() => null);
+      setStudents(getUnifiedStudents(response?.data || []));
     } catch (err) {
-      console.warn('Using demo students data:', err);
-      setStudents(demoStudents);
+      console.warn('Using unified demo students data:', err);
+      setStudents(getUnifiedStudents([]));
     }
   };
 

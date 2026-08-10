@@ -3,6 +3,7 @@ import { examService, marksService, teacherService, studentService, classService
 import { demoExams, demoClasses, demoStudents, demoEmployees } from '../../utils/demoData';
 import {
   getUnifiedExams,
+  getUnifiedStudents,
   subscribeToDataChanges,
   resolveInvigilatorName,
   getExamDateFormatted,
@@ -71,7 +72,7 @@ const PrincipalExamManagement = () => {
       ]);
       const fetchedExams = getUnifiedExams(examsRes.data || []);
       const fetchedClasses = (classesRes.data && classesRes.data.length) ? classesRes.data : demoClasses;
-      const fetchedStudents = (studentsRes.data && studentsRes.data.length) ? studentsRes.data : demoStudents;
+      const fetchedStudents = getUnifiedStudents(studentsRes?.data || []);
       const fetchedTeachers = (teachersRes.data && teachersRes.data.length) ? teachersRes.data : demoEmployees;
 
       setExams(fetchedExams);
@@ -95,7 +96,7 @@ const PrincipalExamManagement = () => {
       console.warn('Using demo data for principal exam management:', err);
       setExams(getUnifiedExams([]));
       setClasses(demoClasses);
-      setStudents(demoStudents);
+      setStudents(getUnifiedStudents([]));
       setTeachers(demoEmployees);
       setSubjects(['Mathematics', 'Science', 'English', 'Social Science']);
       setError('');
